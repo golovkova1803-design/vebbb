@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CLAUDE_CODE // VIBE</title>
+    <title>CLAUDE_CODE // VIBE STUDIO</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -32,26 +32,26 @@
             --bg-main: #0b0d14;
             --text-main: #f3f4f6;
             --text-muted: #94a3b8;
-            --card-bg: rgba(22, 26, 39, 0.72);
+            --card-bg: rgba(22, 26, 39, 0.74);
             --card-border: rgba(255, 255, 255, 0.1);
             --card-highlight: rgba(255, 255, 255, 0.12);
             --input-bg: rgba(255, 255, 255, 0.045);
-            --code-bg: rgba(0, 0, 0, 0.36);
+            --code-bg: rgba(0, 0, 0, 0.38);
             --glare-color: rgba(255, 255, 255, 0.08);
-            --nav-bg: rgba(15, 18, 28, 0.84);
+            --nav-bg: rgba(15, 18, 28, 0.86);
         }
 
         html.light {
             --bg-main: #f1f5f9;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --card-bg: rgba(255, 255, 255, 0.82);
+            --card-bg: rgba(255, 255, 255, 0.85);
             --card-border: rgba(15, 23, 42, 0.09);
             --card-highlight: rgba(255, 255, 255, 0.9);
             --input-bg: rgba(15, 23, 42, 0.045);
             --code-bg: rgba(15, 23, 42, 0.06);
             --glare-color: rgba(99, 102, 241, 0.1);
-            --nav-bg: rgba(255, 255, 255, 0.88);
+            --nav-bg: rgba(255, 255, 255, 0.9);
         }
 
         * {
@@ -66,7 +66,7 @@
             color: var(--text-main);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             overflow-x: hidden;
-            padding-bottom: calc(var(--safe-bottom) + 96px);
+            padding-bottom: calc(var(--safe-bottom) + 100px);
             transition: background-color 300ms ease, color 300ms ease;
         }
 
@@ -74,7 +74,6 @@
         .text-muted-dynamic { color: var(--text-muted); }
         .code-surface { background-color: var(--code-bg); }
 
-        /* Оптимизированный фон без тяжелого CSS filter: blur() */
         .ambient-bg {
             background:
                 radial-gradient(circle at 15% 12%, rgba(99, 102, 241, 0.17) 0%, transparent 45%),
@@ -83,7 +82,6 @@
             transform: translateZ(0);
         }
 
-        /* GPU-ускоренные карточки из матового стекла (12px blur вместо тяжелых 24px) */
         .frosted-card {
             position: relative;
             overflow: hidden;
@@ -96,19 +94,17 @@
             contain: paint;
         }
 
-        /* На мобильных устройствах (WebView) убираем лишний backdrop-filter с карточек для 120 FPS скролла */
         @media (max-width: 768px) {
             .frosted-card {
                 backdrop-filter: none;
                 -webkit-backdrop-filter: none;
-                background: rgba(24, 28, 42, 0.92);
+                background: rgba(22, 26, 40, 0.94);
             }
             html.light .frosted-card {
-                background: rgba(255, 255, 255, 0.95);
+                background: rgba(255, 255, 255, 0.96);
             }
         }
 
-        /* Интерактивный блик работает только на ПК с мышью (не тормозит скролл пальцем) */
         @media (hover: hover) and (pointer: fine) {
             .frosted-card::before {
                 content: '';
@@ -139,7 +135,7 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--card-border);
-            box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 var(--card-highlight);
+            box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 var(--card-highlight);
             transform: translateZ(0);
         }
 
@@ -162,7 +158,7 @@
         .btn-primary {
             background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
             color: #ffffff;
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
             transition: transform 160ms var(--ease-ios), opacity 160ms ease;
         }
         .btn-primary:active { transform: scale(0.97); }
@@ -172,14 +168,40 @@
             border: 1px solid var(--card-border);
             color: var(--text-main);
             box-shadow: inset 0 1px 0 var(--card-highlight);
-            transition: transform 160ms var(--ease-ios), background-color 160ms ease;
+            transition: transform 160ms var(--ease-ios), background-color 160ms ease, border-color 160ms ease;
         }
         .btn-glass:hover {
             background: rgba(99, 102, 241, 0.1);
         }
         .btn-glass:active { transform: scale(0.96); }
 
-        /* Скелетон с мягким shimmer-эффектом */
+        /* Кастомные ползунки в стиле iOS / visionOS */
+        input[type="range"].ios-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.22);
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"].ios-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #6366f1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+            transition: transform 150ms var(--ease-ios), background-color 150ms ease;
+        }
+        input[type="range"].ios-slider::-webkit-slider-thumb:active {
+            transform: scale(1.18);
+            background: #e0e7ff;
+        }
+
         @keyframes shimmerMove {
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
@@ -191,7 +213,6 @@
             border-radius: 8px;
         }
 
-        /* Плавное раскрытие по высоте */
         .expand-grid {
             display: grid;
             grid-template-rows: 0fr;
@@ -204,15 +225,6 @@
         }
         .expand-inner { overflow: hidden; }
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-up {
-            animation: fadeUp 240ms var(--ease-ios) forwards;
-        }
-
-        /* Микроинтеракция прорисовки SVG галочки */
         @keyframes drawCheck {
             from { stroke-dashoffset: 24; }
             to { stroke-dashoffset: 0; }
@@ -223,7 +235,6 @@
             animation: drawCheck 260ms var(--ease-ios) forwards;
         }
 
-        /* Bottom Sheet (шторка снизу) */
         .sheet-backdrop {
             opacity: 0;
             pointer-events: none;
@@ -253,13 +264,13 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-300">
 
-    <!-- Canvas для мини-эффекта частиц (активируется только на 550 мс) -->
+    <!-- Canvas для салюта частиц -->
     <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full hidden"></canvas>
 
-    <!-- Аппаратно-ускоренный градиентный фон без просадок FPS -->
+    <!-- Фоновое свечение -->
     <div class="ambient-bg fixed inset-0 pointer-events-none z-0" aria-hidden="true"></div>
 
-    <!-- Sticky-шапка (Адаптивная для смартфона и ПК) -->
+    <!-- Sticky-шапка -->
     <header class="frosted-header sticky top-0 z-30 px-4 lg:px-8 py-3">
         <div class="max-w-md lg:max-w-6xl mx-auto flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
@@ -271,17 +282,16 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-[15px] lg:text-base font-bold tracking-tight text-dynamic leading-tight">CLAUDE_CODE // VIBE</h1>
-                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-400/25">60 FPS Turbo</span>
+                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-400/25">UI Studio 2.0</span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-0.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        <p id="user-status" class="text-xs text-muted-dynamic font-medium">AI Vibe Workspace</p>
+                        <p id="user-status" class="text-xs text-muted-dynamic font-medium">Visual Vibe Workspace</p>
                     </div>
                 </div>
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- Переключатель Светлой / Тёмной темы -->
                 <button onclick="toggleTheme()" aria-label="Сменить тему оформления" class="btn-glass min-w-[44px] min-h-[44px] rounded-2xl flex items-center justify-center">
                     <svg id="theme-icon-dark" class="w-5 h-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
@@ -291,8 +301,7 @@
                     </svg>
                 </button>
 
-                <!-- Кнопка Онбординга / Справки -->
-                <button onclick="openOnboarding()" aria-label="Открыть гид по приложению" class="btn-glass min-w-[44px] min-h-[44px] rounded-2xl flex items-center justify-center text-xs font-semibold">
+                <button onclick="openOnboarding()" aria-label="Открыть гид" class="btn-glass min-w-[44px] min-h-[44px] rounded-2xl flex items-center justify-center text-xs font-semibold">
                     ?
                 </button>
 
@@ -303,16 +312,261 @@
         </div>
     </header>
 
-    <!-- Основной контейнер: Адаптивный под смартфон (max-w-md) и широкий ПК (lg:max-w-6xl) -->
+    <!-- Основной контейнер -->
     <main class="flex-1 px-4 lg:px-8 pt-5 max-w-md lg:max-w-6xl mx-auto w-full relative z-10">
 
-        <!-- ==================== РАЗДЕЛ 1: ИНСТРУМЕНТЫ (ДВУХКОЛОНОЧНЫЙ НА ПК) ==================== -->
-        <section id="view-tools" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <!-- ==================== РАЗДЕЛ 0: ВИЗУАЛЬНЫЙ КОНСТРУКТОР САЙТА (UI СТУДИЯ) ==================== -->
+        <section id="view-studio" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-            <!-- Левая колонка на ПК -->
+            <!-- Левая/верхняя колонка: ЖИВОЙ ИНТЕРАКТИВНЫЙ ПРЕДПРОСМОТР (Sticky на ПК) -->
+            <div class="lg:col-span-5 lg:sticky lg:top-20 space-y-4">
+                <article class="frosted-card rounded-3xl p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-xs font-semibold text-dynamic">Live-превью твоего сайта</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="togglePreviewTheme()" id="prev-theme-btn" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-medium">🌙 Dark</button>
+                            <button onclick="randomizeVisualBuilder()" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-semibold text-indigo-400">🎲 Рандом</button>
+                        </div>
+                    </div>
+
+                    <!-- Окно браузера с живым рендером -->
+                    <div id="live-preview-canvas" class="rounded-2xl overflow-hidden border border-white/15 transition-all duration-200 relative" style="background: #090b12; color: #f8fafc; min-height: 280px;">
+                        <!-- Декоративное световое пятно внутри превью -->
+                        <div id="prev-glow-orb" class="absolute -top-12 right-4 w-36 h-36 rounded-full pointer-events-none transition-all duration-200" style="background: radial-gradient(circle, rgba(99,102,241,0.45) 0%, transparent 70%);"></div>
+
+                        <div id="prev-inner-wrap" class="relative z-10 p-3.5 space-y-3 transition-all duration-200">
+                            <!-- Мини-навбар -->
+                            <div id="prev-navbar" class="flex items-center justify-between px-3 py-2 transition-all duration-200">
+                                <div class="flex items-center gap-1.5">
+                                    <span id="prev-logo-dot" class="w-2.5 h-2.5 rounded-full"></span>
+                                    <span class="text-[11px] font-bold tracking-tight">VIBE.APP</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-[9px] opacity-75">
+                                    <span>Фичи</span>
+                                    <span>Тарифы</span>
+                                    <span id="prev-nav-cta" class="px-2 py-0.5 font-semibold text-white">Старт</span>
+                                </div>
+                            </div>
+
+                            <!-- Мини-Hero -->
+                            <div id="prev-hero" class="p-3.5 transition-all duration-200">
+                                <span id="prev-badge" class="inline-block px-2 py-0.5 text-[9px] font-semibold mb-1.5">✨ AI Generation 2.0</span>
+                                <h4 id="prev-heading" class="text-sm font-bold leading-tight mb-1">Создавай продукты со скоростью мысли</h4>
+                                <p class="text-[10px] opacity-70 leading-relaxed mb-2.5">Визуальный интерфейс адаптируется под каждый ползунок и выбранную палитру.</p>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" id="prev-primary-btn" class="px-3 py-1.5 text-[10px] font-semibold text-white transition-transform active:scale-95">Запустить проект</button>
+                                    <button type="button" id="prev-secondary-btn" class="px-3 py-1.5 text-[10px] font-medium">Демо ↗</button>
+                                </div>
+                            </div>
+
+                            <!-- Мини-сетка карточек (Bento / Cards) -->
+                            <div id="prev-cards-grid" class="grid grid-cols-2 gap-2 transition-all duration-200">
+                                <div id="prev-card-1" class="p-2.5 transition-all duration-200">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-[10px] font-semibold">⚡ Скорость</span>
+                                        <span id="prev-metric-1" class="text-[10px] font-bold">99.8%</span>
+                                    </div>
+                                    <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                                        <div id="prev-bar-1" class="h-full w-4/5 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div id="prev-card-2" class="p-2.5 transition-all duration-200">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-[10px] font-semibold">🎨 Стиль</span>
+                                        <span id="prev-style-tag" class="text-[9px] opacity-80">visionOS</span>
+                                    </div>
+                                    <p class="text-[9px] opacity-70 truncate">Готовый UI-промт</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Краткая сводка параметров под превью -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2.5 border-t border-white/10 text-[11px] text-muted-dynamic">
+                        <span id="summary-style-pill" class="font-medium text-dynamic">visionOS Glass • Indigo</span>
+                        <span id="summary-metrics-pill" class="font-mono">R: 20px | Blur: 16px</span>
+                    </div>
+                </article>
+
+                <!-- Кнопка мгновенной сборки промта на ПК -->
+                <button onclick="generateVisualUIPrompt()" class="btn-primary w-full min-h-[50px] rounded-2xl text-xs font-bold tracking-wide flex items-center justify-center gap-2 shadow-lg">
+                    <span>✨ Сгенерировать промт этого дизайна</span>
+                </button>
+            </div>
+
+            <!-- Правая колонка: ПУЛЬТ УПРАВЛЕНИЯ (Стили, Палитра, Ползунки, Секции, Вывод) -->
+            <div class="lg:col-span-7 space-y-4">
+
+                <!-- Шаг 1. Формат сайта и Визуальный стиль (8 направлений) -->
+                <article class="frosted-card rounded-3xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Шаг 1 • Эстетика и Формат</span>
+                            <h2 class="text-base font-semibold text-dynamic mt-0.5">Тип проекта и стиль</h2>
+                        </div>
+                    </div>
+
+                    <!-- Выбор типа проекта -->
+                    <label class="block text-xs font-medium text-muted-dynamic mb-2">Что создаём?</label>
+                    <div id="ui-type-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4"></div>
+
+                    <!-- Выбор визуального стиля (8 карточек) -->
+                    <label class="block text-xs font-medium text-muted-dynamic mb-2">Дизайн-система (8 стилей)</label>
+                    <div id="ui-style-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+                </article>
+
+                <!-- Шаг 2. Цветовая палитра + Кастомный пикер -->
+                <article class="frosted-card rounded-3xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-violet-400">Шаг 2 • Колористика</span>
+                            <h3 class="text-base font-semibold text-dynamic mt-0.5">Цветовая палитра</h3>
+                        </div>
+                        <label class="btn-glass px-3 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer">
+                            <span>🎨 Свой цвет</span>
+                            <input type="color" id="custom-color-picker" value="#6366f1" oninput="setCustomAccentColor(this.value)" class="w-4 h-4 rounded border-0 bg-transparent cursor-pointer">
+                        </label>
+                    </div>
+
+                    <div id="ui-palette-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+                </article>
+
+                <!-- Шаг 3. Точные ползунки геометрии и стекла -->
+                <article class="frosted-card rounded-3xl p-5 space-y-4">
+                    <div>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-sky-400">Шаг 3 • Тонкая настройка</span>
+                        <h3 class="text-base font-semibold text-dynamic mt-0.5">Геометрия, стекло и воздух</h3>
+                    </div>
+
+                    <!-- Ползунок 1: Скругление углов -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <span class="font-medium text-dynamic">Скругление углов (Border Radius)</span>
+                            <span id="val-radius" class="font-mono text-indigo-400 font-semibold">20px</span>
+                        </div>
+                        <input type="range" id="slider-radius" min="0" max="32" step="2" value="20" oninput="updateBuilderSliders()" class="ios-slider">
+                        <div class="flex justify-between text-[10px] text-muted-dynamic mt-1">
+                            <span>0px (Острые)</span>
+                            <span>16px (Стандарт)</span>
+                            <span>32px (Капсулы)</span>
+                        </div>
+                    </div>
+
+                    <!-- Ползунок 2: Размытие стекла -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <span class="font-medium text-dynamic">Матовость стекла (Backdrop Blur)</span>
+                            <span id="val-blur" class="font-mono text-indigo-400 font-semibold">16px</span>
+                        </div>
+                        <input type="range" id="slider-blur" min="0" max="28" step="2" value="16" oninput="updateBuilderSliders()" class="ios-slider">
+                    </div>
+
+                    <!-- Ползунок 3: Непрозрачность карточек -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <span class="font-medium text-dynamic">Плотность карточек (Surface Opacity)</span>
+                            <span id="val-opacity" class="font-mono text-indigo-400 font-semibold">8%</span>
+                        </div>
+                        <input type="range" id="slider-opacity" min="2" max="25" step="1" value="8" oninput="updateBuilderSliders()" class="ios-slider">
+                    </div>
+
+                    <!-- Ползунок 4: Воздух и отступы -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <span class="font-medium text-dynamic">Воздух и отступы (Spacing)</span>
+                            <span id="val-spacing" class="font-mono text-indigo-400 font-semibold">Баланс (3/5)</span>
+                        </div>
+                        <input type="range" id="slider-spacing" min="1" max="5" step="1" value="3" oninput="updateBuilderSliders()" class="ios-slider">
+                    </div>
+
+                    <!-- Ползунок 5: Свечение и тени -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <span class="font-medium text-dynamic">Фоновое свечение и тени (Glow)</span>
+                            <span id="val-glow" class="font-mono text-indigo-400 font-semibold">60%</span>
+                        </div>
+                        <input type="range" id="slider-glow" min="0" max="100" step="10" value="60" oninput="updateBuilderSliders()" class="ios-slider">
+                    </div>
+                </article>
+
+                <!-- Шаг 4. Типографика, Секции сайта и Эффекты -->
+                <article class="frosted-card rounded-3xl p-5 space-y-4">
+                    <div>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Шаг 4 • Структура и Движение</span>
+                        <h3 class="text-base font-semibold text-dynamic mt-0.5">Шрифты, секции и анимации</h3>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-muted-dynamic mb-2">Шрифтовая пара</label>
+                        <div id="ui-font-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-muted-dynamic mb-2">Какие блоки добавить на страницу?</label>
+                        <div id="ui-sections-grid" class="flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-muted-dynamic mb-2">Анимации и микроинтеракции</label>
+                        <div id="ui-fx-grid" class="flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div>
+                        <label for="ui-custom-note" class="block text-xs font-medium text-muted-dynamic mb-1.5">Особые пожелания к проекту (необязательно)</label>
+                        <input id="ui-custom-note" type="text" placeholder="Напр.: Тематика — ИИ-сервис для селлеров, добавить калькулятор прибыли..." class="frosted-input w-full min-h-[44px] rounded-2xl px-3.5 text-xs">
+                    </div>
+
+                    <button onclick="generateVisualUIPrompt()" class="btn-primary w-full min-h-[48px] rounded-2xl text-xs font-bold flex items-center justify-center gap-2 lg:hidden">
+                        <span>✨ Собрать готовый дизайн-промт</span>
+                    </button>
+
+                    <!-- Блок вывода готового UI-промта -->
+                    <div id="ui-out-wrap" class="expand-grid">
+                        <div class="expand-inner">
+                            <div class="pt-3 border-t border-white/10">
+                                <div id="ui-skeleton" class="hidden space-y-2.5 p-4 rounded-2xl code-surface mb-3">
+                                    <div class="skeleton-line h-3 w-1/3"></div>
+                                    <div class="skeleton-line h-3 w-full"></div>
+                                    <div class="skeleton-line h-3 w-5/6"></div>
+                                </div>
+
+                                <div id="ui-result-card" class="rounded-2xl code-surface border border-white/10 overflow-hidden">
+                                    <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.03] border-b border-white/10">
+                                        <span class="text-xs font-semibold text-indigo-400">Готовый UI/UX Промт</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <button onclick="copyResult('ui-code', this)" class="btn-glass min-h-[34px] px-3 rounded-xl text-[11px] font-medium">Копировать</button>
+                                            <button onclick="shareResult('ui-code')" class="btn-glass min-h-[34px] px-2.5 rounded-xl text-[11px] font-medium">Поделиться</button>
+                                        </div>
+                                    </div>
+                                    <div id="ui-code" class="p-3.5 font-mono text-[11px] leading-relaxed whitespace-pre-wrap break-words max-h-72 overflow-y-auto"></div>
+                                </div>
+
+                                <div class="grid grid-cols-3 gap-2 mt-2.5">
+                                    <button onclick="quickExportAI('claude', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-indigo-400">↗ В Claude</button>
+                                    <button onclick="quickExportAI('chatgpt', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-emerald-400">↗ В ChatGPT</button>
+                                    <button onclick="quickExportAI('cursor', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-violet-400">↗ В Cursor</button>
+                                </div>
+                                <button onclick="saveResultToVault('UI Концепт: ' + builderState.styleName, 'ui-code', 'Промты')" class="btn-glass w-full min-h-[44px] mt-2 rounded-2xl text-xs font-semibold text-indigo-400 flex items-center justify-center gap-2">
+                                    <span>💾 Сохранить дизайн-промт в Сейф</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- ==================== РАЗДЕЛ 1: ИНСТРУМЕНТЫ (ДЕБАГ, АРХИТЕКТУРА, ОПТИМИЗАТОР) ==================== -->
+        <section id="view-tools" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+            <!-- Левая колонка -->
             <div class="lg:col-span-7 space-y-5">
 
-                <!-- 1. Готовые шаблоны проектов (SaaS, Telegram-бот, Лендинг) -->
+                <!-- 1. Готовые шаблоны проектов -->
                 <article class="frosted-card rounded-3xl p-5">
                     <div class="flex items-center justify-between mb-3">
                         <div>
@@ -350,7 +604,6 @@
                             </svg>
                         </button>
                     </div>
-                    <p class="text-xs text-muted-dynamic mb-3.5 leading-relaxed">Выберите стек в нижней шторке (любимые стеки закрепляются звёздочкой).</p>
 
                     <button onclick="openStackSheet()" class="frosted-input w-full min-h-[48px] rounded-2xl px-4 py-2.5 flex items-center justify-between text-left mb-3.5">
                         <div class="truncate pr-2">
@@ -410,15 +663,9 @@
                     </div>
 
                     <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl code-surface border border-white/10 mb-3">
-                        <button type="button" onclick="setErrorMode('fix', this)" class="err-mode-btn min-h-[38px] rounded-xl text-xs font-semibold bg-indigo-500 text-white transition-all">
-                            Исправить
-                        </button>
-                        <button type="button" onclick="setErrorMode('explain', this)" class="err-mode-btn min-h-[38px] rounded-xl text-xs font-medium text-muted-dynamic transition-all">
-                            Объяснить
-                        </button>
-                        <button type="button" onclick="setErrorMode('root', this)" class="err-mode-btn min-h-[38px] rounded-xl text-xs font-medium text-muted-dynamic transition-all">
-                            Найти причину
-                        </button>
+                        <button type="button" onclick="setErrorMode('fix', this)" class="err-mode-btn min-h-[38px] rounded-xl text-xs font-semibold bg-indigo-500 text-white transition-all">Исправить</button>
+                        <button type="button" onclick="setErrorMode('explain', this)" class="err-mode-btn min-h-[38px] rounded-xl text-xs font-medium text-muted-dynamic transition-all">Объяснить</button>
+                        <button type="button" onclick="setErrorMode('root', this)" class="err-mode-btn min-h-[38px] rounded-xl text-xs font-medium text-muted-dynamic transition-all">Найти причину</button>
                     </div>
 
                     <textarea id="err-input" oninput="handleErrorInput(this)" rows="4" placeholder="Вставьте Traceback (Python, Node.js, React, SQL)..." class="frosted-input w-full rounded-2xl p-3.5 text-xs font-mono placeholder-slate-500 resize-none"></textarea>
@@ -472,19 +719,13 @@
 
             </div>
 
-            <!-- Правая колонка на ПК -->
+            <!-- Правая колонка -->
             <div class="lg:col-span-5 space-y-5">
 
                 <!-- 4. Prompt Optimizer -->
                 <article class="frosted-card rounded-3xl p-5">
-                    <div class="flex items-center justify-between mb-2.5">
-                        <div>
-                            <span class="text-[11px] font-semibold uppercase tracking-wider text-violet-400">Prompt Engineering</span>
-                            <h3 class="text-base font-semibold text-dynamic mt-0.5">Prompt Optimizer</h3>
-                        </div>
-                    </div>
-                    <p class="text-xs text-muted-dynamic mb-3">Превращает сырую мысль в структуру: Роль, Контекст, Задача, Формат.</p>
-
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-violet-400">Prompt Engineering</span>
+                    <h3 class="text-base font-semibold text-dynamic mt-0.5 mb-2">Prompt Optimizer</h3>
                     <textarea id="opt-input" oninput="updateTokenCounter(this, 'opt-token-text', 'opt-token-bar')" rows="3" placeholder="Сделай парсер тг каналов на питоне с защитой от FloodWait..." class="frosted-input w-full rounded-2xl p-3.5 text-xs placeholder-slate-500 resize-none"></textarea>
 
                     <div class="flex items-center justify-between mt-1.5 mb-3 px-1">
@@ -496,9 +737,7 @@
                         </div>
                     </div>
 
-                    <button onclick="optimizeRawPrompt()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold">
-                        Структурировать промт
-                    </button>
+                    <button onclick="optimizeRawPrompt()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold">Структурировать промт</button>
 
                     <div id="opt-out-wrap" class="expand-grid">
                         <div class="expand-inner">
@@ -562,30 +801,7 @@
                     </div>
                 </article>
 
-                <!-- 6. Чек-лист деплоя -->
-                <article class="frosted-card rounded-3xl overflow-hidden">
-                    <button onclick="toggleAccordion('acc-deploy', 'chev-deploy')" class="w-full min-h-[58px] p-5 flex items-center justify-between text-left">
-                        <div>
-                            <h3 class="text-sm font-semibold text-dynamic">Чек-лист деплоя</h3>
-                            <p id="deploy-sub" class="text-xs text-muted-dynamic">Vercel / Netlify / VPS — 0 из 6</p>
-                        </div>
-                        <svg id="chev-deploy" class="w-5 h-5 text-muted-dynamic transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    <div id="acc-deploy" class="expand-grid">
-                        <div class="expand-inner">
-                            <div class="px-5 pb-5 pt-2 border-t border-white/10">
-                                <div class="w-full h-2 rounded-full bg-slate-500/20 overflow-hidden mb-3">
-                                    <div id="deploy-bar" class="h-full w-0 bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-200"></div>
-                                </div>
-                                <div id="checklist-items" class="space-y-2"></div>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- 7. История последних 10 генераций -->
+                <!-- 6. История последних 10 генераций -->
                 <article class="frosted-card rounded-3xl p-5">
                     <div class="flex items-center justify-between mb-3">
                         <div>
@@ -594,7 +810,6 @@
                         </div>
                         <button onclick="clearHistory()" class="text-[11px] text-muted-dynamic hover:text-rose-400 transition">Очистить</button>
                     </div>
-                    <p class="text-[11px] text-muted-dynamic mb-3">Тап — скопировать снова, свайп влево — удалить запись.</p>
                     <div id="history-list" class="space-y-2"></div>
                 </article>
 
@@ -665,30 +880,28 @@
 
     </main>
 
-    <!-- Плавающая стеклянная "пилюля" навигации внизу экрана -->
-    <nav class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,12px)+12px)] z-30 w-[calc(100%-32px)] max-w-sm frosted-nav rounded-full p-1.5" role="tablist" aria-label="Нижняя навигация">
-        <div class="relative grid grid-cols-3 items-center">
-            <div id="bottom-nav-pill" class="absolute top-0 bottom-0 left-0 w-1/3 rounded-full bg-indigo-500/20 border border-indigo-400/35 transition-transform duration-200 ease-ios pointer-events-none"></div>
+    <!-- Плавающая стеклянная "пилюля" навигации на 4 раздела -->
+    <nav class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,12px)+12px)] z-30 w-[calc(100%-24px)] max-w-md frosted-nav rounded-full p-1.5" role="tablist" aria-label="Нижняя навигация">
+        <div class="relative grid grid-cols-4 items-center">
+            <div id="bottom-nav-pill" class="absolute top-0 bottom-0 left-0 w-1/4 rounded-full bg-indigo-500/20 border border-indigo-400/35 transition-transform duration-200 ease-ios pointer-events-none"></div>
 
-            <button onclick="switchTab(0, 'view-tools')" id="nav-btn-0" role="tab" aria-selected="true" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1.5 text-xs font-semibold text-indigo-400 transition-colors">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
+            <button onclick="switchTab(0, 'view-studio')" id="nav-btn-0" role="tab" aria-selected="true" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1 text-[11px] font-semibold text-indigo-400 transition-colors">
+                <span>🎨</span>
+                <span>UI Студия</span>
+            </button>
+
+            <button onclick="switchTab(1, 'view-tools')" id="nav-btn-1" role="tab" aria-selected="false" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1 text-[11px] font-medium text-muted-dynamic transition-colors">
+                <span>🛠</span>
                 <span>Тулзы</span>
             </button>
 
-            <button onclick="switchTab(1, 'view-hub')" id="nav-btn-1" role="tab" aria-selected="false" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1.5 text-xs font-medium text-muted-dynamic transition-colors">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                </svg>
+            <button onclick="switchTab(2, 'view-hub')" id="nav-btn-2" role="tab" aria-selected="false" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1 text-[11px] font-medium text-muted-dynamic transition-colors">
+                <span>📚</span>
                 <span>База</span>
             </button>
 
-            <button onclick="switchTab(2, 'view-vault')" id="nav-btn-2" role="tab" aria-selected="false" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1.5 text-xs font-medium text-muted-dynamic transition-colors">
-                <svg id="vault-lock-icon" class="w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                </svg>
+            <button onclick="switchTab(3, 'view-vault')" id="nav-btn-3" role="tab" aria-selected="false" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1 text-[11px] font-medium text-muted-dynamic transition-colors">
+                <span>🔐</span>
                 <span>Сейф</span>
                 <span id="vault-count-badge" class="px-1.5 py-0.2 text-[10px] rounded-full bg-indigo-500/25 text-indigo-300">0</span>
             </button>
@@ -702,7 +915,7 @@
             <div class="w-10 h-1.5 rounded-full bg-slate-400/40"></div>
         </div>
         <div class="flex items-center justify-between mb-3">
-            <h3 id="sheet-title" class="text-base font-bold text-dynamic">Выбор стека</h3>
+            <h3 id="sheet-title" class="text-base font-bold text-dynamic">Выбор</h3>
             <button onclick="closeBottomSheet()" class="btn-glass min-w-[36px] min-h-[36px] rounded-full text-xs">✕</button>
         </div>
         <div id="sheet-body" class="overflow-y-auto space-y-2 pr-1"></div>
@@ -710,9 +923,9 @@
 
     <!-- ОНБОРДИНГ -->
     <div id="onboarding-modal" class="fixed inset-0 z-50 bg-black/75 hidden items-center justify-center p-4">
-        <div class="frosted-card max-w-sm w-full rounded-3xl p-6 text-center space-y-4 animate-fade-up">
-            <div id="onb-icon" class="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center mx-auto text-2xl">✨</div>
-            <h3 id="onb-title" class="text-lg font-bold text-dynamic">Добро пожаловать в VIBE</h3>
+        <div class="frosted-card max-w-sm w-full rounded-3xl p-6 text-center space-y-4">
+            <div id="onb-icon" class="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center mx-auto text-2xl">🎨</div>
+            <h3 id="onb-title" class="text-lg font-bold text-dynamic">Визуальная UI Студия</h3>
             <p id="onb-desc" class="text-xs text-muted-dynamic leading-relaxed min-h-[54px]"></p>
             <div class="flex justify-center gap-1.5 py-1">
                 <span id="onb-dot-0" class="w-5 h-1.5 rounded-full bg-indigo-500 transition-all"></span>
@@ -739,7 +952,7 @@
     </div>
 
     <script>
-        /* ==================== 1. TELEGRAM API, ТЕМЫ, HAPTIC, MAINBUTTON & BACKBUTTON ==================== */
+        /* ==================== 1. TELEGRAM API & ТЕМЫ ==================== */
         const tg = window.Telegram?.WebApp;
         let currentTabIndex = 0;
         let activeSheetOpen = false;
@@ -783,9 +996,12 @@
             if (!tg?.MainButton) return;
             try {
                 if (currentTabIndex === 0) {
-                    tg.MainButton.setText('⚡ Сгенерировать архитектуру');
+                    tg.MainButton.setText('✨ Сгенерировать UI-промт');
                     tg.MainButton.show();
                 } else if (currentTabIndex === 1) {
+                    tg.MainButton.setText('⚡ Сгенерировать архитектуру');
+                    tg.MainButton.show();
+                } else if (currentTabIndex === 2) {
                     tg.MainButton.setText('🎲 Случайная идея из 500');
                     tg.MainButton.show();
                 } else {
@@ -797,11 +1013,8 @@
 
         function initTelegramApp() {
             const savedTheme = localStorage.getItem('vibe_theme');
-            if (savedTheme) {
-                applyTheme(savedTheme);
-            } else if (tg?.colorScheme) {
-                applyTheme(tg.colorScheme === 'light' ? 'light' : 'dark');
-            }
+            if (savedTheme) applyTheme(savedTheme);
+            else if (tg?.colorScheme) applyTheme(tg.colorScheme === 'light' ? 'light' : 'dark');
 
             if (!tg) return;
             try {
@@ -812,23 +1025,18 @@
                 const user = tg.initDataUnsafe?.user;
                 if (user) {
                     const handle = user.username ? `@${user.username}` : user.first_name;
-                    document.getElementById('user-status').textContent = `${handle} • Vibe Ready`;
+                    document.getElementById('user-status').textContent = `${handle} • UI Studio Ready`;
                 }
-
-                tg.onEvent?.('themeChanged', () => {
-                    if (!localStorage.getItem('vibe_theme')) {
-                        applyTheme(tg.colorScheme === 'light' ? 'light' : 'dark');
-                    }
-                });
 
                 tg.BackButton?.onClick?.(() => {
                     if (activeSheetOpen) closeBottomSheet();
-                    else if (currentTabIndex !== 0) switchTab(0, 'view-tools');
+                    else if (currentTabIndex !== 0) switchTab(0, 'view-studio');
                 });
 
                 tg.MainButton?.onClick?.(() => {
-                    if (currentTabIndex === 0) generateArchitecture();
-                    else if (currentTabIndex === 1) pickRandomIdea();
+                    if (currentTabIndex === 0) generateVisualUIPrompt();
+                    else if (currentTabIndex === 1) generateArchitecture();
+                    else if (currentTabIndex === 2) pickRandomIdea();
                     else toggleAccordion('acc-new-vault');
                 });
 
@@ -842,7 +1050,384 @@
             else showToast('Доступно внутри Telegram');
         }
 
-        /* ==================== 2. ОПТИМИЗИРОВАННЫЕ БЛИКИ КАРТОЧЕК (ТОЛЬКО ПК + rAF) И КОНФЕТТИ ==================== */
+        /* ==================== 2. ВИЗУАЛЬНЫЙ КОНСТРУКТОР САЙТА (UI СТУДИЯ) ==================== */
+        const UI_PROJECT_TYPES = [
+            { id: 'tma', title: '📱 Telegram Mini App', desc: 'Мобильное WebApp с нативным UX, шторками и плавающей навигацией' },
+            { id: 'saas_landing', title: '🚀 Промо-лендинг SaaS', desc: 'Высококонверсионный лендинг продукта с Hero, Bento-сеткой и тарифами' },
+            { id: 'ai_dashboard', title: '🧠 AI Веб-дашборд', desc: 'Рабочее пространство с боковой панелью, графиками и промт-консолью' },
+            { id: 'ecommerce', title: '🛍 Каталог / Дроп-шоп', desc: 'Интерактивная витрина с карточками товаров, фильтрами и корзиной' },
+            { id: 'portfolio', title: '💎 Персональное портфолио', desc: 'Эффектная страница разработчика/креатора с кейсами и контактами' },
+            { id: 'web3', title: '🌐 Web3 / Финтех апп', desc: 'Терминал с балансом, графиками, свапом и стеклянными виджетами' }
+        ];
+
+        const UI_STYLES = [
+            { id: 'visionos', name: 'visionOS Glass', badge: 'Apple', radius: 22, blur: 18, opacity: 7, spacing: 3, glow: 60, borderStyle: '1px solid rgba(255,255,255,0.14)', desc: 'Матовое стекло (frosted glass), мягкие внутренние блики сверху, воздушные тени' },
+            { id: 'bento', name: 'Bento Grid', badge: 'Trend', radius: 24, blur: 12, opacity: 6, spacing: 4, glow: 50, borderStyle: '1px solid rgba(255,255,255,0.1)', desc: 'Модульная асимметричная сетка карточек в стиле презентаций Apple' },
+            { id: 'linear', name: 'Linear Dark', badge: 'Sleek', radius: 12, blur: 8, opacity: 4, spacing: 2, glow: 40, borderStyle: '1px solid rgba(255,255,255,0.08)', desc: 'Ультра-минимализм, микро-рамки 1px, строгая геометрия и тонкие градиенты' },
+            { id: 'brutal', name: 'Neo-Brutalism', badge: 'Bold', radius: 6, blur: 0, opacity: 18, spacing: 3, glow: 0, borderStyle: '2px solid currentColor', desc: 'Смелый контраст, жёсткие смещённые тени 4px без размытия, чёткие контуры' },
+            { id: 'clay', name: 'Soft Clay 3D', badge: '3D', radius: 28, blur: 10, opacity: 14, spacing: 4, glow: 70, borderStyle: '1px solid rgba(255,255,255,0.22)', desc: 'Мягкий тактильный 3D-объём с двойными внутренними тенями' },
+            { id: 'minimal', name: 'Air Minimal', badge: 'Clean', radius: 16, blur: 6, opacity: 5, spacing: 5, glow: 20, borderStyle: '1px solid rgba(148,163,184,0.15)', desc: 'Максимум воздуха, чистая типографика и спокойные акценты' },
+            { id: 'editorial', name: 'Swiss Grid', badge: 'Pro', radius: 0, blur: 0, opacity: 5, spacing: 4, glow: 10, borderStyle: '1px solid rgba(148,163,184,0.25)', desc: 'Швейцарская модульная сетка, острые углы и выразительные заголовки' },
+            { id: 'luxury', name: 'Onyx Luxury', badge: 'VIP', radius: 18, blur: 20, opacity: 6, spacing: 4, glow: 80, borderStyle: '1px solid rgba(250,204,21,0.28)', desc: 'Глубокий ониксовый фон, деликатное свечение и премиальная подача' }
+        ];
+
+        const UI_PALETTES = [
+            { id: 'indigo', name: 'Indigo Pulse', primary: '#6366f1', secondary: '#a855f7', bgDark: '#090b12', bgLight: '#f8fafc' },
+            { id: 'emerald', name: 'Emerald Cyber', primary: '#10b981', secondary: '#06b6d4', bgDark: '#07110e', bgLight: '#f0fdf4' },
+            { id: 'sunset', name: 'Rose Sunset', primary: '#f43f5e', secondary: '#fb923c', bgDark: '#12080d', bgLight: '#fff1f2' },
+            { id: 'gold', name: 'Amber Luxury', primary: '#f59e0b', secondary: '#eab308', bgDark: '#110e07', bgLight: '#fffbeb' },
+            { id: 'arctic', name: 'Arctic Sky', primary: '#0ea5e9', secondary: '#6366f1', bgDark: '#070f17', bgLight: '#f0f9ff' },
+            { id: 'violet', name: 'Violet Nebula', primary: '#8b5cf6', secondary: '#ec4899', bgDark: '#0e0816', bgLight: '#faf5ff' },
+            { id: 'mono', name: 'Monochrome', primary: '#64748b', secondary: '#94a3b8', bgDark: '#09090b', bgLight: '#f4f4f5' },
+            { id: 'crimson', name: 'Crimson Pro', primary: '#ef4444', secondary: '#f97316', bgDark: '#130707', bgLight: '#fef2f2' }
+        ];
+
+        const UI_FONTS = [
+            { id: 'inter', name: 'Inter + JetBrains', css: "'Inter', sans-serif", desc: 'Apple & Tech стандарт' },
+            { id: 'jakarta', name: 'Plus Jakarta Sans', css: "'Plus Jakarta Sans', sans-serif", desc: 'Современный SaaS' },
+            { id: 'space', name: 'Space Grotesk', css: "'Space Grotesk', sans-serif", desc: 'Смелый техно-вайб' },
+            { id: 'playfair', name: 'Playfair + Inter', css: "'Playfair Display', serif", desc: 'Премиум Editorial' },
+            { id: 'system', name: 'SF Pro / System UI', css: "-apple-system, BlinkMacSystemFont, sans-serif", desc: 'Нативный iOS стиль' },
+            { id: 'mono', name: 'JetBrains Mono UI', css: "'JetBrains Mono', monospace", desc: 'Инженерный минимализм' }
+        ];
+
+        const UI_SECTIONS = [
+            'Sticky Glass-шапка', 'Hero с 3D/Градиентом', 'Bento-сетка преимуществ',
+            'Интерактивный калькулятор/демо', 'Карточки тарифов (Pricing)', 'Цифры и метрики',
+            'Отзывы (Marquee)', 'FAQ-аккордеон', 'Нижний плавающий Tab-бар', 'Футер с формой'
+        ];
+
+        const UI_EFFECTS = [
+            'Spring-физика (cubic-bezier)', 'Интерактивные блики за курсором', 'Плавный Stagger при загрузке',
+            'Shimmer-скелетоны', 'Микро-анимации иконок', 'Адаптив Mobile + Desktop'
+        ];
+
+        const builderState = {
+            typeId: 'tma',
+            styleId: 'visionos',
+            styleName: 'visionOS Glass',
+            paletteId: 'indigo',
+            primaryColor: '#6366f1',
+            secondaryColor: '#a855f7',
+            bgDark: '#090b12',
+            bgLight: '#f8fafc',
+            previewDark: true,
+            radius: 20,
+            blur: 16,
+            opacity: 8,
+            spacing: 3,
+            glow: 60,
+            fontId: 'inter',
+            fontCss: "'Inter', sans-serif",
+            sections: ['Sticky Glass-шапка', 'Hero с 3D/Градиентом', 'Bento-сетка преимуществ', 'Нижний плавающий Tab-бар'],
+            effects: ['Spring-физика (cubic-bezier)', 'Интерактивные блики за курсором', 'Плавный Stagger при загрузке', 'Адаптив Mobile + Desktop']
+        };
+
+        function initVisualStudio() {
+            // 1. Рендер типов проекта
+            document.getElementById('ui-type-grid').innerHTML = UI_PROJECT_TYPES.map(t => `
+                <button type="button" onclick="selectProjectType('${t.id}')" data-type-id="${t.id}" class="ui-type-btn min-h-[44px] px-3 py-2 rounded-2xl border text-left transition-all ${t.id === builderState.typeId ? 'border-indigo-400 bg-indigo-500/20 text-dynamic font-semibold' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">
+                    <span class="text-xs block truncate">${t.title}</span>
+                </button>
+            `).join('');
+
+            // 2. Рендер 8 стилей
+            document.getElementById('ui-style-grid').innerHTML = UI_STYLES.map(s => `
+                <button type="button" onclick="selectVisualStyle('${s.id}')" data-style-id="${s.id}" class="ui-style-btn p-2.5 rounded-2xl border text-left transition-all ${s.id === builderState.styleId ? 'border-indigo-400 bg-indigo-500/20' : 'border-white/10 bg-white/[0.03]'}">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400">${s.badge}</span>
+                        <span class="text-[10px] font-mono text-muted-dynamic">${s.radius}px</span>
+                    </div>
+                    <div class="text-xs font-semibold text-dynamic truncate">${s.name}</div>
+                </button>
+            `).join('');
+
+            // 3. Рендер 8 палитр
+            document.getElementById('ui-palette-grid').innerHTML = UI_PALETTES.map(p => `
+                <button type="button" onclick="selectPalette('${p.id}')" data-pal-id="${p.id}" class="ui-pal-btn min-h-[44px] p-2.5 rounded-2xl border flex items-center gap-2.5 transition-all ${p.id === builderState.paletteId ? 'border-indigo-400 bg-indigo-500/20' : 'border-white/10 bg-white/[0.03]'}">
+                    <span class="w-5 h-5 rounded-full shrink-0 shadow-sm" style="background: linear-gradient(135deg, ${p.primary}, ${p.secondary})"></span>
+                    <span class="text-xs font-medium text-dynamic truncate">${p.name}</span>
+                </button>
+            `).join('');
+
+            // 4. Рендер шрифтов
+            document.getElementById('ui-font-grid').innerHTML = UI_FONTS.map(f => `
+                <button type="button" onclick="selectFont('${f.id}')" data-font-id="${f.id}" class="ui-font-btn p-2.5 rounded-2xl border text-left transition-all ${f.id === builderState.fontId ? 'border-indigo-400 bg-indigo-500/20' : 'border-white/10 bg-white/[0.03]'}">
+                    <div class="text-xs font-semibold text-dynamic truncate" style="font-family: ${f.css}">${f.name}</div>
+                    <div class="text-[10px] text-muted-dynamic truncate">${f.desc}</div>
+                </button>
+            `).join('');
+
+            // 5. Рендер секций
+            document.getElementById('ui-sections-grid').innerHTML = UI_SECTIONS.map(sec => {
+                const active = builderState.sections.includes(sec);
+                return `
+                    <button type="button" onclick="toggleBuilderArrayItem('sections', '${sec}', this)" class="px-3 py-1.5 rounded-xl text-xs border transition-all ${active ? 'border-indigo-400/60 bg-indigo-500/20 text-indigo-300 font-semibold' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">
+                        ${active ? '✓ ' + sec : sec}
+                    </button>
+                `;
+            }).join('');
+
+            // 6. Рендер эффектов
+            document.getElementById('ui-fx-grid').innerHTML = UI_EFFECTS.map(fx => {
+                const active = builderState.effects.includes(fx);
+                return `
+                    <button type="button" onclick="toggleBuilderArrayItem('effects', '${fx}', this)" class="px-3 py-1.5 rounded-xl text-xs border transition-all ${active ? 'border-emerald-400/60 bg-emerald-500/15 text-emerald-300 font-semibold' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">
+                        ${active ? '✓ ' + fx : fx}
+                    </button>
+                `;
+            }).join('');
+
+            updateLivePreview();
+        }
+
+        function selectProjectType(id) {
+            Haptic.selection();
+            builderState.typeId = id;
+            document.querySelectorAll('.ui-type-btn').forEach(b => {
+                const active = b.dataset.typeId === id;
+                b.className = `ui-type-btn min-h-[44px] px-3 py-2 rounded-2xl border text-left transition-all ${active ? 'border-indigo-400 bg-indigo-500/20 text-dynamic font-semibold' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}`;
+            });
+            updateLivePreview();
+        }
+
+        function selectVisualStyle(id) {
+            Haptic.selection();
+            const st = UI_STYLES.find(x => x.id === id);
+            if (!st) return;
+            builderState.styleId = st.id;
+            builderState.styleName = st.name;
+            builderState.radius = st.radius;
+            builderState.blur = st.blur;
+            builderState.opacity = st.opacity;
+            builderState.spacing = st.spacing;
+            builderState.glow = st.glow;
+
+            document.getElementById('slider-radius').value = st.radius;
+            document.getElementById('slider-blur').value = st.blur;
+            document.getElementById('slider-opacity').value = st.opacity;
+            document.getElementById('slider-spacing').value = st.spacing;
+            document.getElementById('slider-glow').value = st.glow;
+
+            document.querySelectorAll('.ui-style-btn').forEach(b => {
+                const active = b.dataset.styleId === id;
+                b.className = `ui-style-btn p-2.5 rounded-2xl border text-left transition-all ${active ? 'border-indigo-400 bg-indigo-500/20' : 'border-white/10 bg-white/[0.03]'}`;
+            });
+
+            syncSliderLabels();
+            updateLivePreview();
+        }
+
+        function selectPalette(id) {
+            Haptic.selection();
+            const pal = UI_PALETTES.find(x => x.id === id);
+            if (!pal) return;
+            builderState.paletteId = pal.id;
+            builderState.primaryColor = pal.primary;
+            builderState.secondaryColor = pal.secondary;
+            builderState.bgDark = pal.bgDark;
+            builderState.bgLight = pal.bgLight;
+            document.getElementById('custom-color-picker').value = pal.primary;
+
+            document.querySelectorAll('.ui-pal-btn').forEach(b => {
+                const active = b.dataset.palId === id;
+                b.className = `ui-pal-btn min-h-[44px] p-2.5 rounded-2xl border flex items-center gap-2.5 transition-all ${active ? 'border-indigo-400 bg-indigo-500/20' : 'border-white/10 bg-white/[0.03]'}`;
+            });
+
+            updateLivePreview();
+        }
+
+        function setCustomAccentColor(hex) {
+            builderState.paletteId = 'custom';
+            builderState.primaryColor = hex;
+            builderState.secondaryColor = hex;
+            updateLivePreview();
+        }
+
+        function selectFont(id) {
+            Haptic.selection();
+            const f = UI_FONTS.find(x => x.id === id);
+            if (!f) return;
+            builderState.fontId = f.id;
+            builderState.fontCss = f.css;
+
+            document.querySelectorAll('.ui-font-btn').forEach(b => {
+                const active = b.dataset.fontId === id;
+                b.className = `ui-font-btn p-2.5 rounded-2xl border text-left transition-all ${active ? 'border-indigo-400 bg-indigo-500/20' : 'border-white/10 bg-white/[0.03]'}`;
+            });
+
+            updateLivePreview();
+        }
+
+        function toggleBuilderArrayItem(key, val, btnEl) {
+            Haptic.selection();
+            const arr = builderState[key];
+            const idx = arr.indexOf(val);
+            if (idx >= 0) arr.splice(idx, 1);
+            else arr.push(val);
+
+            const active = arr.includes(val);
+            const isFx = key === 'effects';
+            btnEl.className = `px-3 py-1.5 rounded-xl text-xs border transition-all ${
+                active
+                    ? (isFx ? 'border-emerald-400/60 bg-emerald-500/15 text-emerald-300 font-semibold' : 'border-indigo-400/60 bg-indigo-500/20 text-indigo-300 font-semibold')
+                    : 'border-white/10 bg-white/[0.03] text-muted-dynamic'
+            }`;
+            btnEl.textContent = active ? `✓ ${val}` : val;
+        }
+
+        function syncSliderLabels() {
+            const spacingNames = { 1: 'Плотно (1/5)', 2: 'Компактно (2/5)', 3: 'Баланс (3/5)', 4: 'Свободно (4/5)', 5: 'Максимум воздуха (5/5)' };
+            document.getElementById('val-radius').textContent = `${builderState.radius}px`;
+            document.getElementById('val-blur').textContent = `${builderState.blur}px`;
+            document.getElementById('val-opacity').textContent = `${builderState.opacity}%`;
+            document.getElementById('val-spacing').textContent = spacingNames[builderState.spacing] || 'Баланс';
+            document.getElementById('val-glow').textContent = `${builderState.glow}%`;
+        }
+
+        function updateBuilderSliders() {
+            Haptic.selection();
+            builderState.radius = Number(document.getElementById('slider-radius').value);
+            builderState.blur = Number(document.getElementById('slider-blur').value);
+            builderState.opacity = Number(document.getElementById('slider-opacity').value);
+            builderState.spacing = Number(document.getElementById('slider-spacing').value);
+            builderState.glow = Number(document.getElementById('slider-glow').value);
+            syncSliderLabels();
+            updateLivePreview();
+        }
+
+        function togglePreviewTheme() {
+            Haptic.light();
+            builderState.previewDark = !builderState.previewDark;
+            document.getElementById('prev-theme-btn').textContent = builderState.previewDark ? '🌙 Dark' : '☀️ Light';
+            updateLivePreview();
+        }
+
+        function randomizeVisualBuilder() {
+            Haptic.light();
+            const randStyle = UI_STYLES[Math.floor(Math.random() * UI_STYLES.length)];
+            const randPal = UI_PALETTES[Math.floor(Math.random() * UI_PALETTES.length)];
+            const randFont = UI_FONTS[Math.floor(Math.random() * UI_FONTS.length)];
+            selectVisualStyle(randStyle.id);
+            selectPalette(randPal.id);
+            selectFont(randFont.id);
+            showToast(`Стиль: ${randStyle.name} + ${randPal.name}`);
+        }
+
+        function updateLivePreview() {
+            const canvas = document.getElementById('live-preview-canvas');
+            const orb = document.getElementById('prev-glow-orb');
+            const wrap = document.getElementById('prev-inner-wrap');
+            const nav = document.getElementById('prev-navbar');
+            const hero = document.getElementById('prev-hero');
+            const card1 = document.getElementById('prev-card-1');
+            const card2 = document.getElementById('prev-card-2');
+            const btn1 = document.getElementById('prev-primary-btn');
+            const btn2 = document.getElementById('prev-secondary-btn');
+            const badge = document.getElementById('prev-badge');
+
+            const isDark = builderState.previewDark;
+            const bg = isDark ? builderState.bgDark : builderState.bgLight;
+            const fg = isDark ? '#f8fafc' : '#0f172a';
+            const surfaceAlpha = (builderState.opacity / 100).toFixed(2);
+            const cardBg = isDark ? `rgba(255, 255, 255, ${surfaceAlpha})` : `rgba(15, 23, 42, ${surfaceAlpha})`;
+            const borderCol = builderState.styleId === 'brutal'
+                ? (isDark ? '#ffffff' : '#0f172a')
+                : (isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,23,42,0.12)');
+            const borderWidth = builderState.styleId === 'brutal' ? '2px' : '1px';
+            const shadowStyle = builderState.styleId === 'brutal'
+                ? `4px 4px 0px ${isDark ? '#ffffff' : '#0f172a'}`
+                : `0 10px 24px -8px rgba(0,0,0,${(builderState.glow / 220).toFixed(2)})`;
+
+            canvas.style.background = bg;
+            canvas.style.color = fg;
+            canvas.style.fontFamily = builderState.fontCss;
+
+            orb.style.background = `radial-gradient(circle, ${builderState.primaryColor} 0%, transparent 70%)`;
+            orb.style.opacity = (builderState.glow / 100).toFixed(2);
+
+            const padPx = 8 + builderState.spacing * 3;
+            wrap.style.padding = `${padPx}px`;
+            wrap.style.gap = `${6 + builderState.spacing * 2}px`;
+
+            [nav, hero, card1, card2].forEach(el => {
+                el.style.background = cardBg;
+                el.style.borderRadius = `${builderState.radius}px`;
+                el.style.border = `${borderWidth} solid ${borderCol}`;
+                el.style.backdropFilter = `blur(${builderState.blur}px)`;
+                el.style.webkitBackdropFilter = `blur(${builderState.blur}px)`;
+                el.style.boxShadow = shadowStyle;
+            });
+
+            const btnRadius = Math.max(0, Math.min(999, builderState.radius - 4));
+            btn1.style.background = `linear-gradient(135deg, ${builderState.primaryColor}, ${builderState.secondaryColor})`;
+            btn1.style.borderRadius = `${btnRadius}px`;
+            btn2.style.borderRadius = `${btnRadius}px`;
+            btn2.style.border = `1px solid ${borderCol}`;
+
+            document.getElementById('prev-logo-dot').style.background = builderState.primaryColor;
+            document.getElementById('prev-nav-cta').style.background = builderState.primaryColor;
+            document.getElementById('prev-nav-cta').style.borderRadius = `${Math.max(4, Math.floor(builderState.radius / 2))}px`;
+
+            badge.style.background = `${builderState.primaryColor}25`;
+            badge.style.color = builderState.primaryColor;
+            badge.style.borderRadius = `${btnRadius}px`;
+
+            document.getElementById('prev-metric-1').style.color = builderState.primaryColor;
+            document.getElementById('prev-bar-1').style.background = builderState.primaryColor;
+            document.getElementById('prev-style-tag').textContent = builderState.styleName;
+
+            const palName = UI_PALETTES.find(x => x.id === builderState.paletteId)?.name || builderState.primaryColor;
+            document.getElementById('summary-style-pill').textContent = `${builderState.styleName} • ${palName}`;
+            document.getElementById('summary-metrics-pill').textContent = `R: ${builderState.radius}px | Blur: ${builderState.blur}px | Op: ${builderState.opacity}%`;
+        }
+
+        function generateVisualUIPrompt() {
+            Haptic.light();
+            const typeObj = UI_PROJECT_TYPES.find(x => x.id === builderState.typeId) || UI_PROJECT_TYPES[0];
+            const styleObj = UI_STYLES.find(x => x.id === builderState.styleId) || UI_STYLES[0];
+            const fontObj = UI_FONTS.find(x => x.id === builderState.fontId) || UI_FONTS[0];
+            const customNote = document.getElementById('ui-custom-note').value.trim();
+
+            const spacingDesc = {
+                1: 'компактная плотная сетка (p-3, gap-2.5) для максимальной информативности',
+                2: 'умеренно компактные отступы (p-4, gap-3)',
+                3: 'сбалансированные универсальные отступы (p-5, gap-4)',
+                4: 'просторная вёрстка с большим количеством воздуха (p-6, gap-6)',
+                5: 'максимально воздушная премиум-композиция (p-8, gap-8)'
+            }[builderState.spacing];
+
+            const prompt = `Роль: Senior UI/UX Designer & Frontend Developer.
+Задача: Разработай современный интерфейс для проекта «${typeObj.title}» (${typeObj.desc}).
+${customNote ? `\nДополнительный контекст задачи: ${customNote}\n` : ''}
+1. ВИЗУАЛЬНАЯ ДИЗАЙН-СИСТЕМА (${styleObj.name}):
+- Эстетика: ${styleObj.desc}.
+- Тема по умолчанию: ${builderState.previewDark ? 'Тёмная (Dark Mode)' : 'Светлая (Light Mode)'}, основной фон: ${builderState.previewDark ? builderState.bgDark : builderState.bgLight}.
+- Главный акцентный цвет (Primary): ${builderState.primaryColor}, вторичный градиентный акцент: ${builderState.secondaryColor}.
+- Скругление углов карточек и контейнеров (border-radius): ровно ${builderState.radius}px (кнопки и инпуты: ${Math.max(0, builderState.radius - 6)}px).
+- Эффект стекла (Glassmorphism): backdrop-filter: blur(${builderState.blur}px), непрозрачность подложки карточек: ${builderState.opacity}% (bg-white/[0.${String(builderState.opacity).padStart(2, '0')}]), тонкая рамка ${styleObj.borderStyle}.
+- Плотность и отступы: ${spacingDesc}.
+- Интенсивность фонового свечения и теней: ${builderState.glow}% (радиальные градиентные пятна на фоне).
+
+2. ТИПОГРАФИКА:
+- Основной шрифт: ${fontObj.name} (${fontObj.css}), подключи через Google Fonts.
+- Чёткая иерархия: контрастные заголовки, приглушённый вторичный текст, моноширинный шрифт для цифр и кода.
+
+3. ОБЯЗАТЕЛЬНЫЕ СЕКЦИИ И КОМПОНЕНТЫ НА СТРАНИЦЕ:
+${builderState.sections.map(s => `- ${s}`).join('\n')}
+
+4. АНИМАЦИИ И UX-ТРЕБОВАНИЯ:
+${builderState.effects.map(f => `- ${f}`).join('\n')}
+- Все интерактивные элементы имеют зону нажатия минимум 44px и плавный отклик active:scale-[0.97].
+
+5. ФОРМАТ ВЫДАЧИ КОДА:
+- Стек: HTML5 + Tailwind CSS (CDN) + чистый Vanilla JS в одном самодостаточном файле index.html.
+- Выдай полный рабочий код от <!DOCTYPE html> до </html> без сокращений и заглушек.`;
+
+            runWithSkeleton('ui-out-wrap', 'ui-skeleton', 'ui-result-card', 'ui-code', prompt, `UI Промт: ${styleObj.name}`);
+        }
+
+        /* ==================== 3. БЛИКИ (ПК) И КОНФЕТТИ ==================== */
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
             let rafPending = false;
             document.addEventListener('pointermove', (e) => {
@@ -908,7 +1493,7 @@
             requestAnimationFrame(frame);
         }
 
-        /* ==================== 3. НАВИГАЦИЯ И iOS BOTTOM SHEET ==================== */
+        /* ==================== 4. НАВИГАЦИЯ И BOTTOM SHEET ==================== */
         let toastTimer = null;
         function showToast(msg = 'Скопировано!') {
             const pill = document.getElementById('toast-pill');
@@ -927,12 +1512,12 @@
             currentTabIndex = index;
             document.getElementById('bottom-nav-pill').style.transform = `translate3d(${index * 100}%, 0, 0)`;
 
-            ['view-tools', 'view-hub', 'view-vault'].forEach(id => {
+            ['view-studio', 'view-tools', 'view-hub', 'view-vault'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(viewId).classList.remove('hidden');
 
-            [0, 1, 2].forEach(i => {
+            [0, 1, 2, 3].forEach(i => {
                 const btn = document.getElementById(`nav-btn-${i}`);
                 const active = i === index;
                 btn.setAttribute('aria-selected', String(active));
@@ -942,9 +1527,7 @@
                 btn.classList.toggle('font-medium', !active);
             });
 
-            if (viewId === 'view-vault') {
-                renderVault();
-            }
+            if (viewId === 'view-vault') renderVault();
 
             syncBackButton();
             syncMainButton();
@@ -1000,7 +1583,7 @@
             });
         })();
 
-        /* ==================== 4. СТЕКИ И ШАБЛОНЫ ПРОЕКТОВ ==================== */
+        /* ==================== 5. СТЕКИ, ОШИБКИ, ОПТИМИЗАТОР ==================== */
         const STACKS_DATA = [
             { id: 'python_tg', title: 'Python 3.11 + Aiogram 3.x + aiosqlite', desc: 'Асинхронный Telegram-бот с Роутерами и WAL БД' },
             { id: 'python_fastapi', title: 'Python + FastAPI + SQLAlchemy 2.0 + Postgres', desc: 'Высоконагруженный REST API сервис' },
@@ -1018,8 +1601,7 @@
 
         function updateFavStarUI() {
             const favs = getFavStacks();
-            const isFav = favs.includes(selectedStackId);
-            document.getElementById('fav-star-svg').setAttribute('fill', isFav ? 'currentColor' : 'none');
+            document.getElementById('fav-star-svg')?.setAttribute('fill', favs.includes(selectedStackId) ? 'currentColor' : 'none');
         }
 
         function toggleFavoriteCurrentStack() {
@@ -1030,7 +1612,7 @@
                 showToast('Убрано из избранного');
             } else {
                 favs.push(selectedStackId);
-                showToast('Стек закреплён в избранном ⭐');
+                showToast('Стек закреплён ⭐');
             }
             localStorage.setItem('vibe_fav_stacks', JSON.stringify(favs));
             updateFavStarUI();
@@ -1051,7 +1633,6 @@
         function openStackSheet() {
             const favs = getFavStacks();
             const sorted = [...STACKS_DATA].sort((a, b) => (favs.includes(b.id) ? 1 : 0) - (favs.includes(a.id) ? 1 : 0));
-
             const html = sorted.map(s => {
                 const isFav = favs.includes(s.id);
                 const active = s.id === selectedStackId;
@@ -1068,25 +1649,24 @@
                     </button>
                 `;
             }).join('');
-
             openBottomSheet('Выберите стек проекта', html);
         }
 
         const PROJECT_TEMPLATES = {
             saas: {
                 title: 'Шаблон: AI Micro-SaaS',
-                tree: `saas-app/\n├── app/ (Next.js App Router)\n├── components/ui/\n├── prisma/schema.prisma\n├── lib/ai-client.ts\n└── .env.example`,
-                prompt: `Роль: Senior Fullstack SaaS Architect.\nСоздай каркас AI Micro-SaaS приложения (Next.js 14, Tailwind, Prisma, Stripe/Stars).\nВыдай схему БД, лендинг-пейдж, личный кабинет с лимитами генераций и API-роут для стриминга ответа от Claude.`
+                tree: `saas-app/\n├── app/ (Next.js App Router)\n├── components/ui/\n├── prisma/schema.prisma\n└── lib/ai-client.ts`,
+                prompt: `Роль: Senior Fullstack SaaS Architect.\nСоздай каркас AI Micro-SaaS приложения (Next.js 14, Tailwind, Prisma, Stars/Stripe).\nВыдай схему БД, лендинг, личный кабинет и API-роут.`
             },
             tgbot: {
                 title: 'Шаблон: Модульный Telegram-бот',
-                tree: `tg-bot/\n├── bot.py\n├── config.py\n├── db.py (aiosqlite WAL)\n├── handlers/ (user.py, admin.py)\n└── keyboards.py`,
-                prompt: `Роль: Senior Python Aiogram 3 Developer.\nНапиши модульного Telegram-бота с обязательной проверкой подписки (Gate), реферальной системой, админ-панелью с рассылкой и интеграцией WebApp.`
+                tree: `tg-bot/\n├── bot.py\n├── config.py\n├── db.py (aiosqlite WAL)\n├── handlers/\n└── keyboards.py`,
+                prompt: `Роль: Senior Python Aiogram 3 Developer.\nНапиши модульного Telegram-бота с проверкой подписки, реферальной системой, админкой и WebApp.`
             },
             landing: {
                 title: 'Шаблон: Интерактивный 3D-Лендинг',
-                tree: `landing-3d/\n├── index.html (Single-file)\n├── Three.js Scene + Shaders\n└── Glassmorphism UI Overlay`,
-                prompt: `Роль: Creative Frontend & WebGL Developer.\nСоздай продающий одностраничный сайт в стиле Apple visionOS с интерактивной 3D-сценой на фоне (Three.js), плавным скроллом и карточками из матового стекла.`
+                tree: `landing-3d/\n├── index.html (Single-file)\n├── Three.js Scene\n└── Glassmorphism UI`,
+                prompt: `Роль: Creative Frontend & WebGL Developer.\nСоздай продающий одностраничный сайт в стиле Apple visionOS с интерактивной 3D-сценой Three.js.`
             }
         };
 
@@ -1103,24 +1683,20 @@
                         <span class="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">Стартовый промт</span>
                         <p class="font-mono text-[11px] text-dynamic mt-1.5 whitespace-pre-wrap">${tpl.prompt}</p>
                     </div>
-                    <button onclick="copyDirectText('${enc}', this)" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold">
-                        📋 Скопировать стартовый промт
-                    </button>
+                    <button onclick="copyDirectText('${enc}', this)" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold">📋 Скопировать стартовый промт</button>
                 </div>
             `;
             openBottomSheet(tpl.title, html);
         }
 
-        /* ==================== 5. ГЕНЕРАЦИЯ СО СКЕЛЕТОНАМИ И АВТООПРЕДЕЛЕНИЕ ЯЗЫКА ==================== */
         const ARCH_PROMPTS = {
-            python_tg: `Роль: Senior Python Backend & Telegram Bot Architect.\nСтек: Python 3.11+, aiogram 3.x, aiosqlite.\nЗадача: Спроектируй модульную архитектуру Telegram-бота (bot.py, config.py, db.py с WAL, handlers/, keyboards.py). Выдай дерево файлов и полный рабочий код каждого модуля без сокращений.`,
-            python_fastapi: `Роль: Principal Backend Architect.\nСтек: Python 3.11+, FastAPI, SQLAlchemy 2.0 Async, PostgreSQL, Pydantic v2.\nЗадача: Создай продакшен-каркас REST API с разделением на роутеры, схемы, сервисы и DI-сессии. Выдай полные исходники.`,
-            nextjs_full: `Роль: Senior Fullstack Engineer.\nСтек: Next.js 14 (App Router), TypeScript, Tailwind CSS, Prisma, Supabase.\nЗадача: Спроектируй архитектуру AI SaaS с Server Actions и темной темой. Выдай schema.prisma и ключевые страницы.`,
+            python_tg: `Роль: Senior Python Backend & Telegram Bot Architect.\nСтек: Python 3.11+, aiogram 3.x, aiosqlite.\nЗадача: Спроектируй модульную архитектуру Telegram-бота (bot.py, config.py, db.py с WAL, handlers/, keyboards.py). Выдай дерево файлов и полный рабочий код каждого модуля.`,
+            python_fastapi: `Роль: Principal Backend Architect.\nСтек: Python 3.11+, FastAPI, SQLAlchemy 2.0 Async, PostgreSQL, Pydantic v2.\nЗадача: Создай продакшен-каркас REST API с разделением на роутеры, схемы и DI-сессии. Выдай полные исходники.`,
+            nextjs_full: `Роль: Senior Fullstack Engineer.\nСтек: Next.js 14 (App Router), TypeScript, Tailwind CSS, Prisma, Supabase.\nЗадача: Спроектируй архитектуру AI SaaS с Server Actions. Выдай schema.prisma и ключевые страницы.`,
             html_tma: `Роль: Senior Telegram Mini Apps Developer.\nСтек: HTML5, Tailwind CSS (CDN), Vanilla JS, Telegram WebApp SDK.\nЗадача: Напиши одностраничное приложение в одном файле index.html в стиле Apple visionOS с поддержкой тем Telegram и CloudStorage.`,
             three_webgl: `Роль: Creative WebGL Developer.\nСтек: Three.js, WebGL, GSAP, Tailwind CSS.\nЗадача: Создай интерактивную 3D-сцену в одном файле index.html с реакцией на курсор и гироскоп (60 FPS).`
         };
 
-        // Быстрый рендер текста единым блоком без создания десятков DOM-элементов
         function renderFastOutput(containerId, rawText) {
             const container = document.getElementById(containerId);
             container.dataset.raw = rawText;
@@ -1146,12 +1722,10 @@
 
         function generateArchitecture() {
             Haptic.light();
-            const prompt = ARCH_PROMPTS[selectedStackId];
-            runWithSkeleton('arch-out-wrap', 'arch-skeleton', 'arch-result-card', 'arch-code', prompt, `Архитектура: ${getCurrentStackTitle()}`);
+            runWithSkeleton('arch-out-wrap', 'arch-skeleton', 'arch-result-card', 'arch-code', ARCH_PROMPTS[selectedStackId], `Архитектура: ${getCurrentStackTitle()}`);
         }
 
         let currentErrorMode = 'fix';
-
         function setErrorMode(mode, btnEl) {
             Haptic.selection();
             currentErrorMode = mode;
@@ -1163,10 +1737,10 @@
 
         function detectLanguageFromLog(text) {
             const t = text.toLowerCase();
-            if (t.includes('traceback (most recent call last)') || t.includes('aiogram') || t.includes('.py"')) return 'Python / Aiogram';
-            if (t.includes('react') || t.includes('jsx') || t.includes('useeffect') || t.includes('hydration')) return 'React / Next.js';
-            if (t.includes('node_modules') || t.includes('typeerror:') || t.includes('referenceerror:')) return 'Node.js / JS';
-            if (t.includes('sqlite') || t.includes('postgres') || t.includes('syntax error at or near')) return 'SQL / Database';
+            if (t.includes('traceback') || t.includes('aiogram') || t.includes('.py"')) return 'Python / Aiogram';
+            if (t.includes('react') || t.includes('jsx') || t.includes('hydration')) return 'React / Next.js';
+            if (t.includes('node_modules') || t.includes('typeerror:')) return 'Node.js / JS';
+            if (t.includes('sqlite') || t.includes('postgres')) return 'SQL / Database';
             return 'Auto Stack';
         }
 
@@ -1182,8 +1756,7 @@
             clearErrorRing(textarea);
             updateTokenCounter(textarea, 'err-token-text', 'err-token-bar');
             const val = textarea.value.trim();
-            const badge = document.getElementById('detected-lang-badge');
-            badge.textContent = val ? `Определено: ${detectLanguageFromLog(val)}` : 'Автоопределение...';
+            document.getElementById('detected-lang-badge').textContent = val ? `Определено: ${detectLanguageFromLog(val)}` : 'Автоопределение...';
         }
 
         function convertError() {
@@ -1195,16 +1768,14 @@
                 document.getElementById('err-msg').classList.remove('hidden');
                 return;
             }
-
             Haptic.light();
             const lang = detectLanguageFromLog(val);
             const modeTasks = {
-                fix: 'Напиши полностью исправленный рабочий код без сокращений и заглушек, устраняющий эту ошибку.',
-                explain: 'Объясни простым и понятным языком, почему возникла эта ошибка и как устроен механизм её срабатывания.',
-                root: 'Проведи глубокий анализ стек-трейса, укажи точную строчку-виновника и предложи архитектурную защиту от повторения бага.'
+                fix: 'Напиши полностью исправленный рабочий код без сокращений, устраняющий эту ошибку.',
+                explain: 'Объясни простым языком, почему возникла эта ошибка и как она работает.',
+                root: 'Проведи глубокий анализ стек-трейса, укажи строчку-виновника и добавь защиту от повторения бага.'
             };
-
-            const prompt = `Роль: Senior Debugging Engineer (${lang}).\nРежим: ${currentErrorMode.toUpperCase()}.\n\nЗадача:\n${modeTasks[currentErrorMode]}\n\nЛог ошибки (Traceback):\n\`\`\`text\n${val}\n\`\`\``;
+            const prompt = `Роль: Senior Debugging Engineer (${lang}).\nРежим: ${currentErrorMode.toUpperCase()}.\n\nЗадача:\n${modeTasks[currentErrorMode]}\n\nЛог ошибки:\n\`\`\`text\n${val}\n\`\`\``;
             runWithSkeleton('err-out-wrap', 'err-skeleton', 'err-result-card', 'err-code', prompt, `Ошибка (${lang})`);
         }
 
@@ -1234,42 +1805,35 @@
             const useTypes = document.getElementById('chip-types').getAttribute('data-active') === 'true';
             const useTests = document.getElementById('chip-tests').getAttribute('data-active') === 'true';
             const useComments = document.getElementById('chip-comments').getAttribute('data-active') === 'true';
-
             const prompt = `@Codebase Реализуем задачу: ${task}\nСтек: ${stack}\nТребования:\n${useTypes ? '- Строгая типизация\n' : ''}${useTests ? '- Модульные тесты\n' : ''}${useComments ? '- Докстринги к функциям\n' : ''}- Выдавай полные файлы без поломки соседней логики.`;
             renderFastOutput('cur-code', prompt);
             document.getElementById('cur-out-wrap').classList.add('open');
             addHistoryItem(`Cursor: ${task}`, prompt);
         }
 
-        /* ==================== 6. ИСТОРИЯ ГЕНЕРАЦИЙ ==================== */
+        /* ==================== 6. ИСТОРИЯ, СЕЙФ, ЭКСПОРТ И БАЗА ==================== */
         const HISTORY_KEY = 'vibe_history_v2';
-
         function getHistory() {
             try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
             catch { return []; }
         }
-
         function addHistoryItem(title, text) {
             const list = getHistory().filter(x => x.text !== text);
             list.unshift({ id: Date.now(), title, text, time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) });
             localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 10)));
             renderHistory();
         }
-
         function removeHistoryItem(id) {
             Haptic.light();
-            const list = getHistory().filter(x => x.id !== id);
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(getHistory().filter(x => x.id !== id)));
             renderHistory();
         }
-
         function clearHistory() {
             Haptic.light();
             localStorage.removeItem(HISTORY_KEY);
             renderHistory();
             showToast('История очищена');
         }
-
         function reuseHistoryItem(id) {
             const item = getHistory().find(x => x.id === id);
             if (!item) return;
@@ -1278,41 +1842,25 @@
                 showToast('Скопировано из истории!');
             });
         }
-
         function renderHistory() {
             const list = getHistory();
             const box = document.getElementById('history-list');
+            if (!box) return;
             if (list.length === 0) {
-                box.innerHTML = `<div class="p-4 rounded-2xl code-surface border border-white/5 text-center"><p class="text-xs text-muted-dynamic">История пуста — сгенерируйте архитектуру или промт выше.</p></div>`;
+                box.innerHTML = `<div class="p-4 rounded-2xl code-surface border border-white/5 text-center"><p class="text-xs text-muted-dynamic">История пуста.</p></div>`;
                 return;
             }
-
             box.innerHTML = list.map(item => `
-                <div data-hid="${item.id}" onclick="reuseHistoryItem(${item.id})" class="history-swipe-item p-3 rounded-2xl code-surface border border-white/10 flex items-center justify-between gap-2 cursor-pointer transition-transform duration-150">
+                <div onclick="reuseHistoryItem(${item.id})" class="p-3 rounded-2xl code-surface border border-white/10 flex items-center justify-between gap-2 cursor-pointer">
                     <div class="truncate">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-semibold text-dynamic truncate">${escapeHtml(item.title)}</span>
-                            <span class="text-[10px] text-muted-dynamic">${item.time}</span>
-                        </div>
+                        <span class="text-xs font-semibold text-dynamic truncate">${escapeHtml(item.title)}</span>
                         <p class="text-[11px] text-muted-dynamic truncate font-mono mt-0.5">${escapeHtml(item.text)}</p>
                     </div>
-                    <button onclick="event.stopPropagation(); removeHistoryItem(${item.id})" aria-label="Удалить" class="text-xs text-muted-dynamic hover:text-rose-400 px-2 py-1 shrink-0">✕</button>
+                    <button onclick="event.stopPropagation(); removeHistoryItem(${item.id})" class="text-xs text-muted-dynamic hover:text-rose-400 px-2 py-1 shrink-0">✕</button>
                 </div>
             `).join('');
-
-            document.querySelectorAll('.history-swipe-item').forEach(el => {
-                let startX = 0;
-                el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
-                el.addEventListener('touchend', e => {
-                    if (e.changedTouches[0].clientX - startX < -65) {
-                        el.style.transform = 'translate3d(-100%, 0, 0)';
-                        setTimeout(() => removeHistoryItem(Number(el.dataset.hid)), 150);
-                    }
-                });
-            });
         }
 
-        /* ==================== 7. БЫСТРЫЙ ЭКСПОРТ ==================== */
         function getRawOutput(containerId) {
             const el = document.getElementById(containerId);
             return el.dataset.raw || el.textContent || '';
@@ -1323,11 +1871,7 @@
             if (!text) return;
             navigator.clipboard.writeText(text).then(() => {
                 Haptic.success();
-                const urls = {
-                    claude: 'https://claude.ai/new',
-                    chatgpt: 'https://chatgpt.com/',
-                    cursor: 'cursor://anysphere.cursor-deeplink'
-                };
+                const urls = { claude: 'https://claude.ai/new', chatgpt: 'https://chatgpt.com/', cursor: 'cursor://anysphere.cursor-deeplink' };
                 showToast(`Промт скопирован! Открываем ${target.toUpperCase()}...`);
                 setTimeout(() => window.open(urls[target], '_blank'), 300);
             });
@@ -1356,61 +1900,37 @@
             else copyResult(containerId);
         }
 
-        /* ==================== 8. МОЙ СЕЙФ ==================== */
         const VAULT_KEY = 'vibe_vault_v3';
         let activeVaultTag = 'ALL';
-
         function getVaultList() {
             try { return JSON.parse(localStorage.getItem(VAULT_KEY) || '[]'); }
             catch { return []; }
         }
-
         function persistVaultList(list) {
             const raw = JSON.stringify(list);
             localStorage.setItem(VAULT_KEY, raw);
-            try {
-                if (tg?.CloudStorage && raw.length < 4000) tg.CloudStorage.setItem(VAULT_KEY, raw);
-            } catch (_) {}
+            try { if (tg?.CloudStorage && raw.length < 4000) tg.CloudStorage.setItem(VAULT_KEY, raw); } catch (_) {}
             document.getElementById('vault-count-badge').textContent = String(list.length);
         }
-
         function saveResultToVault(title, containerId, tag = 'Промты') {
             const text = getRawOutput(containerId).trim();
             if (!text) return;
             const list = getVaultList();
-            list.unshift({
-                id: Date.now(),
-                title,
-                text,
-                tag,
-                pinned: false,
-                date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' })
-            });
+            list.unshift({ id: Date.now(), title, text, tag, pinned: false, date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' }) });
             persistVaultList(list);
             Haptic.success();
             fireMiniConfetti();
-            showToast(`Сохранено в папку «${tag}»!`);
+            showToast(`Сохранено в Сейф (${tag})!`);
         }
-
         function addManualVaultItem() {
             const titleEl = document.getElementById('manual-vault-title');
             const bodyEl = document.getElementById('manual-vault-body');
             const tag = document.getElementById('manual-vault-tag').value;
             const title = titleEl.value.trim();
             const text = bodyEl.value.trim();
-            if (!title || !text) {
-                Haptic.error();
-                return;
-            }
+            if (!title || !text) { Haptic.error(); return; }
             const list = getVaultList();
-            list.unshift({
-                id: Date.now(),
-                title,
-                text,
-                tag,
-                pinned: false,
-                date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' })
-            });
+            list.unshift({ id: Date.now(), title, text, tag, pinned: false, date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' }) });
             persistVaultList(list);
             titleEl.value = '';
             bodyEl.value = '';
@@ -1419,25 +1939,20 @@
             showToast('Сниппет добавлен в Сейф!');
             renderVault();
         }
-
         function togglePinVaultItem(id) {
             Haptic.selection();
-            const list = getVaultList().map(item => item.id === id ? { ...item, pinned: !item.pinned } : item);
-            persistVaultList(list);
+            persistVaultList(getVaultList().map(item => item.id === id ? { ...item, pinned: !item.pinned } : item));
             renderVault();
         }
-
         function deleteVaultItem(id) {
             Haptic.light();
             const doDelete = () => {
-                const next = getVaultList().filter(x => x.id !== id);
-                persistVaultList(next);
+                persistVaultList(getVaultList().filter(x => x.id !== id));
                 renderVault();
             };
             if (tg?.showConfirm) tg.showConfirm('Удалить сниппет из Сейфа?', ok => { if (ok) doDelete(); });
             else if (confirm('Удалить сниппет из Сейфа?')) doDelete();
         }
-
         function setVaultTagFilter(tag, btnEl) {
             Haptic.selection();
             activeVaultTag = tag;
@@ -1447,7 +1962,6 @@
             btnEl.className = 'vault-tag-chip min-h-[36px] px-3.5 rounded-full text-xs font-semibold bg-indigo-500 text-white shrink-0';
             renderVault();
         }
-
         function renderVault() {
             const q = (document.getElementById('vault-search')?.value || '').trim().toLowerCase();
             const all = getVaultList().sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
@@ -1456,19 +1970,11 @@
                 const matchQ = !q || item.title.toLowerCase().includes(q) || item.text.toLowerCase().includes(q);
                 return matchTag && matchQ;
             });
-
             const box = document.getElementById('vault-cards');
             if (filtered.length === 0) {
-                box.innerHTML = `
-                    <div class="frosted-card rounded-3xl p-8 text-center lg:col-span-2">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-400/25 flex items-center justify-center mx-auto mb-3 text-xl">🔐</div>
-                        <p class="text-sm font-semibold text-dynamic">В этой папке Сейфа пока пусто</p>
-                        <p class="text-xs text-muted-dynamic mt-1">Сохраняйте архитектуры, промты и отлаженные баги одним нажатием.</p>
-                    </div>
-                `;
+                box.innerHTML = `<div class="frosted-card rounded-3xl p-8 text-center lg:col-span-2"><div class="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-400/25 flex items-center justify-center mx-auto mb-3 text-xl">🔐</div><p class="text-sm font-semibold text-dynamic">В этой папке Сейфа пока пусто</p><p class="text-xs text-muted-dynamic mt-1">Сохраняйте UI-концепты, архитектуры и промты одним нажатием.</p></div>`;
                 return;
             }
-
             box.innerHTML = filtered.map(item => {
                 const enc = encodeURIComponent(item.text);
                 return `
@@ -1479,7 +1985,7 @@
                                     <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-400/20">${escapeHtml(item.tag || 'Промты')}</span>
                                     <h4 class="text-sm font-semibold text-dynamic mt-1">${escapeHtml(item.title)}</h4>
                                 </div>
-                                <button onclick="togglePinVaultItem(${item.id})" aria-label="Закрепить" class="btn-glass min-w-[34px] min-h-[34px] rounded-xl text-xs ${item.pinned ? 'text-amber-400 border-amber-400/40' : 'text-muted-dynamic'}">📌</button>
+                                <button onclick="togglePinVaultItem(${item.id})" class="btn-glass min-w-[34px] min-h-[34px] rounded-xl text-xs ${item.pinned ? 'text-amber-400 border-amber-400/40' : 'text-muted-dynamic'}">📌</button>
                             </div>
                             <p class="font-mono text-[11px] text-muted-dynamic line-clamp-3 code-surface rounded-xl p-2.5 mb-3">${escapeHtml(item.text)}</p>
                         </div>
@@ -1492,25 +1998,22 @@
             }).join('');
         }
 
-        /* ==================== 9. ОНБОРДИНГ ==================== */
         const ONB_SLIDES = [
-            { icon: '✨', title: 'Apple visionOS & Desktop Mode', desc: 'Оптимизированный интерфейс на 60 FPS автоматически подстраивается под тему Telegram, смартфон и монитор ПК.' },
-            { icon: '🧠', title: 'Умный дебаг и экспорт в 1 клик', desc: 'Конвертер сам определяет язык по Traceback, считает токены и отправляет промт в Claude, ChatGPT или Cursor.' },
-            { icon: '🔐', title: 'Сейф с папками и 500 идей', desc: 'Закрепляйте лучшие сниппеты по тегам в Сейфе и используйте генератор из 500 готовых идей для новых проектов.' }
+            { icon: '🎨', title: 'Визуальная UI Студия', desc: 'Крутите ползунки скругления, стекла и свечения, выбирайте палитру и смотрите, как ваш будущий сайт меняется вживую.' },
+            { icon: '✨', title: 'Готовый дизайн-промт в 1 клик', desc: 'Конструктор сам переводит все выбранные настройки в точное ТЗ с классами Tailwind CSS для Claude, ChatGPT или Cursor.' },
+            { icon: '🛠', title: 'Дебаггер, Архитектура и Сейф', desc: 'Во вкладках «Тулзы» и «Сейф» доступны конвертер ошибок, конструктор бэкенда и облачное хранилище сниппетов.' }
         ];
         let onbIndex = 0;
-
         function renderOnboardingSlide() {
             const s = ONB_SLIDES[onbIndex];
             document.getElementById('onb-icon').textContent = s.icon;
             document.getElementById('onb-title').textContent = s.title;
             document.getElementById('onb-desc').textContent = s.desc;
-            document.getElementById('onb-next-btn').textContent = onbIndex === 2 ? 'Начать работу 🚀' : 'Далее →';
+            document.getElementById('onb-next-btn').textContent = onbIndex === 2 ? 'Начать 🚀' : 'Далее →';
             [0, 1, 2].forEach(i => {
                 document.getElementById(`onb-dot-${i}`).className = i === onbIndex ? 'w-5 h-1.5 rounded-full bg-indigo-500 transition-all' : 'w-1.5 h-1.5 rounded-full bg-slate-500/40 transition-all';
             });
         }
-
         function openOnboarding() {
             Haptic.light();
             onbIndex = 0;
@@ -1519,59 +2022,17 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         }
-
         function nextOnboardingSlide() {
             Haptic.selection();
-            if (onbIndex < 2) {
-                onbIndex++;
-                renderOnboardingSlide();
-            } else {
-                finishOnboarding();
-            }
+            if (onbIndex < 2) { onbIndex++; renderOnboardingSlide(); }
+            else finishOnboarding();
         }
-
         function finishOnboarding() {
             Haptic.success();
-            localStorage.setItem('vibe_onboarded_v1', 'true');
+            localStorage.setItem('vibe_onboarded_v2', 'true');
             const modal = document.getElementById('onboarding-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
-        }
-
-        /* ==================== 10. БАЗА БОТА (500 ИДЕЙ, ЧЕК-ЛИСТ) ==================== */
-        const DEPLOY_TASKS = [
-            { id: 'env', text: 'Секреты и токены вынесены в .env' },
-            { id: 'https', text: 'Подключен HTTPS домен для Telegram WebApp' },
-            { id: 'cors', text: 'Настроена проверка подписи initData' },
-            { id: 'err', text: 'Добавлен глобальный перехват исключений' },
-            { id: 'responsive', text: 'Проверена адаптивность на смартфоне и ПК' },
-            { id: 'wal', text: 'Включен режим WAL для базы данных' }
-        ];
-
-        function renderChecklist() {
-            const state = JSON.parse(localStorage.getItem('vibe_deploy_check') || '{}');
-            let done = 0;
-            document.getElementById('checklist-items').innerHTML = DEPLOY_TASKS.map(t => {
-                const ch = !!state[t.id];
-                if (ch) done++;
-                return `
-                    <button onclick="toggleCheck('${t.id}')" class="w-full min-h-[42px] px-3 py-2 rounded-2xl border ${ch ? 'bg-indigo-500/15 border-indigo-400/40' : 'border-white/10 bg-white/[0.02]'} flex items-center gap-2.5 text-left">
-                        <span class="w-4 h-4 rounded flex items-center justify-center border ${ch ? 'bg-indigo-500 border-indigo-400 text-white' : 'border-slate-500'} text-[10px]">${ch ? '✓' : ''}</span>
-                        <span class="text-xs ${ch ? 'line-through text-muted-dynamic' : 'text-dynamic'}">${t.text}</span>
-                    </button>
-                `;
-            }).join('');
-            const pct = Math.round((done / DEPLOY_TASKS.length) * 100);
-            document.getElementById('deploy-bar').style.width = `${pct}%`;
-            document.getElementById('deploy-sub').textContent = `Vercel / Netlify / VPS — ${done} из ${DEPLOY_TASKS.length}`;
-        }
-
-        function toggleCheck(id) {
-            Haptic.selection();
-            const state = JSON.parse(localStorage.getItem('vibe_deploy_check') || '{}');
-            state[id] = !state[id];
-            localStorage.setItem('vibe_deploy_check', JSON.stringify(state));
-            renderChecklist();
         }
 
         const ALL_500_IDEAS = [];
@@ -1640,7 +2101,7 @@
         function pickRandomIdea() {
             Haptic.light();
             const item = ALL_500_IDEAS[Math.floor(Math.random() * ALL_500_IDEAS.length)];
-            if (currentTabIndex !== 1) switchTab(1, 'view-hub');
+            if (currentTabIndex !== 2) switchTab(2, 'view-hub');
             switchHubSub('sub-ideas', document.querySelectorAll('.hub-sub-btn')[1]);
             renderIdeasList(item);
             showToast(`Случайная идея #${item.id}`);
@@ -1697,13 +2158,13 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initTelegramApp();
+            initVisualStudio();
             updateFavStarUI();
-            renderChecklist();
             renderHistory();
             renderBotHub();
             persistVaultList(getVaultList());
 
-            if (!localStorage.getItem('vibe_onboarded_v1')) {
+            if (!localStorage.getItem('vibe_onboarded_v2')) {
                 setTimeout(openOnboarding, 350);
             }
         });
