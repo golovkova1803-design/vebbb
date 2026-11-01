@@ -32,26 +32,26 @@
             --bg-main: #0b0d14;
             --text-main: #f3f4f6;
             --text-muted: #94a3b8;
-            --card-bg: rgba(255, 255, 255, 0.055);
-            --card-border: rgba(255, 255, 255, 0.11);
-            --card-highlight: rgba(255, 255, 255, 0.14);
-            --input-bg: rgba(255, 255, 255, 0.04);
-            --code-bg: rgba(0, 0, 0, 0.35);
-            --glare-color: rgba(255, 255, 255, 0.09);
-            --nav-bg: rgba(15, 18, 28, 0.78);
+            --card-bg: rgba(22, 26, 39, 0.72);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --card-highlight: rgba(255, 255, 255, 0.12);
+            --input-bg: rgba(255, 255, 255, 0.045);
+            --code-bg: rgba(0, 0, 0, 0.36);
+            --glare-color: rgba(255, 255, 255, 0.08);
+            --nav-bg: rgba(15, 18, 28, 0.84);
         }
 
         html.light {
             --bg-main: #f1f5f9;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --card-bg: rgba(255, 255, 255, 0.78);
+            --card-bg: rgba(255, 255, 255, 0.82);
             --card-border: rgba(15, 23, 42, 0.09);
             --card-highlight: rgba(255, 255, 255, 0.9);
-            --input-bg: rgba(15, 23, 42, 0.04);
+            --input-bg: rgba(15, 23, 42, 0.045);
             --code-bg: rgba(15, 23, 42, 0.06);
-            --glare-color: rgba(99, 102, 241, 0.12);
-            --nav-bg: rgba(255, 255, 255, 0.85);
+            --glare-color: rgba(99, 102, 241, 0.1);
+            --nav-bg: rgba(255, 255, 255, 0.88);
         }
 
         * {
@@ -67,33 +67,59 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             overflow-x: hidden;
             padding-bottom: calc(var(--safe-bottom) + 96px);
-            transition: background-color 500ms var(--ease-ios), color 500ms var(--ease-ios);
+            transition: background-color 300ms ease, color 300ms ease;
         }
 
         .text-dynamic { color: var(--text-main); }
         .text-muted-dynamic { color: var(--text-muted); }
         .code-surface { background-color: var(--code-bg); }
 
-        /* Стеклянные карточки + интерактивный радиальный блик (--x, --y) */
+        /* Оптимизированный фон без тяжелого CSS filter: blur() */
+        .ambient-bg {
+            background:
+                radial-gradient(circle at 15% 12%, rgba(99, 102, 241, 0.17) 0%, transparent 45%),
+                radial-gradient(circle at 85% 38%, rgba(139, 92, 246, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 30% 88%, rgba(56, 189, 248, 0.1) 0%, transparent 45%);
+            transform: translateZ(0);
+        }
+
+        /* GPU-ускоренные карточки из матового стекла (12px blur вместо тяжелых 24px) */
         .frosted-card {
             position: relative;
             overflow: hidden;
             background: var(--card-bg);
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--card-border);
-            box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.22), inset 0 1px 0 0 var(--card-highlight);
-            transition: background-color 500ms var(--ease-ios), border-color 400ms var(--ease-ios), transform 280ms var(--ease-ios), box-shadow 280ms var(--ease-ios);
+            box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.25), inset 0 1px 0 0 var(--card-highlight);
+            transform: translateZ(0);
+            contain: paint;
         }
-        .frosted-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(320px circle at var(--x, -200px) var(--y, -200px), var(--glare-color), transparent 70%);
-            opacity: var(--glare-opacity, 0);
-            transition: opacity 300ms var(--ease-ios);
-            pointer-events: none;
-            z-index: 0;
+
+        /* На мобильных устройствах (WebView) убираем лишний backdrop-filter с карточек для 120 FPS скролла */
+        @media (max-width: 768px) {
+            .frosted-card {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: rgba(24, 28, 42, 0.92);
+            }
+            html.light .frosted-card {
+                background: rgba(255, 255, 255, 0.95);
+            }
+        }
+
+        /* Интерактивный блик работает только на ПК с мышью (не тормозит скролл пальцем) */
+        @media (hover: hover) and (pointer: fine) {
+            .frosted-card::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(280px circle at var(--x, -200px) var(--y, -200px), var(--glare-color), transparent 70%);
+                opacity: var(--glare-opacity, 0);
+                transition: opacity 200ms ease;
+                pointer-events: none;
+                z-index: 0;
+            }
         }
         .frosted-card > * {
             position: relative;
@@ -102,46 +128,42 @@
 
         .frosted-header {
             background: var(--nav-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border-bottom: 1px solid var(--card-border);
-            transition: background-color 500ms var(--ease-ios), border-color 500ms var(--ease-ios);
+            transform: translateZ(0);
         }
 
         .frosted-nav {
             background: var(--nav-bg);
-            backdrop-filter: blur(26px);
-            -webkit-backdrop-filter: blur(26px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--card-border);
-            box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 var(--card-highlight);
-            transition: background-color 500ms var(--ease-ios);
+            box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 var(--card-highlight);
+            transform: translateZ(0);
         }
 
         .frosted-input {
             background: var(--input-bg);
             border: 1px solid var(--card-border);
             color: var(--text-main);
-            transition: all 260ms var(--ease-ios);
+            transition: border-color 180ms ease, box-shadow 180ms ease;
         }
         .frosted-input:focus {
             border-color: rgba(99, 102, 241, 0.75);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.22);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
             outline: none;
         }
         .frosted-input.error-ring {
             border-color: rgba(244, 63, 94, 0.85);
-            box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.22);
+            box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.2);
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
             color: #ffffff;
-            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.28);
-            transition: transform 240ms var(--ease-ios), box-shadow 240ms var(--ease-ios), filter 240ms var(--ease-ios);
-        }
-        .btn-primary:hover {
-            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-            filter: brightness(1.05);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            transition: transform 160ms var(--ease-ios), opacity 160ms ease;
         }
         .btn-primary:active { transform: scale(0.97); }
 
@@ -150,10 +172,9 @@
             border: 1px solid var(--card-border);
             color: var(--text-main);
             box-shadow: inset 0 1px 0 var(--card-highlight);
-            transition: all 240ms var(--ease-ios);
+            transition: transform 160ms var(--ease-ios), background-color 160ms ease;
         }
         .btn-glass:hover {
-            border-color: rgba(99, 102, 241, 0.45);
             background: rgba(99, 102, 241, 0.1);
         }
         .btn-glass:active { transform: scale(0.96); }
@@ -164,9 +185,9 @@
             100% { background-position: 200% 0; }
         }
         .skeleton-line {
-            background: linear-gradient(90deg, rgba(148, 163, 184, 0.1) 25%, rgba(129, 140, 248, 0.26) 50%, rgba(148, 163, 184, 0.1) 75%);
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.1) 25%, rgba(129, 140, 248, 0.24) 50%, rgba(148, 163, 184, 0.1) 75%);
             background-size: 200% 100%;
-            animation: shimmerMove 1.4s infinite linear;
+            animation: shimmerMove 1.2s infinite linear;
             border-radius: 8px;
         }
 
@@ -175,7 +196,7 @@
             display: grid;
             grid-template-rows: 0fr;
             opacity: 0;
-            transition: grid-template-rows 360ms var(--ease-ios), opacity 300ms var(--ease-ios);
+            transition: grid-template-rows 280ms var(--ease-ios), opacity 220ms ease;
         }
         .expand-grid.open {
             grid-template-rows: 1fr;
@@ -183,16 +204,11 @@
         }
         .expand-inner { overflow: hidden; }
 
-        /* Появление строк и карточек */
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-up {
-            animation: fadeUp 340ms var(--ease-ios) forwards;
-        }
-        .code-line {
-            opacity: 0;
             animation: fadeUp 240ms var(--ease-ios) forwards;
         }
 
@@ -204,25 +220,26 @@
         .svg-check-anim {
             stroke-dasharray: 24;
             stroke-dashoffset: 24;
-            animation: drawCheck 320ms var(--ease-ios) forwards;
+            animation: drawCheck 260ms var(--ease-ios) forwards;
         }
 
         /* Bottom Sheet (шторка снизу) */
         .sheet-backdrop {
             opacity: 0;
             pointer-events: none;
-            transition: opacity 320ms var(--ease-ios);
+            transition: opacity 240ms ease;
         }
         .sheet-backdrop.open {
             opacity: 1;
             pointer-events: auto;
         }
         .bottom-sheet {
-            transform: translateY(100%);
-            transition: transform 380ms var(--ease-ios);
+            transform: translate3d(0, 100%, 0);
+            transition: transform 300ms var(--ease-ios);
+            will-change: transform;
         }
         .bottom-sheet.open {
-            transform: translateY(0);
+            transform: translate3d(0, 0, 0);
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -236,21 +253,17 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-300">
 
-    <!-- Canvas для мини-эффекта частиц (конфетти на 600 мс) -->
-    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+    <!-- Canvas для мини-эффекта частиц (активируется только на 550 мс) -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full hidden"></canvas>
 
-    <!-- Параллакс-фон с мягкими цветовыми пятнами -->
-    <div id="parallax-bg" class="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-transform duration-300 ease-out" aria-hidden="true">
-        <div id="blob-1" class="absolute -top-24 -left-20 w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl transition-transform duration-300"></div>
-        <div id="blob-2" class="absolute top-1/3 -right-24 w-96 h-96 rounded-full bg-violet-500/15 blur-3xl transition-transform duration-300"></div>
-        <div id="blob-3" class="absolute -bottom-28 left-1/4 w-96 h-96 rounded-full bg-sky-500/10 blur-3xl transition-transform duration-300"></div>
-    </div>
+    <!-- Аппаратно-ускоренный градиентный фон без просадок FPS -->
+    <div class="ambient-bg fixed inset-0 pointer-events-none z-0" aria-hidden="true"></div>
 
     <!-- Sticky-шапка (Адаптивная для смартфона и ПК) -->
     <header class="frosted-header sticky top-0 z-30 px-4 lg:px-8 py-3">
         <div class="max-w-md lg:max-w-6xl mx-auto flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500/25 to-violet-500/25 border border-indigo-400/30 flex items-center justify-center shadow-inner shrink-0">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500/25 to-violet-500/25 border border-indigo-400/30 flex items-center justify-center shrink-0">
                     <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
@@ -258,7 +271,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-[15px] lg:text-base font-bold tracking-tight text-dynamic leading-tight">CLAUDE_CODE // VIBE</h1>
-                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-400/25">visionOS Desktop & Mobile</span>
+                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-400/25">60 FPS Turbo</span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-0.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -296,11 +309,11 @@
         <!-- ==================== РАЗДЕЛ 1: ИНСТРУМЕНТЫ (ДВУХКОЛОНОЧНЫЙ НА ПК) ==================== -->
         <section id="view-tools" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-            <!-- Левая колонка на ПК (Конструктор, Шаблоны проектов, Конвертер ошибок) -->
+            <!-- Левая колонка на ПК -->
             <div class="lg:col-span-7 space-y-5">
 
                 <!-- 1. Готовые шаблоны проектов (SaaS, Telegram-бот, Лендинг) -->
-                <article class="frosted-card rounded-3xl p-5 animate-fade-up">
+                <article class="frosted-card rounded-3xl p-5">
                     <div class="flex items-center justify-between mb-3">
                         <div>
                             <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Starter Kits</span>
@@ -324,22 +337,21 @@
                     </div>
                 </article>
 
-                <!-- 2. Конструктор Архитектуры (Выбор стека через iOS Bottom Sheet + Избранные стеки) -->
-                <article class="frosted-card rounded-3xl p-5 animate-fade-up">
+                <!-- 2. Конструктор Архитектуры -->
+                <article class="frosted-card rounded-3xl p-5">
                     <div class="flex items-start justify-between gap-3 mb-3">
                         <div>
                             <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">System Blueprint</span>
                             <h2 class="text-base font-semibold text-dynamic mt-0.5">Конструктор архитектуры</h2>
                         </div>
                         <button onclick="toggleFavoriteCurrentStack()" id="fav-stack-btn" aria-label="Закрепить стек в избранном" class="btn-glass min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-amber-400">
-                            <svg id="fav-star-svg" class="w-5 h-5 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
+                            <svg id="fav-star-svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                             </svg>
                         </button>
                     </div>
-                    <p class="text-xs text-muted-dynamic mb-3.5 leading-relaxed">Выберите стек в нижней шторке (любимые стеки можно отметить звёздочкой).</p>
+                    <p class="text-xs text-muted-dynamic mb-3.5 leading-relaxed">Выберите стек в нижней шторке (любимые стеки закрепляются звёздочкой).</p>
 
-                    <!-- Кнопка открытия Bottom Sheet со стеками -->
                     <button onclick="openStackSheet()" class="frosted-input w-full min-h-[48px] rounded-2xl px-4 py-2.5 flex items-center justify-between text-left mb-3.5">
                         <div class="truncate pr-2">
                             <span class="block text-[10px] uppercase tracking-wider text-muted-dynamic">Активный стек</span>
@@ -352,32 +364,26 @@
                         <span>Сгенерировать архитектуру</span>
                     </button>
 
-                    <!-- Блок вывода со скелетоном и быстрым экспортом -->
                     <div id="arch-out-wrap" class="expand-grid">
                         <div class="expand-inner">
                             <div class="mt-4 pt-4 border-t border-white/10">
-                                <!-- Скелетон при генерации -->
                                 <div id="arch-skeleton" class="hidden space-y-2.5 p-4 rounded-2xl code-surface mb-3">
                                     <div class="skeleton-line h-3 w-1/3"></div>
                                     <div class="skeleton-line h-3 w-full"></div>
                                     <div class="skeleton-line h-3 w-5/6"></div>
-                                    <div class="skeleton-line h-3 w-4/6"></div>
                                 </div>
 
                                 <div id="arch-result-card" class="rounded-2xl code-surface border border-white/10 overflow-hidden">
                                     <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.03] border-b border-white/10">
                                         <span class="text-xs font-semibold text-indigo-400">Архитектура</span>
                                         <div class="flex items-center gap-1.5">
-                                            <button onclick="copyResult('arch-code', this)" class="btn-glass min-h-[34px] px-3 rounded-xl text-[11px] font-medium flex items-center gap-1">
-                                                <span>Копировать</span>
-                                            </button>
+                                            <button onclick="copyResult('arch-code', this)" class="btn-glass min-h-[34px] px-3 rounded-xl text-[11px] font-medium">Копировать</button>
                                             <button onclick="shareResult('arch-code')" class="btn-glass min-h-[34px] px-2.5 rounded-xl text-[11px] font-medium">Поделиться</button>
                                         </div>
                                     </div>
                                     <div id="arch-code" class="p-3.5 font-mono text-[11px] leading-relaxed whitespace-pre-wrap break-words max-h-64 overflow-y-auto"></div>
                                 </div>
 
-                                <!-- Быстрый экспорт в Claude / ChatGPT / Cursor + Сейф -->
                                 <div class="grid grid-cols-3 gap-2 mt-2.5">
                                     <button onclick="quickExportAI('claude', 'arch-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-indigo-400">↗ В Claude</button>
                                     <button onclick="quickExportAI('chatgpt', 'arch-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-emerald-400">↗ В ChatGPT</button>
@@ -391,8 +397,8 @@
                     </div>
                 </article>
 
-                <!-- 3. Умный конвертер ошибок (Автоопределение языка + 3 режима + Счётчик токенов) -->
-                <article class="frosted-card rounded-3xl p-5 animate-fade-up">
+                <!-- 3. Умный конвертер ошибок -->
+                <article class="frosted-card rounded-3xl p-5">
                     <div class="flex items-start justify-between gap-3 mb-2.5">
                         <div>
                             <span class="text-[11px] font-semibold uppercase tracking-wider text-rose-400">Smart Traceback AI</span>
@@ -403,7 +409,6 @@
                         </span>
                     </div>
 
-                    <!-- Переключатель режимов: Исправить / Объяснить / Найти причину -->
                     <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl code-surface border border-white/10 mb-3">
                         <button type="button" onclick="setErrorMode('fix', this)" class="err-mode-btn min-h-[38px] rounded-xl text-xs font-semibold bg-indigo-500 text-white transition-all">
                             Исправить
@@ -418,11 +423,10 @@
 
                     <textarea id="err-input" oninput="handleErrorInput(this)" rows="4" placeholder="Вставьте Traceback (Python, Node.js, React, SQL)..." class="frosted-input w-full rounded-2xl p-3.5 text-xs font-mono placeholder-slate-500 resize-none"></textarea>
 
-                    <!-- Динамический счётчик токенов и индикатор контекста -->
                     <div class="flex items-center justify-between mt-1.5 mb-3 px-1">
                         <div class="flex items-center gap-2">
                             <div class="w-20 h-1.5 rounded-full bg-slate-500/20 overflow-hidden">
-                                <div id="err-token-bar" class="h-full w-0 bg-indigo-500 transition-all duration-200"></div>
+                                <div id="err-token-bar" class="h-full w-0 bg-indigo-500 transition-all duration-150"></div>
                             </div>
                             <span id="err-token-text" class="text-[11px] text-muted-dynamic font-mono">~0 токенов (0 симв.)</span>
                         </div>
@@ -433,7 +437,6 @@
                         <span>Сформировать отладочный промт</span>
                     </button>
 
-                    <!-- Вывод результата со скелетоном -->
                     <div id="err-out-wrap" class="expand-grid">
                         <div class="expand-inner">
                             <div class="mt-4 pt-4 border-t border-white/10">
@@ -445,7 +448,7 @@
 
                                 <div id="err-result-card" class="rounded-2xl code-surface border border-white/10 overflow-hidden">
                                     <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.03] border-b border-white/10">
-                                        <span id="err-out-title" class="text-xs font-semibold text-indigo-400">Промт для Claude</span>
+                                        <span class="text-xs font-semibold text-indigo-400">Промт для Claude</span>
                                         <div class="flex items-center gap-1.5">
                                             <button onclick="copyResult('err-code', this)" class="btn-glass min-h-[34px] px-3 rounded-xl text-[11px] font-medium">Копировать</button>
                                             <button onclick="shareResult('err-code')" class="btn-glass min-h-[34px] px-2.5 rounded-xl text-[11px] font-medium">Поделиться</button>
@@ -469,11 +472,11 @@
 
             </div>
 
-            <!-- Правая колонка на ПК (Prompt Optimizer, Cursor, Чек-лист, История генераций) -->
+            <!-- Правая колонка на ПК -->
             <div class="lg:col-span-5 space-y-5">
 
-                <!-- 4. Prompt Optimizer со счётчиком токенов -->
-                <article class="frosted-card rounded-3xl p-5 animate-fade-up">
+                <!-- 4. Prompt Optimizer -->
+                <article class="frosted-card rounded-3xl p-5">
                     <div class="flex items-center justify-between mb-2.5">
                         <div>
                             <span class="text-[11px] font-semibold uppercase tracking-wider text-violet-400">Prompt Engineering</span>
@@ -487,7 +490,7 @@
                     <div class="flex items-center justify-between mt-1.5 mb-3 px-1">
                         <div class="flex items-center gap-2">
                             <div class="w-20 h-1.5 rounded-full bg-slate-500/20 overflow-hidden">
-                                <div id="opt-token-bar" class="h-full w-0 bg-violet-500 transition-all duration-200"></div>
+                                <div id="opt-token-bar" class="h-full w-0 bg-violet-500 transition-all duration-150"></div>
                             </div>
                             <span id="opt-token-text" class="text-[11px] text-muted-dynamic font-mono">~0 токенов</span>
                         </div>
@@ -519,14 +522,14 @@
                     </div>
                 </article>
 
-                <!-- 5. Генератор промта для Cursor (Аккордеон) -->
-                <article class="frosted-card rounded-3xl overflow-hidden animate-fade-up">
+                <!-- 5. Генератор промта для Cursor -->
+                <article class="frosted-card rounded-3xl overflow-hidden">
                     <button onclick="toggleAccordion('acc-cursor', 'chev-cursor')" class="w-full min-h-[58px] p-5 flex items-center justify-between text-left">
                         <div>
                             <h3 class="text-sm font-semibold text-dynamic">Генератор промта для Cursor</h3>
                             <p class="text-xs text-muted-dynamic">Composer + .cursorrules переключатели</p>
                         </div>
-                        <svg id="chev-cursor" class="w-5 h-5 text-muted-dynamic transition-transform duration-300 ease-ios" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg id="chev-cursor" class="w-5 h-5 text-muted-dynamic transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
@@ -559,14 +562,14 @@
                     </div>
                 </article>
 
-                <!-- 6. Чек-лист деплоя (Аккордеон) -->
-                <article class="frosted-card rounded-3xl overflow-hidden animate-fade-up">
+                <!-- 6. Чек-лист деплоя -->
+                <article class="frosted-card rounded-3xl overflow-hidden">
                     <button onclick="toggleAccordion('acc-deploy', 'chev-deploy')" class="w-full min-h-[58px] p-5 flex items-center justify-between text-left">
                         <div>
                             <h3 class="text-sm font-semibold text-dynamic">Чек-лист деплоя</h3>
                             <p id="deploy-sub" class="text-xs text-muted-dynamic">Vercel / Netlify / VPS — 0 из 6</p>
                         </div>
-                        <svg id="chev-deploy" class="w-5 h-5 text-muted-dynamic transition-transform duration-300 ease-ios" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg id="chev-deploy" class="w-5 h-5 text-muted-dynamic transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
@@ -574,7 +577,7 @@
                         <div class="expand-inner">
                             <div class="px-5 pb-5 pt-2 border-t border-white/10">
                                 <div class="w-full h-2 rounded-full bg-slate-500/20 overflow-hidden mb-3">
-                                    <div id="deploy-bar" class="h-full w-0 bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300"></div>
+                                    <div id="deploy-bar" class="h-full w-0 bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-200"></div>
                                 </div>
                                 <div id="checklist-items" class="space-y-2"></div>
                             </div>
@@ -582,8 +585,8 @@
                     </div>
                 </article>
 
-                <!-- 7. История последних 10 генераций (Свайп влево для удаления, тап для повтора) -->
-                <article class="frosted-card rounded-3xl p-5 animate-fade-up">
+                <!-- 7. История последних 10 генераций -->
+                <article class="frosted-card rounded-3xl p-5">
                     <div class="flex items-center justify-between mb-3">
                         <div>
                             <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Recent Activity</span>
@@ -619,7 +622,7 @@
             <div id="sub-nets" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
         </section>
 
-        <!-- ==================== РАЗДЕЛ 3: МОЙ СЕЙФ (ТЕГИ, ПАПКИ, ЗАКРЕПЛЕНИЕ) ==================== -->
+        <!-- ==================== РАЗДЕЛ 3: МОЙ СЕЙФ ==================== -->
         <section id="view-vault" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                 <div class="relative flex-1">
@@ -633,7 +636,6 @@
                 </button>
             </div>
 
-            <!-- Чипсы-теги папок в Сейфе -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1">
                 <button onclick="setVaultTagFilter('ALL', this)" class="vault-tag-chip min-h-[36px] px-3.5 rounded-full text-xs font-semibold bg-indigo-500 text-white shrink-0">Все папки</button>
                 <button onclick="setVaultTagFilter('Промты', this)" class="vault-tag-chip min-h-[36px] px-3.5 rounded-full text-xs font-medium btn-glass shrink-0">📁 Промты</button>
@@ -641,7 +643,6 @@
                 <button onclick="setVaultTagFilter('Архитектуры', this)" class="vault-tag-chip min-h-[36px] px-3.5 rounded-full text-xs font-medium btn-glass shrink-0">🏗 Архитектуры</button>
             </div>
 
-            <!-- Форма добавления своего сниппета с выбором тега -->
             <div id="acc-new-vault" class="expand-grid">
                 <div class="expand-inner">
                     <div class="frosted-card rounded-3xl p-4 space-y-3">
@@ -667,7 +668,7 @@
     <!-- Плавающая стеклянная "пилюля" навигации внизу экрана -->
     <nav class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,12px)+12px)] z-30 w-[calc(100%-32px)] max-w-sm frosted-nav rounded-full p-1.5" role="tablist" aria-label="Нижняя навигация">
         <div class="relative grid grid-cols-3 items-center">
-            <div id="bottom-nav-pill" class="absolute top-0 bottom-0 left-0 w-1/3 rounded-full bg-indigo-500/20 border border-indigo-400/35 transition-transform duration-300 ease-ios pointer-events-none"></div>
+            <div id="bottom-nav-pill" class="absolute top-0 bottom-0 left-0 w-1/3 rounded-full bg-indigo-500/20 border border-indigo-400/35 transition-transform duration-200 ease-ios pointer-events-none"></div>
 
             <button onclick="switchTab(0, 'view-tools')" id="nav-btn-0" role="tab" aria-selected="true" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1.5 text-xs font-semibold text-indigo-400 transition-colors">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -694,10 +695,9 @@
         </div>
     </nav>
 
-    <!-- ==================== iOS BOTTOM SHEET (ДЛЯ ВЫБОРА СТЕКА И ШАБЛОНОВ ПРОЕКТОВ) ==================== -->
-    <div id="sheet-backdrop" onclick="closeBottomSheet()" class="sheet-backdrop fixed inset-0 bg-black/60 backdrop-blur-sm z-40"></div>
+    <!-- iOS BOTTOM SHEET -->
+    <div id="sheet-backdrop" onclick="closeBottomSheet()" class="sheet-backdrop fixed inset-0 bg-black/60 z-40"></div>
     <div id="bottom-sheet" class="bottom-sheet fixed left-0 right-0 bottom-0 z-50 max-w-lg mx-auto frosted-card rounded-t-[28px] p-5 pb-[calc(env(safe-area-inset-bottom,16px)+20px)] max-h-[82vh] flex flex-col">
-        <!-- Ручка для свайпа вниз -->
         <div id="sheet-drag-handle" class="w-full pt-1 pb-3 cursor-grab active:cursor-grabbing flex justify-center">
             <div class="w-10 h-1.5 rounded-full bg-slate-400/40"></div>
         </div>
@@ -708,8 +708,8 @@
         <div id="sheet-body" class="overflow-y-auto space-y-2 pr-1"></div>
     </div>
 
-    <!-- ==================== ОНБОРДИНГ ИЗ 3 СТЕКЛЯННЫХ СЛАЙДОВ ==================== -->
-    <div id="onboarding-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md hidden items-center justify-center p-4">
+    <!-- ОНБОРДИНГ -->
+    <div id="onboarding-modal" class="fixed inset-0 z-50 bg-black/75 hidden items-center justify-center p-4">
         <div class="frosted-card max-w-sm w-full rounded-3xl p-6 text-center space-y-4 animate-fade-up">
             <div id="onb-icon" class="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center mx-auto text-2xl">✨</div>
             <h3 id="onb-title" class="text-lg font-bold text-dynamic">Добро пожаловать в VIBE</h3>
@@ -727,7 +727,7 @@
     </div>
 
     <!-- Toast-пилюля -->
-    <div id="toast-pill" role="status" aria-live="polite" class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,16px)+78px)] z-50 pointer-events-none opacity-0 translate-y-3 scale-95 transition-all duration-300 ease-ios">
+    <div id="toast-pill" role="status" aria-live="polite" class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,16px)+78px)] z-50 pointer-events-none opacity-0 translate-y-3 scale-95 transition-all duration-200 ease-ios">
         <div class="frosted-nav px-4 py-2.5 rounded-full flex items-center gap-2.5 shadow-2xl">
             <span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6">
@@ -774,11 +774,8 @@
         function syncBackButton() {
             if (!tg?.BackButton) return;
             try {
-                if (activeSheetOpen || currentTabIndex !== 0) {
-                    tg.BackButton.show();
-                } else {
-                    tg.BackButton.hide();
-                }
+                if (activeSheetOpen || currentTabIndex !== 0) tg.BackButton.show();
+                else tg.BackButton.hide();
             } catch (_) {}
         }
 
@@ -825,11 +822,8 @@
                 });
 
                 tg.BackButton?.onClick?.(() => {
-                    if (activeSheetOpen) {
-                        closeBottomSheet();
-                    } else if (currentTabIndex !== 0) {
-                        switchTab(0, 'view-tools');
-                    }
+                    if (activeSheetOpen) closeBottomSheet();
+                    else if (currentTabIndex !== 0) switchTab(0, 'view-tools');
                 });
 
                 tg.MainButton?.onClick?.(() => {
@@ -848,84 +842,73 @@
             else showToast('Доступно внутри Telegram');
         }
 
-        /* ==================== 2. ИНТЕРАКТИВНЫЕ БЛИКИ КАРТОЧЕК, ПАРАЛЛАКС И КОНФЕТТИ ==================== */
-        document.addEventListener('pointermove', (e) => {
-            const card = e.target.closest('.frosted-card');
-            if (!card) return;
-            const rect = card.getBoundingClientRect();
-            card.style.setProperty('--x', `${e.clientX - rect.left}px`);
-            card.style.setProperty('--y', `${e.clientY - rect.top}px`);
-            card.style.setProperty('--glare-opacity', '1');
-        });
+        /* ==================== 2. ОПТИМИЗИРОВАННЫЕ БЛИКИ КАРТОЧЕК (ТОЛЬКО ПК + rAF) И КОНФЕТТИ ==================== */
+        if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            let rafPending = false;
+            document.addEventListener('pointermove', (e) => {
+                if (rafPending) return;
+                const card = e.target.closest('.frosted-card');
+                if (!card) return;
+                rafPending = true;
+                requestAnimationFrame(() => {
+                    const rect = card.getBoundingClientRect();
+                    card.style.setProperty('--x', `${e.clientX - rect.left}px`);
+                    card.style.setProperty('--y', `${e.clientY - rect.top}px`);
+                    card.style.setProperty('--glare-opacity', '1');
+                    rafPending = false;
+                });
+            }, { passive: true });
 
-        document.addEventListener('pointerout', (e) => {
-            const card = e.target.closest('.frosted-card');
-            if (card && !card.contains(e.relatedTarget)) {
-                card.style.setProperty('--glare-opacity', '0');
-            }
-        });
-
-        // Параллакс фоновых пятен при наклоне смартфона или движении мыши на ПК
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (!prefersReducedMotion) {
-            window.addEventListener('deviceorientation', (e) => {
-                if (e.gamma === null || e.beta === null) return;
-                const x = Math.max(-25, Math.min(25, e.gamma)) * 0.8;
-                const y = Math.max(-25, Math.min(25, e.beta - 45)) * 0.8;
-                document.getElementById('blob-1').style.transform = `translate3d(${x}px, ${y}px, 0)`;
-                document.getElementById('blob-2').style.transform = `translate3d(${-x}px, ${-y}px, 0)`;
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                const x = (e.clientX / window.innerWidth - 0.5) * 24;
-                const y = (e.clientY / window.innerHeight - 0.5) * 24;
-                document.getElementById('blob-1').style.transform = `translate3d(${x}px, ${y}px, 0)`;
-                document.getElementById('blob-2').style.transform = `translate3d(${-x}px, ${-y}px, 0)`;
-            });
+            document.addEventListener('pointerout', (e) => {
+                const card = e.target.closest('.frosted-card');
+                if (card && !card.contains(e.relatedTarget)) {
+                    card.style.setProperty('--glare-opacity', '0');
+                }
+            }, { passive: true });
         }
 
-        // Мини-эффект частиц (конфетти на 600 мс) при сохранении в Сейф
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
         function fireMiniConfetti() {
             if (prefersReducedMotion) return;
             const canvas = document.getElementById('confetti-canvas');
+            canvas.classList.remove('hidden');
             const ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
 
-            const colors = ['#6366f1', '#a855f7', '#34d399', '#38bdf8', '#f472b6'];
-            const particles = Array.from({ length: 34 }, () => ({
+            const colors = ['#6366f1', '#a855f7', '#34d399', '#38bdf8'];
+            const particles = Array.from({ length: 24 }, () => ({
                 x: canvas.width / 2,
                 y: canvas.height * 0.72,
-                vx: (Math.random() - 0.5) * 11,
-                vy: -(Math.random() * 8 + 4),
-                size: Math.random() * 5 + 3,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                alpha: 1
+                vx: (Math.random() - 0.5) * 10,
+                vy: -(Math.random() * 7 + 4),
+                size: Math.random() * 4 + 3,
+                color: colors[Math.floor(Math.random() * colors.length)]
             }));
 
             const start = performance.now();
             function frame(now) {
                 const elapsed = now - start;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                if (elapsed > 620) return;
-
+                if (elapsed > 550) {
+                    canvas.classList.add('hidden');
+                    return;
+                }
+                ctx.globalAlpha = Math.max(0, 1 - elapsed / 550);
                 particles.forEach(p => {
                     p.x += p.vx;
                     p.y += p.vy;
-                    p.vy += 0.32;
-                    p.alpha = Math.max(0, 1 - elapsed / 600);
-                    ctx.globalAlpha = p.alpha;
+                    p.vy += 0.35;
                     ctx.fillStyle = p.color;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
                 });
                 requestAnimationFrame(frame);
             }
             requestAnimationFrame(frame);
         }
 
-        /* ==================== 3. НАВИГАЦИЯ И iOS BOTTOM SHEET СО СВАЙПОМ ==================== */
+        /* ==================== 3. НАВИГАЦИЯ И iOS BOTTOM SHEET ==================== */
         let toastTimer = null;
         function showToast(msg = 'Скопировано!') {
             const pill = document.getElementById('toast-pill');
@@ -936,13 +919,13 @@
             toastTimer = setTimeout(() => {
                 pill.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
                 pill.classList.add('opacity-0', 'translate-y-3', 'scale-95');
-            }, 2000);
+            }, 1800);
         }
 
         function switchTab(index, viewId) {
             Haptic.selection();
             currentTabIndex = index;
-            document.getElementById('bottom-nav-pill').style.transform = `translateX(${index * 100}%)`;
+            document.getElementById('bottom-nav-pill').style.transform = `translate3d(${index * 100}%, 0, 0)`;
 
             ['view-tools', 'view-hub', 'view-vault'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -960,9 +943,6 @@
             });
 
             if (viewId === 'view-vault') {
-                const lock = document.getElementById('vault-lock-icon');
-                lock.style.transform = 'scale(1.2) rotate(-8deg)';
-                setTimeout(() => { lock.style.transform = ''; }, 240);
                 renderVault();
             }
 
@@ -991,7 +971,6 @@
             syncBackButton();
         }
 
-        // Swipe-to-close для Bottom Sheet
         (() => {
             const sheet = document.getElementById('bottom-sheet');
             const handle = document.getElementById('sheet-drag-handle');
@@ -1008,20 +987,20 @@
             handle.addEventListener('touchmove', (e) => {
                 if (!dragging) return;
                 currentY = Math.max(0, e.touches[0].clientY - startY);
-                sheet.style.transform = `translateY(${currentY}px)`;
+                sheet.style.transform = `translate3d(0, ${currentY}px, 0)`;
             }, { passive: true });
 
             handle.addEventListener('touchend', () => {
                 if (!dragging) return;
                 dragging = false;
                 sheet.style.transition = '';
-                if (currentY > 75) closeBottomSheet();
+                if (currentY > 70) closeBottomSheet();
                 else sheet.style.transform = '';
                 currentY = 0;
             });
         })();
 
-        /* ==================== 4. СТЕКИ (ИЗБРАННОЕ) И ШАБЛОНЫ ПРОЕКТОВ ==================== */
+        /* ==================== 4. СТЕКИ И ШАБЛОНЫ ПРОЕКТОВ ==================== */
         const STACKS_DATA = [
             { id: 'python_tg', title: 'Python 3.11 + Aiogram 3.x + aiosqlite', desc: 'Асинхронный Telegram-бот с Роутерами и WAL БД' },
             { id: 'python_fastapi', title: 'Python + FastAPI + SQLAlchemy 2.0 + Postgres', desc: 'Высоконагруженный REST API сервис' },
@@ -1040,8 +1019,7 @@
         function updateFavStarUI() {
             const favs = getFavStacks();
             const isFav = favs.includes(selectedStackId);
-            const svg = document.getElementById('fav-star-svg');
-            svg.setAttribute('fill', isFav ? 'currentColor' : 'none');
+            document.getElementById('fav-star-svg').setAttribute('fill', isFav ? 'currentColor' : 'none');
         }
 
         function toggleFavoriteCurrentStack() {
@@ -1078,7 +1056,7 @@
                 const isFav = favs.includes(s.id);
                 const active = s.id === selectedStackId;
                 return `
-                    <button onclick="selectStackFromSheet('${s.id}')" class="w-full p-3.5 rounded-2xl border ${active ? 'border-indigo-400 bg-indigo-500/15' : 'border-white/10 bg-white/[0.03]'} flex items-center justify-between text-left transition">
+                    <button onclick="selectStackFromSheet('${s.id}')" class="w-full p-3.5 rounded-2xl border ${active ? 'border-indigo-400 bg-indigo-500/15' : 'border-white/10 bg-white/[0.03]'} flex items-center justify-between text-left">
                         <div>
                             <div class="flex items-center gap-1.5">
                                 ${isFav ? '<span class="text-amber-400 text-xs">★</span>' : ''}
@@ -1133,7 +1111,7 @@
             openBottomSheet(tpl.title, html);
         }
 
-        /* ==================== 5. ГЕНЕРАЦИЯ СО СКЕЛЕТОНАМИ, АВТООПРЕДЕЛЕНИЕ ЯЗЫКА И ИСТОРИЯ ==================== */
+        /* ==================== 5. ГЕНЕРАЦИЯ СО СКЕЛЕТОНАМИ И АВТООПРЕДЕЛЕНИЕ ЯЗЫКА ==================== */
         const ARCH_PROMPTS = {
             python_tg: `Роль: Senior Python Backend & Telegram Bot Architect.\nСтек: Python 3.11+, aiogram 3.x, aiosqlite.\nЗадача: Спроектируй модульную архитектуру Telegram-бота (bot.py, config.py, db.py с WAL, handlers/, keyboards.py). Выдай дерево файлов и полный рабочий код каждого модуля без сокращений.`,
             python_fastapi: `Роль: Principal Backend Architect.\nСтек: Python 3.11+, FastAPI, SQLAlchemy 2.0 Async, PostgreSQL, Pydantic v2.\nЗадача: Создай продакшен-каркас REST API с разделением на роутеры, схемы, сервисы и DI-сессии. Выдай полные исходники.`,
@@ -1141,6 +1119,13 @@
             html_tma: `Роль: Senior Telegram Mini Apps Developer.\nСтек: HTML5, Tailwind CSS (CDN), Vanilla JS, Telegram WebApp SDK.\nЗадача: Напиши одностраничное приложение в одном файле index.html в стиле Apple visionOS с поддержкой тем Telegram и CloudStorage.`,
             three_webgl: `Роль: Creative WebGL Developer.\nСтек: Three.js, WebGL, GSAP, Tailwind CSS.\nЗадача: Создай интерактивную 3D-сцену в одном файле index.html с реакцией на курсор и гироскоп (60 FPS).`
         };
+
+        // Быстрый рендер текста единым блоком без создания десятков DOM-элементов
+        function renderFastOutput(containerId, rawText) {
+            const container = document.getElementById(containerId);
+            container.dataset.raw = rawText;
+            container.textContent = rawText;
+        }
 
         function runWithSkeleton(wrapId, skeletonId, cardId, codeId, text, historyTitle) {
             const wrap = document.getElementById(wrapId);
@@ -1154,22 +1139,9 @@
             setTimeout(() => {
                 skel.classList.add('hidden');
                 card.classList.remove('hidden');
-                renderLinesFade(codeId, text);
+                renderFastOutput(codeId, text);
                 addHistoryItem(historyTitle, text);
-            }, 340);
-        }
-
-        function renderLinesFade(containerId, rawText) {
-            const container = document.getElementById(containerId);
-            container.dataset.raw = rawText;
-            container.innerHTML = '';
-            rawText.split('\n').forEach((line, idx) => {
-                const div = document.createElement('div');
-                div.className = 'code-line';
-                div.style.animationDelay = `${Math.min(idx * 22, 240)}ms`;
-                div.textContent = line || ' ';
-                container.appendChild(div);
-            });
+            }, 220);
         }
 
         function generateArchitecture() {
@@ -1178,7 +1150,6 @@
             runWithSkeleton('arch-out-wrap', 'arch-skeleton', 'arch-result-card', 'arch-code', prompt, `Архитектура: ${getCurrentStackTitle()}`);
         }
 
-        // Умный конвертер ошибок: автоопределение языка/фреймворка + 3 режима
         let currentErrorMode = 'fix';
 
         function setErrorMode(mode, btnEl) {
@@ -1212,12 +1183,7 @@
             updateTokenCounter(textarea, 'err-token-text', 'err-token-bar');
             const val = textarea.value.trim();
             const badge = document.getElementById('detected-lang-badge');
-            if (!val) {
-                badge.textContent = 'Автоопределение...';
-                return;
-            }
-            const detected = detectLanguageFromLog(val);
-            badge.textContent = `Определено: ${detected}`;
+            badge.textContent = val ? `Определено: ${detectLanguageFromLog(val)}` : 'Автоопределение...';
         }
 
         function convertError() {
@@ -1270,12 +1236,12 @@
             const useComments = document.getElementById('chip-comments').getAttribute('data-active') === 'true';
 
             const prompt = `@Codebase Реализуем задачу: ${task}\nСтек: ${stack}\nТребования:\n${useTypes ? '- Строгая типизация\n' : ''}${useTests ? '- Модульные тесты\n' : ''}${useComments ? '- Докстринги к функциям\n' : ''}- Выдавай полные файлы без поломки соседней логики.`;
-            renderLinesFade('cur-code', prompt);
+            renderFastOutput('cur-code', prompt);
             document.getElementById('cur-out-wrap').classList.add('open');
             addHistoryItem(`Cursor: ${task}`, prompt);
         }
 
-        /* ==================== 6. ИСТОРИЯ ГЕНЕРАЦИЙ (10 ЗАПИСЕЙ, СВАЙП ВЛЕВО ДЛЯ УДАЛЕНИЯ) ==================== */
+        /* ==================== 6. ИСТОРИЯ ГЕНЕРАЦИЙ ==================== */
         const HISTORY_KEY = 'vibe_history_v2';
 
         function getHistory() {
@@ -1317,16 +1283,12 @@
             const list = getHistory();
             const box = document.getElementById('history-list');
             if (list.length === 0) {
-                box.innerHTML = `
-                    <div class="p-4 rounded-2xl code-surface border border-white/5 text-center">
-                        <p class="text-xs text-muted-dynamic">История пуста — сгенерируйте архитектуру или промт выше.</p>
-                    </div>
-                `;
+                box.innerHTML = `<div class="p-4 rounded-2xl code-surface border border-white/5 text-center"><p class="text-xs text-muted-dynamic">История пуста — сгенерируйте архитектуру или промт выше.</p></div>`;
                 return;
             }
 
             box.innerHTML = list.map(item => `
-                <div data-hid="${item.id}" onclick="reuseHistoryItem(${item.id})" class="history-swipe-item p-3 rounded-2xl code-surface border border-white/10 flex items-center justify-between gap-2 cursor-pointer transition-transform duration-200">
+                <div data-hid="${item.id}" onclick="reuseHistoryItem(${item.id})" class="history-swipe-item p-3 rounded-2xl code-surface border border-white/10 flex items-center justify-between gap-2 cursor-pointer transition-transform duration-150">
                     <div class="truncate">
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-semibold text-dynamic truncate">${escapeHtml(item.title)}</span>
@@ -1334,28 +1296,26 @@
                         </div>
                         <p class="text-[11px] text-muted-dynamic truncate font-mono mt-0.5">${escapeHtml(item.text)}</p>
                     </div>
-                    <button onclick="event.stopPropagation(); removeHistoryItem(${item.id})" aria-label="Удалить из истории" class="text-xs text-muted-dynamic hover:text-rose-400 px-2 py-1 shrink-0">✕</button>
+                    <button onclick="event.stopPropagation(); removeHistoryItem(${item.id})" aria-label="Удалить" class="text-xs text-muted-dynamic hover:text-rose-400 px-2 py-1 shrink-0">✕</button>
                 </div>
             `).join('');
 
-            // Поддержка свайпа влево для удаления записи истории
             document.querySelectorAll('.history-swipe-item').forEach(el => {
                 let startX = 0;
                 el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
                 el.addEventListener('touchend', e => {
-                    const diff = e.changedTouches[0].clientX - startX;
-                    if (diff < -65) {
-                        el.style.transform = 'translateX(-100%)';
-                        setTimeout(() => removeHistoryItem(Number(el.dataset.hid)), 180);
+                    if (e.changedTouches[0].clientX - startX < -65) {
+                        el.style.transform = 'translate3d(-100%, 0, 0)';
+                        setTimeout(() => removeHistoryItem(Number(el.dataset.hid)), 150);
                     }
                 });
             });
         }
 
-        /* ==================== 7. БЫСТРЫЙ ЭКСПОРТ В CLAUDE / CHATGPT / CURSOR ==================== */
+        /* ==================== 7. БЫСТРЫЙ ЭКСПОРТ ==================== */
         function getRawOutput(containerId) {
             const el = document.getElementById(containerId);
-            return el.dataset.raw || el.innerText || '';
+            return el.dataset.raw || el.textContent || '';
         }
 
         function quickExportAI(target, containerId) {
@@ -1369,9 +1329,7 @@
                     cursor: 'cursor://anysphere.cursor-deeplink'
                 };
                 showToast(`Промт скопирован! Открываем ${target.toUpperCase()}...`);
-                setTimeout(() => {
-                    window.open(urls[target], '_blank');
-                }, 350);
+                setTimeout(() => window.open(urls[target], '_blank'), 300);
             });
         }
 
@@ -1382,9 +1340,9 @@
                 Haptic.success();
                 showToast('Скопировано!');
                 if (btnEl) {
-                    const prev = btnEl.innerHTML;
-                    btnEl.innerHTML = `<svg class="w-3.5 h-3.5 text-emerald-400 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path class="svg-check-anim" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Готово`;
-                    setTimeout(() => { btnEl.innerHTML = prev; }, 1500);
+                    const prev = btnEl.textContent;
+                    btnEl.textContent = 'Готово ✓';
+                    setTimeout(() => { btnEl.textContent = prev; }, 1400);
                 }
             });
         }
@@ -1393,16 +1351,12 @@
             Haptic.light();
             const text = getRawOutput(containerId);
             if (!text) return;
-            if (tg?.switchInlineQuery) {
-                tg.switchInlineQuery(text.slice(0, 200));
-            } else if (navigator.share) {
-                navigator.share({ title: 'CLAUDE_CODE // VIBE', text }).catch(() => {});
-            } else {
-                copyResult(containerId);
-            }
+            if (tg?.switchInlineQuery) tg.switchInlineQuery(text.slice(0, 200));
+            else if (navigator.share) navigator.share({ title: 'CLAUDE_CODE // VIBE', text }).catch(() => {});
+            else copyResult(containerId);
         }
 
-        /* ==================== 8. МОЙ СЕЙФ (ТЕГИ, ПАПКИ, ЗАКРЕПЛЕНИЕ И КОНФЕТТИ) ==================== */
+        /* ==================== 8. МОЙ СЕЙФ ==================== */
         const VAULT_KEY = 'vibe_vault_v3';
         let activeVaultTag = 'ALL';
 
@@ -1525,9 +1479,7 @@
                                     <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-400/20">${escapeHtml(item.tag || 'Промты')}</span>
                                     <h4 class="text-sm font-semibold text-dynamic mt-1">${escapeHtml(item.title)}</h4>
                                 </div>
-                                <button onclick="togglePinVaultItem(${item.id})" aria-label="Закрепить" class="btn-glass min-w-[34px] min-h-[34px] rounded-xl text-xs ${item.pinned ? 'text-amber-400 border-amber-400/40' : 'text-muted-dynamic'}">
-                                    📌
-                                </button>
+                                <button onclick="togglePinVaultItem(${item.id})" aria-label="Закрепить" class="btn-glass min-w-[34px] min-h-[34px] rounded-xl text-xs ${item.pinned ? 'text-amber-400 border-amber-400/40' : 'text-muted-dynamic'}">📌</button>
                             </div>
                             <p class="font-mono text-[11px] text-muted-dynamic line-clamp-3 code-surface rounded-xl p-2.5 mb-3">${escapeHtml(item.text)}</p>
                         </div>
@@ -1540,10 +1492,10 @@
             }).join('');
         }
 
-        /* ==================== 9. ОНБОРДИНГ (3 СЛАЙДА ПРИ ПЕРВОМ ЗАПУСКЕ) ==================== */
+        /* ==================== 9. ОНБОРДИНГ ==================== */
         const ONB_SLIDES = [
-            { icon: '✨', title: 'Apple visionOS & Desktop Mode', desc: 'Интерфейс из матового стекла автоматически подстраивается под тему Telegram, смартфон и широкий монитор ПК.' },
-            { icon: '🧠', title: 'Умный дебаг и экспорт в 1 клик', desc: 'Конвертер сам определяет язык по Traceback, считает токены и отправляет готовый промт прямо в Claude, ChatGPT или Cursor.' },
+            { icon: '✨', title: 'Apple visionOS & Desktop Mode', desc: 'Оптимизированный интерфейс на 60 FPS автоматически подстраивается под тему Telegram, смартфон и монитор ПК.' },
+            { icon: '🧠', title: 'Умный дебаг и экспорт в 1 клик', desc: 'Конвертер сам определяет язык по Traceback, считает токены и отправляет промт в Claude, ChatGPT или Cursor.' },
             { icon: '🔐', title: 'Сейф с папками и 500 идей', desc: 'Закрепляйте лучшие сниппеты по тегам в Сейфе и используйте генератор из 500 готовых идей для новых проектов.' }
         ];
         let onbIndex = 0;
@@ -1555,8 +1507,7 @@
             document.getElementById('onb-desc').textContent = s.desc;
             document.getElementById('onb-next-btn').textContent = onbIndex === 2 ? 'Начать работу 🚀' : 'Далее →';
             [0, 1, 2].forEach(i => {
-                const dot = document.getElementById(`onb-dot-${i}`);
-                dot.className = i === onbIndex ? 'w-5 h-1.5 rounded-full bg-indigo-500 transition-all' : 'w-1.5 h-1.5 rounded-full bg-slate-500/40 transition-all';
+                document.getElementById(`onb-dot-${i}`).className = i === onbIndex ? 'w-5 h-1.5 rounded-full bg-indigo-500 transition-all' : 'w-1.5 h-1.5 rounded-full bg-slate-500/40 transition-all';
             });
         }
 
@@ -1587,7 +1538,7 @@
             modal.classList.remove('flex');
         }
 
-        /* ==================== 10. БАЗА БОТА (500 ИДЕЙ, ЧЕК-ЛИСТ И ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ) ==================== */
+        /* ==================== 10. БАЗА БОТА (500 ИДЕЙ, ЧЕК-ЛИСТ) ==================== */
         const DEPLOY_TASKS = [
             { id: 'env', text: 'Секреты и токены вынесены в .env' },
             { id: 'https', text: 'Подключен HTTPS домен для Telegram WebApp' },
@@ -1633,7 +1584,7 @@
             const prompts = [
                 { title: 'Full-File Режим (Без сокращений)', text: 'Всегда выдавай полный рабочий код файла от первой до последней строчки без комментариев вида "// остальной код".' },
                 { title: 'Senior Security & Performance Audit', text: 'Проверь этот код на уязвимости, утечки памяти и гонки данных. Выдай исправленную версию.' },
-                { title: 'Apple visionOS UI Редизайн', text: 'Перепиши интерфейс на Tailwind CSS в стиле матового стекла (backdrop-blur-xl, плавные пружинные анимации и адаптив под мобильные и ПК).' },
+                { title: 'Apple visionOS UI Редизайн', text: 'Перепиши интерфейс на Tailwind CSS в стиле матового стекла (backdrop-blur, плавные пружинные анимации и адаптив под мобильные и ПК).' },
                 { title: 'Архитектурная декомпозиция MVP', text: 'Разбей разработку проекта на 4 последовательных шага с проверкой каждого модуля.' }
             ];
             document.getElementById('sub-prompts').innerHTML = prompts.map(p => {
@@ -1672,7 +1623,7 @@
             const q = (document.getElementById('idea-search')?.value || '').trim().toLowerCase();
             let list = ALL_500_IDEAS.filter(x => !q || x.title.toLowerCase().includes(q) || String(x.id) === q);
             if (highlightItem) list = [highlightItem, ...list.filter(x => x.id !== highlightItem.id)];
-            document.getElementById('ideas-container').innerHTML = list.slice(0, 16).map(item => {
+            document.getElementById('ideas-container').innerHTML = list.slice(0, 14).map(item => {
                 const enc = encodeURIComponent(`Спроектируй MVP для идеи #${item.id}: ${item.title}. Выдай структуру файлов и полный код.`);
                 return `
                     <article class="frosted-card rounded-2xl p-3.5 flex items-center justify-between gap-3">
@@ -1753,7 +1704,7 @@
             persistVaultList(getVaultList());
 
             if (!localStorage.getItem('vibe_onboarded_v1')) {
-                setTimeout(openOnboarding, 400);
+                setTimeout(openOnboarding, 350);
             }
         });
     </script>
