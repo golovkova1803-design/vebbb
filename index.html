@@ -3154,5 +3154,229 @@
       schedulePreview(false);
     })();
     </script>
+    <style id="vx-css">
+html{font-size:calc(16px*var(--vx-d,1))}
+.ambient-bg{transition:opacity .5s ease}
+#vx-bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .5s ease}
+html:is([data-bg=grid],[data-bg=dots],[data-bg=noise],[data-bg=image]) #vx-bg{opacity:1}
+html:is([data-bg=grid],[data-bg=dots],[data-bg=noise],[data-bg=image],[data-bg=none]) .ambient-bg{opacity:0}
+html[data-bg=grid] #vx-bg{background-image:linear-gradient(color-mix(in srgb,var(--accent-primary) 13%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--accent-primary) 13%,transparent) 1px,transparent 1px);background-size:28px 28px;-webkit-mask-image:radial-gradient(ellipse at 50% 0,#000 15%,transparent 78%);mask-image:radial-gradient(ellipse at 50% 0,#000 15%,transparent 78%)}
+html[data-bg=dots] #vx-bg{background-image:radial-gradient(color-mix(in srgb,var(--accent-primary) 38%,transparent) 1.2px,transparent 1.5px);background-size:22px 22px}
+html[data-fx=min] *:not(.btn-ripple-circle),html[data-fx=min] *::before,html[data-fx=min] *::after{animation:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html[data-fx=max] .btn-primary::after,html[data-fx=max] .btn-gold::after{animation:sheenSweep 3.6s infinite!important}
+html[data-nav=icons] nav[role=tablist] button>span:nth-child(2){display:none}
+#sheet-drag-handle{touch-action:none;cursor:grab;min-height:28px}
+</style>
+
+<script id="vx-js">
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const K = 'vx_prefs', TK = 'vx_themes', AK = 'vx_ach', CK = 'vx_acts';
+  const FONTS = { inter: "'Inter',sans-serif", jakarta: "'Plus Jakarta Sans',sans-serif", space: "'Space Grotesk',sans-serif", playfair: "'Playfair Display',serif", system: "-apple-system,BlinkMacSystemFont,sans-serif", mono: "'JetBrains Mono',monospace" };
+  const FN = { inter: 'Inter', jakarta: 'Jakarta', space: 'Grotesk', playfair: 'Playfair', system: 'System', mono: 'Mono' };
+  const BGS = { aura: 'Аура', grid: 'Сетка', dots: 'Точки', noise: 'Зерно', image: 'Фото', none: 'Без' };
+  const FXS = { min: 'Минимум', balanced: 'Баланс', max: 'Максимум' };
+  const DENS = [['Компакт', .92], ['Обычно', 1], ['Просторно', 1.08]];
+  const EM = ['🧩', '🛠', '👑', '🔐'];
+  const SV = [
+    '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+    '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/>',
+    '<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/>',
+    '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'
+  ];
+  const NOISE = "<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .08 0'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>";
+  const HEX = /^#[0-9a-f]{6}$/i;
+
+  /* ---------- настройки ---------- */
+  const D = { density: 1, font: 'inter', bg: 'aura', bgImg: '', fx: 'balanced', icons: 'emoji', nav: 'full', tg: false };
+  let P;
+  try { P = { ...D, ...JSON.parse(localStorage.getItem(K) || '{}') }; } catch (_) { P = { ...D }; }
+  if (!DENS.some(d => d[1] === P.density)) P.density = 1;
+  if (!FONTS[P.font]) P.font = 'inter';
+  if (!BGS[P.bg]) P.bg = 'aura';
+  if (!FXS[P.fx]) P.fx = 'balanced';
+  const save = () => { try { localStorage.setItem(K, JSON.stringify(P)); } catch (_) {} };
+  const rd = (k, f) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? f; } catch (_) { return f; } };
+  const wr = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} };
+  const getThemes = () => rd(TK, []);
+
+  document.body.insertAdjacentHTML('afterbegin', '<div id="vx-bg" aria-hidden="true"></div>');
+
+  function apply() {
+    const r = document.documentElement, bg = $('vx-bg');
+    r.style.setProperty('--vx-d', P.density);
+    document.body.style.fontFamily = FONTS[P.font];
+    r.dataset.bg = (P.bg === 'image' && !P.bgImg) ? 'aura' : P.bg;
+    r.dataset.fx = P.fx; r.dataset.nav = P.nav;
+    bg.style.cssText = '';
+    if (P.bg === 'noise') bg.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(NOISE)}")`;
+    if (P.bg === 'image' && P.bgImg) bg.style.background = `linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url("${P.bgImg.replace(/["\\\n\r]/g, '')}") center/cover no-repeat`;
+    [0, 1, 2, 3].forEach(i => {
+      const s = $('nav-btn-' + i)?.querySelector('span');
+      if (s) s.innerHTML = P.icons === 'line' ? `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${SV[i]}</svg>` : EM[i];
+    });
+  }
+
+  function tgSync() {
+    const t = tg?.themeParams; if (!P.tg || !t) return;
+    const dark = tg.colorScheme !== 'light', r = document.documentElement;
+    r.classList.toggle('light', !dark); r.classList.toggle('dark', dark);
+    $('theme-icon-dark')?.classList.toggle('hidden', !dark);
+    $('theme-icon-light')?.classList.toggle('hidden', dark);
+    if (typeof builderState !== 'undefined') builderState.previewDark = dark;
+    if (t.button_color) r.style.setProperty('--accent-primary', t.button_color);
+    if (t.link_color) r.style.setProperty('--accent-secondary', t.link_color);
+    if (dark && t.bg_color) r.style.setProperty('--bg-main', t.bg_color); else if (!dark) r.style.removeProperty('--bg-main');
+  }
+  try { tg?.onEvent?.('themeChanged', tgSync); } catch (_) {}
+
+  /* ---------- достижения ---------- */
+  let ready = false;
+  const acts = () => +localStorage.getItem(CK) || 0;
+  const ACH = [
+    ['first', '🚀', 'Первый запуск', 'Сделай первую генерацию', () => acts() >= 1],
+    ['ten', '⚡', 'Прокачка', '10 действий в студии', () => acts() >= 10],
+    ['vault', '🔐', 'Хранитель', '5 сниппетов в Сейфе', () => getVaultList().length >= 5],
+    ['streak', '🔥', 'В потоке', 'Стрик 3 дня', () => +localStorage.getItem('vibe_streak_days') >= 3],
+    ['stylist', '🎨', 'Стилист', 'Сохрани свою тему', () => getThemes().length >= 1]
+  ];
+  function checkAch() {
+    const have = rd(AK, []); let last = null;
+    ACH.forEach(a => { if (!have.includes(a[0]) && a[4]()) { have.push(a[0]); last = a; } });
+    if (last) {
+      wr(AK, have);
+      if (ready) { try { SoundFX.levelUp(); fireMiniConfetti(); showToast(`🏆 ${last[2]}`); } catch (_) {} }
+    }
+  }
+  const _xp = window.addXp;
+  window.addXp = function (n) { try { localStorage.setItem(CK, String(acts() + 1)); } catch (_) {} _xp(n); checkAch(); };
+  const _pv = window.persistVaultList;
+  window.persistVaultList = function (l) { _pv(l); checkAch(); };
+
+  /* ---------- окно «Свой стиль» + кастомизация ---------- */
+  const chip = (l, on, call) => `<button type="button" onclick="${call}" class="${on ? 'bg-indigo-500 text-white font-semibold' : 'btn-glass'} min-h-[34px] px-3 rounded-xl text-[11px]">${l}</button>`;
+  const sec = (t, body) => `<div><b class="text-dynamic block mb-1.5">${t}</b>${body}</div>`;
+
+  function extra() {
+    const th = getThemes(), have = rd(AK, []);
+    return `<div id="vx-extra" class="space-y-3.5 text-xs pt-3 mt-3 border-t border-white/10">
+      ${sec('Плотность интерфейса', `<div class="flex gap-1.5">${DENS.map(d => chip(d[0], P.density === d[1], `VX.set('density',${d[1]})`)).join('')}</div>`)}
+      ${sec('Шрифт интерфейса', `<div class="grid grid-cols-3 gap-1.5">${Object.keys(FONTS).map(k => chip(FN[k], P.font === k, `VX.set('font','${k}')`)).join('')}</div>`)}
+      ${sec('Фон', `<div class="grid grid-cols-3 gap-1.5">${Object.keys(BGS).map(k => chip(BGS[k], P.bg === k, `VX.set('bg','${k}')`)).join('')}</div>
+        ${P.bg === 'image' ? `<input id="vx-img" value="${escapeHtml(P.bgImg)}" onchange="VX.img(this.value)" placeholder="https:// ссылка на картинку" class="frosted-input w-full min-h-[38px] rounded-xl px-3 text-[11px] mt-1.5">` : ''}`)}
+      ${sec('Эффекты (слабым телефонам — «Минимум»)', `<div class="flex gap-1.5">${Object.keys(FXS).map(k => chip(FXS[k], P.fx === k, `VX.set('fx','${k}')`)).join('')}</div>`)}
+      ${sec('Иконки и навигация', `<div class="flex flex-wrap gap-1.5">${chip('Эмодзи', P.icons === 'emoji', `VX.set('icons','emoji')`)}${chip('Линейные', P.icons === 'line', `VX.set('icons','line')`)}${chip('Подписи', P.nav === 'full', `VX.set('nav','full')`)}${chip('Только иконки', P.nav === 'icons', `VX.set('nav','icons')`)}</div>`)}
+      ${sec('Тема Telegram', `<div>${chip(P.tg ? '✓ Следовать теме Telegram' : 'Следовать теме Telegram', P.tg, 'VX.toggleTg()')}</div>`)}
+      ${sec('Мои темы', `<div class="flex gap-1.5"><input id="vx-name" maxlength="20" placeholder="Название темы" class="frosted-input flex-1 min-h-[36px] rounded-xl px-3 text-[11px]"><button type="button" onclick="VX.saveTheme()" class="btn-primary px-3 rounded-xl text-[11px] font-bold">Сохранить</button></div>
+        <div class="grid grid-cols-2 gap-1.5 mt-1.5">${th.map((t, i) => `<div class="p-2 rounded-xl code-surface border border-white/10 flex items-center gap-2"><button type="button" onclick="VX.useTheme(${i})" class="flex-1 flex items-center gap-2 text-left min-w-0"><span class="w-4 h-4 rounded-full shrink-0" style="background:linear-gradient(135deg,${t.p},${t.s})"></span><span class="truncate text-dynamic">${escapeHtml(t.n)}</span></button><button type="button" onclick="VX.delTheme(${i})" class="text-rose-400 px-1">✕</button></div>`).join('') || '<span class="text-muted-dynamic">Пока нет сохранённых тем</span>'}</div>`)}
+      ${sec('Поделиться темой', `<div class="grid grid-cols-2 gap-1.5"><button type="button" onclick="VX.exportTheme()" class="btn-glass min-h-[36px] rounded-xl text-[11px] font-semibold">📋 Скопировать код</button><button type="button" onclick="VX.shareTheme()" class="btn-glass min-h-[36px] rounded-xl text-[11px] font-semibold">📤 Другу</button></div>
+        <div class="flex gap-1.5 mt-1.5"><input id="vx-code" placeholder="Вставь код темы VIBE1:..." class="frosted-input flex-1 min-h-[36px] rounded-xl px-3 text-[11px] font-mono"><button type="button" onclick="VX.importTheme()" class="btn-glass px-3 rounded-xl text-[11px] font-semibold">Импорт</button></div>`)}
+      ${sec(`Достижения ${have.length}/${ACH.length}`, `<div class="space-y-1">${ACH.map(a => `<div class="p-2 rounded-xl code-surface border ${have.includes(a[0]) ? 'border-emerald-400/40' : 'border-white/10 opacity-60'} flex items-center gap-2"><span>${have.includes(a[0]) ? a[1] : '🔒'}</span><div><div class="font-semibold text-dynamic">${a[2]}</div><div class="text-[10px] text-muted-dynamic">${a[3]}</div></div></div>`).join('')}</div>`)}
+    </div>`;
+  }
+  const refresh = () => { const e = $('vx-extra'); if (!e) return; const t = document.createElement('div'); t.innerHTML = extra(); e.replaceWith(t.firstElementChild); };
+  const _ops = window.openPersonalizeSheet;
+  window.openPersonalizeSheet = function () { _ops(); $('sheet-body').insertAdjacentHTML('beforeend', extra()); };
+
+  const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+  const unb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s), c => c.charCodeAt(0)));
+  const curTheme = () => { const c = loadUserSiteTheme(); return { bg: c.bg, p: c.primary, s: c.secondary, r: c.radius }; };
+  const themeCode = () => 'VIBE1:' + b64(JSON.stringify({ ...curTheme(), d: P.density, f: P.font, b: P.bg === 'image' ? 'aura' : P.bg, x: P.fx }));
+
+  window.VX = {
+    set(k, v) { P[k] = v; save(); apply(); Haptic.selection(); refresh(); },
+    img(v) {
+      v = v.trim();
+      if (v && !/^(https:\/\/|data:image\/)/i.test(v)) { Haptic.error(); showToast('Нужна ссылка https:// на картинку'); return; }
+      P.bgImg = v; save(); apply();
+    },
+    toggleTg() {
+      P.tg = !P.tg; save(); Haptic.selection();
+      if (P.tg) { if (!tg?.themeParams) showToast('Откройте приложение внутри Telegram'); tgSync(); } else applyUserSiteTheme(loadUserSiteTheme());
+      refresh();
+    },
+    saveTheme() {
+      const n = ($('vx-name')?.value || '').trim().slice(0, 20), th = getThemes();
+      if (!n) { Haptic.error(); showToast('Введите название темы'); return; }
+      if (th.length >= 12) { Haptic.error(); showToast('Максимум 12 тем — удалите лишнюю'); return; }
+      th.push({ n, ...curTheme() }); wr(TK, th); Haptic.success(); showToast('Тема сохранена!'); checkAch(); refresh();
+    },
+    useTheme(i) { const t = getThemes()[i]; if (!t) return; Haptic.selection(); applyUserSiteTheme({ ...loadUserSiteTheme(), bg: t.bg, primary: t.p, secondary: t.s, radius: t.r }); },
+    delTheme(i) { const th = getThemes(); th.splice(i, 1); wr(TK, th); Haptic.light(); refresh(); },
+    exportTheme() { navigator.clipboard.writeText(themeCode()).then(() => { Haptic.success(); showToast('Код темы скопирован!'); }); },
+    shareTheme() {
+      Haptic.light();
+      const u = `https://t.me/share/url?url=${encodeURIComponent(getPersonalRefLink())}&text=${encodeURIComponent('🎨 Моя тема для VIBE STUDIO — вставь код в «Свой стиль»:\n' + themeCode())}`;
+      if (tg?.openTelegramLink) tg.openTelegramLink(u); else window.open(u, '_blank');
+    },
+    importTheme() {
+      try {
+        const o = JSON.parse(unb64(($('vx-code').value || '').trim().replace(/^VIBE1:/, '')));
+        if (![o.bg, o.p, o.s].every(c => HEX.test(c))) throw 0;
+        const r = Math.min(32, Math.max(0, +o.r || 0));
+        applyUserSiteTheme({ ...loadUserSiteTheme(), bg: o.bg, primary: o.p, secondary: o.s, radius: r });
+        if (DENS.some(d => d[1] === o.d)) P.density = o.d;
+        if (FONTS[o.f]) P.font = o.f;
+        if (BGS[o.b] && o.b !== 'image') P.bg = o.b;
+        if (FXS[o.x]) P.fx = o.x;
+        save(); apply(); Haptic.success(); showToast('Тема применена!'); refresh();
+      } catch (_) { Haptic.error(); showToast('Неверный код темы'); }
+    }
+  };
+
+  /* ---------- надёжность ---------- */
+  // Конструктор БД: поле ввода больше не теряет фокус после каждой буквы
+  const _rdb = window.renderDbBuilder;
+  window.renderDbBuilder = function () {
+    const ed = $('db-tables-editor'), a = document.activeElement;
+    if (ed && a && a.tagName === 'INPUT' && ed.contains(a)) {
+      ed.id = 'db-tables-editor-live';
+      const t = document.createElement('div'); t.id = 'db-tables-editor'; document.body.appendChild(t);
+      try { _rdb(); } finally { t.remove(); ed.id = 'db-tables-editor'; }
+    } else _rdb();
+  };
+  // Python-парсер: лишний пробел перед PATTERN давал IndentationError
+  const _gp = window.generatePythonParserSnippet;
+  window.generatePythonParserSnippet = function () {
+    _gp(); const el = $('regex-code'), t = (el.dataset.raw || '').replace('\n\n PATTERN', '\n\nPATTERN');
+    el.dataset.raw = t; el.textContent = t;
+  };
+  // Анти-слив: добавлены пароли БД-ссылок и KEY="..." присваивания
+  const _san = window.sanitizeSecretsInCode;
+  window.sanitizeSecretsInCode = function (txt) {
+    const r = _san(txt); let c = r.maskedCount, s = r.cleaned;
+    s = s.replace(/\b(postgres(?:ql)?|mysql|mongodb(?:\+srv)?):\/\/[^:\s]+:[^@\s]+@[^\s"']+/gi, (_, p) => { c++; return p + '://USER:HIDDEN_PASSWORD@localhost/dbname'; });
+    s = s.replace(/((?:BOT_TOKEN|API_KEY|SECRET_KEY|PASSWORD|TOKEN)\s*=\s*["'])([^"'\n]{8,})(["'])/gi, (_, a, _b, d) => { c++; return a + 'HIDDEN_SECRET_VALUE' + d; });
+    return { cleaned: s, maskedCount: c };
+  };
+  // Повторная загрузка того же файла в сборщик
+  const _hf = window.handleProjectFilesUpload;
+  window.handleProjectFilesUpload = function (fl) { _hf(fl); const i = $('project-files-input'); if (i) i.value = ''; };
+
+  // Шторка: Esc, кнопка «Назад» Telegram, свайп вниз
+  const _obs = window.openBottomSheet, _cbs = window.closeBottomSheet;
+  window.openBottomSheet = function (...a) { _obs.apply(this, a); try { tg?.BackButton?.show(); } catch (_) {} };
+  window.closeBottomSheet = function () { _cbs(); try { tg?.BackButton?.hide(); } catch (_) {} };
+  try { tg?.BackButton?.onClick(() => closeBottomSheet()); } catch (_) {}
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('bottom-sheet').classList.contains('open')) closeBottomSheet(); });
+  (() => {
+    const h = $('sheet-drag-handle'), sh = $('bottom-sheet'); let y0 = null, dy = 0;
+    h.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; dy = 0; sh.style.transition = 'none'; }, { passive: true });
+    h.addEventListener('touchmove', e => { if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); sh.style.transform = `translate3d(0,${dy}px,0)`; }, { passive: true });
+    const end = () => { if (y0 === null) return; y0 = null; sh.style.transition = ''; sh.style.transform = ''; if (dy > 90) closeBottomSheet(); dy = 0; };
+    h.addEventListener('touchend', end); h.addEventListener('touchcancel', end);
+  })();
+
+  // Ошибки промисов больше не «молчат»
+  window.addEventListener('unhandledrejection', e => {
+    e.preventDefault(); console.warn(e.reason);
+    try { Haptic.error(); showToast('Не получилось. Попробуйте ещё раз'); } catch (_) {}
+  });
+
+  apply();
+  document.addEventListener('DOMContentLoaded', () => { tgSync(); ready = true; checkAch(); });
+})();
+</script>
 </body>
 </html>
