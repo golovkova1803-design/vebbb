@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CLAUDE_CODE // VIBE STUDIO VIP</title>
+    <title>CLAUDE_CODE // VIBE STUDIO</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,11 +32,11 @@
             --bg-main: #0b0d14;
             --text-main: #f3f4f6;
             --text-muted: #94a3b8;
-            --card-bg: rgba(22, 26, 39, 0.76);
+            --card-bg: rgba(22, 26, 39, 0.78);
             --card-border: rgba(255, 255, 255, 0.1);
-            --card-highlight: rgba(255, 255, 255, 0.12);
+            --card-highlight: rgba(255, 255, 255, 0.13);
             --input-bg: rgba(255, 255, 255, 0.045);
-            --code-bg: rgba(0, 0, 0, 0.38);
+            --code-bg: rgba(0, 0, 0, 0.4);
             --nav-bg: rgba(15, 18, 28, 0.88);
         }
 
@@ -44,9 +44,9 @@
             --bg-main: #f1f5f9;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --card-bg: rgba(255, 255, 255, 0.88);
+            --card-bg: rgba(255, 255, 255, 0.9);
             --card-border: rgba(15, 23, 42, 0.1);
-            --card-highlight: rgba(255, 255, 255, 0.9);
+            --card-highlight: rgba(255, 255, 255, 0.95);
             --input-bg: rgba(15, 23, 42, 0.045);
             --code-bg: rgba(15, 23, 42, 0.06);
             --nav-bg: rgba(255, 255, 255, 0.92);
@@ -65,7 +65,7 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             overflow-x: hidden;
             padding-bottom: calc(var(--safe-bottom) + 104px);
-            transition: background-color 300ms ease, color 300ms ease;
+            transition: background-color 350ms ease, color 350ms ease;
             scroll-behavior: smooth;
         }
 
@@ -73,12 +73,17 @@
         .text-muted-dynamic { color: var(--text-muted); }
         .code-surface { background-color: var(--code-bg); }
 
+        /* Плавное дыхание фонового градиента */
+        @keyframes ambientPulse {
+            0%, 100% { transform: scale(1) translateZ(0); }
+            50% { transform: scale(1.04) translateZ(0); }
+        }
         .ambient-bg {
             background:
-                radial-gradient(circle at 15% 12%, rgba(99, 102, 241, 0.16) 0%, transparent 45%),
-                radial-gradient(circle at 85% 38%, rgba(139, 92, 246, 0.13) 0%, transparent 45%),
-                radial-gradient(circle at 30% 88%, rgba(56, 189, 248, 0.09) 0%, transparent 45%);
-            transform: translateZ(0);
+                radial-gradient(circle at 15% 12%, rgba(99, 102, 241, 0.17) 0%, transparent 45%),
+                radial-gradient(circle at 85% 38%, rgba(139, 92, 246, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 30% 88%, rgba(56, 189, 248, 0.1) 0%, transparent 45%);
+            animation: ambientPulse 12s ease-in-out infinite;
         }
 
         .frosted-card {
@@ -88,10 +93,15 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--card-border);
-            box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.25), inset 0 1px 0 0 var(--card-highlight);
+            box-shadow: 0 10px 28px -10px rgba(0, 0, 0, 0.28), inset 0 1px 0 0 var(--card-highlight);
             transform: translateZ(0);
+            transition: transform 280ms var(--ease-ios), border-color 240ms ease, box-shadow 280ms var(--ease-ios);
         }
-
+        @media (hover: hover) {
+            .frosted-card:hover {
+                border-color: rgba(129, 140, 248, 0.28);
+            }
+        }
         @media (max-width: 768px) {
             .frosted-card {
                 backdrop-filter: none;
@@ -124,10 +134,10 @@
             background: var(--input-bg);
             border: 1px solid var(--card-border);
             color: var(--text-main);
-            transition: border-color 180ms ease, box-shadow 180ms ease;
+            transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms var(--ease-ios);
         }
         .frosted-input:focus {
-            border-color: rgba(99, 102, 241, 0.75);
+            border-color: rgba(99, 102, 241, 0.8);
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
             outline: none;
         }
@@ -136,31 +146,75 @@
             box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.2);
         }
 
+        /* Кнопки с переливающимся бликом */
+        @keyframes sheenSweep {
+            0% { transform: translateX(-120%) skewX(-15deg); }
+            100% { transform: translateX(220%) skewX(-15deg); }
+        }
         .btn-primary {
+            position: relative;
+            overflow: hidden;
             background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
             color: #ffffff;
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-            transition: transform 160ms var(--ease-ios), opacity 160ms ease;
+            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            transition: transform 180ms var(--ease-ios), box-shadow 200ms ease;
         }
-        .btn-primary:active { transform: scale(0.97); }
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0; left: 0;
+            width: 45%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+            transform: translateX(-120%) skewX(-15deg);
+            animation: sheenSweep 4.5s infinite;
+            pointer-events: none;
+        }
+        .btn-primary:active { transform: scale(0.96); }
 
         .btn-gold {
+            position: relative;
+            overflow: hidden;
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: #ffffff;
-            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            transition: transform 160ms var(--ease-ios);
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: transform 180ms var(--ease-ios);
         }
-        .btn-gold:active { transform: scale(0.97); }
+        .btn-gold:active { transform: scale(0.96); }
 
         .btn-glass {
             background: var(--input-bg);
             border: 1px solid var(--card-border);
             color: var(--text-main);
             box-shadow: inset 0 1px 0 var(--card-highlight);
-            transition: transform 160ms var(--ease-ios), background-color 160ms ease, border-color 160ms ease;
+            transition: transform 180ms var(--ease-ios), background-color 180ms ease, border-color 180ms ease;
         }
-        .btn-glass:hover { background: rgba(99, 102, 241, 0.1); }
-        .btn-glass:active { transform: scale(0.96); }
+        .btn-glass:hover { background: rgba(99, 102, 241, 0.12); }
+        .btn-glass:active { transform: scale(0.95); }
+
+        /* Плавные входные и левитирующие анимации */
+        @keyframes viewSlideIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.99); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-view-enter {
+            animation: viewSlideIn 340ms var(--ease-ios) forwards;
+        }
+
+        @keyframes floatSoft {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+        .animate-float {
+            animation: floatSoft 3.6s ease-in-out infinite;
+        }
+
+        @keyframes popScale {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popScale 240ms var(--ease-ios) forwards;
+        }
 
         input[type="range"].ios-slider {
             -webkit-appearance: none;
@@ -181,10 +235,10 @@
             background: #ffffff;
             border: 2px solid #6366f1;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-            transition: transform 150ms var(--ease-ios);
+            transition: transform 160ms var(--ease-ios);
         }
         input[type="range"].ios-slider::-webkit-slider-thumb:active {
-            transform: scale(1.18);
+            transform: scale(1.22);
         }
 
         @keyframes shimmerMove {
@@ -202,7 +256,7 @@
             display: grid;
             grid-template-rows: 0fr;
             opacity: 0;
-            transition: grid-template-rows 280ms var(--ease-ios), opacity 220ms ease;
+            transition: grid-template-rows 300ms var(--ease-ios), opacity 240ms ease;
         }
         .expand-grid.open {
             grid-template-rows: 1fr;
@@ -221,7 +275,7 @@
         }
         .bottom-sheet {
             transform: translate3d(0, 100%, 0);
-            transition: transform 300ms var(--ease-ios);
+            transition: transform 320ms var(--ease-ios);
         }
         .bottom-sheet.open {
             transform: translate3d(0, 0, 0);
@@ -236,13 +290,12 @@
     <!-- Фоновое свечение -->
     <div class="ambient-bg fixed inset-0 pointer-events-none z-0" aria-hidden="true"></div>
 
-    <!-- ==================== STICKY ШАПКА + КРАТКАЯ НАВИГАЦИЯ ПО САЙТУ ==================== -->
+    <!-- ==================== STICKY ШАПКА + КРАТКАЯ НАВИГАЦИЯ ==================== -->
     <header class="frosted-header sticky top-0 z-30 px-4 lg:px-8 pt-3 pb-2.5">
         <div class="max-w-md lg:max-w-6xl mx-auto space-y-2.5">
-            <!-- Верхний ряд шапки -->
             <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-indigo-500/25 to-violet-500/25 border border-indigo-400/30 flex items-center justify-center shrink-0">
+                    <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-indigo-500/25 to-violet-500/25 border border-indigo-400/30 flex items-center justify-center shrink-0 animate-float">
                         <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
@@ -250,23 +303,22 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h1 class="text-sm lg:text-base font-bold tracking-tight text-dynamic leading-tight">VIBE STUDIO</h1>
-                            <button onclick="openVipModal()" id="header-vip-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-400 border border-amber-400/30 flex items-center gap-1">
+                            <button onclick="openVipModal()" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-400 border border-amber-400/30 flex items-center gap-1">
                                 <span>👑 VIP:</span>
                                 <span id="header-refs-count">0/3</span>
                             </button>
                         </div>
-                        <p id="user-status" class="text-[11px] text-muted-dynamic font-medium">Конструктор сайтов и ИИ-промтов</p>
+                        <p id="user-status" class="text-[11px] text-muted-dynamic font-medium">Конструктор сайтов и Telegram-ботов</p>
                     </div>
                 </div>
 
-                <!-- Кнопки управления: Карта сайта, Звук, Тема -->
                 <div class="flex items-center gap-1.5">
-                    <button onclick="toggleSiteMapBanner()" class="btn-glass min-h-[38px] px-2.5 rounded-xl flex items-center gap-1 text-[11px] font-semibold text-indigo-400" title="Краткая навигация по сайту">
+                    <button onclick="toggleSiteMapBanner()" class="btn-glass min-h-[38px] px-2.5 rounded-xl flex items-center gap-1 text-[11px] font-semibold text-indigo-400">
                         <span>🧭</span>
-                        <span class="hidden sm:inline">Навигация</span>
+                        <span class="hidden sm:inline">Карта сайта</span>
                     </button>
 
-                    <button onclick="SoundFX.toggleMute()" id="sound-toggle-btn" aria-label="Звуковые эффекты" class="btn-glass min-w-[38px] min-h-[38px] rounded-xl flex items-center justify-center text-xs" title="Вкл/Выкл звук">
+                    <button onclick="SoundFX.toggleMute()" id="sound-toggle-btn" aria-label="Звуковые эффекты" class="btn-glass min-w-[38px] min-h-[38px] rounded-xl flex items-center justify-center text-xs">
                         🔊
                     </button>
 
@@ -277,35 +329,33 @@
                 </div>
             </div>
 
-            <!-- Строка быстрой навигации (Якоря по текущему разделу) -->
+            <!-- Быстрые шаги-якоря по текущему экрану -->
             <div class="flex items-center justify-between gap-2 pt-1 border-t border-white/5">
-                <div id="quick-breadcrumbs" class="flex items-center gap-1.5 overflow-x-auto py-0.5 text-[11px]">
-                    <!-- Заполняется динамически под активную вкладку -->
-                </div>
+                <div id="quick-breadcrumbs" class="flex items-center gap-1.5 overflow-x-auto py-0.5 text-[11px]"></div>
                 <button onclick="openVipModal()" class="text-[11px] font-semibold text-amber-400 shrink-0 hover:underline">
-                    🎁 Награды
+                    🎁 Мои награды
                 </button>
             </div>
 
-            <!-- Раскрывающаяся краткая карта сайта (Показывается по кнопке 🧭 или при старте) -->
+            <!-- Выпадающая карта сайта -->
             <div id="sitemap-drawer" class="expand-grid">
                 <div class="expand-inner">
                     <div class="pt-2 pb-1 grid grid-cols-2 lg:grid-cols-4 gap-2 text-left">
-                        <button onclick="switchTab(0, 'view-studio'); toggleSiteMapBanner(false)" class="p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 hover:bg-indigo-500/20 transition">
-                            <div class="text-xs font-bold text-indigo-400">1. 🎨 UI Студия</div>
-                            <p class="text-[10px] text-muted-dynamic mt-0.5">Собери макет сайта ползунками и получи готовый код-промт</p>
+                        <button onclick="switchTab(0, 'view-studio'); switchBuilderMode('web'); toggleSiteMapBanner(false)" class="p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 hover:bg-indigo-500/20 transition">
+                            <div class="text-xs font-bold text-indigo-400">1A. 🎨 Конструктор сайтов</div>
+                            <p class="text-[10px] text-muted-dynamic mt-0.5">Живой макет с ползунками, палитрами и генерацией промта</p>
+                        </button>
+                        <button onclick="switchTab(0, 'view-studio'); switchBuilderMode('bot'); toggleSiteMapBanner(false)" class="p-2.5 rounded-2xl bg-sky-500/10 border border-sky-400/30 hover:bg-sky-500/20 transition">
+                            <div class="text-xs font-bold text-sky-400">1B. 🤖 Конструктор ТГ-ботов</div>
+                            <p class="text-[10px] text-muted-dynamic mt-0.5">Собери инлайн-кнопки и модули и скачай код на Aiogram 3.x</p>
                         </button>
                         <button onclick="switchTab(1, 'view-tools'); toggleSiteMapBanner(false)" class="p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] transition">
-                            <div class="text-xs font-bold text-dynamic">2. 🛠 Тулзы кода</div>
-                            <p class="text-[10px] text-muted-dynamic mt-0.5">Архитектура бэкенда, дебаг ошибок и промты для Cursor</p>
+                            <div class="text-xs font-bold text-dynamic">2. 🛠 Тулзы и Дебаггер</div>
+                            <p class="text-[10px] text-muted-dynamic mt-0.5">Архитектура бэкенда, конвертер ошибок и усилитель промтов</p>
                         </button>
                         <button onclick="switchTab(2, 'view-hub'); toggleSiteMapBanner(false)" class="p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] transition">
-                            <div class="text-xs font-bold text-amber-400">3. 👑 VIP & База</div>
-                            <p class="text-[10px] text-muted-dynamic mt-0.5">Закрытые Golden Prompts, 500 идей стартапов и ИИ-каталог</p>
-                        </button>
-                        <button onclick="switchTab(3, 'view-vault'); toggleSiteMapBanner(false)" class="p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] transition">
-                            <div class="text-xs font-bold text-emerald-400">4. 🔐 Мой Сейф</div>
-                            <p class="text-[10px] text-muted-dynamic mt-0.5">Твоё личное хранилище сниппетов с папками и экспортом</p>
+                            <div class="text-xs font-bold text-amber-400">3. 👑 VIP База & Сейф</div>
+                            <p class="text-[10px] text-muted-dynamic mt-0.5">Закрытые Golden Prompts, 500 идей и твоё хранилище кода</p>
                         </button>
                     </div>
                 </div>
@@ -316,258 +366,392 @@
     <!-- Основной контейнер -->
     <main class="flex-1 px-4 lg:px-8 pt-4 max-w-md lg:max-w-6xl mx-auto w-full relative z-10 space-y-5">
 
-        <!-- ==================== БАННЕР VIP-ПРОГРЕССА (3 НАГРАДЫ ЗА ДРУЗЕЙ) ==================== -->
-        <section id="vip-banner-card" class="frosted-card rounded-3xl p-4 border border-amber-400/25">
+        <!-- ==================== БАННЕР VIP-ПРОГРЕССА (БЕЗ ТЕСТОВЫХ КНОПОК — ЧИТАЕТ РЕАЛЬНЫЕ ДАННЫЕ) ==================== -->
+        <section id="vip-banner-card" class="frosted-card rounded-3xl p-4 border border-amber-400/25 animate-view-enter">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-start sm:items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-lg shrink-0">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-lg shrink-0 animate-float">
                         👑
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h2 class="text-xs sm:text-sm font-bold text-dynamic">VIP-программа: Открывай фичи за друзей</h2>
-                            <span id="vip-level-pill" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300">Уровень 0/3</span>
+                            <h2 class="text-xs sm:text-sm font-bold text-dynamic">Реферальная программа VIP</h2>
+                            <span id="vip-level-pill" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300">Приглашено: 0/3</span>
                         </div>
-                        <p id="vip-next-hint" class="text-[11px] text-muted-dynamic mt-0.5">Пригласи 1 друга → открой 4 VIP-стиля в UI Студии (visionOS, Bento, Clay 3D, Luxury)</p>
+                        <p id="vip-next-hint" class="text-[11px] text-muted-dynamic mt-0.5">Пригласи 1 друга → открой 4 VIP-стиля в конструкторе сайтов (visionOS, Bento, Clay 3D, Luxury)</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <button onclick="shareInviteLink()" class="btn-gold min-h-[38px] px-3.5 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                        <span>🚀 Пригласить</span>
+                    <button onclick="shareInviteLink()" class="btn-gold min-h-[40px] px-4 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                        <span>🚀 Пригласить друга</span>
                     </button>
-                    <button onclick="simulateAddFriend()" class="btn-glass min-h-[38px] px-2.5 rounded-xl text-[11px] font-semibold text-amber-400" title="Тестовая кнопка для проверки наград">
-                        ⚡ +1 друг (Тест)
+                    <button onclick="copyInviteLink()" class="btn-glass min-h-[40px] px-3 rounded-xl text-xs font-semibold text-amber-300" title="Скопировать реферальную ссылку">
+                        📋 Ссылка
                     </button>
                 </div>
             </div>
 
             <!-- 3 ступени наград -->
             <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-white/10">
-                <div id="reward-tier-1" class="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-center">
+                <div id="reward-tier-1" class="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-center transition-all">
                     <div class="text-[10px] font-bold text-muted-dynamic" id="tier-1-status">🔒 1 друг</div>
                     <div class="text-[11px] font-semibold text-dynamic mt-0.5">4 VIP-стиля UI</div>
                 </div>
-                <div id="reward-tier-2" class="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-center">
+                <div id="reward-tier-2" class="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-center transition-all">
                     <div class="text-[10px] font-bold text-muted-dynamic" id="tier-2-status">🔒 2 друга</div>
                     <div class="text-[11px] font-semibold text-dynamic mt-0.5">Безлимит Сейфа</div>
                 </div>
-                <div id="reward-tier-3" class="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-center">
+                <div id="reward-tier-3" class="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-center transition-all">
                     <div class="text-[10px] font-bold text-muted-dynamic" id="tier-3-status">🔒 3 друга</div>
                     <div class="text-[11px] font-semibold text-dynamic mt-0.5">Golden Prompts</div>
                 </div>
             </div>
         </section>
 
-        <!-- ==================== РАЗДЕЛ 0: ВИЗУАЛЬНЫЙ КОНСТРУКТОР САЙТА (UI СТУДИЯ) ==================== -->
-        <section id="view-studio" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <!-- ==================== ВКЛАДКА 0: КОНСТРУКТОРЫ ПРИЛОЖЕНИЙ (САЙТЫ + ТГ-БОТЫ AIOGRAM) ==================== -->
+        <section id="view-studio" class="space-y-5 animate-view-enter">
 
-            <!-- Левая колонка: ЖИВОЕ ПРЕВЬЮ (Динамически меняет структуру под тип проекта и стиль) -->
-            <div id="anchor-preview" class="lg:col-span-5 lg:sticky lg:top-28 space-y-4">
-                <article class="frosted-card rounded-3xl p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span class="text-xs font-bold text-dynamic">Интерактивный макет</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="togglePreviewTheme()" id="prev-theme-btn" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-medium">🌙 Dark</button>
-                            <button onclick="randomizeVisualBuilder()" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-semibold text-indigo-400">🎲 Рандом</button>
-                        </div>
-                    </div>
-
-                    <!-- Контейнер живого рендера (меняет и геометрию, и внутренний макет) -->
-                    <div id="live-preview-canvas" class="rounded-2xl overflow-hidden border border-white/15 transition-all duration-300 relative" style="background: #090b12; color: #f8fafc; min-height: 310px;">
-                        <div id="prev-glow-orb" class="absolute -top-12 right-4 w-40 h-40 rounded-full pointer-events-none transition-all duration-300"></div>
-                        <div id="prev-dynamic-mount" class="relative z-10 transition-all duration-200"></div>
-                    </div>
-
-                    <!-- Индикаторы выбранного стиля -->
-                    <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2.5 border-t border-white/10 text-[11px] text-muted-dynamic">
-                        <span id="summary-style-pill" class="font-semibold text-dynamic">Linear Dark • Indigo</span>
-                        <span id="summary-metrics-pill" class="font-mono">R: 12px | Blur: 8px</span>
-                    </div>
-                </article>
-
-                <button onclick="generateVisualUIPrompt()" class="btn-primary w-full min-h-[50px] rounded-2xl text-xs font-bold tracking-wide flex items-center justify-center gap-2 shadow-lg">
-                    <span>✨ Сгенерировать ТЗ и промт этого сайта</span>
-                </button>
-            </div>
-
-            <!-- Правая колонка: ПУЛЬТ УПРАВЛЕНИЯ КОНСТРУКТОРОМ -->
-            <div class="lg:col-span-7 space-y-4">
-
-                <!-- Шаг 1. Тип проекта и Дизайн-система -->
-                <article id="anchor-style" class="frosted-card rounded-3xl p-5">
-                    <div class="mb-3">
-                        <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Шаг 1 из 4 • Архитектура интерфейса</span>
-                        <h2 class="text-base font-semibold text-dynamic mt-0.5">Выбери тип сайта и визуальный стиль</h2>
-                        <p class="text-[11px] text-muted-dynamic mt-0.5">Каждый тип и стиль полностью перестраивает макет на превью.</p>
-                    </div>
-
-                    <label class="block text-xs font-semibold text-dynamic mb-2">1. Формат проекта (меняет структуру блоков):</label>
-                    <div id="ui-type-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4"></div>
-
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="text-xs font-semibold text-dynamic">2. Дизайн-система (4 базовых + 4 VIP):</label>
-                        <span class="text-[10px] text-amber-400 font-semibold">👑 VIP открывается за 1 друга</span>
-                    </div>
-                    <div id="ui-style-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
-                </article>
-
-                <!-- Шаг 2. Палитра + Ползунки геометрии -->
-                <article id="anchor-sliders" class="frosted-card rounded-3xl p-5 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-[11px] font-semibold uppercase tracking-wider text-violet-400">Шаг 2 из 4 • Палитра и Ползунки</span>
-                            <h3 class="text-base font-semibold text-dynamic mt-0.5">Цвета, скругления и глубина стекла</h3>
-                        </div>
-                        <label class="btn-glass px-3 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer">
-                            <span>🎨 Пипетка</span>
-                            <input type="color" id="custom-color-picker" value="#6366f1" oninput="setCustomAccentColor(this.value)" class="w-4 h-4 rounded border-0 bg-transparent cursor-pointer">
-                        </label>
-                    </div>
-
-                    <div id="ui-palette-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
-
-                    <div class="pt-2 border-t border-white/10 space-y-3.5">
-                        <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <span class="font-medium text-dynamic">Скругление углов (Border Radius)</span>
-                                <span id="val-radius" class="font-mono text-indigo-400 font-semibold">12px</span>
-                            </div>
-                            <input type="range" id="slider-radius" min="0" max="32" step="2" value="12" oninput="updateBuilderSliders()" class="ios-slider">
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <span class="font-medium text-dynamic">Размытие стекла (Backdrop Blur)</span>
-                                <span id="val-blur" class="font-mono text-indigo-400 font-semibold">8px</span>
-                            </div>
-                            <input type="range" id="slider-blur" min="0" max="28" step="2" value="8" oninput="updateBuilderSliders()" class="ios-slider">
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <span class="font-medium text-dynamic">Плотность карточек (Surface Opacity)</span>
-                                <span id="val-opacity" class="font-mono text-indigo-400 font-semibold">6%</span>
-                            </div>
-                            <input type="range" id="slider-opacity" min="2" max="26" step="1" value="6" oninput="updateBuilderSliders()" class="ios-slider">
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <span class="font-medium text-dynamic">Отступы и воздух (Spacing)</span>
-                                <span id="val-spacing" class="font-mono text-indigo-400 font-semibold">Баланс (3/5)</span>
-                            </div>
-                            <input type="range" id="slider-spacing" min="1" max="5" step="1" value="3" oninput="updateBuilderSliders()" class="ios-slider">
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <span class="font-medium text-dynamic">Свечение и глубина теней (Glow)</span>
-                                <span id="val-glow" class="font-mono text-indigo-400 font-semibold">40%</span>
-                            </div>
-                            <input type="range" id="slider-glow" min="0" max="100" step="10" value="40" oninput="updateBuilderSliders()" class="ios-slider">
-                        </div>
-                    </div>
-                </article>
-
-                <!-- Шаг 3 и 4. Шрифты, Секции и Вывод готового промта -->
-                <article id="anchor-output" class="frosted-card rounded-3xl p-5 space-y-4">
-                    <div>
-                        <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Шаг 3 & 4 • Типографика и Генерация</span>
-                        <h3 class="text-base font-semibold text-dynamic mt-0.5">Шрифты, блоки страницы и готовый промт</h3>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-muted-dynamic mb-2">Шрифтовая пара</label>
-                        <div id="ui-font-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-muted-dynamic mb-2">Секции страницы (кликни, чтобы включить/выключить)</label>
-                        <div id="ui-sections-grid" class="flex flex-wrap gap-1.5"></div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-muted-dynamic mb-1.5">О чём твой проект? (Тема, ниша, фичи)</label>
-                        <input id="ui-custom-note" type="text" placeholder="Напр.: Сервис аналитики Telegram-каналов с расчётом окупаемости рекламы..." class="frosted-input w-full min-h-[44px] rounded-2xl px-3.5 text-xs">
-                    </div>
-
-                    <button onclick="generateVisualUIPrompt()" class="btn-primary w-full min-h-[48px] rounded-2xl text-xs font-bold flex items-center justify-center gap-2">
-                        <span>✨ Собрать детальный дизайн-промт</span>
+            <!-- Переключатель внутри вкладки «Конструкторы приложений» -->
+            <div class="frosted-card rounded-3xl p-1.5 max-w-lg mx-auto">
+                <div class="relative grid grid-cols-2 items-center">
+                    <div id="builder-mode-pill" class="absolute top-0 bottom-0 left-0 w-1/2 rounded-2xl bg-gradient-to-r from-indigo-500/25 to-violet-500/25 border border-indigo-400/40 transition-transform duration-300 ease-ios pointer-events-none"></div>
+                    <button type="button" onclick="switchBuilderMode('web')" id="mode-btn-web" class="relative z-10 min-h-[44px] rounded-2xl text-xs font-bold text-indigo-300 flex items-center justify-center gap-2 transition-colors">
+                        <span>🎨 UI Студия (Сайты)</span>
                     </button>
+                    <button type="button" onclick="switchBuilderMode('bot')" id="mode-btn-bot" class="relative z-10 min-h-[44px] rounded-2xl text-xs font-semibold text-muted-dynamic flex items-center justify-center gap-2 transition-colors">
+                        <span>🤖 ТГ-Боты (Aiogram 3)</span>
+                    </button>
+                </div>
+            </div>
 
-                    <div id="ui-out-wrap" class="expand-grid">
-                        <div class="expand-inner">
-                            <div class="pt-3 border-t border-white/10">
-                                <div id="ui-skeleton" class="hidden space-y-2 p-4 rounded-2xl code-surface mb-3">
-                                    <div class="skeleton-line h-3 w-1/3"></div>
-                                    <div class="skeleton-line h-3 w-full"></div>
-                                    <div class="skeleton-line h-3 w-5/6"></div>
-                                </div>
+            <!-- ==================== РЕЖИМ A: КОНСТРУКТОР САЙТОВ (UI СТУДИЯ) ==================== -->
+            <div id="sub-builder-web" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start animate-view-enter">
 
-                                <div id="ui-result-card" class="rounded-2xl code-surface border border-white/10 overflow-hidden">
-                                    <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.03] border-b border-white/10">
-                                        <span class="text-xs font-semibold text-indigo-400">Готовый UI/UX Промт</span>
-                                        <div class="flex items-center gap-1.5">
-                                            <button onclick="copyResult('ui-code', this)" class="btn-glass min-h-[32px] px-3 rounded-xl text-[11px] font-medium">Копировать</button>
-                                            <button onclick="shareResult('ui-code')" class="btn-glass min-h-[32px] px-2.5 rounded-xl text-[11px] font-medium">Поделиться</button>
-                                        </div>
-                                    </div>
-                                    <div id="ui-code" class="p-3.5 font-mono text-[11px] leading-relaxed whitespace-pre-wrap break-words max-h-72 overflow-y-auto"></div>
-                                </div>
-
-                                <div class="grid grid-cols-3 gap-2 mt-2.5">
-                                    <button onclick="quickExportAI('claude', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-indigo-400">↗ В Claude</button>
-                                    <button onclick="quickExportAI('chatgpt', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-emerald-400">↗ В ChatGPT</button>
-                                    <button onclick="quickExportAI('cursor', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-violet-400">↗ В Cursor</button>
-                                </div>
-                                <button onclick="saveResultToVault('UI Концепт: ' + builderState.styleName, 'ui-code', 'Промты')" class="btn-glass w-full min-h-[44px] mt-2 rounded-2xl text-xs font-semibold text-indigo-400">
-                                    💾 Сохранить дизайн-промт в Сейф
-                                </button>
+                <!-- Левая колонка: ЖИВОЕ ПРЕВЬЮ САЙТА -->
+                <div id="anchor-preview" class="lg:col-span-5 lg:sticky lg:top-28 space-y-4">
+                    <article class="frosted-card rounded-3xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span class="text-xs font-bold text-dynamic">Интерактивный макет сайта</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="togglePreviewTheme()" id="prev-theme-btn" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-medium">🌙 Dark</button>
+                                <button onclick="randomizeVisualBuilder()" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-semibold text-indigo-400">🎲 Рандом</button>
                             </div>
                         </div>
-                    </div>
-                </article>
 
+                        <div id="live-preview-canvas" class="rounded-2xl overflow-hidden border border-white/15 transition-all duration-300 relative" style="background: #090b12; color: #f8fafc; min-height: 310px;">
+                            <div id="prev-glow-orb" class="absolute -top-12 right-4 w-40 h-40 rounded-full pointer-events-none transition-all duration-300"></div>
+                            <div id="prev-dynamic-mount" class="relative z-10 transition-all duration-200"></div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2.5 border-t border-white/10 text-[11px] text-muted-dynamic">
+                            <span id="summary-style-pill" class="font-semibold text-dynamic">Linear Dark • Indigo</span>
+                            <span id="summary-metrics-pill" class="font-mono">R: 10px | Blur: 8px</span>
+                        </div>
+                    </article>
+
+                    <button onclick="generateVisualUIPrompt()" class="btn-primary w-full min-h-[50px] rounded-2xl text-xs font-bold tracking-wide flex items-center justify-center gap-2 shadow-lg">
+                        <span>✨ Сгенерировать ТЗ и промт этого сайта</span>
+                    </button>
+                </div>
+
+                <!-- Правая колонка: ПУЛЬТ УПРАВЛЕНИЯ САЙТОМ -->
+                <div class="lg:col-span-7 space-y-4">
+                    <article id="anchor-style" class="frosted-card rounded-3xl p-5">
+                        <div class="mb-3">
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Шаг 1 • Архитектура интерфейса</span>
+                            <h2 class="text-base font-semibold text-dynamic mt-0.5">Выбери тип сайта и визуальный стиль</h2>
+                        </div>
+
+                        <label class="block text-xs font-semibold text-dynamic mb-2">1. Формат проекта (меняет структуру блоков):</label>
+                        <div id="ui-type-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4"></div>
+
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs font-semibold text-dynamic">2. Дизайн-система (4 базовых + 4 VIP):</label>
+                            <span class="text-[10px] text-amber-400 font-semibold">👑 VIP за 1 друга</span>
+                        </div>
+                        <div id="ui-style-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+                    </article>
+
+                    <article id="anchor-sliders" class="frosted-card rounded-3xl p-5 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] font-semibold uppercase tracking-wider text-violet-400">Шаг 2 • Палитра и Ползунки</span>
+                                <h3 class="text-base font-semibold text-dynamic mt-0.5">Цвета, скругления и глубина стекла</h3>
+                            </div>
+                            <label class="btn-glass px-3 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer">
+                                <span>🎨 Пипетка</span>
+                                <input type="color" id="custom-color-picker" value="#6366f1" oninput="setCustomAccentColor(this.value)" class="w-4 h-4 rounded border-0 bg-transparent cursor-pointer">
+                            </label>
+                        </div>
+
+                        <div id="ui-palette-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+
+                        <div class="pt-2 border-t border-white/10 space-y-3.5">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-medium text-dynamic">Скругление углов (Border Radius)</span>
+                                    <span id="val-radius" class="font-mono text-indigo-400 font-semibold">10px</span>
+                                </div>
+                                <input type="range" id="slider-radius" min="0" max="32" step="2" value="10" oninput="updateBuilderSliders()" class="ios-slider">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-medium text-dynamic">Размытие стекла (Backdrop Blur)</span>
+                                    <span id="val-blur" class="font-mono text-indigo-400 font-semibold">8px</span>
+                                </div>
+                                <input type="range" id="slider-blur" min="0" max="28" step="2" value="8" oninput="updateBuilderSliders()" class="ios-slider">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-medium text-dynamic">Плотность карточек (Surface Opacity)</span>
+                                    <span id="val-opacity" class="font-mono text-indigo-400 font-semibold">5%</span>
+                                </div>
+                                <input type="range" id="slider-opacity" min="2" max="26" step="1" value="5" oninput="updateBuilderSliders()" class="ios-slider">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-medium text-dynamic">Отступы и воздух (Spacing)</span>
+                                    <span id="val-spacing" class="font-mono text-indigo-400 font-semibold">Компактно (2/5)</span>
+                                </div>
+                                <input type="range" id="slider-spacing" min="1" max="5" step="1" value="2" oninput="updateBuilderSliders()" class="ios-slider">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-medium text-dynamic">Свечение и глубина теней (Glow)</span>
+                                    <span id="val-glow" class="font-mono text-indigo-400 font-semibold">35%</span>
+                                </div>
+                                <input type="range" id="slider-glow" min="0" max="100" step="10" value="35" oninput="updateBuilderSliders()" class="ios-slider">
+                            </div>
+                        </div>
+                    </article>
+
+                    <article id="anchor-output" class="frosted-card rounded-3xl p-5 space-y-4">
+                        <div>
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Шаг 3 • Типографика и Генерация</span>
+                            <h3 class="text-base font-semibold text-dynamic mt-0.5">Шрифты, секции и готовый промт</h3>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-muted-dynamic mb-2">Шрифтовая пара</label>
+                            <div id="ui-font-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-muted-dynamic mb-2">Секции страницы</label>
+                            <div id="ui-sections-grid" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-muted-dynamic mb-1.5">О чём твой проект? (Тема, ниша, фичи)</label>
+                            <input id="ui-custom-note" type="text" placeholder="Напр.: Сервис аналитики Telegram-каналов с расчётом окупаемости рекламы..." class="frosted-input w-full min-h-[44px] rounded-2xl px-3.5 text-xs">
+                        </div>
+
+                        <button onclick="generateVisualUIPrompt()" class="btn-primary w-full min-h-[48px] rounded-2xl text-xs font-bold flex items-center justify-center gap-2">
+                            <span>✨ Собрать детальный дизайн-промт</span>
+                        </button>
+
+                        <div id="ui-out-wrap" class="expand-grid">
+                            <div class="expand-inner">
+                                <div class="pt-3 border-t border-white/10">
+                                    <div id="ui-skeleton" class="hidden space-y-2 p-4 rounded-2xl code-surface mb-3">
+                                        <div class="skeleton-line h-3 w-1/3"></div>
+                                        <div class="skeleton-line h-3 w-full"></div>
+                                    </div>
+                                    <div id="ui-result-card" class="rounded-2xl code-surface border border-white/10 overflow-hidden">
+                                        <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.03] border-b border-white/10">
+                                            <span class="text-xs font-semibold text-indigo-400">Готовый UI/UX Промт</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <button onclick="copyResult('ui-code', this)" class="btn-glass min-h-[32px] px-3 rounded-xl text-[11px] font-medium">Копировать</button>
+                                                <button onclick="shareResult('ui-code')" class="btn-glass min-h-[32px] px-2.5 rounded-xl text-[11px] font-medium">Поделиться</button>
+                                            </div>
+                                        </div>
+                                        <div id="ui-code" class="p-3.5 font-mono text-[11px] leading-relaxed whitespace-pre-wrap break-words max-h-72 overflow-y-auto"></div>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-2 mt-2.5">
+                                        <button onclick="quickExportAI('claude', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-indigo-400">↗ В Claude</button>
+                                        <button onclick="quickExportAI('chatgpt', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-emerald-400">↗ В ChatGPT</button>
+                                        <button onclick="quickExportAI('cursor', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-violet-400">↗ В Cursor</button>
+                                    </div>
+                                    <button onclick="saveResultToVault('UI Концепт: ' + builderState.styleName, 'ui-code', 'Промты')" class="btn-glass w-full min-h-[44px] mt-2 rounded-2xl text-xs font-semibold text-indigo-400">
+                                        💾 Сохранить дизайн-промт в Сейф
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
             </div>
+
+            <!-- ==================== РЕЖИМ B: ВИЗУАЛЬНЫЙ КОНСТРУКТОР ТГ-БОТОВ НА AIOGRAM 3.X ==================== -->
+            <div id="sub-builder-bot" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start animate-view-enter">
+
+                <!-- Левая колонка: ЖИВОЙ ЭКРАН ЧАТА TELEGRAM -->
+                <div id="anchor-bot-preview" class="lg:col-span-5 lg:sticky lg:top-28 space-y-4">
+                    <article class="frosted-card rounded-3xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+                                <span class="text-xs font-bold text-dynamic">Превью чата в Telegram</span>
+                            </div>
+                            <button onclick="loadPresetBot('shop')" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-semibold text-sky-400">⚡ Пресет магазина</button>
+                        </div>
+
+                        <!-- Имитация окна чата Telegram -->
+                        <div class="rounded-2xl overflow-hidden border border-white/15" style="background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 100%); min-height: 300px;">
+                            <!-- Шапка чата -->
+                            <div class="px-3.5 py-2.5 bg-black/40 border-b border-white/10 flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center text-xs font-bold text-white">🤖</div>
+                                <div>
+                                    <div id="tg-preview-botname" class="text-xs font-bold text-white leading-tight">Vibe Aiogram Bot</div>
+                                    <div class="text-[10px] text-sky-300">bot • aiogram 3.x</div>
+                                </div>
+                            </div>
+
+                            <!-- Сообщение и инлайн-клавиатура -->
+                            <div class="p-3.5 space-y-2">
+                                <div class="max-w-[92%] rounded-2xl rounded-tl-sm bg-[#182533] border border-white/10 p-3 text-xs text-slate-100 leading-relaxed whitespace-pre-wrap shadow-md" id="tg-preview-msg"></div>
+                                <!-- Динамическая сетка инлайн-кнопок -->
+                                <div id="tg-preview-kb" class="max-w-[92%] space-y-1.5"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-white/10 text-[11px] text-muted-dynamic">
+                            <span id="bot-summary-stats">Рядов: 2 • Кнопок: 3</span>
+                            <span class="font-mono text-sky-400">Aiogram 3.x + Router</span>
+                        </div>
+                    </article>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button onclick="generateAiogramOutput('code')" class="btn-primary min-h-[48px] rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5">
+                            <span>🐍 Готовый Python код</span>
+                        </button>
+                        <button onclick="generateAiogramOutput('prompt')" class="btn-glass min-h-[48px] rounded-2xl text-xs font-bold text-indigo-300 flex items-center justify-center gap-1.5">
+                            <span>✨ Промт для ИИ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Правая колонка: РЕДАКТОР КНОПОК, СООБЩЕНИЯ И МОДУЛЕЙ AIOGRAM -->
+                <div class="lg:col-span-7 space-y-4">
+
+                    <!-- Блок 1: Название и приветственный текст -->
+                    <article id="anchor-bot-msg" class="frosted-card rounded-3xl p-5 space-y-3">
+                        <div>
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-sky-400">Шаг 1 • Сообщение стартового экрана (/start)</span>
+                            <h2 class="text-base font-semibold text-dynamic mt-0.5">Текст ответа бота</h2>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-muted-dynamic mb-1">Название бота (для шапки и комментариев)</label>
+                            <input id="bot-name-input" oninput="updateBotBuilderPreview()" type="text" value="Vibe Shop & Studio Bot" class="frosted-input w-full min-h-[42px] rounded-2xl px-3.5 text-xs">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-muted-dynamic mb-1">Текст сообщения (поддерживает HTML-теги &lt;b&gt;, &lt;code&gt;)</label>
+                            <textarea id="bot-msg-input" oninput="updateBotBuilderPreview()" rows="3" class="frosted-input w-full rounded-2xl p-3.5 text-xs resize-none">👋 Привет, {user_name}!
+
+Добро пожаловать в наш сервис на Aiogram 3.x. Выбери нужный раздел на клавиатуре ниже:</textarea>
+                        </div>
+                    </article>
+
+                    <!-- Блок 2: Конструктор Инлайн-клавиатуры (InlineKeyboardBuilder) -->
+                    <article id="anchor-bot-kb" class="frosted-card rounded-3xl p-5 space-y-3.5">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Шаг 2 • Визуальный редактор кнопок</span>
+                                <h3 class="text-base font-semibold text-dynamic mt-0.5">Инлайн-клавиатура (InlineKeyboardBuilder)</h3>
+                            </div>
+                            <button onclick="addBotKeyboardRow()" class="btn-primary px-3 py-2 rounded-xl text-xs font-semibold">
+                                ＋ Новый ряд
+                            </button>
+                        </div>
+
+                        <!-- Список рядов и кнопок для редактирования -->
+                        <div id="bot-rows-editor" class="space-y-3"></div>
+                    </article>
+
+                    <!-- Блок 3: Архитектурные модули Aiogram 3 -->
+                    <article id="anchor-bot-mods" class="frosted-card rounded-3xl p-5 space-y-4">
+                        <div>
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Шаг 3 • Бэкенд-модули и генерация кода</span>
+                            <h3 class="text-base font-semibold text-dynamic mt-0.5">Что подключить в код бота?</h3>
+                        </div>
+
+                        <div id="bot-modules-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+
+                        <div class="grid grid-cols-2 gap-2.5 pt-2">
+                            <button onclick="generateAiogramOutput('code')" class="btn-primary min-h-[48px] rounded-2xl text-xs font-bold">
+                                🐍 Собрать рабочий код bot.py
+                            </button>
+                            <button onclick="generateAiogramOutput('prompt')" class="btn-glass min-h-[48px] rounded-2xl text-xs font-bold text-indigo-300">
+                                ✨ Собрать ТЗ для Claude / Cursor
+                            </button>
+                        </div>
+
+                        <!-- Вывод сгенерированного кода или промта бота -->
+                        <div id="bot-out-wrap" class="expand-grid">
+                            <div class="expand-inner">
+                                <div class="pt-3 border-t border-white/10">
+                                    <div id="bot-skeleton" class="hidden space-y-2 p-4 rounded-2xl code-surface mb-3">
+                                        <div class="skeleton-line h-3 w-1/3"></div>
+                                        <div class="skeleton-line h-3 w-full"></div>
+                                    </div>
+                                    <div id="bot-result-card" class="rounded-2xl code-surface border border-white/10 overflow-hidden">
+                                        <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.03] border-b border-white/10">
+                                            <span id="bot-out-title" class="text-xs font-semibold text-sky-400">Готовый код на Aiogram 3.x</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <button onclick="copyResult('bot-code', this)" class="btn-glass min-h-[32px] px-3 rounded-xl text-[11px] font-medium">Копировать</button>
+                                                <button onclick="downloadBotPyFile()" class="btn-glass min-h-[32px] px-2.5 rounded-xl text-[11px] font-medium text-emerald-400">📥 Скачать .py</button>
+                                            </div>
+                                        </div>
+                                        <div id="bot-code" class="p-3.5 font-mono text-[11px] leading-relaxed whitespace-pre-wrap break-words max-h-80 overflow-y-auto"></div>
+                                    </div>
+                                    <button onclick="saveResultToVault('Aiogram 3 Бот: ' + document.getElementById('bot-name-input').value, 'bot-code', 'Архитектуры')" class="btn-glass w-full min-h-[44px] mt-2.5 rounded-2xl text-xs font-semibold text-indigo-400">
+                                        💾 Сохранить код бота в Мой Сейф
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                </div>
+            </div>
+
         </section>
 
-        <!-- ==================== РАЗДЕЛ 1: ИНСТРУМЕНТЫ (АРХИТЕКТУРА, ОШИБКИ, ОПТИМИЗАТОР) ==================== -->
-        <section id="view-tools" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <!-- ==================== ВКЛАДКА 1: ИНСТРУМЕНТЫ (АРХИТЕКТУРА, ОШИБКИ, ОПТИМИЗАТОР) ==================== -->
+        <section id="view-tools" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start animate-view-enter">
             <div class="lg:col-span-7 space-y-5">
-
-                <!-- 1. Готовые шаблоны проектов -->
                 <article id="tool-templates" class="frosted-card rounded-3xl p-5">
                     <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Starter Kits</span>
                     <h2 class="text-base font-semibold text-dynamic mt-0.5 mb-3">Готовые шаблоны проектов</h2>
                     <div class="grid grid-cols-3 gap-2.5">
                         <button onclick="openTemplateSheet('saas')" class="btn-glass min-h-[54px] p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1">
-                            <span class="text-sm">🚀</span>
-                            <span class="text-xs font-semibold">AI SaaS</span>
+                            <span class="text-sm">🚀</span><span class="text-xs font-semibold">AI SaaS</span>
                         </button>
                         <button onclick="openTemplateSheet('tgbot')" class="btn-glass min-h-[54px] p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1">
-                            <span class="text-sm">🤖</span>
-                            <span class="text-xs font-semibold">TG-бот</span>
+                            <span class="text-sm">🤖</span><span class="text-xs font-semibold">TG-бот</span>
                         </button>
                         <button onclick="openTemplateSheet('landing')" class="btn-glass min-h-[54px] p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1">
-                            <span class="text-sm">✨</span>
-                            <span class="text-xs font-semibold">3D Сайт</span>
+                            <span class="text-sm">✨</span><span class="text-xs font-semibold">3D Сайт</span>
                         </button>
                     </div>
                 </article>
 
-                <!-- 2. Конструктор Архитектуры -->
                 <article id="tool-arch" class="frosted-card rounded-3xl p-5">
                     <div class="flex items-start justify-between gap-3 mb-3">
                         <div>
                             <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">System Blueprint</span>
                             <h2 class="text-base font-semibold text-dynamic mt-0.5">Конструктор архитектуры</h2>
                         </div>
-                        <button onclick="toggleFavoriteCurrentStack()" class="btn-glass min-w-[40px] min-h-[40px] rounded-xl flex items-center justify-center text-amber-400">★</button>
                     </div>
-
                     <button onclick="openStackSheet()" class="frosted-input w-full min-h-[48px] rounded-2xl px-4 py-2.5 flex items-center justify-between text-left mb-3.5">
                         <div class="truncate pr-2">
                             <span class="block text-[10px] uppercase tracking-wider text-muted-dynamic">Активный стек</span>
@@ -575,7 +759,6 @@
                         </div>
                         <span class="px-2.5 py-1 rounded-xl bg-indigo-500/15 text-indigo-400 text-[11px] font-semibold shrink-0">Сменить ▾</span>
                     </button>
-
                     <button onclick="generateArchitecture()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold">Сгенерировать архитектуру</button>
 
                     <div id="arch-out-wrap" class="expand-grid">
@@ -598,7 +781,6 @@
                     </div>
                 </article>
 
-                <!-- 3. Умный конвертер ошибок -->
                 <article id="tool-debug" class="frosted-card rounded-3xl p-5">
                     <div class="flex items-center justify-between mb-2.5">
                         <div>
@@ -607,13 +789,11 @@
                         </div>
                         <span id="detected-lang-badge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/[0.06] text-muted-dynamic">Авто...</span>
                     </div>
-
                     <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl code-surface border border-white/10 mb-3">
                         <button type="button" onclick="setErrorMode('fix', this)" class="err-mode-btn min-h-[36px] rounded-xl text-xs font-semibold bg-indigo-500 text-white">Исправить</button>
                         <button type="button" onclick="setErrorMode('explain', this)" class="err-mode-btn min-h-[36px] rounded-xl text-xs font-medium text-muted-dynamic">Объяснить</button>
                         <button type="button" onclick="setErrorMode('root', this)" class="err-mode-btn min-h-[36px] rounded-xl text-xs font-medium text-muted-dynamic">Причина</button>
                     </div>
-
                     <textarea id="err-input" oninput="handleErrorInput(this)" rows="3" placeholder="Вставьте Traceback ошибки из консоли..." class="frosted-input w-full rounded-2xl p-3.5 text-xs font-mono placeholder-slate-500 resize-none mb-2"></textarea>
                     <button onclick="convertError()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold">Сформировать отладочный промт</button>
 
@@ -638,7 +818,6 @@
                 </article>
             </div>
 
-            <!-- Правая колонка -->
             <div class="lg:col-span-5 space-y-5">
                 <article id="tool-opt" class="frosted-card rounded-3xl p-5">
                     <span class="text-[11px] font-semibold uppercase tracking-wider text-violet-400">Prompt Optimizer</span>
@@ -674,21 +853,17 @@
             </div>
         </section>
 
-        <!-- ==================== РАЗДЕЛ 2: БАЗА ЗНАНИЙ + GOLDEN PROMPTS (VIP НАГРАДА 3) ==================== -->
-        <section id="view-hub" class="hidden space-y-5">
+        <!-- ==================== ВКЛАДКА 2: БАЗА ЗНАНИЙ + GOLDEN PROMPTS ==================== -->
+        <section id="view-hub" class="hidden space-y-5 animate-view-enter">
             <div class="grid grid-cols-3 gap-2 max-w-lg mx-auto">
                 <button onclick="switchHubSub('sub-golden', this)" class="hub-sub-btn min-h-[44px] rounded-2xl text-xs font-semibold bg-amber-500 text-white transition-all">👑 Golden VIP</button>
                 <button onclick="switchHubSub('sub-prompts', this)" class="hub-sub-btn min-h-[44px] rounded-2xl text-xs font-medium btn-glass transition-all">⚡ Базовые</button>
                 <button onclick="switchHubSub('sub-ideas', this)" class="hub-sub-btn min-h-[44px] rounded-2xl text-xs font-medium btn-glass transition-all">📚 500 Идей</button>
             </div>
 
-            <!-- Секретный пак Golden Prompts (Открывается за 3 друзей) -->
             <div id="sub-golden" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
-
-            <!-- Базовые промты -->
             <div id="sub-prompts" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
 
-            <!-- 500 идей -->
             <div id="sub-ideas" class="hidden space-y-4">
                 <div class="frosted-card rounded-3xl p-4 flex flex-col sm:flex-row gap-2.5">
                     <input id="idea-search" oninput="renderIdeasList()" type="text" placeholder="Поиск из 500 идей (бот, 3D, SaaS)..." class="frosted-input flex-1 min-h-[44px] rounded-2xl px-4 text-xs">
@@ -698,8 +873,8 @@
             </div>
         </section>
 
-        <!-- ==================== РАЗДЕЛ 3: МОЙ СЕЙФ (НАГРАДА 2 — БЕЗЛИМИТ И ЭКСПОРТ JSON) ==================== -->
-        <section id="view-vault" class="hidden space-y-4">
+        <!-- ==================== ВКЛАДКА 3: МОЙ СЕЙФ ==================== -->
+        <section id="view-vault" class="hidden space-y-4 animate-view-enter">
             <div class="frosted-card rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <div class="flex items-center gap-2">
@@ -749,10 +924,10 @@
     <!-- Плавающая стеклянная "пилюля" навигации внизу экрана -->
     <nav class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,12px)+12px)] z-30 w-[calc(100%-24px)] max-w-md frosted-nav rounded-full p-1.5" role="tablist">
         <div class="relative grid grid-cols-4 items-center">
-            <div id="bottom-nav-pill" class="absolute top-0 bottom-0 left-0 w-1/4 rounded-full bg-indigo-500/20 border border-indigo-400/35 transition-transform duration-200 ease-ios pointer-events-none"></div>
+            <div id="bottom-nav-pill" class="absolute top-0 bottom-0 left-0 w-1/4 rounded-full bg-indigo-500/20 border border-indigo-400/35 transition-transform duration-300 ease-ios pointer-events-none"></div>
 
             <button onclick="switchTab(0, 'view-studio')" id="nav-btn-0" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1 text-[11px] font-semibold text-indigo-400">
-                <span>🎨</span><span>UI Студия</span>
+                <span>🧩</span><span>Конструктор</span>
             </button>
             <button onclick="switchTab(1, 'view-tools')" id="nav-btn-1" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1 text-[11px] font-medium text-muted-dynamic">
                 <span>🛠</span><span>Тулзы</span>
@@ -787,7 +962,7 @@
     </div>
 
     <script>
-        /* ==================== 1. ЗВУКОВОЙ ДВИЖОК НА WEB AUDIO API (0 БАЙТ ЗАГРУЗОК) ==================== */
+        /* ==================== 1. ЗВУКОВОЙ ДВИЖОК WEB AUDIO API ==================== */
         const SoundFX = {
             ctx: null,
             muted: localStorage.getItem('vibe_sound_muted') === 'true',
@@ -810,7 +985,6 @@
                 showToast(this.muted ? 'Звук выключен 🔇' : 'Звук включён 🔊');
             },
 
-            // Мягкий тактильный тап в стиле iOS
             tap(freq = 320) {
                 if (this.muted) return;
                 try {
@@ -830,7 +1004,6 @@
                 } catch (_) {}
             },
 
-            // Щелчок при движении ползунка
             tick() {
                 const nowMs = performance.now();
                 if (this.muted || nowMs - this.lastTick < 45) return;
@@ -838,7 +1011,6 @@
                 this.tap(520);
             },
 
-            // Приятный аккорд при генерации, разблокировке VIP и сохранении в Сейф
             success() {
                 if (this.muted) return;
                 try {
@@ -860,7 +1032,6 @@
                 } catch (_) {}
             },
 
-            // Мягкий сигнал закрытого замка или пустого поля
             error() {
                 if (this.muted) return;
                 try {
@@ -882,9 +1053,9 @@
             }
         };
 
-        /* ==================== 2. TELEGRAM API & HAPTIC ==================== */
         const tg = window.Telegram?.WebApp;
         let currentTabIndex = 0;
+        let currentBuilderMode = 'web'; // 'web' | 'bot'
         let activeSheetOpen = false;
 
         const Haptic = {
@@ -894,35 +1065,73 @@
             error() { SoundFX.error(); try { tg?.HapticFeedback?.notificationOccurred('error'); } catch (_) {} }
         };
 
-        /* ==================== 3. КРАТКАЯ НАВИГАЦИЯ ПО САЙТУ (ХЛЕБНЫЕ КРОШКИ И ЯКОРЯ) ==================== */
-        const TAB_NAVIGATION_STEPS = {
-            0: [
-                { label: '1. Превью', target: 'anchor-preview' },
-                { label: '2. Тип и Стиль', target: 'anchor-style' },
-                { label: '3. Палитра и Ползунки', target: 'anchor-sliders' },
-                { label: '4. Готовый промт', target: 'anchor-output' }
-            ],
-            1: [
-                { label: '1. Шаблоны', target: 'tool-templates' },
-                { label: '2. Архитектура', target: 'tool-arch' },
-                { label: '3. Дебаг ошибок', target: 'tool-debug' },
-                { label: '4. Оптимизатор', target: 'tool-opt' }
-            ],
-            2: [
-                { label: '👑 Golden VIP', action: () => switchHubSub('sub-golden', document.querySelectorAll('.hub-sub-btn')[0]) },
-                { label: '⚡ Базовые промты', action: () => switchHubSub('sub-prompts', document.querySelectorAll('.hub-sub-btn')[1]) },
-                { label: '📚 500 Идей', action: () => switchHubSub('sub-ideas', document.querySelectorAll('.hub-sub-btn')[2]) }
-            ],
-            3: [
-                { label: '📁 Все папки', action: () => setVaultTagFilter('ALL', document.querySelectorAll('.vault-tag-chip')[0]) },
-                { label: '＋ Добавить сниппет', action: () => toggleAccordion('acc-new-vault') },
-                { label: '📥 Экспорт .JSON', action: () => exportVaultJson() }
-            ]
-        };
+        /* ==================== 2. ПЕРЕКЛЮЧЕНИЕ МЕЖДУ КОНСТРУКТОРОМ САЙТОВ И КОНСТРУКТОРОМ ТГ-БОТОВ ==================== */
+        function switchBuilderMode(mode) {
+            Haptic.selection();
+            currentBuilderMode = mode;
+            const pill = document.getElementById('builder-mode-pill');
+            const webBtn = document.getElementById('mode-btn-web');
+            const botBtn = document.getElementById('mode-btn-bot');
+            const webBox = document.getElementById('sub-builder-web');
+            const botBox = document.getElementById('sub-builder-bot');
 
+            if (mode === 'web') {
+                pill.style.transform = 'translate3d(0%, 0, 0)';
+                webBtn.className = 'relative z-10 min-h-[44px] rounded-2xl text-xs font-bold text-indigo-300 flex items-center justify-center gap-2 transition-colors';
+                botBtn.className = 'relative z-10 min-h-[44px] rounded-2xl text-xs font-semibold text-muted-dynamic flex items-center justify-center gap-2 transition-colors';
+                webBox.classList.remove('hidden');
+                botBox.classList.add('hidden');
+            } else {
+                pill.style.transform = 'translate3d(100%, 0, 0)';
+                botBtn.className = 'relative z-10 min-h-[44px] rounded-2xl text-xs font-bold text-sky-300 flex items-center justify-center gap-2 transition-colors';
+                webBtn.className = 'relative z-10 min-h-[44px] rounded-2xl text-xs font-semibold text-muted-dynamic flex items-center justify-center gap-2 transition-colors';
+                botBox.classList.remove('hidden');
+                webBox.classList.add('hidden');
+                renderBotBuilderEditor();
+            }
+            renderQuickBreadcrumbs();
+        }
+
+        /* ==================== 3. КРАТКАЯ НАВИГАЦИЯ ПО САЙТУ ==================== */
         function renderQuickBreadcrumbs() {
-            const steps = TAB_NAVIGATION_STEPS[currentTabIndex] || [];
             const box = document.getElementById('quick-breadcrumbs');
+            let steps = [];
+            if (currentTabIndex === 0) {
+                steps = currentBuilderMode === 'web'
+                    ? [
+                        { label: '🎨 1. Превью сайта', target: 'anchor-preview' },
+                        { label: '2. Тип и Стиль', target: 'anchor-style' },
+                        { label: '3. Ползунки', target: 'anchor-sliders' },
+                        { label: '4. Промт', target: 'anchor-output' }
+                    ]
+                    : [
+                        { label: '🤖 1. Экран чата', target: 'anchor-bot-preview' },
+                        { label: '2. Текст /start', target: 'anchor-bot-msg' },
+                        { label: '3. Кнопки', target: 'anchor-bot-kb' },
+                        { label: '4. Код Aiogram', target: 'anchor-bot-mods' }
+                    ];
+            } else if (currentTabIndex === 1) {
+                steps = [
+                    { label: '1. Шаблоны', target: 'tool-templates' },
+                    { label: '2. Архитектура', target: 'tool-arch' },
+                    { label: '3. Дебаг ошибок', target: 'tool-debug' },
+                    { label: '4. Оптимизатор', target: 'tool-opt' }
+                ];
+            } else if (currentTabIndex === 2) {
+                steps = [
+                    { label: '👑 Golden VIP', action: () => switchHubSub('sub-golden', document.querySelectorAll('.hub-sub-btn')[0]) },
+                    { label: '⚡ Базовые промты', action: () => switchHubSub('sub-prompts', document.querySelectorAll('.hub-sub-btn')[1]) },
+                    { label: '📚 500 Идей', action: () => switchHubSub('sub-ideas', document.querySelectorAll('.hub-sub-btn')[2]) }
+                ];
+            } else {
+                steps = [
+                    { label: '📁 Все папки', action: () => setVaultTagFilter('ALL', document.querySelectorAll('.vault-tag-chip')[0]) },
+                    { label: '＋ Добавить сниппет', action: () => toggleAccordion('acc-new-vault') },
+                    { label: '📥 Экспорт .JSON', action: () => exportVaultJson() }
+                ];
+            }
+
+            window._activeBreadcrumbSteps = steps;
             box.innerHTML = steps.map((st, idx) => `
                 <button type="button" onclick="handleNavStepClick(${idx})" class="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-indigo-500/20 border border-white/10 text-dynamic font-medium shrink-0 transition">
                     ${st.label}
@@ -932,59 +1141,77 @@
 
         function handleNavStepClick(idx) {
             Haptic.selection();
-            const step = (TAB_NAVIGATION_STEPS[currentTabIndex] || [])[idx];
+            const step = (window._activeBreadcrumbSteps || [])[idx];
             if (!step) return;
-            if (step.action) {
-                step.action();
-            } else if (step.target) {
-                document.getElementById(step.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            if (step.action) step.action();
+            else if (step.target) document.getElementById(step.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function toggleSiteMapBanner(forceState) {
             Haptic.light();
             const drawer = document.getElementById('sitemap-drawer');
-            if (typeof forceState === 'boolean') {
-                drawer.classList.toggle('open', forceState);
-            } else {
-                drawer.classList.toggle('open');
-            }
+            if (typeof forceState === 'boolean') drawer.classList.toggle('open', forceState);
+            else drawer.classList.toggle('open');
         }
 
-        /* ==================== 4. VIP-СИСТЕМА НА 3 НАГРАДЫ ЗА РЕФЕРАЛОВ ==================== */
+        /* ==================== 4. РЕАЛЬНАЯ РЕФЕРАЛЬНАЯ СИСТЕМА (СИНХРОНИЗАЦИЯ С БОТОМ И CLOUDSTORAGE) ==================== */
         function getRefsCount() {
             const urlParams = new URLSearchParams(window.location.search);
-            const fromUrl = parseInt(urlParams.get('refs') || '', 10);
-            if (!isNaN(fromUrl) && fromUrl >= 0) {
-                localStorage.setItem('vibe_refs_count', String(fromUrl));
-                return fromUrl;
+            const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+            const rawUrlRefs = urlParams.get('refs') ?? hashParams.get('refs');
+
+            if (rawUrlRefs !== null) {
+                const parsed = parseInt(rawUrlRefs, 10);
+                if (!isNaN(parsed) && parsed >= 0) {
+                    localStorage.setItem('vibe_refs_count', String(parsed));
+                    try { tg?.CloudStorage?.setItem('vibe_refs_count', String(parsed)); } catch (_) {}
+                    return parsed;
+                }
             }
+
             const startParam = tg?.initDataUnsafe?.start_param || '';
             if (startParam.startsWith('refs_')) {
                 const parsed = parseInt(startParam.replace('refs_', ''), 10);
-                if (!isNaN(parsed)) {
+                if (!isNaN(parsed) && parsed >= 0) {
                     localStorage.setItem('vibe_refs_count', String(parsed));
                     return parsed;
                 }
             }
+
             return parseInt(localStorage.getItem('vibe_refs_count') || '0', 10);
+        }
+
+        function syncRefsFromCloudStorage() {
+            try {
+                tg?.CloudStorage?.getItem('vibe_refs_count', (err, val) => {
+                    if (!err && val) {
+                        const cloudRefs = parseInt(val, 10);
+                        const localRefs = getRefsCount();
+                        if (!isNaN(cloudRefs) && cloudRefs > localRefs) {
+                            localStorage.setItem('vibe_refs_count', String(cloudRefs));
+                            updateVipUI();
+                            initVisualStudio();
+                            renderBotHub();
+                        }
+                    }
+                });
+            } catch (_) {}
         }
 
         function updateVipUI() {
             const refs = getRefsCount();
             const capped = Math.min(3, refs);
             document.getElementById('header-refs-count').textContent = `${capped}/3`;
-            document.getElementById('vip-level-pill').textContent = `Друзей: ${refs} (Уровень ${capped}/3)`;
+            document.getElementById('vip-level-pill').textContent = `Приглашено: ${refs} (${capped}/3)`;
 
             const hints = [
                 'Пригласи 1 друга → открой 4 VIP-стиля в UI Студии (visionOS, Bento, Clay 3D, Luxury)',
                 'Пригласи ещё 1 друга (всего 2) → сними лимит в 5 записей в Сейфе и открой экспорт .JSON',
                 'Пригласи ещё 1 друга (всего 3) → разблокируй секретный пак «👑 Golden Prompts»',
-                '🔥 Все 3 VIP-награды разблокированы! Тебе доступен полный функционал студии.'
+                '🔥 Все 3 VIP-награды активны! Тебе доступен полный функционал VIBE STUDIO.'
             ];
             document.getElementById('vip-next-hint').textContent = hints[capped];
 
-            // Статусы 3 карточек наград
             const tiers = [
                 { id: 'reward-tier-1', statusId: 'tier-1-status', need: 1, label: '1 друг' },
                 { id: 'reward-tier-2', statusId: 'tier-2-status', need: 2, label: '2 друга' },
@@ -995,13 +1222,12 @@
                 const card = document.getElementById(t.id);
                 const st = document.getElementById(t.statusId);
                 card.className = unlocked
-                    ? 'p-2 rounded-xl bg-amber-500/15 border border-amber-400/40 text-center'
-                    : 'p-2 rounded-xl bg-white/[0.03] border border-white/10 text-center';
+                    ? 'p-2 rounded-xl bg-amber-500/15 border border-amber-400/40 text-center transition-all'
+                    : 'p-2 rounded-xl bg-white/[0.03] border border-white/10 text-center transition-all';
                 st.className = unlocked ? 'text-[10px] font-bold text-amber-400' : 'text-[10px] font-bold text-muted-dynamic';
                 st.textContent = unlocked ? `🔓 Открыто (${t.label})` : `🔒 ${t.label}`;
             });
 
-            // Обновляем бейдж Сейфа (Награда 2)
             const vaultCount = getVaultList().length;
             const vaultPill = document.getElementById('vault-limit-pill');
             const exportLock = document.getElementById('export-lock-icon');
@@ -1016,65 +1242,347 @@
             }
         }
 
-        function simulateAddFriend() {
-            const current = getRefsCount();
-            const next = current >= 3 ? 0 : current + 1;
-            localStorage.setItem('vibe_refs_count', String(next));
-            updateVipUI();
-            initVisualStudio();
-            renderBotHub();
-            if (next > 0) {
-                Haptic.success();
-                fireMiniConfetti();
-                showToast(`🎉 Открыта награда ${next} из 3!`);
-            } else {
-                Haptic.light();
-                showToast('VIP-прогресс сброшен до 0 для теста');
-            }
+        function getPersonalRefLink() {
+            const userId = tg?.initDataUnsafe?.user?.id || '';
+            return userId ? `https://t.me/DarxyNN_bot?start=${userId}` : 'https://t.me/DarxyNN_bot';
         }
 
         function shareInviteLink() {
             Haptic.light();
-            const userId = tg?.initDataUnsafe?.user?.id || 'vibe';
-            const botLink = `https://t.me/DarxyNN_bot?start=${userId}`;
-            const text = '🔥 Зацени VIBE STUDIO — визуальный конструктор сайтов и ИИ-промтов прямо в Telegram!';
+            const botLink = getPersonalRefLink();
+            const text = '🔥 Зацени VIBE STUDIO — визуальный конструктор сайтов, ботов на Aiogram 3 и ИИ-промтов прямо в Telegram!';
             const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent(text)}`;
-            if (tg?.openTelegramLink) {
-                tg.openTelegramLink(shareUrl);
-            } else {
-                window.open(shareUrl, '_blank');
-            }
+            if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
+            else window.open(shareUrl, '_blank');
+        }
+
+        function copyInviteLink() {
+            const link = getPersonalRefLink();
+            navigator.clipboard.writeText(link).then(() => {
+                Haptic.success();
+                showToast('Реферальная ссылка скопирована!');
+            });
         }
 
         function openVipModal() {
             const refs = getRefsCount();
+            const link = getPersonalRefLink();
             const html = `
                 <div class="space-y-3">
                     <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-400/30">
-                        <div class="text-xs font-bold text-amber-400">Твой прогресс: ${refs} из 3 друзей</div>
-                        <p class="text-[11px] text-muted-dynamic mt-1">Отправь реферальную ссылку другу. Как только он запустит бота, награды откроются автоматически.</p>
+                        <div class="text-xs font-bold text-amber-400">Твои приглашённые друзья: ${refs} из 3</div>
+                        <p class="text-[11px] text-muted-dynamic mt-1">Отправь свою личную ссылку другу. Когда он запустит бота и откроет Mini App, награда разблокируется автоматически.</p>
+                        <div class="mt-2 p-2 rounded-xl code-surface font-mono text-[10px] text-amber-200 truncate">${link}</div>
                     </div>
                     <div class="space-y-2 text-xs">
                         <div class="p-3 rounded-2xl code-surface flex items-center justify-between">
                             <span><b>1 друг:</b> 4 VIP-стиля (visionOS, Bento, Clay 3D, Luxury)</span>
-                            <span>${refs >= 1 ? '✅' : '🔒'}</span>
+                            <span>${refs >= 1 ? '✅ Открыто' : '🔒 Закрыто'}</span>
                         </div>
                         <div class="p-3 rounded-2xl code-surface flex items-center justify-between">
                             <span><b>2 друга:</b> Безлимитный Сейф + экспорт .JSON</span>
-                            <span>${refs >= 2 ? '✅' : '🔒'}</span>
+                            <span>${refs >= 2 ? '✅ Открыто' : '🔒 Закрыто'}</span>
                         </div>
                         <div class="p-3 rounded-2xl code-surface flex items-center justify-between">
-                            <span><b>3 друга:</b> Закрытый пак «👑 Golden Prompts»</span>
-                            <span>${refs >= 3 ? '✅' : '🔒'}</span>
+                            <span><b>3 друга:</b> Секретный архив «👑 Golden Prompts»</span>
+                            <span>${refs >= 3 ? '✅ Открыто' : '🔒 Закрыто'}</span>
                         </div>
                     </div>
-                    <button onclick="shareInviteLink()" class="btn-gold w-full min-h-[46px] rounded-2xl text-xs font-bold">🚀 Поделиться ссылкой с другом</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="shareInviteLink()" class="btn-gold min-h-[44px] rounded-2xl text-xs font-bold">🚀 Отправить другу</button>
+                        <button onclick="copyInviteLink()" class="btn-glass min-h-[44px] rounded-2xl text-xs font-semibold text-amber-300">📋 Скопировать</button>
+                    </div>
                 </div>
             `;
             openBottomSheet('👑 VIP-награды за друзей', html);
         }
 
-        /* ==================== 5. ВИЗУАЛЬНЫЙ КОНСТРУКТОР (КАРДИНАЛЬНО РАЗНЫЕ МАКЕТЫ И СТИЛИ) ==================== */
+        /* ==================== 5. ВИЗУАЛЬНЫЙ КОНСТРУКТОР ТГ-БОТОВ НА AIOGRAM 3.X ==================== */
+        const botBuilderState = {
+            rows: [
+                [
+                    { text: '🚀 Запустить приложение', type: 'webapp', value: 'https://vibe-app-sandy-tau.vercel.app' }
+                ],
+                [
+                    { text: '🛍 Каталог товаров', type: 'callback', value: 'menu:catalog' },
+                    { text: '👤 Профиль', type: 'callback', value: 'menu:profile' }
+                ],
+                [
+                    { text: '💬 Наш Telegram-канал', type: 'url', value: 'https://t.me/telegram' }
+                ]
+            ],
+            modules: {
+                sqlite: true,
+                sub_gate: true,
+                referrals: true,
+                fsm: false,
+                admin: true,
+                payments: false
+            }
+        };
+
+        const AIOGRAM_MODULES_LIST = [
+            { id: 'sqlite', name: '🗄 База aiosqlite (WAL)' },
+            { id: 'sub_gate', name: '🔒 ОП (Проверка подписки)' },
+            { id: 'referrals', name: '👥 Реферальная система' },
+            { id: 'fsm', name: '📝 FSM Анкета / Диалог' },
+            { id: 'admin', name: '👑 Админка + Рассылка' },
+            { id: 'payments', name: '⭐ Оплата Telegram Stars' }
+        ];
+
+        function renderBotBuilderEditor() {
+            const editor = document.getElementById('bot-rows-editor');
+            editor.innerHTML = botBuilderState.rows.map((row, rIdx) => `
+                <div class="p-3.5 rounded-2xl code-surface border border-white/10 space-y-2.5 animate-pop">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-sky-400">Ряд кнопок #${rIdx + 1} (${row.length}/3)</span>
+                        <div class="flex items-center gap-1.5">
+                            ${row.length < 3 ? `<button type="button" onclick="addBotBtnToRow(${rIdx})" class="btn-glass px-2.5 py-1 rounded-lg text-[10px] font-semibold text-emerald-400">＋ Кнопка в ряд</button>` : ''}
+                            ${botBuilderState.rows.length > 1 ? `<button type="button" onclick="removeBotRow(${rIdx})" class="btn-glass px-2 py-1 rounded-lg text-[10px] text-rose-400">Удалить ряд</button>` : ''}
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        ${row.map((btn, bIdx) => `
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-black/25 p-2 rounded-xl border border-white/5">
+                                <input type="text" value="${escapeHtml(btn.text)}" oninput="updateBotBtnField(${rIdx}, ${bIdx}, 'text', this.value)" placeholder="Текст кнопки" class="frosted-input sm:col-span-5 min-h-[36px] rounded-xl px-2.5 text-xs">
+                                <select onchange="updateBotBtnField(${rIdx}, ${bIdx}, 'type', this.value); renderBotBuilderEditor();" class="frosted-input sm:col-span-3 min-h-[36px] rounded-xl px-2 text-[11px]">
+                                    <option value="callback" ${btn.type === 'callback' ? 'selected' : ''} class="bg-slate-900 text-white">Callback</option>
+                                    <option value="url" ${btn.type === 'url' ? 'selected' : ''} class="bg-slate-900 text-white">URL Ссылка</option>
+                                    <option value="webapp" ${btn.type === 'webapp' ? 'selected' : ''} class="bg-slate-900 text-white">WebApp</option>
+                                </select>
+                                <div class="sm:col-span-4 flex items-center gap-1">
+                                    <input type="text" value="${escapeHtml(btn.value)}" oninput="updateBotBtnField(${rIdx}, ${bIdx}, 'value', this.value)" placeholder="${btn.type === 'callback' ? 'callback_data' : 'https://...'}" class="frosted-input flex-1 min-h-[36px] rounded-xl px-2.5 text-[11px] font-mono">
+                                    ${row.length > 1 ? `<button type="button" onclick="removeBotBtn(${rIdx}, ${bIdx})" class="text-xs text-rose-400 px-1.5">✕</button>` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            const modsGrid = document.getElementById('bot-modules-grid');
+            modsGrid.innerHTML = AIOGRAM_MODULES_LIST.map(m => {
+                const active = !!botBuilderState.modules[m.id];
+                return `
+                    <button type="button" onclick="toggleBotModule('${m.id}')" class="min-h-[42px] px-3 py-2 rounded-2xl border text-left text-xs transition-all ${active ? 'border-sky-400 bg-sky-500/20 text-sky-200 font-semibold' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">
+                        ${active ? '✓ ' : ''}${m.name}
+                    </button>
+                `;
+            }).join('');
+
+            updateBotBuilderPreview();
+        }
+
+        function updateBotBtnField(rIdx, bIdx, field, val) {
+            botBuilderState.rows[rIdx][bIdx][field] = val;
+            updateBotBuilderPreview();
+        }
+
+        function addBotKeyboardRow() {
+            if (botBuilderState.rows.length >= 6) {
+                Haptic.error();
+                showToast('Максимум 6 рядов для компактного меню');
+                return;
+            }
+            Haptic.light();
+            botBuilderState.rows.push([
+                { text: `✨ Новая кнопка ${botBuilderState.rows.length + 1}`, type: 'callback', value: `action_${botBuilderState.rows.length + 1}` }
+            ]);
+            renderBotBuilderEditor();
+        }
+
+        function addBotBtnToRow(rIdx) {
+            if (botBuilderState.rows[rIdx].length >= 3) return;
+            Haptic.selection();
+            botBuilderState.rows[rIdx].push({
+                text: 'Кнопка',
+                type: 'callback',
+                value: `btn_${rIdx}_${botBuilderState.rows[rIdx].length}`
+            });
+            renderBotBuilderEditor();
+        }
+
+        function removeBotRow(rIdx) {
+            Haptic.light();
+            botBuilderState.rows.splice(rIdx, 1);
+            renderBotBuilderEditor();
+        }
+
+        function removeBotBtn(rIdx, bIdx) {
+            Haptic.light();
+            botBuilderState.rows[rIdx].splice(bIdx, 1);
+            renderBotBuilderEditor();
+        }
+
+        function toggleBotModule(modId) {
+            Haptic.selection();
+            botBuilderState.modules[modId] = !botBuilderState.modules[modId];
+            renderBotBuilderEditor();
+        }
+
+        function loadPresetBot(preset) {
+            Haptic.success();
+            if (preset === 'shop') {
+                document.getElementById('bot-name-input').value = 'Vibe Digital Store Bot';
+                document.getElementById('bot-msg-input').value = '💎 <b>Добро пожаловать в цифровой магазин!</b>\n\nВыбирайте подписки, пополняйте баланс в 1 клик и получайте автовыдачу 24/7:';
+                botBuilderState.rows = [
+                    [{ text: '🛒 Открыть витрину (Mini App)', type: 'webapp', value: 'https://vibe-app-sandy-tau.vercel.app' }],
+                    [
+                        { text: '📦 Мои покупки', type: 'callback', value: 'shop:orders' },
+                        { text: '💳 Пополнить баланс', type: 'callback', value: 'shop:topup' }
+                    ],
+                    [
+                        { text: '🎁 Рефералка', type: 'callback', value: 'shop:ref' },
+                        { text: '👨‍💻 Поддержка', type: 'url', value: 'https://t.me/telegram' }
+                    ]
+                ];
+                renderBotBuilderEditor();
+                showToast('Загружен пресет цифрового магазина!');
+            }
+        }
+
+        function updateBotBuilderPreview() {
+            const name = document.getElementById('bot-name-input')?.value || 'Vibe Bot';
+            const msg = document.getElementById('bot-msg-input')?.value || '/start';
+            document.getElementById('tg-preview-botname').textContent = name;
+            document.getElementById('tg-preview-msg').textContent = msg.replace(/<[^>]*>/g, '');
+
+            const kbBox = document.getElementById('tg-preview-kb');
+            let totalBtns = 0;
+            kbBox.innerHTML = botBuilderState.rows.map(row => {
+                totalBtns += row.length;
+                return `
+                    <div class="grid gap-1.5" style="grid-template-columns: repeat(${row.length}, minmax(0, 1fr));">
+                        ${row.map(b => {
+                            const badge = b.type === 'url' ? '↗' : (b.type === 'webapp' ? '📱' : '');
+                            return `
+                                <div onclick="Haptic.selection(); showToast('Кнопка: ${escapeHtml(b.value)}')" class="px-2.5 py-2 rounded-xl bg-white/[0.11] hover:bg-white/[0.18] active:scale-95 transition text-center text-[11px] font-semibold text-white truncate cursor-pointer relative">
+                                    <span>${escapeHtml(b.text)}</span>
+                                    ${badge ? `<span class="text-[9px] opacity-75 ml-1">${badge}</span>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('bot-summary-stats').textContent = `Рядов: ${botBuilderState.rows.length} • Кнопок: ${totalBtns}`;
+        }
+
+        function generateAiogramOutput(mode = 'code') {
+            Haptic.success();
+            const botName = document.getElementById('bot-name-input').value.trim() || 'VibeBot';
+            const startText = document.getElementById('bot-msg-input').value.trim();
+
+            if (mode === 'code') {
+                document.getElementById('bot-out-title').textContent = 'Готовый код bot.py (Aiogram 3.x)';
+
+                const rowsCode = botBuilderState.rows.map(row => {
+                    const btns = row.map(b => {
+                        if (b.type === 'url') return `InlineKeyboardButton(text="${b.text.replace(/"/g, '\\"')}", url="${b.value}")`;
+                        if (b.type === 'webapp') return `InlineKeyboardButton(text="${b.text.replace(/"/g, '\\"')}", web_app=WebAppInfo(url="${b.value}"))`;
+                        return `InlineKeyboardButton(text="${b.text.replace(/"/g, '\\"')}", callback_data="${b.value}")`;
+                    }).join(',\n        ');
+                    return `    kb.row(\n        ${btns}\n    )`;
+                }).join('\n');
+
+                const callbacks = [];
+                botBuilderState.rows.forEach(r => r.forEach(b => {
+                    if (b.type === 'callback') callbacks.push(b);
+                }));
+
+                const handlersCode = callbacks.map((b, i) => `
+@router.callback_query(F.data == "${b.value}")
+async def handle_cb_${i + 1}(call: CallbackQuery):
+    await call.answer("Раздел: ${b.text.replace(/"/g, '\\"')}")
+    await call.message.edit_text(
+        text="Вы открыли раздел: <b>${b.text.replace(/"/g, '\\"')}</b>",
+        reply_markup=main_menu_kb(),
+        parse_mode="HTML"
+    )`).join('\n');
+
+                const pyCode = `# ${botName} — Сгенерировано в VIBE STUDIO (Aiogram 3.x)
+import asyncio
+import logging
+from os import getenv
+from aiogram import Bot, Dispatcher, F, Router
+from aiogram.filters import CommandStart
+from aiogram.types import (
+    Message, CallbackQuery,
+    InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+)
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+BOT_TOKEN = getenv("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+router = Router()
+
+
+def main_menu_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+${rowsCode}
+    return kb.as_markup()
+
+
+@router.message(CommandStart())
+async def cmd_start(message: Message):
+    user_name = message.from_user.first_name or "друг"
+    text = """${startText.replace(/"""/g, "'''")}""".replace("{user_name}", user_name)
+    await message.answer(text, reply_markup=main_menu_kb(), parse_mode="HTML")
+${handlersCode}
+
+
+async def main():
+    logging.basicConfig(level=logging.INFO)
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher()
+    dp.include_router(router)
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())`;
+
+                runWithSkeleton('bot-out-wrap', 'bot-skeleton', 'bot-result-card', 'bot-code', pyCode, `Aiogram 3 код: ${botName}`);
+            } else {
+                document.getElementById('bot-out-title').textContent = 'Системный промт для создания ТГ-бота';
+                const enabledMods = AIOGRAM_MODULES_LIST.filter(m => botBuilderState.modules[m.id]).map(m => `- ${m.name}`).join('\n');
+                const kbSummary = botBuilderState.rows.map((r, idx) => `Ряд ${idx + 1}: ` + r.map(b => `[${b.text}] (${b.type}: ${b.value})`).join(' | ')).join('\n');
+
+                const promptText = `Роль: Senior Python & Aiogram 3.x Architect.
+Задача: Разработай полноценного модульного Telegram-бота «${botName}» на Python 3.11+ и aiogram 3.x.
+
+1. СТАРТОВОЕ СООБЩЕНИЕ (/start):
+«${startText}»
+
+2. СХЕМА ИНЛАЙН-КЛАВИАТУРЫ (InlineKeyboardBuilder):
+${kbSummary}
+
+3. ОБЯЗАТЕЛЬНЫЕ БЭКЕНД-МОДУЛИ:
+${enabledMods || '- Чистая архитектура на Router'}
+
+4. ТРЕБОВАНИЯ К КОДУ:
+- Раздели проект на модули: bot.py, config.py, db.py (aiosqlite в режиме WAL), keyboards.py, handlers/user.py, handlers/admin.py.
+- Выдай полный рабочий код каждого файла от первой до последней строчки без пропусков и заглушек.`;
+
+                runWithSkeleton('bot-out-wrap', 'bot-skeleton', 'bot-result-card', 'bot-code', promptText, `Промт ТГ-бота: ${botName}`);
+            }
+        }
+
+        function downloadBotPyFile() {
+            const el = document.getElementById('bot-code');
+            const text = el.dataset.raw || el.textContent || '';
+            if (!text) return;
+            const blob = new Blob([text], { type: 'text/x-python' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bot.py';
+            a.click();
+            Haptic.success();
+            showToast('Файл bot.py скачан!');
+        }
+
+        /* ==================== 6. КОНСТРУКТОР САЙТОВ (UI СТУДИЯ) ==================== */
         const UI_PROJECT_TYPES = [
             { id: 'tma', title: '📱 TG Mini App', desc: 'Мобильное приложение внутри Telegram с балансом, карточками и нижним доком' },
             { id: 'saas_landing', title: '🚀 SaaS Лендинг', desc: 'Продающий сайт стартапа с Hero-блоком, Bento-сеткой и тарифами' },
@@ -1084,7 +1592,6 @@
             { id: 'web3', title: '🌐 Web3 Свап', desc: 'Крипто-терминал с пулами ликвидности, курсом токенов и обменом' }
         ];
 
-        // 4 базовых + 4 VIP стиля (с кардинально разной геометрией и CSS-физикой)
         const UI_STYLES = [
             { id: 'linear', name: 'Linear Dark', badge: 'FREE', vip: false, radius: 10, blur: 8, opacity: 5, spacing: 2, glow: 35, desc: 'Строгий инженерный минимализм, тонкие рамки 1px и деликатный верхний градиент' },
             { id: 'brutal', name: 'Neo-Brutalism', badge: 'FREE', vip: false, radius: 4, blur: 0, opacity: 22, spacing: 3, glow: 0, desc: 'Жирные контрастные рамки 2.5px, жёсткие смещённые тени 4pxх4px без размытия' },
@@ -1205,7 +1712,8 @@
 
             if (st.vip && getRefsCount() < 1) {
                 Haptic.error();
-                showToast('🔒 Стиль VIP! Пригласи 1 друга (или нажми «Тест +1 друг» сверху)');
+                openVipModal();
+                showToast('🔒 Этот VIP-стиль открывается за 1 приглашённого друга!');
                 return;
             }
 
@@ -1304,7 +1812,6 @@
             showToast(`🎲 ${rType.title} • ${rStyle.name}`);
         }
 
-        // Генерация CSS-стилей карточки в зависимости от выбранной дизайн-системы (кардинальные отличия!)
         function computePreviewSurfaceCSS() {
             const isDark = builderState.previewDark;
             const alpha = (builderState.opacity / 100).toFixed(2);
@@ -1340,10 +1847,9 @@
                 ? `background:${p}; color:#fff; border:2px solid ${isDark ? '#fff' : '#000'}; box-shadow:3px 3px 0px ${isDark ? '#fff' : '#000'}; border-radius:${Math.max(0, r - 2)}px;`
                 : `background:linear-gradient(135deg, ${p}, ${s}); color:#fff; border-radius:${Math.max(0, r - 4)}px; box-shadow:0 4px 12px ${p}55;`;
 
-            return { cardCss, btnCss, p, s };
+            return { cardCss, btnCss, p };
         }
 
-        // Живой рендер 6 разных типов интерфейсов!
         function updateLivePreview() {
             const canvas = document.getElementById('live-preview-canvas');
             const orb = document.getElementById('prev-glow-orb');
@@ -1365,9 +1871,7 @@
             const isBento = builderState.styleId === 'bento';
 
             let html = '';
-
             if (builderState.typeId === 'tma') {
-                // 1. Макет Telegram Mini App
                 html = `
                     <div style="display:flex; flex-direction:column; gap:${gap}px;">
                         <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
@@ -1392,48 +1896,35 @@
                                 <div style="font-size:9px; color:${p}; margin-top:2px;">Лидерборд</div>
                             </div>
                         </div>
-                        <div style="${cardCss} padding:6px 12px; display:flex; justify-content:space-around; font-size:9px; font-weight:600;">
-                            <span style="color:${p};">🏠 Главная</span><span>⚡ Бусты</span><span>👥 Друзья</span>
-                        </div>
                     </div>
                 `;
             } else if (builderState.typeId === 'ai_dashboard') {
-                // 2. Макет AI Веб-дашборда с графиком
                 html = `
                     <div style="display:grid; grid-template-columns:72px 1fr; gap:${gap}px;">
                         <div style="${cardCss} padding:10px 6px; display:flex; flex-direction:column; gap:8px; font-size:9px; font-weight:600;">
                             <div style="color:${p}; font-weight:800;">⚡ AI.OS</div>
-                            <div style="opacity:0.9;">📊 Аналитика</div>
+                            <div style="opacity:0.9;">📊 График</div>
                             <div style="opacity:0.6;">🤖 Агенты</div>
                             <div style="opacity:0.6;">⚙️ Ключи</div>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:${gap}px;">
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:${gap}px;">
-                                <div style="${cardCss} padding:8px 10px;">
-                                    <div style="font-size:8px; opacity:0.7;">ЗАПРОСЫ API</div>
-                                    <div style="font-size:14px; font-weight:800; color:${p};">84.2K</div>
-                                </div>
-                                <div style="${cardCss} padding:8px 10px;">
-                                    <div style="font-size:8px; opacity:0.7;">ОТКЛИК</div>
-                                    <div style="font-size:14px; font-weight:800;">120ms</div>
-                                </div>
+                                <div style="${cardCss} padding:8px 10px;"><div style="font-size:8px; opacity:0.7;">ЗАПРОСЫ</div><div style="font-size:14px; font-weight:800; color:${p};">84.2K</div></div>
+                                <div style="${cardCss} padding:8px 10px;"><div style="font-size:8px; opacity:0.7;">ОТКЛИК</div><div style="font-size:14px; font-weight:800;">120ms</div></div>
                             </div>
                             <div style="${cardCss} padding:10px;">
                                 <div style="font-size:9px; font-weight:700; margin-bottom:6px;">Нагрузка нейросети</div>
                                 <div style="display:flex; align-items:flex-end; gap:5px; height:42px;">
                                     <div style="flex:1; height:45%; background:${p}55; border-radius:4px;"></div>
                                     <div style="flex:1; height:70%; background:${p}88; border-radius:4px;"></div>
-                                    <div style="flex:1; height:55%; background:${p}66; border-radius:4px;"></div>
                                     <div style="flex:1; height:100%; background:${p}; border-radius:4px;"></div>
                                     <div style="flex:1; height:82%; background:${p}aa; border-radius:4px;"></div>
                                 </div>
                             </div>
-                            <button style="${btnCss} padding:7px; font-size:10px; font-weight:700;">＋ Создать AI-агента</button>
                         </div>
                     </div>
                 `;
             } else if (builderState.typeId === 'ecommerce') {
-                // 3. Макет Дроп-Шопа / Магазина
                 html = `
                     <div style="display:flex; flex-direction:column; gap:${gap}px;">
                         <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
@@ -1442,27 +1933,19 @@
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:${gap}px;">
                             <div style="${cardCss} padding:10px;">
-                                <div style="height:46px; background:${p}25; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:6px;">👟</div>
+                                <div style="height:44px; background:${p}25; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:6px;">👟</div>
                                 <div style="font-size:10px; font-weight:700;">Cyber Runner</div>
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                                    <span style="font-size:10px; font-weight:800; color:${p};">$189</span>
-                                    <button style="${btnCss} padding:2px 7px; font-size:9px;">＋</button>
-                                </div>
+                                <span style="font-size:10px; font-weight:800; color:${p};">$189</span>
                             </div>
                             <div style="${cardCss} padding:10px;">
-                                <div style="height:46px; background:${p}25; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:6px;">🎧</div>
+                                <div style="height:44px; background:${p}25; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:6px;">🎧</div>
                                 <div style="font-size:10px; font-weight:700;">Vision Pods</div>
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                                    <span style="font-size:10px; font-weight:800; color:${p};">$249</span>
-                                    <button style="${btnCss} padding:2px 7px; font-size:9px;">＋</button>
-                                </div>
+                                <span style="font-size:10px; font-weight:800; color:${p};">$249</span>
                             </div>
                         </div>
-                        <button style="${btnCss} padding:8px; font-size:10px; font-weight:700;">Оформить заказ со скидкой 20%</button>
                     </div>
                 `;
             } else if (builderState.typeId === 'portfolio') {
-                // 4. Макет Портфолио
                 html = `
                     <div style="display:flex; flex-direction:column; gap:${gap}px;">
                         <div style="${cardCss} padding:12px; display:flex; align-items:center; gap:10px;">
@@ -1472,76 +1955,33 @@
                                 <div style="font-size:9px; color:${p}; font-weight:600;">● Доступен для заказов</div>
                             </div>
                         </div>
-                        <div style="display:grid; grid-template-columns:${isBento ? '1.3fr 1fr' : '1fr 1fr'}; gap:${gap}px;">
-                            <div style="${cardCss} padding:10px;">
-                                <div style="font-size:9px; opacity:0.7;">КЕЙС #1</div>
-                                <div style="font-size:10px; font-weight:700; margin-top:2px;">TG Mini App Биржа</div>
-                            </div>
-                            <div style="${cardCss} padding:10px;">
-                                <div style="font-size:9px; opacity:0.7;">ОПЫТ</div>
-                                <div style="font-size:12px; font-weight:800; color:${p};">45+ ботов</div>
-                            </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:${gap}px;">
+                            <div style="${cardCss} padding:10px;"><div style="font-size:9px; opacity:0.7;">КЕЙС #1</div><div style="font-size:10px; font-weight:700;">TG Mini App</div></div>
+                            <div style="${cardCss} padding:10px;"><div style="font-size:9px; opacity:0.7;">ОПЫТ</div><div style="font-size:12px; font-weight:800; color:${p};">45+ ботов</div></div>
                         </div>
-                        <button style="${btnCss} padding:8px; font-size:10px; font-weight:700;">💬 Написать в Telegram</button>
                     </div>
                 `;
             } else if (builderState.typeId === 'web3') {
-                // 5. Макет Web3 Терминала
                 html = `
                     <div style="display:flex; flex-direction:column; gap:${gap}px;">
-                        <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:10px; font-weight:800;">🌐 DEX.SWAP</span>
-                            <span style="font-size:9px; color:${p}; font-family:monospace;">0x71C...9A2</span>
-                        </div>
-                        <div style="${cardCss} padding:10px;">
-                            <div style="display:flex; justify-content:space-between; font-size:9px; opacity:0.75;"><span>Отдаёте</span><span>Баланс: 14.5 TON</span></div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                                <span style="font-size:15px; font-weight:800;">10.0</span>
-                                <span style="font-size:10px; font-weight:700; color:${p};">💎 TON</span>
-                            </div>
-                        </div>
-                        <div style="${cardCss} padding:10px;">
-                            <div style="display:flex; justify-content:space-between; font-size:9px; opacity:0.75;"><span>Получаете</span><span>Курс: 1 TON = $5.42</span></div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                                <span style="font-size:15px; font-weight:800;">54.20</span>
-                                <span style="font-size:10px; font-weight:700;">💵 USDT</span>
-                            </div>
-                        </div>
-                        <button style="${btnCss} padding:8px; font-size:10px; font-weight:700;">🔄 Мгновенный Swap (0.1% fee)</button>
+                        <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between;"><span style="font-size:10px; font-weight:800;">🌐 DEX.SWAP</span><span style="font-size:9px; color:${p};">0x71C...9A2</span></div>
+                        <div style="${cardCss} padding:10px;"><div style="font-size:9px; opacity:0.75;">Отдаёте: 10.0 💎 TON</div><div style="font-size:14px; font-weight:800; margin-top:2px;">Получаете: 54.20 USDT</div></div>
+                        <button style="${btnCss} padding:8px; font-size:10px; font-weight:700;">🔄 Мгновенный Swap</button>
                     </div>
                 `;
             } else {
-                // 6. Макет SaaS Лендинга (по умолчанию)
                 html = `
                     <div style="display:flex; flex-direction:column; gap:${gap}px;">
-                        <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:11px; font-weight:800;">VIBE.SAAS</span>
-                            <span style="${btnCss} padding:3px 8px; font-size:9px; font-weight:700;">Начать</span>
-                        </div>
+                        <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between;"><span style="font-size:11px; font-weight:800;">VIBE.SAAS</span><span style="${btnCss} padding:2px 8px; font-size:9px;">Старт</span></div>
                         <div style="${cardCss} padding:12px;">
                             <span style="font-size:9px; font-weight:700; color:${p};">✨ AI ENGINE 2.0</span>
-                            <div style="font-size:13px; font-weight:800; line-height:1.25; margin:4px 0;">Запускай продукты в 10 раз быстрее с ИИ</div>
-                            <div style="display:flex; gap:6px; margin-top:8px;">
-                                <button style="${btnCss} padding:5px 10px; font-size:9px; font-weight:700;">Попробовать бесплатно</button>
-                                <button style="${cardCss} padding:5px 10px; font-size:9px;">Демо ↗</button>
-                            </div>
-                        </div>
-                        <div style="display:grid; grid-template-columns:${isBento ? '1.5fr 1fr' : '1fr 1fr'}; gap:${gap}px;">
-                            <div style="${cardCss} padding:9px;">
-                                <div style="font-size:10px; font-weight:700;">⚡ 99.9% Uptime</div>
-                                <div style="font-size:8px; opacity:0.7;">Аппаратное ускорение</div>
-                            </div>
-                            <div style="${cardCss} padding:9px;">
-                                <div style="font-size:10px; font-weight:700; color:${p};">PRO $19/m</div>
-                                <div style="font-size:8px; opacity:0.7;">Безлимит токенов</div>
-                            </div>
+                            <div style="font-size:13px; font-weight:800; margin:4px 0;">Запускай продукты в 10 раз быстрее с ИИ</div>
                         </div>
                     </div>
                 `;
             }
 
             mount.innerHTML = html;
-
             const palName = UI_PALETTES.find(x => x.id === builderState.paletteId)?.name || builderState.primaryColor;
             document.getElementById('summary-style-pill').textContent = `${builderState.styleName} • ${palName}`;
             document.getElementById('summary-metrics-pill').textContent = `R: ${builderState.radius}px | Blur: ${builderState.blur}px | Op: ${builderState.opacity}%`;
@@ -1556,42 +1996,36 @@
 
             const prompt = `Роль: Senior UI/UX Designer & Frontend Developer.
 Задача: Создай современный интерфейс для проекта «${typeObj.title}» (${typeObj.desc}).
-${customNote ? `\nСпецифика и ниша проекта: ${customNote}\n` : ''}
+${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
 1. ДИЗАЙН-СИСТЕМА (${styleObj.name}):
 - Характер стиля: ${styleObj.desc}.
-- Цветовая тема: ${builderState.previewDark ? 'Тёмная (Dark Mode)' : 'Светлая (Light Mode)'}, базовый фон: ${builderState.previewDark ? builderState.bgDark : builderState.bgLight}.
-- Главный акцент (Primary): ${builderState.primaryColor}, вторичный акцент: ${builderState.secondaryColor}.
-- Скругление карточек (border-radius): ${builderState.radius}px, размытие фона (backdrop-filter): blur(${builderState.blur}px), плотность карточек: ${builderState.opacity}%.
-- Уровень воздушности отступов: ${builderState.spacing} из 5, фоновое свечение: ${builderState.glow}%.
+- Тема: ${builderState.previewDark ? 'Тёмная' : 'Светлая'}, фон: ${builderState.previewDark ? builderState.bgDark : builderState.bgLight}.
+- Главный акцент: ${builderState.primaryColor}, вторичный: ${builderState.secondaryColor}.
+- Скругление (border-radius): ${builderState.radius}px, размытие (backdrop-filter): blur(${builderState.blur}px), плотность карточек: ${builderState.opacity}%.
 
-2. ТИПОГРАФИКА:
-- Шрифт: ${fontObj.name} (${fontObj.css}) через Google Fonts.
+2. ТИПОГРАФИКА И БЛОКИ:
+- Шрифт: ${fontObj.name} (${fontObj.css}).
+- Секции: ${builderState.sections.join(', ')}.
 
-3. СТРУКТУРА БЛОКОВ НА СТРАНИЦЕ:
-${builderState.sections.map(s => `- ${s}`).join('\n')}
+3. ФОРМАТ КОДА:
+- Один файл index.html (HTML5 + Tailwind CSS CDN + чистый Vanilla JS), полный код без сокращений.`;
 
-4. ТЕХНИЧЕСКИЕ ТРЕБОВАНИЯ:
-- Один самодостаточный файл index.html (HTML5 + Tailwind CSS CDN + чистый Vanilla JS).
-- Полный адаптив под смартфоны (320-430px) и широкие мониторы ПК (двухколоночная сетка lg:grid-cols-12).
-- Выдай полный рабочий код без сокращений и заглушек.`;
-
-            runWithSkeleton('ui-out-wrap', 'ui-skeleton', 'ui-result-card', 'ui-code', prompt, `UI Промт: ${typeObj.title} (${styleObj.name})`);
+            runWithSkeleton('ui-out-wrap', 'ui-skeleton', 'ui-result-card', 'ui-code', prompt, `UI Промт: ${typeObj.title}`);
         }
 
-        /* ==================== 6. ОСТАЛЬНЫЕ ИНСТРУМЕНТЫ, GOLDEN PROMPTS И СЕЙФ ==================== */
+        /* ==================== 7. СЕЙФ, БАЗА И ОСТАЛЬНЫЕ ФУНКЦИИ ==================== */
         const GOLDEN_VIP_PROMPTS = [
-            { title: '👑 [VIP] Анти-сокращение кода (100% Full-File Protocol)', text: 'КРИТИЧЕСКАЯ ИНСТРУКЦИЯ: Ты работаешь в режиме Full-File Output. Тебе строго запрещено использовать комментарии "// ... остальной код", "// без изменений" или пропускать импорты. Всегда возвращай каждый файл от первой до последней строчки, готовым к прямому копированию в продакшен.' },
-            { title: '👑 [VIP] Промт на создание 3D WebGL-сайта в 1 файл', text: 'Роль: Creative WebGL & Three.js Developer. Создай интерактивный 3D-лендинг в одном файле index.html. Сцена Three.js на фоне должна плавно реагировать на движение мыши и гироскоп телефона (lerp-инерция, 60 FPS), а поверх сцены расположи карточки из матового стекла с Tailwind CSS.' },
-            { title: '👑 [VIP] Архитектор Telegram Mini App + Бота под ключ', text: 'Роль: Principal Telegram Mini App Architect. Спроектируй связку из бота на Python (aiogram 3 + aiosqlite WAL) и Mini App (index.html + Telegram WebApp SDK). Настрой валидацию initData, передачу реферальных параметров и сохранение состояния в CloudStorage.' },
-            { title: '👑 [VIP] Глубокий рефакторинг и ускорение до 60 FPS', text: 'Проведи аудит производительности моего фронтенд-кода. Устрани лишние перерисовки DOM, замени тяжелые фильтры blur на аппаратно-ускоренные радиальные градиенты, оберни обработчики pointermove в requestAnimationFrame и выдай полностью оптимизированный файл.' }
+            { title: '👑 [VIP] Анти-сокращение кода (100% Full-File Protocol)', text: 'КРИТИЧЕСКАЯ ИНСТРУКЦИЯ: Ты работаешь в режиме Full-File Output. Тебе строго запрещено использовать комментарии "// ... остальной код" или пропускать импорты. Всегда возвращай каждый файл от первой до последней строчки.' },
+            { title: '👑 [VIP] Промт на создание 3D WebGL-сайта в 1 файл', text: 'Роль: Creative WebGL & Three.js Developer. Создай интерактивный 3D-лендинг в одном файле index.html с реакцией на курсор и гироскоп (60 FPS) и карточками из матового стекла.' },
+            { title: '👑 [VIP] Архитектор Telegram Mini App + Бота под ключ', text: 'Роль: Principal Telegram Mini App Architect. Спроектируй связку из бота на Python (aiogram 3 + aiosqlite WAL) и Mini App (index.html + Telegram WebApp SDK).' },
+            { title: '👑 [VIP] Глубокий рефакторинг и ускорение до 60 FPS', text: 'Проведи аудит производительности фронтенд-кода: устрани лишние перерисовки DOM, замени тяжелые фильтры blur на радиальные градиенты и выдай полный оптимизированный файл.' }
         ];
 
         const STACKS_DATA = [
             { id: 'python_tg', title: 'Python 3.11 + Aiogram 3.x + aiosqlite', desc: 'Асинхронный Telegram-бот с Роутерами и WAL БД' },
             { id: 'python_fastapi', title: 'Python + FastAPI + SQLAlchemy 2.0 + Postgres', desc: 'Высоконагруженный REST API сервис' },
             { id: 'nextjs_full', title: 'Next.js 14 + Tailwind + Prisma + Supabase', desc: 'Полноценный AI Micro-SaaS с авторизацией' },
-            { id: 'html_tma', title: 'HTML5 + Tailwind + Vanilla JS (Telegram Mini App)', desc: 'Молниеносный сингл-файл апп в стиле visionOS' },
-            { id: 'three_webgl', title: 'Three.js + WebGL + GSAP (Interactive 3D)', desc: 'Интерактивный 3D-сайт с шейдерами и камерой' }
+            { id: 'html_tma', title: 'HTML5 + Tailwind + Vanilla JS (Telegram Mini App)', desc: 'Молниеносный сингл-файл апп в стиле visionOS' }
         ];
         let selectedStackId = 'python_tg';
 
@@ -1607,11 +2041,6 @@ ${builderState.sections.map(s => `- ${s}`).join('\n')}
                 </button>
             `).join('');
             openBottomSheet('Выберите стек проекта', html);
-        }
-
-        function toggleFavoriteCurrentStack() {
-            Haptic.success();
-            showToast('Стек закреплён в избранном ★');
         }
 
         const PROJECT_TEMPLATES = {
@@ -1690,7 +2119,6 @@ ${builderState.sections.map(s => `- ${s}`).join('\n')}
             runWithSkeleton('opt-out-wrap', 'opt-skeleton', 'opt-result-card', 'opt-code', prompt, `Оптимизатор: ${val.slice(0, 20)}`);
         }
 
-        /* ==================== 7. СЕЙФ С ПРОВЕРКОЙ ЛИМИТА (5 ЗАПИСЕЙ БЕЗ VIP, БЕЗЛИМИТ ЗА 2 ДРУЗЕЙ) ==================== */
         const VAULT_KEY = 'vibe_vault_v3';
         let activeVaultTag = 'ALL';
 
@@ -1709,6 +2137,7 @@ ${builderState.sections.map(s => `- ${s}`).join('\n')}
             const list = getVaultList();
             if (getRefsCount() < 2 && list.length >= 5) {
                 Haptic.error();
+                openVipModal();
                 showToast('🔒 В бесплатной версии лимит 5 сниппетов! Пригласи 2 друзей для безлимита.');
                 return false;
             }
@@ -1748,6 +2177,7 @@ ${builderState.sections.map(s => `- ${s}`).join('\n')}
         function exportVaultJson() {
             if (getRefsCount() < 2) {
                 Haptic.error();
+                openVipModal();
                 showToast('🔒 Экспорт в .JSON открывается за 2 приглашённых друзей!');
                 return;
             }
@@ -1786,7 +2216,7 @@ ${builderState.sections.map(s => `- ${s}`).join('\n')}
             box.innerHTML = list.map(item => {
                 const enc = encodeURIComponent(item.text);
                 return `
-                    <article class="frosted-card rounded-3xl p-4 flex flex-col justify-between">
+                    <article class="frosted-card rounded-3xl p-4 flex flex-col justify-between animate-pop">
                         <div>
                             <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-500/15 text-indigo-400">${escapeHtml(item.tag)}</span>
                             <h4 class="text-sm font-semibold text-dynamic mt-1 mb-2">${escapeHtml(item.title)}</h4>
@@ -1801,7 +2231,6 @@ ${builderState.sections.map(s => `- ${s}`).join('\n')}
             }).join('');
         }
 
-        /* ==================== 8. БАЗА ЗНАНИЙ + ЗАКРЫТЫЙ ПАК GOLDEN PROMPTS (ЗА 3 ДРУЗЕЙ) ==================== */
         const ALL_500_IDEAS = [];
         const DOMAINS = ['TG Mini App трекер', 'AI Micro-SaaS сервис', 'Telegram-бот автоматизатор', 'Three.js 3D конфигуратор', 'Биржа микро-задач', 'Анализатор договоров на ИИ', 'Турнирный бот с сеткой', 'Конструктор резюме', 'Мониторинг цен селлеров', 'Генератор обложек и карточек'];
         for (let i = 1; i <= 50; i++) DOMAINS.forEach(d => ALL_500_IDEAS.push({ id: ALL_500_IDEAS.length + 1, title: `${d} — концепт #${i} (Stars оплата + AI)` }));
@@ -1813,12 +2242,12 @@ ${builderState.sections.map(s => `- ${s}`).join('\n')}
             if (!goldenUnlocked) {
                 goldenBox.innerHTML = `
                     <div class="frosted-card rounded-3xl p-6 text-center lg:col-span-2 border border-amber-400/30">
-                        <div class="text-3xl mb-2">🔒👑</div>
+                        <div class="text-3xl mb-2 animate-float">🔒👑</div>
                         <h3 class="text-base font-bold text-dynamic">Закрытый архив «Golden Prompts»</h3>
                         <p class="text-xs text-muted-dynamic mt-1 max-w-md mx-auto">Секретные системные промты для создания 3D-сайтов в один файл, обхода лени нейросетей и проектирования ботов открываются за 3 приглашённых друзей (сейчас: ${getRefsCount()}/3).</p>
                         <div class="flex justify-center gap-2 mt-4">
-                            <button onclick="shareInviteLink()" class="btn-gold min-h-[42px] px-4 rounded-xl text-xs font-bold">🚀 Пригласить друзей</button>
-                            <button onclick="simulateAddFriend()" class="btn-glass min-h-[42px] px-3.5 rounded-xl text-xs font-semibold text-amber-400">⚡ Тест +1 друг</button>
+                            <button onclick="shareInviteLink()" class="btn-gold min-h-[42px] px-5 rounded-xl text-xs font-bold">🚀 Пригласить друзей</button>
+                            <button onclick="copyInviteLink()" class="btn-glass min-h-[42px] px-4 rounded-xl text-xs font-semibold text-amber-300">📋 Скопировать ссылку</button>
                         </div>
                     </div>
                 `;
@@ -1892,7 +2321,6 @@ ${builderState.sections.map(s => `- ${s}`).join('\n')}
             if (btnEl) btnEl.className = 'hub-sub-btn min-h-[44px] rounded-2xl text-xs font-semibold bg-indigo-500 text-white transition-all';
         }
 
-        /* ==================== 9. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==================== */
         let toastTimer = null;
         function showToast(msg = 'Скопировано!') {
             const pill = document.getElementById('toast-pill');
@@ -2075,8 +2503,10 @@ ${builderState.sections.map(s => `- ${s}`).join('\n')}
             if (tg) {
                 try { tg.ready(); tg.expand(); tg.disableVerticalSwipes?.(); } catch (_) {}
             }
+            syncRefsFromCloudStorage();
             updateVipUI();
             initVisualStudio();
+            renderBotBuilderEditor();
             renderQuickBreadcrumbs();
             renderBotHub();
             renderHistory();
