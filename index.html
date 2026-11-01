@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CLAUDE_CODE // VIBE STUDIO</title>
+    <title>CLAUDE_CODE // VIBE STUDIO MAX</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,15 +29,20 @@
         :root {
             --ease-ios: cubic-bezier(0.22, 1, 0.36, 1);
             --safe-bottom: env(safe-area-inset-bottom, 16px);
-            --bg-main: #0b0d14;
+            /* Динамические переменные персональной темы сайта */
+            --bg-main: #090b12;
+            --accent-primary: #6366f1;
+            --accent-secondary: #a855f7;
+            --site-radius: 24px;
+            --card-alpha: 0.78;
             --text-main: #f3f4f6;
             --text-muted: #94a3b8;
-            --card-bg: rgba(22, 26, 39, 0.78);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --card-highlight: rgba(255, 255, 255, 0.13);
-            --input-bg: rgba(255, 255, 255, 0.045);
-            --code-bg: rgba(0, 0, 0, 0.4);
-            --nav-bg: rgba(15, 18, 28, 0.88);
+            --card-bg: rgba(20, 24, 38, var(--card-alpha));
+            --card-border: rgba(255, 255, 255, 0.11);
+            --card-highlight: rgba(255, 255, 255, 0.14);
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --code-bg: rgba(0, 0, 0, 0.42);
+            --nav-bg: rgba(11, 14, 23, 0.9);
         }
 
         html.light {
@@ -64,7 +69,7 @@
             color: var(--text-main);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             overflow-x: hidden;
-            padding-bottom: calc(var(--safe-bottom) + 104px);
+            padding-bottom: calc(var(--safe-bottom) + 108px);
             transition: background-color 350ms ease, color 350ms ease;
             scroll-behavior: smooth;
         }
@@ -72,61 +77,84 @@
         .text-dynamic { color: var(--text-main); }
         .text-muted-dynamic { color: var(--text-muted); }
         .code-surface { background-color: var(--code-bg); }
+        .accent-text { color: var(--accent-primary); }
 
-        /* Плавное дыхание фонового градиента */
         @keyframes ambientPulse {
             0%, 100% { transform: scale(1) translateZ(0); }
-            50% { transform: scale(1.04) translateZ(0); }
+            50% { transform: scale(1.06) translateZ(0); }
         }
         .ambient-bg {
             background:
-                radial-gradient(circle at 15% 12%, rgba(99, 102, 241, 0.17) 0%, transparent 45%),
-                radial-gradient(circle at 85% 38%, rgba(139, 92, 246, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 18% 14%, color-mix(in srgb, var(--accent-primary) 22%, transparent) 0%, transparent 45%),
+                radial-gradient(circle at 84% 36%, color-mix(in srgb, var(--accent-secondary) 18%, transparent) 0%, transparent 45%),
                 radial-gradient(circle at 30% 88%, rgba(56, 189, 248, 0.1) 0%, transparent 45%);
-            animation: ambientPulse 12s ease-in-out infinite;
+            animation: ambientPulse 10s ease-in-out infinite;
         }
 
         .frosted-card {
             position: relative;
             overflow: hidden;
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--site-radius);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border: 1px solid var(--card-border);
-            box-shadow: 0 10px 28px -10px rgba(0, 0, 0, 0.28), inset 0 1px 0 0 var(--card-highlight);
+            box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.32), inset 0 1px 0 0 var(--card-highlight);
             transform: translateZ(0);
-            transition: transform 280ms var(--ease-ios), border-color 240ms ease, box-shadow 280ms var(--ease-ios);
+            transition: transform 280ms var(--ease-ios), border-color 240ms ease, box-shadow 280ms var(--ease-ios), border-radius 240ms ease;
         }
         @media (hover: hover) {
             .frosted-card:hover {
-                border-color: rgba(129, 140, 248, 0.28);
+                border-color: color-mix(in srgb, var(--accent-primary) 45%, transparent);
+                transform: translateY(-2px);
             }
         }
         @media (max-width: 768px) {
             .frosted-card {
                 backdrop-filter: none;
                 -webkit-backdrop-filter: none;
-                background: rgba(22, 26, 40, 0.95);
-            }
-            html.light .frosted-card {
-                background: rgba(255, 255, 255, 0.96);
             }
         }
 
+        /* Закрепленная шапка с фоновым видео/гиф-баннером */
         .frosted-header {
+            position: sticky;
+            top: 0;
+            z-index: 30;
             background: var(--nav-bg);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--card-border);
             transform: translateZ(0);
         }
 
+        /* 3D-вращение иконок ИИ (ChatGPT, Gemini, Claude) как на прикрепленном видео */
+        @keyframes spin3dY {
+            0% { transform: perspective(400px) rotateY(0deg); }
+            50% { transform: perspective(400px) rotateY(180deg) scale(1.08); }
+            100% { transform: perspective(400px) rotateY(360deg); }
+        }
+        .ai-3d-spin-1 { animation: spin3dY 4.2s linear infinite; transform-style: preserve-3d; }
+        .ai-3d-spin-2 { animation: spin3dY 4.2s linear infinite 0.35s; transform-style: preserve-3d; }
+        .ai-3d-spin-3 { animation: spin3dY 4.2s linear infinite 0.7s; transform-style: preserve-3d; }
+
+        @keyframes handReachLeft {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(6px); }
+        }
+        @keyframes handReachRight {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(-6px); }
+        }
+        .hand-left-anim { animation: handReachLeft 3.5s ease-in-out infinite; }
+        .hand-right-anim { animation: handReachRight 3.5s ease-in-out infinite; }
+
         .frosted-nav {
             background: var(--nav-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             border: 1px solid var(--card-border);
-            box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 var(--card-highlight);
+            box-shadow: 0 14px 36px -6px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 var(--card-highlight);
             transform: translateZ(0);
         }
 
@@ -134,19 +162,18 @@
             background: var(--input-bg);
             border: 1px solid var(--card-border);
             color: var(--text-main);
-            transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms var(--ease-ios);
+            transition: border-color 200ms ease, box-shadow 200ms ease;
         }
         .frosted-input:focus {
-            border-color: rgba(99, 102, 241, 0.8);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 25%, transparent);
             outline: none;
         }
         .frosted-input.error-ring {
-            border-color: rgba(244, 63, 94, 0.85);
-            box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.2);
+            border-color: #f43f5e;
+            box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.25);
         }
 
-        /* Кнопки с переливающимся бликом */
         @keyframes sheenSweep {
             0% { transform: translateX(-120%) skewX(-15deg); }
             100% { transform: translateX(220%) skewX(-15deg); }
@@ -154,32 +181,31 @@
         .btn-primary {
             position: relative;
             overflow: hidden;
-            background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
             color: #ffffff;
-            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-            transition: transform 180ms var(--ease-ios), box-shadow 200ms ease;
+            box-shadow: 0 6px 20px color-mix(in srgb, var(--accent-primary) 38%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+            transition: transform 180ms var(--ease-ios), box-shadow 200ms ease, filter 200ms ease;
         }
+        .btn-primary:hover { filter: brightness(1.07); }
         .btn-primary::after {
             content: '';
             position: absolute;
             top: 0; bottom: 0; left: 0;
             width: 45%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.24), transparent);
             transform: translateX(-120%) skewX(-15deg);
-            animation: sheenSweep 4.5s infinite;
+            animation: sheenSweep 4.2s infinite;
             pointer-events: none;
         }
-        .btn-primary:active { transform: scale(0.96); }
+        .btn-primary:active { transform: scale(0.95); }
 
         .btn-gold {
-            position: relative;
-            overflow: hidden;
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: #ffffff;
             box-shadow: 0 4px 14px rgba(245, 158, 11, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.3);
             transition: transform 180ms var(--ease-ios);
         }
-        .btn-gold:active { transform: scale(0.96); }
+        .btn-gold:active { transform: scale(0.95); }
 
         .btn-glass {
             background: var(--input-bg);
@@ -188,16 +214,19 @@
             box-shadow: inset 0 1px 0 var(--card-highlight);
             transition: transform 180ms var(--ease-ios), background-color 180ms ease, border-color 180ms ease;
         }
-        .btn-glass:hover { background: rgba(99, 102, 241, 0.12); }
+        .btn-glass:hover {
+            background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+            border-color: color-mix(in srgb, var(--accent-primary) 40%, transparent);
+        }
         .btn-glass:active { transform: scale(0.95); }
 
-        /* Плавные входные и левитирующие анимации */
+        /* Анимации переходов, микрофона и появления */
         @keyframes viewSlideIn {
-            from { opacity: 0; transform: translateY(12px) scale(0.99); }
+            from { opacity: 0; transform: translateY(14px) scale(0.985); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .animate-view-enter {
-            animation: viewSlideIn 340ms var(--ease-ios) forwards;
+            animation: viewSlideIn 360ms var(--ease-ios) forwards;
         }
 
         @keyframes floatSoft {
@@ -205,15 +234,18 @@
             50% { transform: translateY(-4px); }
         }
         .animate-float {
-            animation: floatSoft 3.6s ease-in-out infinite;
+            animation: floatSoft 3.4s ease-in-out infinite;
         }
 
-        @keyframes popScale {
-            0% { transform: scale(0.92); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.6); }
+            50% { box-shadow: 0 0 0 10px rgba(244, 63, 94, 0); }
         }
-        .animate-pop {
-            animation: popScale 240ms var(--ease-ios) forwards;
+        .mic-recording {
+            background: rgba(244, 63, 94, 0.25) !important;
+            border-color: #f43f5e !important;
+            color: #fda4af !important;
+            animation: micPulse 1.2s infinite;
         }
 
         input[type="range"].ios-slider {
@@ -233,12 +265,12 @@
             height: 22px;
             border-radius: 50%;
             background: #ffffff;
-            border: 2px solid #6366f1;
+            border: 2.5px solid var(--accent-primary);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
             transition: transform 160ms var(--ease-ios);
         }
         input[type="range"].ios-slider::-webkit-slider-thumb:active {
-            transform: scale(1.22);
+            transform: scale(1.24);
         }
 
         @keyframes shimmerMove {
@@ -246,7 +278,7 @@
             100% { background-position: 200% 0; }
         }
         .skeleton-line {
-            background: linear-gradient(90deg, rgba(148, 163, 184, 0.1) 25%, rgba(129, 140, 248, 0.24) 50%, rgba(148, 163, 184, 0.1) 75%);
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.1) 25%, rgba(129, 140, 248, 0.26) 50%, rgba(148, 163, 184, 0.1) 75%);
             background-size: 200% 100%;
             animation: shimmerMove 1.2s infinite linear;
             border-radius: 8px;
@@ -256,7 +288,7 @@
             display: grid;
             grid-template-rows: 0fr;
             opacity: 0;
-            transition: grid-template-rows 300ms var(--ease-ios), opacity 240ms ease;
+            transition: grid-template-rows 320ms var(--ease-ios), opacity 240ms ease;
         }
         .expand-grid.open {
             grid-template-rows: 1fr;
@@ -290,13 +322,87 @@
     <!-- Фоновое свечение -->
     <div class="ambient-bg fixed inset-0 pointer-events-none z-0" aria-hidden="true"></div>
 
-    <!-- ==================== STICKY ШАПКА + КРАТКАЯ НАВИГАЦИЯ ==================== -->
-    <header class="frosted-header sticky top-0 z-30 px-4 lg:px-8 pt-3 pb-2.5">
-        <div class="max-w-md lg:max-w-6xl mx-auto space-y-2.5">
+    <!-- ==================== ЗАКРЕПЛЕННАЯ ШАПКА (STICKY TOP-0) С БАННЕРОМ И КОМПАСОМ ==================== -->
+    <header class="frosted-header overflow-hidden">
+        <!-- Верхний закрепленный медиа-слот: Видео/Гиф баннер (Сотворение ИИ: руки + 3D логотипы ChatGPT, Gemini, Claude) -->
+        <div class="relative w-full h-16 sm:h-20 bg-black overflow-hidden border-b border-white/10 select-none">
+            <!-- Если в репозитории лежит файл banner.mp4 или пользователь указал свой URL, играет видео -->
+            <video id="header-custom-video" src="banner.mp4" autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover opacity-85 hidden" onloadeddata="this.classList.remove('hidden'); document.getElementById('header-procedural-banner').classList.add('hidden');"></video>
+            <img id="header-custom-gif" src="banner.gif" alt="" class="absolute inset-0 w-full h-full object-cover opacity-85 hidden" onload="this.classList.remove('hidden'); document.getElementById('header-procedural-banner').classList.add('hidden');" onerror="this.classList.add('hidden')">
+
+            <!-- Встроенная живая 3D-сцена точь-в-точь как на твоём видео (работает сразу из коробки!) -->
+            <div id="header-procedural-banner" class="absolute inset-0 flex items-center justify-center bg-black px-3">
+                <div class="flex items-center justify-center gap-3 sm:gap-6 w-full max-w-xl">
+                    <!-- Левая тянущаяся рука Адама -->
+                    <div class="hand-left-anim flex items-center justify-end flex-1 opacity-90">
+                        <svg class="w-24 sm:w-32 h-10 text-[#d8b48e]" viewBox="0 0 160 50" fill="none">
+                            <path d="M0 32 C35 30, 65 20, 95 22 C112 23, 128 16, 148 17 C154 17, 154 22, 146 23 C130 23, 118 27, 108 29 C120 31, 132 33, 138 35 C142 36, 139 40, 133 39 C120 36, 105 34, 92 35 C70 37, 35 42, 0 44 Z" fill="url(#skinGradL)"/>
+                            <defs>
+                                <linearGradient id="skinGradL" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#8c6239"/>
+                                    <stop offset="55%" stop-color="#dfb995"/>
+                                    <stop offset="100%" stop-color="#f3d6b8"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <!-- Три вращающихся в 3D логотипа ИИ в центре: ChatGPT, Gemini, Claude -->
+                    <div class="flex items-center gap-2.5 sm:gap-3.5 shrink-0 px-1">
+                        <!-- 1. ChatGPT 3D -->
+                        <div class="ai-3d-spin-1 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 border border-white/25 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.35)]">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3a4.5 4.5 0 00-3.89 2.25A4.5 4.5 0 004.5 9.75c0 .83.22 1.6.61 2.25A4.5 4.5 0 008.11 18.75 4.5 4.5 0 0012 21a4.5 4.5 0 003.89-2.25 4.5 4.5 0 003.61-4.5c0-.83-.22-1.6-.61-2.25A4.5 4.5 0 0015.89 5.25 4.5 4.5 0 0012 3z"/>
+                            </svg>
+                        </div>
+                        <!-- 2. Gemini 3D Rainbow Star -->
+                        <div class="ai-3d-spin-2 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center drop-shadow-[0_0_14px_rgba(56,189,248,0.6)]">
+                            <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 24 24">
+                                <defs>
+                                    <linearGradient id="geminiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#3b82f6"/>
+                                        <stop offset="40%" stop-color="#10b981"/>
+                                        <stop offset="75%" stop-color="#f59e0b"/>
+                                        <stop offset="100%" stop-color="#ef4444"/>
+                                    </linearGradient>
+                                </defs>
+                                <path fill="url(#geminiGrad)" d="M12 1 C12.8 7.2, 16.8 11.2, 23 12 C16.8 12.8, 12.8 16.8, 12 23 C11.2 16.8, 7.2 12.8, 1 12 C7.2 11.2, 11.2 7.2, 12 1 Z"/>
+                            </svg>
+                        </div>
+                        <!-- 3. Claude 3D Spark -->
+                        <div class="ai-3d-spin-3 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center drop-shadow-[0_0_14px_rgba(217,119,87,0.65)]">
+                            <svg class="w-6 h-6 sm:w-7 sm:h-7 text-[#d97757]" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                                <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07M7.5 2.8l9 18.4M16.5 2.8l-9 18.4"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Правая рука Творца -->
+                    <div class="hand-right-anim flex items-center justify-start flex-1 opacity-90">
+                        <svg class="w-24 sm:w-32 h-10" viewBox="0 0 160 50" fill="none">
+                            <path d="M160 28 C125 26, 95 16, 65 18 C48 19, 32 14, 12 15 C6 15, 6 20, 14 21 C30 21, 42 25, 52 27 C40 29, 28 32, 22 34 C18 35, 21 39, 27 38 C40 35, 55 32, 68 33 C90 35, 125 40, 160 42 Z" fill="url(#skinGradR)"/>
+                            <defs>
+                                <linearGradient id="skinGradR" x1="1" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#8c6239"/>
+                                    <stop offset="55%" stop-color="#dfb995"/>
+                                    <stop offset="100%" stop-color="#f3d6b8"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Градиентная растушевка внизу баннера для плавного перехода в шапку -->
+            <div class="absolute inset-x-0 bottom-0 h-5 bg-gradient-to-t from-[var(--bg-main)] to-transparent pointer-events-none"></div>
+        </div>
+
+        <!-- Панель управления, Компас и Хлебные крошки (также закреплены внутри header) -->
+        <div class="px-4 lg:px-8 pt-2 pb-2.5 max-w-md lg:max-w-6xl mx-auto space-y-2">
             <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-indigo-500/25 to-violet-500/25 border border-indigo-400/30 flex items-center justify-center shrink-0 animate-float">
-                        <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg class="w-5 h-5 accent-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
                     </div>
@@ -308,21 +414,27 @@
                                 <span id="header-refs-count">0/3</span>
                             </button>
                         </div>
-                        <p id="user-status" class="text-[11px] text-muted-dynamic font-medium">Конструктор сайтов и Telegram-ботов</p>
+                        <p id="user-status" class="text-[11px] text-muted-dynamic font-medium">AI Vibe-Coding Ecosystem</p>
                     </div>
                 </div>
 
+                <!-- Кнопки: Персонализация сайта, Компас, Звук, Тема -->
                 <div class="flex items-center gap-1.5">
-                    <button onclick="toggleSiteMapBanner()" class="btn-glass min-h-[38px] px-2.5 rounded-xl flex items-center gap-1 text-[11px] font-semibold text-indigo-400">
-                        <span>🧭</span>
-                        <span class="hidden sm:inline">Карта сайта</span>
+                    <button onclick="openPersonalizeSheet()" class="btn-glass min-h-[38px] px-2.5 rounded-xl flex items-center gap-1 text-[11px] font-semibold text-violet-300" title="Настроить цвета сайта и баннер под себя">
+                        <span>🎨</span>
+                        <span class="hidden sm:inline">Свой стиль</span>
                     </button>
 
-                    <button onclick="SoundFX.toggleMute()" id="sound-toggle-btn" aria-label="Звуковые эффекты" class="btn-glass min-w-[38px] min-h-[38px] rounded-xl flex items-center justify-center text-xs">
+                    <button onclick="toggleSiteMapBanner()" class="btn-glass min-h-[38px] px-2.5 rounded-xl flex items-center gap-1 text-[11px] font-semibold accent-text" title="Компас по всем функциям сайта">
+                        <span>🧭</span>
+                        <span class="hidden sm:inline">Компас</span>
+                    </button>
+
+                    <button onclick="SoundFX.toggleMute()" id="sound-toggle-btn" aria-label="Звук" class="btn-glass min-w-[38px] min-h-[38px] rounded-xl flex items-center justify-center text-xs">
                         🔊
                     </button>
 
-                    <button onclick="toggleTheme()" aria-label="Сменить тему" class="btn-glass min-w-[38px] min-h-[38px] rounded-xl flex items-center justify-center text-xs">
+                    <button onclick="toggleTheme()" aria-label="Тема" class="btn-glass min-w-[38px] min-h-[38px] rounded-xl flex items-center justify-center text-xs">
                         <span id="theme-icon-dark">🌙</span>
                         <span id="theme-icon-light" class="hidden">☀️</span>
                     </button>
@@ -332,30 +444,30 @@
             <!-- Быстрые шаги-якоря по текущему экрану -->
             <div class="flex items-center justify-between gap-2 pt-1 border-t border-white/5">
                 <div id="quick-breadcrumbs" class="flex items-center gap-1.5 overflow-x-auto py-0.5 text-[11px]"></div>
-                <button onclick="openVipModal()" class="text-[11px] font-semibold text-amber-400 shrink-0 hover:underline">
-                    🎁 Мои награды
+                <button onclick="openPersonalizeSheet()" class="text-[11px] font-semibold text-violet-400 shrink-0 hover:underline">
+                    ⚙️ Под себя
                 </button>
             </div>
 
-            <!-- Выпадающая карта сайта -->
+            <!-- ОБНОВЛЕННЫЙ КОМПАС (КАРТА ВСЕХ 8 МОДУЛЕЙ САЙТА) -->
             <div id="sitemap-drawer" class="expand-grid">
                 <div class="expand-inner">
                     <div class="pt-2 pb-1 grid grid-cols-2 lg:grid-cols-4 gap-2 text-left">
                         <button onclick="switchTab(0, 'view-studio'); switchBuilderMode('web'); toggleSiteMapBanner(false)" class="p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 hover:bg-indigo-500/20 transition">
-                            <div class="text-xs font-bold text-indigo-400">1A. 🎨 Конструктор сайтов</div>
-                            <p class="text-[10px] text-muted-dynamic mt-0.5">Живой макет с ползунками, палитрами и генерацией промта</p>
+                            <div class="text-xs font-bold text-indigo-400">1. 🎨 UI Студия сайтов</div>
+                            <p class="text-[10px] text-muted-dynamic mt-0.5">Собери макет ползунками + голосовой ввод ТЗ 🎙</p>
                         </button>
                         <button onclick="switchTab(0, 'view-studio'); switchBuilderMode('bot'); toggleSiteMapBanner(false)" class="p-2.5 rounded-2xl bg-sky-500/10 border border-sky-400/30 hover:bg-sky-500/20 transition">
-                            <div class="text-xs font-bold text-sky-400">1B. 🤖 Конструктор ТГ-ботов</div>
-                            <p class="text-[10px] text-muted-dynamic mt-0.5">Собери инлайн-кнопки и модули и скачай код на Aiogram 3.x</p>
+                            <div class="text-xs font-bold text-sky-400">2. 🤖 Конструктор Ботов</div>
+                            <p class="text-[10px] text-muted-dynamic mt-0.5">Визуальный редактор кнопок и код на Aiogram 3.x</p>
                         </button>
-                        <button onclick="switchTab(1, 'view-tools'); toggleSiteMapBanner(false)" class="p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] transition">
-                            <div class="text-xs font-bold text-dynamic">2. 🛠 Тулзы и Дебаггер</div>
-                            <p class="text-[10px] text-muted-dynamic mt-0.5">Архитектура бэкенда, конвертер ошибок и усилитель промтов</p>
+                        <button onclick="switchTab(1, 'view-tools'); toggleSiteMapBanner(false); setTimeout(()=>document.getElementById('tool-combiner')?.scrollIntoView({behavior:'smooth'}),150)" class="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-400/30 hover:bg-emerald-500/20 transition">
+                            <div class="text-xs font-bold text-emerald-400">3. 📦 Сборщик + Анти-слив</div>
+                            <p class="text-[10px] text-muted-dynamic mt-0.5">Склейка файлов проекта и авто-скрытие API токенов</p>
                         </button>
-                        <button onclick="switchTab(2, 'view-hub'); toggleSiteMapBanner(false)" class="p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] transition">
-                            <div class="text-xs font-bold text-amber-400">3. 👑 VIP База & Сейф</div>
-                            <p class="text-[10px] text-muted-dynamic mt-0.5">Закрытые Golden Prompts, 500 идей и твоё хранилище кода</p>
+                        <button onclick="switchTab(1, 'view-tools'); toggleSiteMapBanner(false); setTimeout(()=>document.getElementById('tool-rules')?.scrollIntoView({behavior:'smooth'}),150)" class="p-2.5 rounded-2xl bg-violet-500/10 border border-violet-400/30 hover:bg-violet-500/20 transition">
+                            <div class="text-xs font-bold text-violet-400">4. ⚙️ .cursorrules & Дебаг</div>
+                            <p class="text-[10px] text-muted-dynamic mt-0.5">Генератор правил CLAUDE.md, дебаггер и голосовой промтер</p>
                         </button>
                     </div>
                 </div>
@@ -363,11 +475,11 @@
         </div>
     </header>
 
-    <!-- Основной контейнер -->
+    <!-- Основной контент -->
     <main class="flex-1 px-4 lg:px-8 pt-4 max-w-md lg:max-w-6xl mx-auto w-full relative z-10 space-y-5">
 
-        <!-- ==================== БАННЕР VIP-ПРОГРЕССА (БЕЗ ТЕСТОВЫХ КНОПОК — ЧИТАЕТ РЕАЛЬНЫЕ ДАННЫЕ) ==================== -->
-        <section id="vip-banner-card" class="frosted-card rounded-3xl p-4 border border-amber-400/25 animate-view-enter">
+        <!-- ==================== БАННЕР VIP-ПРОГРЕССА ==================== -->
+        <section id="vip-banner-card" class="frosted-card p-4 border border-amber-400/25 animate-view-enter">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-start sm:items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-lg shrink-0 animate-float">
@@ -385,13 +497,12 @@
                     <button onclick="shareInviteLink()" class="btn-gold min-h-[40px] px-4 rounded-xl text-xs font-bold flex items-center gap-1.5">
                         <span>🚀 Пригласить друга</span>
                     </button>
-                    <button onclick="copyInviteLink()" class="btn-glass min-h-[40px] px-3 rounded-xl text-xs font-semibold text-amber-300" title="Скопировать реферальную ссылку">
+                    <button onclick="copyInviteLink()" class="btn-glass min-h-[40px] px-3 rounded-xl text-xs font-semibold text-amber-300">
                         📋 Ссылка
                     </button>
                 </div>
             </div>
 
-            <!-- 3 ступени наград -->
             <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-white/10">
                 <div id="reward-tier-1" class="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-center transition-all">
                     <div class="text-[10px] font-bold text-muted-dynamic" id="tier-1-status">🔒 1 друг</div>
@@ -411,11 +522,10 @@
         <!-- ==================== ВКЛАДКА 0: КОНСТРУКТОРЫ ПРИЛОЖЕНИЙ (САЙТЫ + ТГ-БОТЫ AIOGRAM) ==================== -->
         <section id="view-studio" class="space-y-5 animate-view-enter">
 
-            <!-- Переключатель внутри вкладки «Конструкторы приложений» -->
-            <div class="frosted-card rounded-3xl p-1.5 max-w-lg mx-auto">
+            <div class="frosted-card p-1.5 max-w-lg mx-auto">
                 <div class="relative grid grid-cols-2 items-center">
-                    <div id="builder-mode-pill" class="absolute top-0 bottom-0 left-0 w-1/2 rounded-2xl bg-gradient-to-r from-indigo-500/25 to-violet-500/25 border border-indigo-400/40 transition-transform duration-300 ease-ios pointer-events-none"></div>
-                    <button type="button" onclick="switchBuilderMode('web')" id="mode-btn-web" class="relative z-10 min-h-[44px] rounded-2xl text-xs font-bold text-indigo-300 flex items-center justify-center gap-2 transition-colors">
+                    <div id="builder-mode-pill" class="absolute top-0 bottom-0 left-0 w-1/2 rounded-2xl bg-white/[0.1] border border-white/20 transition-transform duration-300 ease-ios pointer-events-none"></div>
+                    <button type="button" onclick="switchBuilderMode('web')" id="mode-btn-web" class="relative z-10 min-h-[44px] rounded-2xl text-xs font-bold accent-text flex items-center justify-center gap-2 transition-colors">
                         <span>🎨 UI Студия (Сайты)</span>
                     </button>
                     <button type="button" onclick="switchBuilderMode('bot')" id="mode-btn-bot" class="relative z-10 min-h-[44px] rounded-2xl text-xs font-semibold text-muted-dynamic flex items-center justify-center gap-2 transition-colors">
@@ -424,12 +534,10 @@
                 </div>
             </div>
 
-            <!-- ==================== РЕЖИМ A: КОНСТРУКТОР САЙТОВ (UI СТУДИЯ) ==================== -->
+            <!-- РЕЖИМ A: КОНСТРУКТОР САЙТОВ -->
             <div id="sub-builder-web" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start animate-view-enter">
-
-                <!-- Левая колонка: ЖИВОЕ ПРЕВЬЮ САЙТА -->
-                <div id="anchor-preview" class="lg:col-span-5 lg:sticky lg:top-28 space-y-4">
-                    <article class="frosted-card rounded-3xl p-4">
+                <div id="anchor-preview" class="lg:col-span-5 lg:sticky lg:top-44 space-y-4">
+                    <article class="frosted-card p-4">
                         <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center gap-2">
                                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -437,7 +545,7 @@
                             </div>
                             <div class="flex items-center gap-1.5">
                                 <button onclick="togglePreviewTheme()" id="prev-theme-btn" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-medium">🌙 Dark</button>
-                                <button onclick="randomizeVisualBuilder()" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-semibold text-indigo-400">🎲 Рандом</button>
+                                <button onclick="randomizeVisualBuilder()" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-semibold accent-text">🎲 Рандом</button>
                             </div>
                         </div>
 
@@ -457,15 +565,14 @@
                     </button>
                 </div>
 
-                <!-- Правая колонка: ПУЛЬТ УПРАВЛЕНИЯ САЙТОМ -->
                 <div class="lg:col-span-7 space-y-4">
-                    <article id="anchor-style" class="frosted-card rounded-3xl p-5">
+                    <article id="anchor-style" class="frosted-card p-5">
                         <div class="mb-3">
-                            <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Шаг 1 • Архитектура интерфейса</span>
+                            <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Шаг 1 • Архитектура интерфейса</span>
                             <h2 class="text-base font-semibold text-dynamic mt-0.5">Выбери тип сайта и визуальный стиль</h2>
                         </div>
 
-                        <label class="block text-xs font-semibold text-dynamic mb-2">1. Формат проекта (меняет структуру блоков):</label>
+                        <label class="block text-xs font-semibold text-dynamic mb-2">1. Формат проекта:</label>
                         <div id="ui-type-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4"></div>
 
                         <div class="flex items-center justify-between mb-2">
@@ -475,7 +582,7 @@
                         <div id="ui-style-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
                     </article>
 
-                    <article id="anchor-sliders" class="frosted-card rounded-3xl p-5 space-y-4">
+                    <article id="anchor-sliders" class="frosted-card p-5 space-y-4">
                         <div class="flex items-center justify-between">
                             <div>
                                 <span class="text-[11px] font-semibold uppercase tracking-wider text-violet-400">Шаг 2 • Палитра и Ползунки</span>
@@ -493,7 +600,7 @@
                             <div>
                                 <div class="flex justify-between text-xs mb-1">
                                     <span class="font-medium text-dynamic">Скругление углов (Border Radius)</span>
-                                    <span id="val-radius" class="font-mono text-indigo-400 font-semibold">10px</span>
+                                    <span id="val-radius" class="font-mono accent-text font-semibold">10px</span>
                                 </div>
                                 <input type="range" id="slider-radius" min="0" max="32" step="2" value="10" oninput="updateBuilderSliders()" class="ios-slider">
                             </div>
@@ -501,7 +608,7 @@
                             <div>
                                 <div class="flex justify-between text-xs mb-1">
                                     <span class="font-medium text-dynamic">Размытие стекла (Backdrop Blur)</span>
-                                    <span id="val-blur" class="font-mono text-indigo-400 font-semibold">8px</span>
+                                    <span id="val-blur" class="font-mono accent-text font-semibold">8px</span>
                                 </div>
                                 <input type="range" id="slider-blur" min="0" max="28" step="2" value="8" oninput="updateBuilderSliders()" class="ios-slider">
                             </div>
@@ -509,7 +616,7 @@
                             <div>
                                 <div class="flex justify-between text-xs mb-1">
                                     <span class="font-medium text-dynamic">Плотность карточек (Surface Opacity)</span>
-                                    <span id="val-opacity" class="font-mono text-indigo-400 font-semibold">5%</span>
+                                    <span id="val-opacity" class="font-mono accent-text font-semibold">5%</span>
                                 </div>
                                 <input type="range" id="slider-opacity" min="2" max="26" step="1" value="5" oninput="updateBuilderSliders()" class="ios-slider">
                             </div>
@@ -517,7 +624,7 @@
                             <div>
                                 <div class="flex justify-between text-xs mb-1">
                                     <span class="font-medium text-dynamic">Отступы и воздух (Spacing)</span>
-                                    <span id="val-spacing" class="font-mono text-indigo-400 font-semibold">Компактно (2/5)</span>
+                                    <span id="val-spacing" class="font-mono accent-text font-semibold">Компактно (2/5)</span>
                                 </div>
                                 <input type="range" id="slider-spacing" min="1" max="5" step="1" value="2" oninput="updateBuilderSliders()" class="ios-slider">
                             </div>
@@ -525,17 +632,17 @@
                             <div>
                                 <div class="flex justify-between text-xs mb-1">
                                     <span class="font-medium text-dynamic">Свечение и глубина теней (Glow)</span>
-                                    <span id="val-glow" class="font-mono text-indigo-400 font-semibold">35%</span>
+                                    <span id="val-glow" class="font-mono accent-text font-semibold">35%</span>
                                 </div>
                                 <input type="range" id="slider-glow" min="0" max="100" step="10" value="35" oninput="updateBuilderSliders()" class="ios-slider">
                             </div>
                         </div>
                     </article>
 
-                    <article id="anchor-output" class="frosted-card rounded-3xl p-5 space-y-4">
+                    <article id="anchor-output" class="frosted-card p-5 space-y-4">
                         <div>
-                            <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Шаг 3 • Типографика и Генерация</span>
-                            <h3 class="text-base font-semibold text-dynamic mt-0.5">Шрифты, секции и готовый промт</h3>
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Шаг 3 • Типографика, Голос и Генерация</span>
+                            <h3 class="text-base font-semibold text-dynamic mt-0.5">Шрифты, секции и голосовой ввод</h3>
                         </div>
 
                         <div>
@@ -549,8 +656,13 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-muted-dynamic mb-1.5">О чём твой проект? (Тема, ниша, фичи)</label>
-                            <input id="ui-custom-note" type="text" placeholder="Напр.: Сервис аналитики Telegram-каналов с расчётом окупаемости рекламы..." class="frosted-input w-full min-h-[44px] rounded-2xl px-3.5 text-xs">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-xs font-medium text-muted-dynamic">О чём твой проект? (Введи или надиктуй голосом)</label>
+                                <button type="button" onclick="toggleVoiceInput('ui-custom-note', this)" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-semibold text-rose-300 flex items-center gap-1">
+                                    <span>🎙 Голос</span>
+                                </button>
+                            </div>
+                            <input id="ui-custom-note" type="text" placeholder="Напр.: Сервис аналитики Telegram-каналов с расчётом окупаемости..." class="frosted-input w-full min-h-[44px] rounded-2xl px-3.5 text-xs">
                         </div>
 
                         <button onclick="generateVisualUIPrompt()" class="btn-primary w-full min-h-[48px] rounded-2xl text-xs font-bold flex items-center justify-center gap-2">
@@ -566,7 +678,7 @@
                                     </div>
                                     <div id="ui-result-card" class="rounded-2xl code-surface border border-white/10 overflow-hidden">
                                         <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.03] border-b border-white/10">
-                                            <span class="text-xs font-semibold text-indigo-400">Готовый UI/UX Промт</span>
+                                            <span class="text-xs font-semibold accent-text">Готовый UI/UX Промт</span>
                                             <div class="flex items-center gap-1.5">
                                                 <button onclick="copyResult('ui-code', this)" class="btn-glass min-h-[32px] px-3 rounded-xl text-[11px] font-medium">Копировать</button>
                                                 <button onclick="shareResult('ui-code')" class="btn-glass min-h-[32px] px-2.5 rounded-xl text-[11px] font-medium">Поделиться</button>
@@ -579,7 +691,7 @@
                                         <button onclick="quickExportAI('chatgpt', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-emerald-400">↗ В ChatGPT</button>
                                         <button onclick="quickExportAI('cursor', 'ui-code')" class="btn-glass min-h-[40px] rounded-xl text-[11px] font-semibold text-violet-400">↗ В Cursor</button>
                                     </div>
-                                    <button onclick="saveResultToVault('UI Концепт: ' + builderState.styleName, 'ui-code', 'Промты')" class="btn-glass w-full min-h-[44px] mt-2 rounded-2xl text-xs font-semibold text-indigo-400">
+                                    <button onclick="saveResultToVault('UI Концепт: ' + builderState.styleName, 'ui-code', 'Промты')" class="btn-glass w-full min-h-[44px] mt-2 rounded-2xl text-xs font-semibold accent-text">
                                         💾 Сохранить дизайн-промт в Сейф
                                     </button>
                                 </div>
@@ -589,12 +701,10 @@
                 </div>
             </div>
 
-            <!-- ==================== РЕЖИМ B: ВИЗУАЛЬНЫЙ КОНСТРУКТОР ТГ-БОТОВ НА AIOGRAM 3.X ==================== -->
+            <!-- РЕЖИМ B: ВИЗУАЛЬНЫЙ КОНСТРУКТОР ТГ-БОТОВ НА AIOGRAM 3.X -->
             <div id="sub-builder-bot" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start animate-view-enter">
-
-                <!-- Левая колонка: ЖИВОЙ ЭКРАН ЧАТА TELEGRAM -->
-                <div id="anchor-bot-preview" class="lg:col-span-5 lg:sticky lg:top-28 space-y-4">
-                    <article class="frosted-card rounded-3xl p-4">
+                <div id="anchor-bot-preview" class="lg:col-span-5 lg:sticky lg:top-44 space-y-4">
+                    <article class="frosted-card p-4">
                         <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center gap-2">
                                 <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
@@ -603,9 +713,7 @@
                             <button onclick="loadPresetBot('shop')" class="btn-glass px-2.5 py-1 rounded-xl text-[11px] font-semibold text-sky-400">⚡ Пресет магазина</button>
                         </div>
 
-                        <!-- Имитация окна чата Telegram -->
                         <div class="rounded-2xl overflow-hidden border border-white/15" style="background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 100%); min-height: 300px;">
-                            <!-- Шапка чата -->
                             <div class="px-3.5 py-2.5 bg-black/40 border-b border-white/10 flex items-center gap-2.5">
                                 <div class="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center text-xs font-bold text-white">🤖</div>
                                 <div>
@@ -613,17 +721,14 @@
                                     <div class="text-[10px] text-sky-300">bot • aiogram 3.x</div>
                                 </div>
                             </div>
-
-                            <!-- Сообщение и инлайн-клавиатура -->
                             <div class="p-3.5 space-y-2">
                                 <div class="max-w-[92%] rounded-2xl rounded-tl-sm bg-[#182533] border border-white/10 p-3 text-xs text-slate-100 leading-relaxed whitespace-pre-wrap shadow-md" id="tg-preview-msg"></div>
-                                <!-- Динамическая сетка инлайн-кнопок -->
                                 <div id="tg-preview-kb" class="max-w-[92%] space-y-1.5"></div>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-white/10 text-[11px] text-muted-dynamic">
-                            <span id="bot-summary-stats">Рядов: 2 • Кнопок: 3</span>
+                            <span id="bot-summary-stats">Рядов: 3 • Кнопок: 4</span>
                             <span class="font-mono text-sky-400">Aiogram 3.x + Router</span>
                         </div>
                     </article>
@@ -638,64 +743,41 @@
                     </div>
                 </div>
 
-                <!-- Правая колонка: РЕДАКТОР КНОПОК, СООБЩЕНИЯ И МОДУЛЕЙ AIOGRAM -->
                 <div class="lg:col-span-7 space-y-4">
-
-                    <!-- Блок 1: Название и приветственный текст -->
-                    <article id="anchor-bot-msg" class="frosted-card rounded-3xl p-5 space-y-3">
+                    <article id="anchor-bot-msg" class="frosted-card p-5 space-y-3">
                         <div>
                             <span class="text-[11px] font-semibold uppercase tracking-wider text-sky-400">Шаг 1 • Сообщение стартового экрана (/start)</span>
                             <h2 class="text-base font-semibold text-dynamic mt-0.5">Текст ответа бота</h2>
                         </div>
-
-                        <div>
-                            <label class="block text-xs font-medium text-muted-dynamic mb-1">Название бота (для шапки и комментариев)</label>
-                            <input id="bot-name-input" oninput="updateBotBuilderPreview()" type="text" value="Vibe Shop & Studio Bot" class="frosted-input w-full min-h-[42px] rounded-2xl px-3.5 text-xs">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-medium text-muted-dynamic mb-1">Текст сообщения (поддерживает HTML-теги &lt;b&gt;, &lt;code&gt;)</label>
-                            <textarea id="bot-msg-input" oninput="updateBotBuilderPreview()" rows="3" class="frosted-input w-full rounded-2xl p-3.5 text-xs resize-none">👋 Привет, {user_name}!
+                        <input id="bot-name-input" oninput="updateBotBuilderPreview()" type="text" value="Vibe Shop & Studio Bot" class="frosted-input w-full min-h-[42px] rounded-2xl px-3.5 text-xs">
+                        <textarea id="bot-msg-input" oninput="updateBotBuilderPreview()" rows="3" class="frosted-input w-full rounded-2xl p-3.5 text-xs resize-none">👋 Привет, {user_name}!
 
 Добро пожаловать в наш сервис на Aiogram 3.x. Выбери нужный раздел на клавиатуре ниже:</textarea>
-                        </div>
                     </article>
 
-                    <!-- Блок 2: Конструктор Инлайн-клавиатуры (InlineKeyboardBuilder) -->
-                    <article id="anchor-bot-kb" class="frosted-card rounded-3xl p-5 space-y-3.5">
+                    <article id="anchor-bot-kb" class="frosted-card p-5 space-y-3.5">
                         <div class="flex items-center justify-between">
                             <div>
-                                <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Шаг 2 • Визуальный редактор кнопок</span>
+                                <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Шаг 2 • Визуальный редактор кнопок</span>
                                 <h3 class="text-base font-semibold text-dynamic mt-0.5">Инлайн-клавиатура (InlineKeyboardBuilder)</h3>
                             </div>
-                            <button onclick="addBotKeyboardRow()" class="btn-primary px-3 py-2 rounded-xl text-xs font-semibold">
-                                ＋ Новый ряд
-                            </button>
+                            <button onclick="addBotKeyboardRow()" class="btn-primary px-3 py-2 rounded-xl text-xs font-semibold">＋ Новый ряд</button>
                         </div>
-
-                        <!-- Список рядов и кнопок для редактирования -->
                         <div id="bot-rows-editor" class="space-y-3"></div>
                     </article>
 
-                    <!-- Блок 3: Архитектурные модули Aiogram 3 -->
-                    <article id="anchor-bot-mods" class="frosted-card rounded-3xl p-5 space-y-4">
+                    <article id="anchor-bot-mods" class="frosted-card p-5 space-y-4">
                         <div>
                             <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Шаг 3 • Бэкенд-модули и генерация кода</span>
                             <h3 class="text-base font-semibold text-dynamic mt-0.5">Что подключить в код бота?</h3>
                         </div>
-
                         <div id="bot-modules-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
 
                         <div class="grid grid-cols-2 gap-2.5 pt-2">
-                            <button onclick="generateAiogramOutput('code')" class="btn-primary min-h-[48px] rounded-2xl text-xs font-bold">
-                                🐍 Собрать рабочий код bot.py
-                            </button>
-                            <button onclick="generateAiogramOutput('prompt')" class="btn-glass min-h-[48px] rounded-2xl text-xs font-bold text-indigo-300">
-                                ✨ Собрать ТЗ для Claude / Cursor
-                            </button>
+                            <button onclick="generateAiogramOutput('code')" class="btn-primary min-h-[48px] rounded-2xl text-xs font-bold">🐍 Собрать код bot.py</button>
+                            <button onclick="generateAiogramOutput('prompt')" class="btn-glass min-h-[48px] rounded-2xl text-xs font-bold text-indigo-300">✨ Собрать ТЗ для ИИ</button>
                         </div>
 
-                        <!-- Вывод сгенерированного кода или промта бота -->
                         <div id="bot-out-wrap" class="expand-grid">
                             <div class="expand-inner">
                                 <div class="pt-3 border-t border-white/10">
@@ -713,79 +795,119 @@
                                         </div>
                                         <div id="bot-code" class="p-3.5 font-mono text-[11px] leading-relaxed whitespace-pre-wrap break-words max-h-80 overflow-y-auto"></div>
                                     </div>
-                                    <button onclick="saveResultToVault('Aiogram 3 Бот: ' + document.getElementById('bot-name-input').value, 'bot-code', 'Архитектуры')" class="btn-glass w-full min-h-[44px] mt-2.5 rounded-2xl text-xs font-semibold text-indigo-400">
+                                    <button onclick="saveResultToVault('Aiogram 3 Бот: ' + document.getElementById('bot-name-input').value, 'bot-code', 'Архитектуры')" class="btn-glass w-full min-h-[44px] mt-2.5 rounded-2xl text-xs font-semibold accent-text">
                                         💾 Сохранить код бота в Мой Сейф
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </article>
-
                 </div>
             </div>
-
         </section>
 
-        <!-- ==================== ВКЛАДКА 1: ИНСТРУМЕНТЫ (АРХИТЕКТУРА, ОШИБКИ, ОПТИМИЗАТОР) ==================== -->
+        <!-- ==================== ВКЛАДКА 1: ИНСТРУМЕНТЫ (ФИЧИ 2, 3, 4 + ДЕБАГГЕР) ==================== -->
         <section id="view-tools" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start animate-view-enter">
+
+            <!-- Левая колонка: СБОРЩИК ПРОЕКТА С АНТИ-СЛИВОМ ТОКЕНОВ + КОНСТРУКТОР .CURSORRULES -->
             <div class="lg:col-span-7 space-y-5">
-                <article id="tool-templates" class="frosted-card rounded-3xl p-5">
-                    <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Starter Kits</span>
-                    <h2 class="text-base font-semibold text-dynamic mt-0.5 mb-3">Готовые шаблоны проектов</h2>
-                    <div class="grid grid-cols-3 gap-2.5">
-                        <button onclick="openTemplateSheet('saas')" class="btn-glass min-h-[54px] p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1">
-                            <span class="text-sm">🚀</span><span class="text-xs font-semibold">AI SaaS</span>
-                        </button>
-                        <button onclick="openTemplateSheet('tgbot')" class="btn-glass min-h-[54px] p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1">
-                            <span class="text-sm">🤖</span><span class="text-xs font-semibold">TG-бот</span>
-                        </button>
-                        <button onclick="openTemplateSheet('landing')" class="btn-glass min-h-[54px] p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1">
-                            <span class="text-sm">✨</span><span class="text-xs font-semibold">3D Сайт</span>
-                        </button>
-                    </div>
-                </article>
 
-                <article id="tool-arch" class="frosted-card rounded-3xl p-5">
-                    <div class="flex items-start justify-between gap-3 mb-3">
+                <!-- НОВАЯ ФИЧА #2: Сборщик контекста проекта + Авто-фильтр секретов (API Sanitizer) -->
+                <article id="tool-combiner" class="frosted-card p-5 space-y-3.5">
+                    <div class="flex items-start justify-between gap-2">
                         <div>
-                            <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">System Blueprint</span>
-                            <h2 class="text-base font-semibold text-dynamic mt-0.5">Конструктор архитектуры</h2>
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Фича #2 • Project Combiner & Sanitizer</span>
+                            <h2 class="text-base font-semibold text-dynamic mt-0.5">📦 Сборщик файлов проекта + Анти-слив токенов</h2>
                         </div>
+                        <span id="combiner-files-badge" class="px-2.5 py-1 rounded-full text-[11px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 shrink-0">0 файлов</span>
                     </div>
-                    <button onclick="openStackSheet()" class="frosted-input w-full min-h-[48px] rounded-2xl px-4 py-2.5 flex items-center justify-between text-left mb-3.5">
-                        <div class="truncate pr-2">
-                            <span class="block text-[10px] uppercase tracking-wider text-muted-dynamic">Активный стек</span>
-                            <span id="selected-stack-label" class="text-xs font-semibold text-dynamic">Python 3.11 + Aiogram 3.x + aiosqlite</span>
-                        </div>
-                        <span class="px-2.5 py-1 rounded-xl bg-indigo-500/15 text-indigo-400 text-[11px] font-semibold shrink-0">Сменить ▾</span>
-                    </button>
-                    <button onclick="generateArchitecture()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold">Сгенерировать архитектуру</button>
+                    <p class="text-xs text-muted-dynamic leading-relaxed">Закинь несколько файлов проекта (`.py`, `.js`, `.html`, `.json`) или вставь код вручную — скрипт склеит их в единый промт с деревом файлов и <b>автоматически замаскирует токены ботов и API-ключи</b>.</p>
 
-                    <div id="arch-out-wrap" class="expand-grid">
+                    <!-- Зона выбора файлов -->
+                    <label class="frosted-input border-dashed border-2 border-indigo-400/40 hover:border-indigo-400 rounded-2xl p-4 flex flex-col items-center justify-center gap-1.5 cursor-pointer text-center transition">
+                        <span class="text-xl">📂</span>
+                        <span class="text-xs font-semibold text-dynamic">Нажми, чтобы выбрать файлы проекта (.py, .js, .ts, .html, .json)</span>
+                        <span class="text-[10px] text-muted-dynamic">Обработка происходит локально в твоём браузере</span>
+                        <input type="file" id="project-files-input" multiple onchange="handleProjectFilesUpload(this.files)" class="hidden">
+                    </label>
+
+                    <!-- Тумблер защиты секретов -->
+                    <div class="flex items-center justify-between p-3 rounded-2xl code-surface border border-white/10">
+                        <div>
+                            <div class="text-xs font-semibold text-dynamic flex items-center gap-1.5">
+                                <span>🛡 Авто-фильтр секретов (API Key Sanitizer)</span>
+                            </div>
+                            <p class="text-[10px] text-muted-dynamic">Скрывает токены ТГ-ботов, ключи OpenAI/Claude/DeepSeek и пароли БД</p>
+                        </div>
+                        <input type="checkbox" id="sanitize-toggle" checked class="w-5 h-5 accent-indigo-500 rounded cursor-pointer">
+                    </div>
+
+                    <textarea id="combiner-manual-code" rows="3" placeholder="Или вставь сюда кусок кода с токенами для мгновенной очистки и упаковки..." class="frosted-input w-full rounded-2xl p-3.5 text-xs font-mono placeholder-slate-500 resize-none"></textarea>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="buildCombinedProjectPrompt()" class="btn-primary min-h-[46px] rounded-2xl text-xs font-bold">
+                            📦 Склеить и очистить токены
+                        </button>
+                        <button onclick="clearCombinedFiles()" class="btn-glass min-h-[46px] rounded-2xl text-xs font-semibold text-rose-300">
+                            Очистить список
+                        </button>
+                    </div>
+
+                    <div id="combiner-out-wrap" class="expand-grid">
                         <div class="expand-inner">
-                            <div class="mt-4 pt-3 border-t border-white/10">
-                                <div id="arch-skeleton" class="hidden space-y-2 p-4 rounded-2xl code-surface mb-2">
-                                    <div class="skeleton-line h-3 w-1/3"></div>
-                                    <div class="skeleton-line h-3 w-full"></div>
-                                </div>
-                                <div id="arch-result-card" class="rounded-2xl code-surface border border-white/10 overflow-hidden">
+                            <div class="pt-3 border-t border-white/10">
+                                <div class="rounded-2xl code-surface border border-white/10 overflow-hidden">
                                     <div class="flex items-center justify-between px-3.5 py-2 bg-white/[0.03] border-b border-white/10">
-                                        <span class="text-xs font-semibold text-indigo-400">Архитектура</span>
-                                        <button onclick="copyResult('arch-code', this)" class="btn-glass min-h-[30px] px-2.5 rounded-xl text-[11px]">Копировать</button>
+                                        <span id="combiner-stats-label" class="text-xs font-semibold text-emerald-400">Готовый контекст проекта</span>
+                                        <button onclick="copyResult('combiner-code', this)" class="btn-glass min-h-[30px] px-2.5 rounded-xl text-[11px]">Копировать</button>
                                     </div>
-                                    <div id="arch-code" class="p-3.5 font-mono text-[11px] whitespace-pre-wrap break-words max-h-60 overflow-y-auto"></div>
+                                    <div id="combiner-code" class="p-3.5 font-mono text-[11px] whitespace-pre-wrap break-words max-h-64 overflow-y-auto"></div>
                                 </div>
-                                <button onclick="saveResultToVault('Архитектура: ' + getCurrentStackTitle(), 'arch-code', 'Архитектуры')" class="btn-glass w-full min-h-[42px] mt-2 rounded-2xl text-xs font-semibold text-indigo-400">💾 В Сейф</button>
                             </div>
                         </div>
                     </div>
                 </article>
 
-                <article id="tool-debug" class="frosted-card rounded-3xl p-5">
+                <!-- НОВАЯ ФИЧА #4: Генератор файлов .cursorrules и CLAUDE.md -->
+                <article id="tool-rules" class="frosted-card p-5 space-y-3.5">
+                    <div>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-violet-400">Фича #4 • AI IDE Configurator</span>
+                        <h2 class="text-base font-semibold text-dynamic mt-0.5">⚙️ Генератор файлов .cursorrules и CLAUDE.md</h2>
+                        <p class="text-xs text-muted-dynamic mt-0.5">Собери системный файл правил для корня проекта, чтобы ИИ никогда не обрезал код и соблюдал архитектуру.</p>
+                    </div>
+
+                    <div id="rules-chips-grid" class="grid grid-cols-2 gap-2"></div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button onclick="generateIdeRulesFile()" class="btn-primary min-h-[46px] rounded-2xl text-xs font-bold">
+                            ⚙️ Сгенерировать правила
+                        </button>
+                        <button onclick="downloadRulesFile()" class="btn-glass min-h-[46px] rounded-2xl text-xs font-semibold text-emerald-400">
+                            📥 Скачать .cursorrules
+                        </button>
+                    </div>
+
+                    <div id="rules-out-wrap" class="expand-grid">
+                        <div class="expand-inner">
+                            <div class="pt-3 border-t border-white/10">
+                                <div class="rounded-2xl code-surface border border-white/10 overflow-hidden">
+                                    <div class="flex items-center justify-between px-3.5 py-2 bg-white/[0.03] border-b border-white/10">
+                                        <span class="text-xs font-semibold text-violet-400">.cursorrules / CLAUDE.md</span>
+                                        <button onclick="copyResult('rules-code', this)" class="btn-glass min-h-[30px] px-2.5 rounded-xl text-[11px]">Копировать</button>
+                                    </div>
+                                    <div id="rules-code" class="p-3.5 font-mono text-[11px] whitespace-pre-wrap break-words max-h-60 overflow-y-auto"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Умный конвертер ошибок -->
+                <article id="tool-debug" class="frosted-card p-5">
                     <div class="flex items-center justify-between mb-2.5">
                         <div>
                             <span class="text-[11px] font-semibold uppercase tracking-wider text-rose-400">Smart Traceback</span>
-                            <h2 class="text-base font-semibold text-dynamic mt-0.5">Умный конвертер ошибок</h2>
+                            <h2 class="text-base font-semibold text-dynamic mt-0.5">🐛 Умный конвертер ошибок</h2>
                         </div>
                         <span id="detected-lang-badge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/[0.06] text-muted-dynamic">Авто...</span>
                     </div>
@@ -811,18 +933,29 @@
                                     </div>
                                     <div id="err-code" class="p-3.5 font-mono text-[11px] whitespace-pre-wrap break-words max-h-60 overflow-y-auto"></div>
                                 </div>
-                                <button onclick="saveResultToVault('Отладка ошибки', 'err-code', 'Ошибки')" class="btn-glass w-full min-h-[42px] mt-2 rounded-2xl text-xs font-semibold text-indigo-400">💾 В Сейф</button>
+                                <button onclick="saveResultToVault('Отладка ошибки', 'err-code', 'Ошибки')" class="btn-glass w-full min-h-[42px] mt-2 rounded-2xl text-xs font-semibold accent-text">💾 В Сейф</button>
                             </div>
                         </div>
                     </div>
                 </article>
             </div>
 
+            <!-- Правая колонка: ГОЛОСОВОЙ PROMPT OPTIMIZER + АРХИТЕКТУРА + ИСТОРИЯ -->
             <div class="lg:col-span-5 space-y-5">
-                <article id="tool-opt" class="frosted-card rounded-3xl p-5">
-                    <span class="text-[11px] font-semibold uppercase tracking-wider text-violet-400">Prompt Optimizer</span>
-                    <h3 class="text-base font-semibold text-dynamic mt-0.5 mb-2">Усилитель сырых промтов</h3>
-                    <textarea id="opt-input" rows="3" placeholder="Напиши задачу своими словами..." class="frosted-input w-full rounded-2xl p-3.5 text-xs placeholder-slate-500 resize-none mb-3"></textarea>
+
+                <!-- НОВАЯ ФИЧА #3: Голосовой вайбкодинг (Voice-to-Prompt) в Prompt Optimizer -->
+                <article id="tool-opt" class="frosted-card p-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-rose-400">Фича #3 • Voice-to-Prompt AI</span>
+                            <h3 class="text-base font-semibold text-dynamic mt-0.5">🎙 Голосовой усилитель промтов</h3>
+                        </div>
+                        <button type="button" onclick="toggleVoiceInput('opt-input', this)" class="btn-glass px-3 py-1.5 rounded-xl text-xs font-bold text-rose-300 flex items-center gap-1.5">
+                            <span>🎙 Диктовать</span>
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-muted-dynamic mb-2.5">Нажми «🎙 Диктовать», скажи идею своими словами — и получи профессиональное ТЗ.</p>
+                    <textarea id="opt-input" rows="3" placeholder="Скажи голосом или напиши: Сделай бота для турниров по Brawl Stars с сеткой..." class="frosted-input w-full rounded-2xl p-3.5 text-xs placeholder-slate-500 resize-none mb-3"></textarea>
                     <button onclick="optimizeRawPrompt()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold">Структурировать промт</button>
 
                     <div id="opt-out-wrap" class="expand-grid">
@@ -833,7 +966,7 @@
                                 </div>
                                 <div id="opt-result-card" class="rounded-2xl code-surface border border-white/10 overflow-hidden">
                                     <div class="flex items-center justify-between px-3.5 py-2 bg-white/[0.03] border-b border-white/10">
-                                        <span class="text-xs font-semibold text-indigo-400">Результат</span>
+                                        <span class="text-xs font-semibold accent-text">Результат</span>
                                         <button onclick="copyResult('opt-code', this)" class="btn-glass min-h-[30px] px-2.5 rounded-xl text-[11px]">Копировать</button>
                                     </div>
                                     <div id="opt-code" class="p-3.5 font-mono text-[11px] whitespace-pre-wrap break-words max-h-56 overflow-y-auto"></div>
@@ -843,7 +976,37 @@
                     </div>
                 </article>
 
-                <article class="frosted-card rounded-3xl p-5">
+                <article id="tool-arch" class="frosted-card p-5">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">System Blueprint</span>
+                    <h2 class="text-base font-semibold text-dynamic mt-0.5 mb-3">🏗 Конструктор архитектуры</h2>
+                    <button onclick="openStackSheet()" class="frosted-input w-full min-h-[48px] rounded-2xl px-4 py-2.5 flex items-center justify-between text-left mb-3">
+                        <div class="truncate pr-2">
+                            <span class="block text-[10px] uppercase tracking-wider text-muted-dynamic">Активный стек</span>
+                            <span id="selected-stack-label" class="text-xs font-semibold text-dynamic">Python 3.11 + Aiogram 3.x + aiosqlite</span>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-xl bg-indigo-500/15 accent-text text-[11px] font-semibold shrink-0">Сменить ▾</span>
+                    </button>
+                    <button onclick="generateArchitecture()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold">Сгенерировать архитектуру</button>
+
+                    <div id="arch-out-wrap" class="expand-grid">
+                        <div class="expand-inner">
+                            <div class="mt-4 pt-3 border-t border-white/10">
+                                <div id="arch-skeleton" class="hidden space-y-2 p-4 rounded-2xl code-surface mb-2">
+                                    <div class="skeleton-line h-3 w-1/3"></div>
+                                </div>
+                                <div id="arch-result-card" class="rounded-2xl code-surface border border-white/10 overflow-hidden">
+                                    <div class="flex items-center justify-between px-3.5 py-2 bg-white/[0.03] border-b border-white/10">
+                                        <span class="text-xs font-semibold accent-text">Архитектура</span>
+                                        <button onclick="copyResult('arch-code', this)" class="btn-glass min-h-[30px] px-2.5 rounded-xl text-[11px]">Копировать</button>
+                                    </div>
+                                    <div id="arch-code" class="p-3.5 font-mono text-[11px] whitespace-pre-wrap break-words max-h-60 overflow-y-auto"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="frosted-card p-5">
                     <div class="flex items-center justify-between mb-2">
                         <h3 class="text-sm font-semibold text-dynamic">История генераций</h3>
                         <button onclick="clearHistory()" class="text-[11px] text-muted-dynamic hover:text-rose-400">Очистить</button>
@@ -865,7 +1028,7 @@
             <div id="sub-prompts" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
 
             <div id="sub-ideas" class="hidden space-y-4">
-                <div class="frosted-card rounded-3xl p-4 flex flex-col sm:flex-row gap-2.5">
+                <div class="frosted-card p-4 flex flex-col sm:flex-row gap-2.5">
                     <input id="idea-search" oninput="renderIdeasList()" type="text" placeholder="Поиск из 500 идей (бот, 3D, SaaS)..." class="frosted-input flex-1 min-h-[44px] rounded-2xl px-4 text-xs">
                     <button onclick="pickRandomIdea()" class="btn-primary min-h-[44px] px-4 rounded-2xl text-xs font-semibold shrink-0">🎲 Случайная идея</button>
                 </div>
@@ -875,7 +1038,7 @@
 
         <!-- ==================== ВКЛАДКА 3: МОЙ СЕЙФ ==================== -->
         <section id="view-vault" class="hidden space-y-4 animate-view-enter">
-            <div class="frosted-card rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="frosted-card p-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <div class="flex items-center gap-2">
                         <h2 class="text-sm font-bold text-dynamic">Хранилище сниппетов</h2>
@@ -901,7 +1064,7 @@
 
             <div id="acc-new-vault" class="expand-grid">
                 <div class="expand-inner">
-                    <div class="frosted-card rounded-3xl p-4 space-y-3">
+                    <div class="frosted-card p-4 space-y-3">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                             <input id="manual-vault-title" type="text" placeholder="Название сниппета" class="frosted-input sm:col-span-2 min-h-[44px] rounded-2xl px-3.5 text-xs">
                             <select id="manual-vault-tag" class="frosted-input min-h-[44px] rounded-2xl px-3.5 text-xs">
@@ -921,16 +1084,16 @@
 
     </main>
 
-    <!-- Плавающая стеклянная "пилюля" навигации внизу экрана -->
+    <!-- Нижняя плавающая навигация -->
     <nav class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,12px)+12px)] z-30 w-[calc(100%-24px)] max-w-md frosted-nav rounded-full p-1.5" role="tablist">
         <div class="relative grid grid-cols-4 items-center">
-            <div id="bottom-nav-pill" class="absolute top-0 bottom-0 left-0 w-1/4 rounded-full bg-indigo-500/20 border border-indigo-400/35 transition-transform duration-300 ease-ios pointer-events-none"></div>
+            <div id="bottom-nav-pill" class="absolute top-0 bottom-0 left-0 w-1/4 rounded-full bg-white/[0.1] border border-white/20 transition-transform duration-300 ease-ios pointer-events-none"></div>
 
-            <button onclick="switchTab(0, 'view-studio')" id="nav-btn-0" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1 text-[11px] font-semibold text-indigo-400">
+            <button onclick="switchTab(0, 'view-studio')" id="nav-btn-0" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1 text-[11px] font-semibold accent-text">
                 <span>🧩</span><span>Конструктор</span>
             </button>
             <button onclick="switchTab(1, 'view-tools')" id="nav-btn-1" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1 text-[11px] font-medium text-muted-dynamic">
-                <span>🛠</span><span>Тулзы</span>
+                <span>🛠</span><span>Тулзы 2.0</span>
             </button>
             <button onclick="switchTab(2, 'view-hub')" id="nav-btn-2" class="relative z-10 min-h-[44px] rounded-full flex items-center justify-center gap-1 text-[11px] font-medium text-muted-dynamic">
                 <span>👑</span><span>VIP База</span>
@@ -942,15 +1105,15 @@
         </div>
     </nav>
 
-    <!-- iOS BOTTOM SHEET -->
+    <!-- iOS BOTTOM SHEET (ДЛЯ ПЕРСОНАЛИЗАЦИИ САЙТА, VIP И СТЕКОВ) -->
     <div id="sheet-backdrop" onclick="closeBottomSheet()" class="sheet-backdrop fixed inset-0 bg-black/60 z-40"></div>
-    <div id="bottom-sheet" class="bottom-sheet fixed left-0 right-0 bottom-0 z-50 max-w-lg mx-auto frosted-card rounded-t-[28px] p-5 pb-[calc(env(safe-area-inset-bottom,16px)+20px)] max-h-[82vh] flex flex-col">
+    <div id="bottom-sheet" class="bottom-sheet fixed left-0 right-0 bottom-0 z-50 max-w-lg mx-auto frosted-card rounded-t-[28px] p-5 pb-[calc(env(safe-area-inset-bottom,16px)+20px)] max-h-[84vh] flex flex-col">
         <div id="sheet-drag-handle" class="w-full pt-1 pb-3 flex justify-center"><div class="w-10 h-1.5 rounded-full bg-slate-400/40"></div></div>
         <div class="flex items-center justify-between mb-3">
-            <h3 id="sheet-title" class="text-base font-bold text-dynamic">Выбор</h3>
+            <h3 id="sheet-title" class="text-base font-bold text-dynamic">Настройки</h3>
             <button onclick="closeBottomSheet()" class="btn-glass min-w-[36px] min-h-[36px] rounded-full text-xs">✕</button>
         </div>
-        <div id="sheet-body" class="overflow-y-auto space-y-2 pr-1"></div>
+        <div id="sheet-body" class="overflow-y-auto space-y-2.5 pr-1"></div>
     </div>
 
     <!-- Toast-пилюля -->
@@ -967,16 +1130,12 @@
             ctx: null,
             muted: localStorage.getItem('vibe_sound_muted') === 'true',
             lastTick: 0,
-
             init() {
                 if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
                     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                if (this.ctx && this.ctx.state === 'suspended') {
-                    this.ctx.resume().catch(() => {});
-                }
+                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
             },
-
             toggleMute() {
                 this.muted = !this.muted;
                 localStorage.setItem('vibe_sound_muted', String(this.muted));
@@ -984,7 +1143,6 @@
                 if (!this.muted) this.success();
                 showToast(this.muted ? 'Звук выключен 🔇' : 'Звук включён 🔊');
             },
-
             tap(freq = 320) {
                 if (this.muted) return;
                 try {
@@ -997,26 +1155,21 @@
                     osc.frequency.exponentialRampToValueAtTime(90, now + 0.038);
                     gain.gain.setValueAtTime(0.08, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.038);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.04);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(now); osc.stop(now + 0.04);
                 } catch (_) {}
             },
-
             tick() {
                 const nowMs = performance.now();
                 if (this.muted || nowMs - this.lastTick < 45) return;
                 this.lastTick = nowMs;
                 this.tap(520);
             },
-
             success() {
                 if (this.muted) return;
                 try {
                     this.init();
-                    const notes = [523.25, 659.25, 783.99, 1046.5];
-                    notes.forEach((freq, idx) => {
+                    [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
                         const now = this.ctx.currentTime + idx * 0.055;
                         const osc = this.ctx.createOscillator();
                         const gain = this.ctx.createGain();
@@ -1024,14 +1177,11 @@
                         osc.frequency.setValueAtTime(freq, now);
                         gain.gain.setValueAtTime(0.07, now);
                         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-                        osc.connect(gain);
-                        gain.connect(this.ctx.destination);
-                        osc.start(now);
-                        osc.stop(now + 0.23);
+                        osc.connect(gain); gain.connect(this.ctx.destination);
+                        osc.start(now); osc.stop(now + 0.23);
                     });
                 } catch (_) {}
             },
-
             error() {
                 if (this.muted) return;
                 try {
@@ -1044,10 +1194,8 @@
                         osc.frequency.setValueAtTime(freq, now);
                         gain.gain.setValueAtTime(0.05, now);
                         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
-                        osc.connect(gain);
-                        gain.connect(this.ctx.destination);
-                        osc.start(now);
-                        osc.stop(now + 0.1);
+                        osc.connect(gain); gain.connect(this.ctx.destination);
+                        osc.start(now); osc.stop(now + 0.1);
                     });
                 } catch (_) {}
             }
@@ -1055,8 +1203,7 @@
 
         const tg = window.Telegram?.WebApp;
         let currentTabIndex = 0;
-        let currentBuilderMode = 'web'; // 'web' | 'bot'
-        let activeSheetOpen = false;
+        let currentBuilderMode = 'web';
 
         const Haptic = {
             selection() { SoundFX.tap(360); try { tg?.HapticFeedback?.selectionChanged(); } catch (_) {} },
@@ -1065,7 +1212,332 @@
             error() { SoundFX.error(); try { tg?.HapticFeedback?.notificationOccurred('error'); } catch (_) {} }
         };
 
-        /* ==================== 2. ПЕРЕКЛЮЧЕНИЕ МЕЖДУ КОНСТРУКТОРОМ САЙТОВ И КОНСТРУКТОРОМ ТГ-БОТОВ ==================== */
+        /* ==================== 2. ПЕРСОНАЛЬНАЯ НАСТРОЙКА САЙТА ПОД КАЖДОГО ПОЛЬЗОВАТЕЛЯ ==================== */
+        const SITE_THEME_KEY = 'vibe_user_custom_theme_v1';
+        const SITE_PRESETS = [
+            { name: 'Indigo Vision', bg: '#090b12', p: '#6366f1', s: '#a855f7', r: 24 },
+            { name: 'Cyber Emerald', bg: '#06100e', p: '#10b981', s: '#06b6d4', r: 18 },
+            { name: 'Crimson Sunset', bg: '#12070b', p: '#f43f5e', s: '#fb923c', r: 26 },
+            { name: 'Onyx Gold VIP', bg: '#0c0a06', p: '#f59e0b', s: '#eab308', r: 20 },
+            { name: 'Arctic Sky', bg: '#060d17', p: '#0ea5e9', s: '#6366f1', r: 22 },
+            { name: 'Pure Obsidian', bg: '#000000', p: '#8b5cf6', s: '#ec4899', r: 14 }
+        ];
+
+        function loadUserSiteTheme() {
+            try {
+                return JSON.parse(localStorage.getItem(SITE_THEME_KEY) || 'null') || {
+                    bg: '#090b12', primary: '#6366f1', secondary: '#a855f7', radius: 24, bannerUrl: ''
+                };
+            } catch {
+                return { bg: '#090b12', primary: '#6366f1', secondary: '#a855f7', radius: 24, bannerUrl: '' };
+            }
+        }
+
+        function applyUserSiteTheme(cfg) {
+            const root = document.documentElement;
+            root.style.setProperty('--bg-main', cfg.bg || '#090b12');
+            root.style.setProperty('--accent-primary', cfg.primary || '#6366f1');
+            root.style.setProperty('--accent-secondary', cfg.secondary || '#a855f7');
+            root.style.setProperty('--site-radius', `${cfg.radius ?? 24}px`);
+            localStorage.setItem(SITE_THEME_KEY, JSON.stringify(cfg));
+
+            if (cfg.bannerUrl && cfg.bannerUrl.trim()) {
+                const url = cfg.bannerUrl.trim();
+                const vid = document.getElementById('header-custom-video');
+                const gif = document.getElementById('header-custom-gif');
+                const proc = document.getElementById('header-procedural-banner');
+                if (url.endsWith('.mp4') || url.endsWith('.webm')) {
+                    vid.src = url;
+                    vid.classList.remove('hidden');
+                    gif.classList.add('hidden');
+                    proc.classList.add('hidden');
+                } else {
+                    gif.src = url;
+                    gif.classList.remove('hidden');
+                    vid.classList.add('hidden');
+                    proc.classList.add('hidden');
+                }
+            }
+        }
+
+        function openPersonalizeSheet() {
+            const cfg = loadUserSiteTheme();
+            const html = `
+                <div class="space-y-3.5 text-xs">
+                    <p class="text-muted-dynamic">Настрой внешний вид всего приложения под свой вкус — цвета фона, кнопок, скругление карточек и верхний видео-баннер:</p>
+
+                    <div>
+                        <span class="font-semibold text-dynamic block mb-1.5">Быстрые темы оформления:</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            ${SITE_PRESETS.map((pr, i) => `
+                                <button type="button" onclick="applySitePreset(${i})" class="p-2.5 rounded-2xl border border-white/10 bg-white/[0.03] flex items-center gap-2 text-left hover:border-white/30">
+                                    <span class="w-4 h-4 rounded-full shrink-0" style="background:linear-gradient(135deg, ${pr.p}, ${pr.s})"></span>
+                                    <span class="font-semibold text-dynamic truncate">${pr.name}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/10">
+                        <label class="p-2.5 rounded-2xl code-surface flex flex-col items-center gap-1 cursor-pointer">
+                            <span class="text-[10px] text-muted-dynamic">Цвет фона</span>
+                            <input type="color" value="${cfg.bg}" oninput="updateCustomThemeField('bg', this.value)" class="w-8 h-6 bg-transparent border-0 cursor-pointer">
+                        </label>
+                        <label class="p-2.5 rounded-2xl code-surface flex flex-col items-center gap-1 cursor-pointer">
+                            <span class="text-[10px] text-muted-dynamic">Кнопки (Осн.)</span>
+                            <input type="color" value="${cfg.primary}" oninput="updateCustomThemeField('primary', this.value)" class="w-8 h-6 bg-transparent border-0 cursor-pointer">
+                        </label>
+                        <label class="p-2.5 rounded-2xl code-surface flex flex-col items-center gap-1 cursor-pointer">
+                            <span class="text-[10px] text-muted-dynamic">Градиент</span>
+                            <input type="color" value="${cfg.secondary}" oninput="updateCustomThemeField('secondary', this.value)" class="w-8 h-6 bg-transparent border-0 cursor-pointer">
+                        </label>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="font-medium text-dynamic">Скругление карточек сайта</span>
+                            <span id="site-rad-label" class="font-mono accent-text">${cfg.radius}px</span>
+                        </div>
+                        <input type="range" min="8" max="32" step="2" value="${cfg.radius}" oninput="updateCustomThemeField('radius', Number(this.value)); document.getElementById('site-rad-label').textContent=this.value+'px'" class="ios-slider">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-muted-dynamic mb-1">Своя ссылка на GIF / MP4 для баннера в шапке (необязательно):</label>
+                        <input type="text" value="${escapeHtml(cfg.bannerUrl || '')}" oninput="updateCustomThemeField('bannerUrl', this.value)" placeholder="https://.../banner.gif или оставь 3D-сцену с руками" class="frosted-input w-full min-h-[38px] rounded-xl px-3 text-[11px]">
+                    </div>
+
+                    <button onclick="closeBottomSheet(); showToast('Персональный стиль сохранён! ✨')" class="btn-primary w-full min-h-[44px] rounded-2xl text-xs font-bold">Готово ✓</button>
+                </div>
+            `;
+            openBottomSheet('🎨 Настройка сайта под себя', html);
+        }
+
+        function applySitePreset(idx) {
+            Haptic.selection();
+            const pr = SITE_PRESETS[idx];
+            if (!pr) return;
+            const current = loadUserSiteTheme();
+            applyUserSiteTheme({ ...current, bg: pr.bg, primary: pr.p, secondary: pr.s, radius: pr.r });
+            openPersonalizeSheet();
+        }
+
+        function updateCustomThemeField(key, val) {
+            SoundFX.tick();
+            const current = loadUserSiteTheme();
+            current[key] = val;
+            applyUserSiteTheme(current);
+        }
+
+        /* ==================== 3. ГОЛОСОВОЙ ВАЙБКОДИНГ (VOICE-TO-PROMPT НА WEB SPEECH API) ==================== */
+        let activeRecognition = null;
+        let activeMicBtn = null;
+
+        function toggleVoiceInput(targetInputId, btnEl) {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) {
+                Haptic.error();
+                showToast('Голосовой ввод не поддерживается в этом браузере');
+                return;
+            }
+
+            if (activeRecognition) {
+                activeRecognition.stop();
+                return;
+            }
+
+            Haptic.light();
+            const rec = new SpeechRec();
+            rec.lang = 'ru-RU';
+            rec.interimResults = false;
+            rec.maxAlternatives = 1;
+
+            activeRecognition = rec;
+            activeMicBtn = btnEl;
+            const originalLabel = btnEl.innerHTML;
+            btnEl.classList.add('mic-recording');
+            btnEl.innerHTML = '<span>🔴 Слушаю...</span>';
+            showToast('🎙 Говорите идею проекта...');
+
+            rec.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                const inputEl = document.getElementById(targetInputId);
+                if (inputEl) {
+                    inputEl.value = (inputEl.value ? inputEl.value.trim() + ' ' : '') + transcript;
+                    Haptic.success();
+                    showToast('✨ Голос переведён в текст!');
+                }
+            };
+
+            rec.onerror = () => {
+                Haptic.error();
+                showToast('Не удалось распознать речь');
+            };
+
+            rec.onend = () => {
+                btnEl.classList.remove('mic-recording');
+                btnEl.innerHTML = originalLabel;
+                activeRecognition = null;
+                activeMicBtn = null;
+            };
+
+            rec.start();
+        }
+
+        /* ==================== 4. СБОРЩИК ПРОЕКТА + АВТО-ФИЛЬТР СЕКРЕТОВ (PROJECT COMBINER & SANITIZER) ==================== */
+        let uploadedProjectFiles = [];
+
+        function handleProjectFilesUpload(fileList) {
+            if (!fileList || fileList.length === 0) return;
+            Haptic.light();
+            const filesArray = Array.from(fileList).slice(0, 15);
+            let loaded = 0;
+
+            filesArray.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedProjectFiles.push({
+                        name: file.name,
+                        content: String(e.target?.result || '')
+                    });
+                    loaded++;
+                    if (loaded === filesArray.length) {
+                        document.getElementById('combiner-files-badge').textContent = `${uploadedProjectFiles.length} файл(ов)`;
+                        Haptic.success();
+                        showToast(`Загружено файлов: ${filesArray.length}`);
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        function sanitizeSecretsInCode(rawCode) {
+            let maskedCount = 0;
+            let cleaned = rawCode;
+
+            // 1. Токены Telegram-ботов (123456789:AA...)
+            cleaned = cleaned.replace(/\b\d{8,11}:[A-Za-z0-9_-]{34,36}\b/g, () => {
+                maskedCount++;
+                return 'YOUR_TELEGRAM_BOT_TOKEN_HERE';
+            });
+            // 2. Ключи OpenAI / DeepSeek / Anthropic (sk-...)
+            cleaned = cleaned.replace(/\bsk-(?:proj-|ant-)?[A-Za-z0-9_-]{20,}\b/g, () => {
+                maskedCount++;
+                return 'YOUR_AI_API_KEY_HERE';
+            });
+            // 3. Ссылки подключения к БД с паролями (postgres://, mongodb://)
+            cleaned = cleaned.replace(/\b(postgres(?:ql)?|mysql|mongodb(?:\+srv)?):\/\/[^:\s]+:[^@\s]+@[^\s"']+/gi, (match, proto) => {
+                maskedCount++;
+                return `${proto}://USER:HIDDEN_PASSWORD@localhost/dbname`;
+            });
+            // 4. Переменные окружения TOKEN / SECRET / API_KEY = "..."
+            cleaned = cleaned.replace(/((?:BOT_TOKEN|API_KEY|SECRET_KEY|PASSWORD)\s*=\s*["'])([^"'\n]{8,})(["'])/gi, (_, p1, _p2, p3) => {
+                maskedCount++;
+                return `${p1}HIDDEN_SECRET_VALUE${p3}`;
+            });
+
+            return { cleaned, maskedCount };
+        }
+
+        function buildCombinedProjectPrompt() {
+            const manual = document.getElementById('combiner-manual-code').value.trim();
+            if (uploadedProjectFiles.length === 0 && !manual) {
+                Haptic.error();
+                showToast('Выберите файлы или вставьте код в поле ниже!');
+                return;
+            }
+
+            const doSanitize = document.getElementById('sanitize-toggle').checked;
+            let totalMasked = 0;
+            const allFiles = [...uploadedProjectFiles];
+            if (manual) allFiles.push({ name: 'snippet.py', content: manual });
+
+            const treeLines = allFiles.map(f => `├── ${f.name}`).join('\n');
+            const blocks = allFiles.map(f => {
+                let content = f.content;
+                if (doSanitize) {
+                    const res = sanitizeSecretsInCode(content);
+                    content = res.cleaned;
+                    totalMasked += res.maskedCount;
+                }
+                return `<file path="${f.name}">\n${content}\n</file>`;
+            }).join('\n\n');
+
+            const finalPrompt = `Ниже представлена структура и исходный код моего проекта.\n\nДЕРЕВО ПРОЕКТА:\nproject/\n${treeLines}\n\nИСХОДНЫЙ КОД ФАЙЛОВ:\n${blocks}\n\nЗАДАЧА:\nПроанализируй архитектуру и код, сохрани текущую работоспособность и выдай полные обновлённые файлы.`;
+
+            const tokensEst = Math.ceil(finalPrompt.length / 3.8);
+            document.getElementById('combiner-stats-label').textContent = `~${tokensEst} токенов • Скрыто секретов: ${totalMasked}`;
+            const codeEl = document.getElementById('combiner-code');
+            codeEl.dataset.raw = finalPrompt;
+            codeEl.textContent = finalPrompt;
+            document.getElementById('combiner-out-wrap').classList.add('open');
+
+            Haptic.success();
+            showToast(totalMasked > 0 ? `🛡 Замаскировано секретов: ${totalMasked}!` : '📦 Проект склеен в единый промт!');
+        }
+
+        function clearCombinedFiles() {
+            Haptic.light();
+            uploadedProjectFiles = [];
+            document.getElementById('combiner-manual-code').value = '';
+            document.getElementById('combiner-files-badge').textContent = '0 файлов';
+            document.getElementById('combiner-out-wrap').classList.remove('open');
+            showToast('Список файлов очищен');
+        }
+
+        /* ==================== 5. ГЕНЕРАТОР ФАЙЛОВ ПРАВИЛ .CURSORRULES И CLAUDE.MD ==================== */
+        const IDE_RULES_OPTIONS = [
+            { id: 'full_file', title: '🚫 Запрет на "// ... остальной код"', active: true, rule: '- FULL-FILE OUTPUT ONLY: Никогда не используй сокращения вроде "// ... rest of code". Всегда выдавай полный рабочий код файла.' },
+            { id: 'python_async', title: '🐍 Python 3.11 + Aiogram 3 Async', active: true, rule: '- PYTHON ASYNC STANDARD: Используй строгую типизацию (Type Hints), роутеры aiogram 3.x и асинхронный aiosqlite в режиме WAL.' },
+            { id: 'vision_ui', title: '✨ Apple visionOS UI (Tailwind)', active: true, rule: '- UI/UX AESTHETIC: Оформляй интерфейс в стиле матового стекла (backdrop-blur, тонкие рамки border-white/10, плавные анимации cubic-bezier(0.22, 1, 0.36, 1)).' },
+            { id: 'no_regress', title: '🛡 Защита старой логики', active: true, rule: '- NO REGRESSIONS: При добавлении новых фич никогда не ломай и не удаляй существующие функции и импорты.' },
+            { id: 'sec_env', title: '🔐 Безопасность (.env & initData)', active: false, rule: '- SECURITY FIRST: Выноси все секреты в переменные окружения и проверяй входные данные.' },
+            { id: 'ru_docs', title: '🇷🇺 Комментарии на русском', active: true, rule: '- LANGUAGE: Пиши все объяснения, комментарии и docstrings на чистом русском языке.' }
+        ];
+
+        function initIdeRulesBuilder() {
+            const box = document.getElementById('rules-chips-grid');
+            if (!box) return;
+            box.innerHTML = IDE_RULES_OPTIONS.map((r, idx) => `
+                <button type="button" onclick="toggleIdeRule(${idx})" class="min-h-[42px] p-2.5 rounded-2xl border text-left text-xs transition-all ${r.active ? 'border-violet-400 bg-violet-500/20 text-violet-200 font-semibold' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">
+                    ${r.active ? '✓ ' : ''}${r.title}
+                </button>
+            `).join('');
+        }
+
+        function toggleIdeRule(idx) {
+            Haptic.selection();
+            IDE_RULES_OPTIONS[idx].active = !IDE_RULES_OPTIONS[idx].active;
+            initIdeRulesBuilder();
+        }
+
+        function buildIdeRulesText() {
+            const activeRules = IDE_RULES_OPTIONS.filter(r => r.active).map(r => r.rule).join('\n');
+            return `# SYSTEM RULES (.cursorrules / CLAUDE.md) — Сгенерировано в VIBE STUDIO\n\nТы — Senior Fullstack Architect и AI Vibe-Coding партнёр. Строго соблюдай следующие правила в каждом ответе:\n\n${activeRules}\n\n# WORKFLOW:\n1. Сначала кратко опиши план изменений в 2-3 пунктах.\n2. Затем выдай полностью готовые к копированию файлы.`;
+        }
+
+        function generateIdeRulesFile() {
+            Haptic.success();
+            const text = buildIdeRulesText();
+            const el = document.getElementById('rules-code');
+            el.dataset.raw = text;
+            el.textContent = text;
+            document.getElementById('rules-out-wrap').classList.add('open');
+            showToast('Файл правил сгенерирован!');
+        }
+
+        function downloadRulesFile() {
+            const text = buildIdeRulesText();
+            const blob = new Blob([text], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '.cursorrules';
+            a.click();
+            Haptic.success();
+            showToast('Файл .cursorrules скачан!');
+        }
+
+        /* ==================== 6. ОСТАЛЬНАЯ ЛОГИКА (КОНСТРУКТОРЫ САЙТОВ И БОТОВ, РЕФЕРАЛКА, СЕЙФ) ==================== */
         function switchBuilderMode(mode) {
             Haptic.selection();
             currentBuilderMode = mode;
@@ -1077,7 +1549,7 @@
 
             if (mode === 'web') {
                 pill.style.transform = 'translate3d(0%, 0, 0)';
-                webBtn.className = 'relative z-10 min-h-[44px] rounded-2xl text-xs font-bold text-indigo-300 flex items-center justify-center gap-2 transition-colors';
+                webBtn.className = 'relative z-10 min-h-[44px] rounded-2xl text-xs font-bold accent-text flex items-center justify-center gap-2 transition-colors';
                 botBtn.className = 'relative z-10 min-h-[44px] rounded-2xl text-xs font-semibold text-muted-dynamic flex items-center justify-center gap-2 transition-colors';
                 webBox.classList.remove('hidden');
                 botBox.classList.add('hidden');
@@ -1092,30 +1564,29 @@
             renderQuickBreadcrumbs();
         }
 
-        /* ==================== 3. КРАТКАЯ НАВИГАЦИЯ ПО САЙТУ ==================== */
         function renderQuickBreadcrumbs() {
             const box = document.getElementById('quick-breadcrumbs');
             let steps = [];
             if (currentTabIndex === 0) {
                 steps = currentBuilderMode === 'web'
                     ? [
-                        { label: '🎨 1. Превью сайта', target: 'anchor-preview' },
-                        { label: '2. Тип и Стиль', target: 'anchor-style' },
+                        { label: '🎨 1. Макет', target: 'anchor-preview' },
+                        { label: '2. Стиль', target: 'anchor-style' },
                         { label: '3. Ползунки', target: 'anchor-sliders' },
-                        { label: '4. Промт', target: 'anchor-output' }
+                        { label: '🎙 4. Голос и Промт', target: 'anchor-output' }
                     ]
                     : [
-                        { label: '🤖 1. Экран чата', target: 'anchor-bot-preview' },
+                        { label: '🤖 1. Чат', target: 'anchor-bot-preview' },
                         { label: '2. Текст /start', target: 'anchor-bot-msg' },
                         { label: '3. Кнопки', target: 'anchor-bot-kb' },
                         { label: '4. Код Aiogram', target: 'anchor-bot-mods' }
                     ];
             } else if (currentTabIndex === 1) {
                 steps = [
-                    { label: '1. Шаблоны', target: 'tool-templates' },
-                    { label: '2. Архитектура', target: 'tool-arch' },
-                    { label: '3. Дебаг ошибок', target: 'tool-debug' },
-                    { label: '4. Оптимизатор', target: 'tool-opt' }
+                    { label: '📦 1. Сборщик + Анти-слив', target: 'tool-combiner' },
+                    { label: '⚙️ 2. .cursorrules', target: 'tool-rules' },
+                    { label: '🎙 3. Голосовой промт', target: 'tool-opt' },
+                    { label: '🐛 4. Дебаг ошибок', target: 'tool-debug' }
                 ];
             } else if (currentTabIndex === 2) {
                 steps = [
@@ -1154,12 +1625,10 @@
             else drawer.classList.toggle('open');
         }
 
-        /* ==================== 4. РЕАЛЬНАЯ РЕФЕРАЛЬНАЯ СИСТЕМА (СИНХРОНИЗАЦИЯ С БОТОМ И CLOUDSTORAGE) ==================== */
         function getRefsCount() {
             const urlParams = new URLSearchParams(window.location.search);
             const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
             const rawUrlRefs = urlParams.get('refs') ?? hashParams.get('refs');
-
             if (rawUrlRefs !== null) {
                 const parsed = parseInt(rawUrlRefs, 10);
                 if (!isNaN(parsed) && parsed >= 0) {
@@ -1168,7 +1637,6 @@
                     return parsed;
                 }
             }
-
             const startParam = tg?.initDataUnsafe?.start_param || '';
             if (startParam.startsWith('refs_')) {
                 const parsed = parseInt(startParam.replace('refs_', ''), 10);
@@ -1177,25 +1645,7 @@
                     return parsed;
                 }
             }
-
             return parseInt(localStorage.getItem('vibe_refs_count') || '0', 10);
-        }
-
-        function syncRefsFromCloudStorage() {
-            try {
-                tg?.CloudStorage?.getItem('vibe_refs_count', (err, val) => {
-                    if (!err && val) {
-                        const cloudRefs = parseInt(val, 10);
-                        const localRefs = getRefsCount();
-                        if (!isNaN(cloudRefs) && cloudRefs > localRefs) {
-                            localStorage.setItem('vibe_refs_count', String(cloudRefs));
-                            updateVipUI();
-                            initVisualStudio();
-                            renderBotHub();
-                        }
-                    }
-                });
-            } catch (_) {}
         }
 
         function updateVipUI() {
@@ -1212,18 +1662,16 @@
             ];
             document.getElementById('vip-next-hint').textContent = hints[capped];
 
-            const tiers = [
+            [
                 { id: 'reward-tier-1', statusId: 'tier-1-status', need: 1, label: '1 друг' },
                 { id: 'reward-tier-2', statusId: 'tier-2-status', need: 2, label: '2 друга' },
                 { id: 'reward-tier-3', statusId: 'tier-3-status', need: 3, label: '3 друга' }
-            ];
-            tiers.forEach(t => {
+            ].forEach(t => {
                 const unlocked = refs >= t.need;
-                const card = document.getElementById(t.id);
-                const st = document.getElementById(t.statusId);
-                card.className = unlocked
+                document.getElementById(t.id).className = unlocked
                     ? 'p-2 rounded-xl bg-amber-500/15 border border-amber-400/40 text-center transition-all'
                     : 'p-2 rounded-xl bg-white/[0.03] border border-white/10 text-center transition-all';
+                const st = document.getElementById(t.statusId);
                 st.className = unlocked ? 'text-[10px] font-bold text-amber-400' : 'text-[10px] font-bold text-muted-dynamic';
                 st.textContent = unlocked ? `🔓 Открыто (${t.label})` : `🔒 ${t.label}`;
             });
@@ -1233,9 +1681,7 @@
             const exportLock = document.getElementById('export-lock-icon');
             if (refs >= 2) {
                 vaultPill.textContent = `👑 Безлимит (${vaultCount})`;
-                vaultPill.className = 'px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300';
                 exportLock.textContent = '📥';
-                document.getElementById('vault-vip-hint').textContent = 'VIP Безлимит активен: сохраняй сколько угодно сниппетов и выгружай бэкап.';
             } else {
                 vaultPill.textContent = `Лимит: ${vaultCount}/5`;
                 exportLock.textContent = '🔒';
@@ -1257,8 +1703,7 @@
         }
 
         function copyInviteLink() {
-            const link = getPersonalRefLink();
-            navigator.clipboard.writeText(link).then(() => {
+            navigator.clipboard.writeText(getPersonalRefLink()).then(() => {
                 Haptic.success();
                 showToast('Реферальная ссылка скопирована!');
             });
@@ -1267,58 +1712,31 @@
         function openVipModal() {
             const refs = getRefsCount();
             const link = getPersonalRefLink();
-            const html = `
+            openBottomSheet('👑 VIP-награды за друзей', `
                 <div class="space-y-3">
                     <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-400/30">
-                        <div class="text-xs font-bold text-amber-400">Твои приглашённые друзья: ${refs} из 3</div>
-                        <p class="text-[11px] text-muted-dynamic mt-1">Отправь свою личную ссылку другу. Когда он запустит бота и откроет Mini App, награда разблокируется автоматически.</p>
+                        <div class="text-xs font-bold text-amber-400">Приглашено друзей: ${refs} из 3</div>
                         <div class="mt-2 p-2 rounded-xl code-surface font-mono text-[10px] text-amber-200 truncate">${link}</div>
-                    </div>
-                    <div class="space-y-2 text-xs">
-                        <div class="p-3 rounded-2xl code-surface flex items-center justify-between">
-                            <span><b>1 друг:</b> 4 VIP-стиля (visionOS, Bento, Clay 3D, Luxury)</span>
-                            <span>${refs >= 1 ? '✅ Открыто' : '🔒 Закрыто'}</span>
-                        </div>
-                        <div class="p-3 rounded-2xl code-surface flex items-center justify-between">
-                            <span><b>2 друга:</b> Безлимитный Сейф + экспорт .JSON</span>
-                            <span>${refs >= 2 ? '✅ Открыто' : '🔒 Закрыто'}</span>
-                        </div>
-                        <div class="p-3 rounded-2xl code-surface flex items-center justify-between">
-                            <span><b>3 друга:</b> Секретный архив «👑 Golden Prompts»</span>
-                            <span>${refs >= 3 ? '✅ Открыто' : '🔒 Закрыто'}</span>
-                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <button onclick="shareInviteLink()" class="btn-gold min-h-[44px] rounded-2xl text-xs font-bold">🚀 Отправить другу</button>
                         <button onclick="copyInviteLink()" class="btn-glass min-h-[44px] rounded-2xl text-xs font-semibold text-amber-300">📋 Скопировать</button>
                     </div>
                 </div>
-            `;
-            openBottomSheet('👑 VIP-награды за друзей', html);
+            `);
         }
 
-        /* ==================== 5. ВИЗУАЛЬНЫЙ КОНСТРУКТОР ТГ-БОТОВ НА AIOGRAM 3.X ==================== */
+        /* ==================== КОНСТРУКТОР БОТОВ И САЙТОВ ==================== */
         const botBuilderState = {
             rows: [
-                [
-                    { text: '🚀 Запустить приложение', type: 'webapp', value: 'https://vibe-app-sandy-tau.vercel.app' }
-                ],
+                [{ text: '🚀 Запустить приложение', type: 'webapp', value: 'https://vibe-app-sandy-tau.vercel.app' }],
                 [
                     { text: '🛍 Каталог товаров', type: 'callback', value: 'menu:catalog' },
                     { text: '👤 Профиль', type: 'callback', value: 'menu:profile' }
                 ],
-                [
-                    { text: '💬 Наш Telegram-канал', type: 'url', value: 'https://t.me/telegram' }
-                ]
+                [{ text: '💬 Наш Telegram-канал', type: 'url', value: 'https://t.me/telegram' }]
             ],
-            modules: {
-                sqlite: true,
-                sub_gate: true,
-                referrals: true,
-                fsm: false,
-                admin: true,
-                payments: false
-            }
+            modules: { sqlite: true, sub_gate: true, referrals: true, fsm: false, admin: true, payments: false }
         };
 
         const AIOGRAM_MODULES_LIST = [
@@ -1332,26 +1750,27 @@
 
         function renderBotBuilderEditor() {
             const editor = document.getElementById('bot-rows-editor');
+            if (!editor) return;
             editor.innerHTML = botBuilderState.rows.map((row, rIdx) => `
-                <div class="p-3.5 rounded-2xl code-surface border border-white/10 space-y-2.5 animate-pop">
+                <div class="p-3.5 rounded-2xl code-surface border border-white/10 space-y-2.5">
                     <div class="flex items-center justify-between">
                         <span class="text-[11px] font-bold text-sky-400">Ряд кнопок #${rIdx + 1} (${row.length}/3)</span>
                         <div class="flex items-center gap-1.5">
-                            ${row.length < 3 ? `<button type="button" onclick="addBotBtnToRow(${rIdx})" class="btn-glass px-2.5 py-1 rounded-lg text-[10px] font-semibold text-emerald-400">＋ Кнопка в ряд</button>` : ''}
-                            ${botBuilderState.rows.length > 1 ? `<button type="button" onclick="removeBotRow(${rIdx})" class="btn-glass px-2 py-1 rounded-lg text-[10px] text-rose-400">Удалить ряд</button>` : ''}
+                            ${row.length < 3 ? `<button type="button" onclick="addBotBtnToRow(${rIdx})" class="btn-glass px-2.5 py-1 rounded-lg text-[10px] font-semibold text-emerald-400">＋ Кнопка</button>` : ''}
+                            ${botBuilderState.rows.length > 1 ? `<button type="button" onclick="removeBotRow(${rIdx})" class="btn-glass px-2 py-1 rounded-lg text-[10px] text-rose-400">Удалить</button>` : ''}
                         </div>
                     </div>
                     <div class="space-y-2">
                         ${row.map((btn, bIdx) => `
                             <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-black/25 p-2 rounded-xl border border-white/5">
-                                <input type="text" value="${escapeHtml(btn.text)}" oninput="updateBotBtnField(${rIdx}, ${bIdx}, 'text', this.value)" placeholder="Текст кнопки" class="frosted-input sm:col-span-5 min-h-[36px] rounded-xl px-2.5 text-xs">
+                                <input type="text" value="${escapeHtml(btn.text)}" oninput="updateBotBtnField(${rIdx}, ${bIdx}, 'text', this.value)" class="frosted-input sm:col-span-5 min-h-[36px] rounded-xl px-2.5 text-xs">
                                 <select onchange="updateBotBtnField(${rIdx}, ${bIdx}, 'type', this.value); renderBotBuilderEditor();" class="frosted-input sm:col-span-3 min-h-[36px] rounded-xl px-2 text-[11px]">
                                     <option value="callback" ${btn.type === 'callback' ? 'selected' : ''} class="bg-slate-900 text-white">Callback</option>
-                                    <option value="url" ${btn.type === 'url' ? 'selected' : ''} class="bg-slate-900 text-white">URL Ссылка</option>
+                                    <option value="url" ${btn.type === 'url' ? 'selected' : ''} class="bg-slate-900 text-white">URL</option>
                                     <option value="webapp" ${btn.type === 'webapp' ? 'selected' : ''} class="bg-slate-900 text-white">WebApp</option>
                                 </select>
                                 <div class="sm:col-span-4 flex items-center gap-1">
-                                    <input type="text" value="${escapeHtml(btn.value)}" oninput="updateBotBtnField(${rIdx}, ${bIdx}, 'value', this.value)" placeholder="${btn.type === 'callback' ? 'callback_data' : 'https://...'}" class="frosted-input flex-1 min-h-[36px] rounded-xl px-2.5 text-[11px] font-mono">
+                                    <input type="text" value="${escapeHtml(btn.value)}" oninput="updateBotBtnField(${rIdx}, ${bIdx}, 'value', this.value)" class="frosted-input flex-1 min-h-[36px] rounded-xl px-2.5 text-[11px] font-mono">
                                     ${row.length > 1 ? `<button type="button" onclick="removeBotBtn(${rIdx}, ${bIdx})" class="text-xs text-rose-400 px-1.5">✕</button>` : ''}
                                 </div>
                             </div>
@@ -1360,8 +1779,7 @@
                 </div>
             `).join('');
 
-            const modsGrid = document.getElementById('bot-modules-grid');
-            modsGrid.innerHTML = AIOGRAM_MODULES_LIST.map(m => {
+            document.getElementById('bot-modules-grid').innerHTML = AIOGRAM_MODULES_LIST.map(m => {
                 const active = !!botBuilderState.modules[m.id];
                 return `
                     <button type="button" onclick="toggleBotModule('${m.id}')" class="min-h-[42px] px-3 py-2 rounded-2xl border text-left text-xs transition-all ${active ? 'border-sky-400 bg-sky-500/20 text-sky-200 font-semibold' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">
@@ -1377,68 +1795,28 @@
             botBuilderState.rows[rIdx][bIdx][field] = val;
             updateBotBuilderPreview();
         }
-
         function addBotKeyboardRow() {
-            if (botBuilderState.rows.length >= 6) {
-                Haptic.error();
-                showToast('Максимум 6 рядов для компактного меню');
-                return;
-            }
+            if (botBuilderState.rows.length >= 6) return;
             Haptic.light();
-            botBuilderState.rows.push([
-                { text: `✨ Новая кнопка ${botBuilderState.rows.length + 1}`, type: 'callback', value: `action_${botBuilderState.rows.length + 1}` }
-            ]);
+            botBuilderState.rows.push([{ text: 'Новая кнопка', type: 'callback', value: `cb_${Date.now()}` }]);
             renderBotBuilderEditor();
         }
-
         function addBotBtnToRow(rIdx) {
             if (botBuilderState.rows[rIdx].length >= 3) return;
             Haptic.selection();
-            botBuilderState.rows[rIdx].push({
-                text: 'Кнопка',
-                type: 'callback',
-                value: `btn_${rIdx}_${botBuilderState.rows[rIdx].length}`
-            });
+            botBuilderState.rows[rIdx].push({ text: 'Кнопка', type: 'callback', value: `btn_${rIdx}` });
             renderBotBuilderEditor();
         }
+        function removeBotRow(rIdx) { Haptic.light(); botBuilderState.rows.splice(rIdx, 1); renderBotBuilderEditor(); }
+        function removeBotBtn(rIdx, bIdx) { Haptic.light(); botBuilderState.rows[rIdx].splice(bIdx, 1); renderBotBuilderEditor(); }
+        function toggleBotModule(modId) { Haptic.selection(); botBuilderState.modules[modId] = !botBuilderState.modules[modId]; renderBotBuilderEditor(); }
 
-        function removeBotRow(rIdx) {
-            Haptic.light();
-            botBuilderState.rows.splice(rIdx, 1);
-            renderBotBuilderEditor();
-        }
-
-        function removeBotBtn(rIdx, bIdx) {
-            Haptic.light();
-            botBuilderState.rows[rIdx].splice(bIdx, 1);
-            renderBotBuilderEditor();
-        }
-
-        function toggleBotModule(modId) {
-            Haptic.selection();
-            botBuilderState.modules[modId] = !botBuilderState.modules[modId];
-            renderBotBuilderEditor();
-        }
-
-        function loadPresetBot(preset) {
+        function loadPresetBot() {
             Haptic.success();
-            if (preset === 'shop') {
-                document.getElementById('bot-name-input').value = 'Vibe Digital Store Bot';
-                document.getElementById('bot-msg-input').value = '💎 <b>Добро пожаловать в цифровой магазин!</b>\n\nВыбирайте подписки, пополняйте баланс в 1 клик и получайте автовыдачу 24/7:';
-                botBuilderState.rows = [
-                    [{ text: '🛒 Открыть витрину (Mini App)', type: 'webapp', value: 'https://vibe-app-sandy-tau.vercel.app' }],
-                    [
-                        { text: '📦 Мои покупки', type: 'callback', value: 'shop:orders' },
-                        { text: '💳 Пополнить баланс', type: 'callback', value: 'shop:topup' }
-                    ],
-                    [
-                        { text: '🎁 Рефералка', type: 'callback', value: 'shop:ref' },
-                        { text: '👨‍💻 Поддержка', type: 'url', value: 'https://t.me/telegram' }
-                    ]
-                ];
-                renderBotBuilderEditor();
-                showToast('Загружен пресет цифрового магазина!');
-            }
+            document.getElementById('bot-name-input').value = 'Vibe Digital Store Bot';
+            document.getElementById('bot-msg-input').value = '💎 Добро пожаловать в цифровой магазин!\n\nВыбирайте подписки и получайте автовыдачу 24/7:';
+            renderBotBuilderEditor();
+            showToast('Загружен пресет цифрового магазина!');
         }
 
         function updateBotBuilderPreview() {
@@ -1453,19 +1831,14 @@
                 totalBtns += row.length;
                 return `
                     <div class="grid gap-1.5" style="grid-template-columns: repeat(${row.length}, minmax(0, 1fr));">
-                        ${row.map(b => {
-                            const badge = b.type === 'url' ? '↗' : (b.type === 'webapp' ? '📱' : '');
-                            return `
-                                <div onclick="Haptic.selection(); showToast('Кнопка: ${escapeHtml(b.value)}')" class="px-2.5 py-2 rounded-xl bg-white/[0.11] hover:bg-white/[0.18] active:scale-95 transition text-center text-[11px] font-semibold text-white truncate cursor-pointer relative">
-                                    <span>${escapeHtml(b.text)}</span>
-                                    ${badge ? `<span class="text-[9px] opacity-75 ml-1">${badge}</span>` : ''}
-                                </div>
-                            `;
-                        }).join('')}
+                        ${row.map(b => `
+                            <div onclick="Haptic.selection()" class="px-2.5 py-2 rounded-xl bg-white/[0.12] hover:bg-white/[0.18] text-center text-[11px] font-semibold text-white truncate cursor-pointer">
+                                ${escapeHtml(b.text)}
+                            </div>
+                        `).join('')}
                     </div>
                 `;
             }).join('');
-
             document.getElementById('bot-summary-stats').textContent = `Рядов: ${botBuilderState.rows.length} • Кнопок: ${totalBtns}`;
         }
 
@@ -1475,95 +1848,20 @@
             const startText = document.getElementById('bot-msg-input').value.trim();
 
             if (mode === 'code') {
-                document.getElementById('bot-out-title').textContent = 'Готовый код bot.py (Aiogram 3.x)';
-
                 const rowsCode = botBuilderState.rows.map(row => {
                     const btns = row.map(b => {
-                        if (b.type === 'url') return `InlineKeyboardButton(text="${b.text.replace(/"/g, '\\"')}", url="${b.value}")`;
-                        if (b.type === 'webapp') return `InlineKeyboardButton(text="${b.text.replace(/"/g, '\\"')}", web_app=WebAppInfo(url="${b.value}"))`;
-                        return `InlineKeyboardButton(text="${b.text.replace(/"/g, '\\"')}", callback_data="${b.value}")`;
-                    }).join(',\n        ');
-                    return `    kb.row(\n        ${btns}\n    )`;
+                        if (b.type === 'url') return `InlineKeyboardButton(text="${b.text}", url="${b.value}")`;
+                        if (b.type === 'webapp') return `InlineKeyboardButton(text="${b.text}", web_app=WebAppInfo(url="${b.value}"))`;
+                        return `InlineKeyboardButton(text="${b.text}", callback_data="${b.value}")`;
+                    }).join(', ');
+                    return `    kb.row(${btns})`;
                 }).join('\n');
 
-                const callbacks = [];
-                botBuilderState.rows.forEach(r => r.forEach(b => {
-                    if (b.type === 'callback') callbacks.push(b);
-                }));
-
-                const handlersCode = callbacks.map((b, i) => `
-@router.callback_query(F.data == "${b.value}")
-async def handle_cb_${i + 1}(call: CallbackQuery):
-    await call.answer("Раздел: ${b.text.replace(/"/g, '\\"')}")
-    await call.message.edit_text(
-        text="Вы открыли раздел: <b>${b.text.replace(/"/g, '\\"')}</b>",
-        reply_markup=main_menu_kb(),
-        parse_mode="HTML"
-    )`).join('\n');
-
-                const pyCode = `# ${botName} — Сгенерировано в VIBE STUDIO (Aiogram 3.x)
-import asyncio
-import logging
-from os import getenv
-from aiogram import Bot, Dispatcher, F, Router
-from aiogram.filters import CommandStart
-from aiogram.types import (
-    Message, CallbackQuery,
-    InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
-)
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-BOT_TOKEN = getenv("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
-router = Router()
-
-
-def main_menu_kb() -> InlineKeyboardMarkup:
-    kb = InlineKeyboardBuilder()
-${rowsCode}
-    return kb.as_markup()
-
-
-@router.message(CommandStart())
-async def cmd_start(message: Message):
-    user_name = message.from_user.first_name or "друг"
-    text = """${startText.replace(/"""/g, "'''")}""".replace("{user_name}", user_name)
-    await message.answer(text, reply_markup=main_menu_kb(), parse_mode="HTML")
-${handlersCode}
-
-
-async def main():
-    logging.basicConfig(level=logging.INFO)
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher()
-    dp.include_router(router)
-    await dp.start_polling(bot)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())`;
-
+                const pyCode = `import asyncio\nfrom os import getenv\nfrom aiogram import Bot, Dispatcher, F, Router\nfrom aiogram.filters import CommandStart\nfrom aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo\nfrom aiogram.utils.keyboard import InlineKeyboardBuilder\n\nBOT_TOKEN = getenv("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")\nrouter = Router()\n\ndef main_menu_kb() -> InlineKeyboardMarkup:\n    kb = InlineKeyboardBuilder()\n${rowsCode}\n    return kb.as_markup()\n\n@router.message(CommandStart())\nasync def cmd_start(message: Message):\n    await message.answer("""${startText}""", reply_markup=main_menu_kb())\n\nasync def main():\n    bot = Bot(token=BOT_TOKEN)\n    dp = Dispatcher()\n    dp.include_router(router)\n    await dp.start_polling(bot)\n\nif __name__ == "__main__":\n    asyncio.run(main())`;
                 runWithSkeleton('bot-out-wrap', 'bot-skeleton', 'bot-result-card', 'bot-code', pyCode, `Aiogram 3 код: ${botName}`);
             } else {
-                document.getElementById('bot-out-title').textContent = 'Системный промт для создания ТГ-бота';
                 const enabledMods = AIOGRAM_MODULES_LIST.filter(m => botBuilderState.modules[m.id]).map(m => `- ${m.name}`).join('\n');
-                const kbSummary = botBuilderState.rows.map((r, idx) => `Ряд ${idx + 1}: ` + r.map(b => `[${b.text}] (${b.type}: ${b.value})`).join(' | ')).join('\n');
-
-                const promptText = `Роль: Senior Python & Aiogram 3.x Architect.
-Задача: Разработай полноценного модульного Telegram-бота «${botName}» на Python 3.11+ и aiogram 3.x.
-
-1. СТАРТОВОЕ СООБЩЕНИЕ (/start):
-«${startText}»
-
-2. СХЕМА ИНЛАЙН-КЛАВИАТУРЫ (InlineKeyboardBuilder):
-${kbSummary}
-
-3. ОБЯЗАТЕЛЬНЫЕ БЭКЕНД-МОДУЛИ:
-${enabledMods || '- Чистая архитектура на Router'}
-
-4. ТРЕБОВАНИЯ К КОДУ:
-- Раздели проект на модули: bot.py, config.py, db.py (aiosqlite в режиме WAL), keyboards.py, handlers/user.py, handlers/admin.py.
-- Выдай полный рабочий код каждого файла от первой до последней строчки без пропусков и заглушек.`;
-
+                const promptText = `Роль: Senior Python & Aiogram 3.x Architect.\nСоздай Telegram-бота «${botName}» на aiogram 3.x.\nСообщение /start: «${startText}»\nМодули:\n${enabledMods}\nВыдай полный рабочий код всех файлов.`;
                 runWithSkeleton('bot-out-wrap', 'bot-skeleton', 'bot-result-card', 'bot-code', promptText, `Промт ТГ-бота: ${botName}`);
             }
         }
@@ -1573,34 +1871,32 @@ ${enabledMods || '- Чистая архитектура на Router'}
             const text = el.dataset.raw || el.textContent || '';
             if (!text) return;
             const blob = new Blob([text], { type: 'text/x-python' });
-            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
+            a.href = URL.createObjectURL(blob);
             a.download = 'bot.py';
             a.click();
             Haptic.success();
-            showToast('Файл bot.py скачан!');
         }
 
-        /* ==================== 6. КОНСТРУКТОР САЙТОВ (UI СТУДИЯ) ==================== */
+        /* ==================== UI СТУДИЯ САЙТОВ ==================== */
         const UI_PROJECT_TYPES = [
-            { id: 'tma', title: '📱 TG Mini App', desc: 'Мобильное приложение внутри Telegram с балансом, карточками и нижним доком' },
-            { id: 'saas_landing', title: '🚀 SaaS Лендинг', desc: 'Продающий сайт стартапа с Hero-блоком, Bento-сеткой и тарифами' },
-            { id: 'ai_dashboard', title: '🧠 AI Дашборд', desc: 'Панель управления с боковым меню, графиком аналитики и консолью' },
-            { id: 'ecommerce', title: '🛍 Дроп-Шоп', desc: 'Витрина товаров с фильтрами, бейджами скидок и быстрой корзиной' },
-            { id: 'portfolio', title: '💎 Портфолио', desc: 'Персональный сайт разработчика со стеком, кейсами и контактами' },
-            { id: 'web3', title: '🌐 Web3 Свап', desc: 'Крипто-терминал с пулами ликвидности, курсом токенов и обменом' }
+            { id: 'tma', title: '📱 TG Mini App', desc: 'Мобильное приложение внутри Telegram с балансом и карточками' },
+            { id: 'saas_landing', title: '🚀 SaaS Лендинг', desc: 'Продающий сайт стартапа с Hero-блоком и тарифами' },
+            { id: 'ai_dashboard', title: '🧠 AI Дашборд', desc: 'Панель управления с графиком аналитики и консолью' },
+            { id: 'ecommerce', title: '🛍 Дроп-Шоп', desc: 'Витрина товаров с фильтрами и быстрой корзиной' },
+            { id: 'portfolio', title: '💎 Портфолио', desc: 'Персональный сайт разработчика с кейсами' },
+            { id: 'web3', title: '🌐 Web3 Свап', desc: 'Крипто-терминал с курсом токенов и обменом' }
         ];
 
         const UI_STYLES = [
-            { id: 'linear', name: 'Linear Dark', badge: 'FREE', vip: false, radius: 10, blur: 8, opacity: 5, spacing: 2, glow: 35, desc: 'Строгий инженерный минимализм, тонкие рамки 1px и деликатный верхний градиент' },
-            { id: 'brutal', name: 'Neo-Brutalism', badge: 'FREE', vip: false, radius: 4, blur: 0, opacity: 22, spacing: 3, glow: 0, desc: 'Жирные контрастные рамки 2.5px, жёсткие смещённые тени 4pxх4px без размытия' },
-            { id: 'minimal', name: 'Air Minimal', badge: 'FREE', vip: false, radius: 16, blur: 4, opacity: 4, spacing: 5, glow: 15, desc: 'Чистый воздух, тонкие разделители и акцент на типографику без лишнего шума' },
-            { id: 'editorial', name: 'Swiss Grid', badge: 'FREE', vip: false, radius: 0, blur: 0, opacity: 6, spacing: 3, glow: 10, desc: 'Швейцарская модульная сетка с острыми углами 0px и видимыми направляющими' },
-            { id: 'visionos', name: 'visionOS Glass', badge: '👑 VIP', vip: true, radius: 24, blur: 20, opacity: 9, spacing: 3, glow: 70, desc: 'Пространственное матовое стекло Apple с внутренним верхним бликом и глубоким размытием' },
-            { id: 'bento', name: 'Bento Grid', badge: '👑 VIP', vip: true, radius: 22, blur: 14, opacity: 8, spacing: 3, glow: 55, desc: 'Асимметричная модульная сетка карточек разного размера в стиле презентаций Apple' },
-            { id: 'clay', name: 'Soft Clay 3D', badge: '👑 VIP', vip: true, radius: 28, blur: 10, opacity: 16, spacing: 4, glow: 65, desc: 'Тактильный пухлый 3D-объём с двойными внутренними тенями сверху и снизу' },
-            { id: 'luxury', name: 'Onyx Luxury', badge: '👑 VIP', vip: true, radius: 18, blur: 22, opacity: 7, spacing: 4, glow: 85, desc: 'Премиальный ониксовый стиль с золочёным кантом и тёплым радиальным свечением' }
+            { id: 'linear', name: 'Linear Dark', badge: 'FREE', vip: false, radius: 10, blur: 8, opacity: 5, spacing: 2, glow: 35, desc: 'Строгий инженерный минимализм, тонкие рамки 1px' },
+            { id: 'brutal', name: 'Neo-Brutalism', badge: 'FREE', vip: false, radius: 4, blur: 0, opacity: 22, spacing: 3, glow: 0, desc: 'Жирные контрастные рамки 2.5px, жёсткие смещённые тени 4px' },
+            { id: 'minimal', name: 'Air Minimal', badge: 'FREE', vip: false, radius: 16, blur: 4, opacity: 4, spacing: 5, glow: 15, desc: 'Чистый воздух и акцент на типографику' },
+            { id: 'editorial', name: 'Swiss Grid', badge: 'FREE', vip: false, radius: 0, blur: 0, opacity: 6, spacing: 3, glow: 10, desc: 'Швейцарская модульная сетка с острыми углами 0px' },
+            { id: 'visionos', name: 'visionOS Glass', badge: '👑 VIP', vip: true, radius: 24, blur: 20, opacity: 9, spacing: 3, glow: 70, desc: 'Пространственное матовое стекло Apple с верхним бликом' },
+            { id: 'bento', name: 'Bento Grid', badge: '👑 VIP', vip: true, radius: 22, blur: 14, opacity: 8, spacing: 3, glow: 55, desc: 'Асимметричная модульная сетка карточек Apple' },
+            { id: 'clay', name: 'Soft Clay 3D', badge: '👑 VIP', vip: true, radius: 28, blur: 10, opacity: 16, spacing: 4, glow: 65, desc: 'Тактильный пухлый 3D-объём с внутренними тенями' },
+            { id: 'luxury', name: 'Onyx Luxury', badge: '👑 VIP', vip: true, radius: 18, blur: 22, opacity: 7, spacing: 4, glow: 85, desc: 'Премиальный ониксовый стиль с золотым свечением' }
         ];
 
         const UI_PALETTES = [
@@ -1630,29 +1926,15 @@ ${enabledMods || '- Чистая архитектура на Router'}
         ];
 
         const builderState = {
-            typeId: 'tma',
-            styleId: 'linear',
-            styleName: 'Linear Dark',
-            paletteId: 'indigo',
-            primaryColor: '#6366f1',
-            secondaryColor: '#a855f7',
-            bgDark: '#090b12',
-            bgLight: '#f8fafc',
-            previewDark: true,
-            radius: 10,
-            blur: 8,
-            opacity: 5,
-            spacing: 2,
-            glow: 35,
-            fontId: 'inter',
-            fontCss: "'Inter', sans-serif",
+            typeId: 'tma', styleId: 'linear', styleName: 'Linear Dark', paletteId: 'indigo',
+            primaryColor: '#6366f1', secondaryColor: '#a855f7', bgDark: '#090b12', bgLight: '#f8fafc',
+            previewDark: true, radius: 10, blur: 8, opacity: 5, spacing: 2, glow: 35,
+            fontId: 'inter', fontCss: "'Inter', sans-serif",
             sections: ['Sticky Шапка', 'Hero с 3D-акцентом', 'Bento-преимущества', 'Плавающий Tab-бар']
         };
 
         function initVisualStudio() {
-            const refs = getRefsCount();
-            const vipUnlocked = refs >= 1;
-
+            const vipUnlocked = getRefsCount() >= 1;
             document.getElementById('ui-type-grid').innerHTML = UI_PROJECT_TYPES.map(t => `
                 <button type="button" onclick="selectProjectType('${t.id}')" class="min-h-[44px] px-3 py-2 rounded-2xl border text-left transition-all ${t.id === builderState.typeId ? 'border-indigo-400 bg-indigo-500/20 text-dynamic font-semibold' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">
                     <span class="text-xs block truncate">${t.title}</span>
@@ -1700,79 +1982,40 @@ ${enabledMods || '- Чистая архитектура на Router'}
             updateLivePreview();
         }
 
-        function selectProjectType(id) {
-            Haptic.selection();
-            builderState.typeId = id;
-            initVisualStudio();
-        }
-
+        function selectProjectType(id) { Haptic.selection(); builderState.typeId = id; initVisualStudio(); }
         function selectVisualStyle(id) {
             const st = UI_STYLES.find(x => x.id === id);
             if (!st) return;
-
             if (st.vip && getRefsCount() < 1) {
-                Haptic.error();
-                openVipModal();
+                Haptic.error(); openVipModal();
                 showToast('🔒 Этот VIP-стиль открывается за 1 приглашённого друга!');
                 return;
             }
-
             Haptic.selection();
-            builderState.styleId = st.id;
-            builderState.styleName = st.name;
-            builderState.radius = st.radius;
-            builderState.blur = st.blur;
-            builderState.opacity = st.opacity;
-            builderState.spacing = st.spacing;
-            builderState.glow = st.glow;
-
+            Object.assign(builderState, { styleId: st.id, styleName: st.name, radius: st.radius, blur: st.blur, opacity: st.opacity, spacing: st.spacing, glow: st.glow });
             document.getElementById('slider-radius').value = st.radius;
             document.getElementById('slider-blur').value = st.blur;
             document.getElementById('slider-opacity').value = st.opacity;
             document.getElementById('slider-spacing').value = st.spacing;
             document.getElementById('slider-glow').value = st.glow;
-
             initVisualStudio();
         }
-
         function selectPalette(id) {
             Haptic.selection();
             const pal = UI_PALETTES.find(x => x.id === id);
             if (!pal) return;
-            builderState.paletteId = pal.id;
-            builderState.primaryColor = pal.primary;
-            builderState.secondaryColor = pal.secondary;
-            builderState.bgDark = pal.bgDark;
-            builderState.bgLight = pal.bgLight;
+            Object.assign(builderState, { paletteId: pal.id, primaryColor: pal.primary, secondaryColor: pal.secondary, bgDark: pal.bgDark, bgLight: pal.bgLight });
             document.getElementById('custom-color-picker').value = pal.primary;
             initVisualStudio();
         }
-
-        function setCustomAccentColor(hex) {
-            SoundFX.tick();
-            builderState.paletteId = 'custom';
-            builderState.primaryColor = hex;
-            builderState.secondaryColor = hex;
-            updateLivePreview();
-        }
-
-        function selectFont(id) {
-            Haptic.selection();
-            const f = UI_FONTS.find(x => x.id === id);
-            if (!f) return;
-            builderState.fontId = f.id;
-            builderState.fontCss = f.css;
-            initVisualStudio();
-        }
-
+        function setCustomAccentColor(hex) { SoundFX.tick(); builderState.paletteId = 'custom'; builderState.primaryColor = hex; builderState.secondaryColor = hex; updateLivePreview(); }
+        function selectFont(id) { Haptic.selection(); const f = UI_FONTS.find(x => x.id === id); if (f) { builderState.fontId = f.id; builderState.fontCss = f.css; initVisualStudio(); } }
         function toggleSectionChip(sec) {
             Haptic.selection();
             const idx = builderState.sections.indexOf(sec);
-            if (idx >= 0) builderState.sections.splice(idx, 1);
-            else builderState.sections.push(sec);
+            if (idx >= 0) builderState.sections.splice(idx, 1); else builderState.sections.push(sec);
             initVisualStudio();
         }
-
         function syncSliderLabels() {
             const spacingNames = { 1: 'Плотно (1/5)', 2: 'Компактно (2/5)', 3: 'Баланс (3/5)', 4: 'Просторно (4/5)', 5: 'Максимум воздуха (5/5)' };
             document.getElementById('val-radius').textContent = `${builderState.radius}px`;
@@ -1781,7 +2024,6 @@ ${enabledMods || '- Чистая архитектура на Router'}
             document.getElementById('val-spacing').textContent = spacingNames[builderState.spacing];
             document.getElementById('val-glow').textContent = `${builderState.glow}%`;
         }
-
         function updateBuilderSliders() {
             SoundFX.tick();
             builderState.radius = Number(document.getElementById('slider-radius').value);
@@ -1789,26 +2031,16 @@ ${enabledMods || '- Чистая архитектура на Router'}
             builderState.opacity = Number(document.getElementById('slider-opacity').value);
             builderState.spacing = Number(document.getElementById('slider-spacing').value);
             builderState.glow = Number(document.getElementById('slider-glow').value);
-            syncSliderLabels();
-            updateLivePreview();
+            syncSliderLabels(); updateLivePreview();
         }
-
-        function togglePreviewTheme() {
-            Haptic.light();
-            builderState.previewDark = !builderState.previewDark;
-            document.getElementById('prev-theme-btn').textContent = builderState.previewDark ? '🌙 Dark' : '☀️ Light';
-            updateLivePreview();
-        }
-
+        function togglePreviewTheme() { Haptic.light(); builderState.previewDark = !builderState.previewDark; document.getElementById('prev-theme-btn').textContent = builderState.previewDark ? '🌙 Dark' : '☀️ Light'; updateLivePreview(); }
         function randomizeVisualBuilder() {
             Haptic.light();
             const unlockedStyles = UI_STYLES.filter(s => !s.vip || getRefsCount() >= 1);
             const rType = UI_PROJECT_TYPES[Math.floor(Math.random() * UI_PROJECT_TYPES.length)];
             const rStyle = unlockedStyles[Math.floor(Math.random() * unlockedStyles.length)];
             const rPal = UI_PALETTES[Math.floor(Math.random() * UI_PALETTES.length)];
-            builderState.typeId = rType.id;
-            selectPalette(rPal.id);
-            selectVisualStyle(rStyle.id);
+            builderState.typeId = rType.id; selectPalette(rPal.id); selectVisualStyle(rStyle.id);
             showToast(`🎲 ${rType.title} • ${rStyle.name}`);
         }
 
@@ -1819,34 +2051,24 @@ ${enabledMods || '- Чистая архитектура на Router'}
             const b = builderState.blur;
             const p = builderState.primaryColor;
             const s = builderState.secondaryColor;
-
             let bg = isDark ? `rgba(255,255,255,${alpha})` : `rgba(15,23,42,${alpha})`;
             let border = isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(15,23,42,0.12)';
             let shadow = `0 10px 24px -8px rgba(0,0,0,${(builderState.glow / 200).toFixed(2)})`;
 
             if (builderState.styleId === 'brutal') {
                 const hc = isDark ? '#ffffff' : '#0f172a';
-                border = `2.5px solid ${hc}`;
-                shadow = `4px 4px 0px ${hc}`;
+                border = `2.5px solid ${hc}`; shadow = `4px 4px 0px ${hc}`;
             } else if (builderState.styleId === 'clay') {
                 border = '1px solid rgba(255,255,255,0.25)';
                 shadow = `0 12px 24px -6px rgba(0,0,0,0.4), inset 0 3px 6px rgba(255,255,255,0.35), inset 0 -4px 8px rgba(0,0,0,0.35)`;
-            } else if (builderState.styleId === 'editorial') {
-                border = `1px solid ${isDark ? 'rgba(255,255,255,0.28)' : 'rgba(15,23,42,0.3)'}`;
-                shadow = 'none';
             } else if (builderState.styleId === 'luxury') {
-                border = `1px solid ${p}66`;
-                shadow = `0 12px 30px -8px ${p}40, inset 0 1px 0 ${p}55`;
-            } else if (builderState.styleId === 'visionos') {
-                border = '1px solid rgba(255,255,255,0.18)';
-                shadow = `0 14px 28px -8px rgba(0,0,0,0.45), inset 0 1.5px 0 rgba(255,255,255,0.28)`;
+                border = `1px solid ${p}66`; shadow = `0 12px 30px -8px ${p}40, inset 0 1px 0 ${p}55`;
             }
 
-            const cardCss = `background:${bg}; border:${border}; border-radius:${r}px; box-shadow:${shadow}; backdrop-filter:blur(${b}px); -webkit-backdrop-filter:blur(${b}px);`;
+            const cardCss = `background:${bg}; border:${border}; border-radius:${r}px; box-shadow:${shadow}; backdrop-filter:blur(${b}px);`;
             const btnCss = builderState.styleId === 'brutal'
                 ? `background:${p}; color:#fff; border:2px solid ${isDark ? '#fff' : '#000'}; box-shadow:3px 3px 0px ${isDark ? '#fff' : '#000'}; border-radius:${Math.max(0, r - 2)}px;`
                 : `background:linear-gradient(135deg, ${p}, ${s}); color:#fff; border-radius:${Math.max(0, r - 4)}px; box-shadow:0 4px 12px ${p}55;`;
-
             return { cardCss, btnCss, p };
         }
 
@@ -1854,137 +2076,41 @@ ${enabledMods || '- Чистая архитектура на Router'}
             const canvas = document.getElementById('live-preview-canvas');
             const orb = document.getElementById('prev-glow-orb');
             const mount = document.getElementById('prev-dynamic-mount');
-
             const isDark = builderState.previewDark;
             canvas.style.background = isDark ? builderState.bgDark : builderState.bgLight;
             canvas.style.color = isDark ? '#f8fafc' : '#0f172a';
             canvas.style.fontFamily = builderState.fontCss;
-
             orb.style.background = `radial-gradient(circle, ${builderState.primaryColor} 0%, transparent 70%)`;
             orb.style.opacity = (builderState.glow / 100).toFixed(2);
 
             const pad = 10 + builderState.spacing * 2;
             const gap = 6 + builderState.spacing * 2;
             mount.style.padding = `${pad}px`;
-
             const { cardCss, btnCss, p } = computePreviewSurfaceCSS();
             const isBento = builderState.styleId === 'bento';
 
-            let html = '';
-            if (builderState.typeId === 'tma') {
-                html = `
-                    <div style="display:flex; flex-direction:column; gap:${gap}px;">
-                        <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:10px; font-weight:700;">● MINI APP</span>
-                            <span style="font-size:10px; color:${p}; font-weight:700;">★ 2,450 Stars</span>
-                        </div>
-                        <div style="${cardCss} padding:12px;">
-                            <div style="font-size:9px; opacity:0.7;">БАЛАНС КОШЕЛЬКА</div>
-                            <div style="font-size:18px; font-weight:800; margin:2px 0 8px;">$1,280.50 <span style="font-size:10px; color:${p};">+18%</span></div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-                                <button style="${btnCss} padding:6px; font-size:10px; font-weight:700;">⚡ Пополнить</button>
-                                <button style="${cardCss} padding:6px; font-size:10px; font-weight:600;">↗ Вывести</button>
-                            </div>
-                        </div>
-                        <div style="display:grid; grid-template-columns:${isBento ? '1.4fr 1fr' : '1fr 1fr'}; gap:${gap}px;">
-                            <div style="${cardCss} padding:10px;">
-                                <div style="font-size:10px; font-weight:700;">🎁 Задания</div>
-                                <div style="font-size:9px; opacity:0.7; margin-top:2px;">+350 токенов</div>
-                            </div>
-                            <div style="${cardCss} padding:10px;">
-                                <div style="font-size:10px; font-weight:700;">🏆 Топ-12</div>
-                                <div style="font-size:9px; color:${p}; margin-top:2px;">Лидерборд</div>
-                            </div>
+            mount.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:${gap}px;">
+                    <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:10px; font-weight:700;">● ${builderState.typeId.toUpperCase()}</span>
+                        <span style="font-size:10px; color:${p}; font-weight:700;">★ VIBE 2.0</span>
+                    </div>
+                    <div style="${cardCss} padding:12px;">
+                        <div style="font-size:9px; opacity:0.7;">ИНТЕРАКТИВНЫЙ МАКЕТ</div>
+                        <div style="font-size:16px; font-weight:800; margin:2px 0 8px;">${builderState.styleName} <span style="font-size:10px; color:${p};">+60 FPS</span></div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                            <button style="${btnCss} padding:6px; font-size:10px; font-weight:700;">⚡ Запустить</button>
+                            <button style="${cardCss} padding:6px; font-size:10px; font-weight:600;">↗ Детали</button>
                         </div>
                     </div>
-                `;
-            } else if (builderState.typeId === 'ai_dashboard') {
-                html = `
-                    <div style="display:grid; grid-template-columns:72px 1fr; gap:${gap}px;">
-                        <div style="${cardCss} padding:10px 6px; display:flex; flex-direction:column; gap:8px; font-size:9px; font-weight:600;">
-                            <div style="color:${p}; font-weight:800;">⚡ AI.OS</div>
-                            <div style="opacity:0.9;">📊 График</div>
-                            <div style="opacity:0.6;">🤖 Агенты</div>
-                            <div style="opacity:0.6;">⚙️ Ключи</div>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:${gap}px;">
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:${gap}px;">
-                                <div style="${cardCss} padding:8px 10px;"><div style="font-size:8px; opacity:0.7;">ЗАПРОСЫ</div><div style="font-size:14px; font-weight:800; color:${p};">84.2K</div></div>
-                                <div style="${cardCss} padding:8px 10px;"><div style="font-size:8px; opacity:0.7;">ОТКЛИК</div><div style="font-size:14px; font-weight:800;">120ms</div></div>
-                            </div>
-                            <div style="${cardCss} padding:10px;">
-                                <div style="font-size:9px; font-weight:700; margin-bottom:6px;">Нагрузка нейросети</div>
-                                <div style="display:flex; align-items:flex-end; gap:5px; height:42px;">
-                                    <div style="flex:1; height:45%; background:${p}55; border-radius:4px;"></div>
-                                    <div style="flex:1; height:70%; background:${p}88; border-radius:4px;"></div>
-                                    <div style="flex:1; height:100%; background:${p}; border-radius:4px;"></div>
-                                    <div style="flex:1; height:82%; background:${p}aa; border-radius:4px;"></div>
-                                </div>
-                            </div>
-                        </div>
+                    <div style="display:grid; grid-template-columns:${isBento ? '1.4fr 1fr' : '1fr 1fr'}; gap:${gap}px;">
+                        <div style="${cardCss} padding:10px;"><div style="font-size:10px; font-weight:700;">🎨 Палитра</div><div style="font-size:9px; opacity:0.7;">Акцент: ${p}</div></div>
+                        <div style="${cardCss} padding:10px;"><div style="font-size:10px; font-weight:700;">📐 Радиус</div><div style="font-size:9px; color:${p};">${builderState.radius}px</div></div>
                     </div>
-                `;
-            } else if (builderState.typeId === 'ecommerce') {
-                html = `
-                    <div style="display:flex; flex-direction:column; gap:${gap}px;">
-                        <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:11px; font-weight:800;">SNEAKER.DROP</span>
-                            <span style="${btnCss} padding:2px 8px; font-size:9px;">🛒 Корзина (2)</span>
-                        </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:${gap}px;">
-                            <div style="${cardCss} padding:10px;">
-                                <div style="height:44px; background:${p}25; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:6px;">👟</div>
-                                <div style="font-size:10px; font-weight:700;">Cyber Runner</div>
-                                <span style="font-size:10px; font-weight:800; color:${p};">$189</span>
-                            </div>
-                            <div style="${cardCss} padding:10px;">
-                                <div style="height:44px; background:${p}25; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:6px;">🎧</div>
-                                <div style="font-size:10px; font-weight:700;">Vision Pods</div>
-                                <span style="font-size:10px; font-weight:800; color:${p};">$249</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (builderState.typeId === 'portfolio') {
-                html = `
-                    <div style="display:flex; flex-direction:column; gap:${gap}px;">
-                        <div style="${cardCss} padding:12px; display:flex; align-items:center; gap:10px;">
-                            <div style="width:38px; height:38px; border-radius:50%; background:${p}; display:flex; align-items:center; justify-content:center; font-size:16px; color:#fff; font-weight:800;">D</div>
-                            <div>
-                                <div style="font-size:12px; font-weight:800;">DARXY // AI DEV</div>
-                                <div style="font-size:9px; color:${p}; font-weight:600;">● Доступен для заказов</div>
-                            </div>
-                        </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:${gap}px;">
-                            <div style="${cardCss} padding:10px;"><div style="font-size:9px; opacity:0.7;">КЕЙС #1</div><div style="font-size:10px; font-weight:700;">TG Mini App</div></div>
-                            <div style="${cardCss} padding:10px;"><div style="font-size:9px; opacity:0.7;">ОПЫТ</div><div style="font-size:12px; font-weight:800; color:${p};">45+ ботов</div></div>
-                        </div>
-                    </div>
-                `;
-            } else if (builderState.typeId === 'web3') {
-                html = `
-                    <div style="display:flex; flex-direction:column; gap:${gap}px;">
-                        <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between;"><span style="font-size:10px; font-weight:800;">🌐 DEX.SWAP</span><span style="font-size:9px; color:${p};">0x71C...9A2</span></div>
-                        <div style="${cardCss} padding:10px;"><div style="font-size:9px; opacity:0.75;">Отдаёте: 10.0 💎 TON</div><div style="font-size:14px; font-weight:800; margin-top:2px;">Получаете: 54.20 USDT</div></div>
-                        <button style="${btnCss} padding:8px; font-size:10px; font-weight:700;">🔄 Мгновенный Swap</button>
-                    </div>
-                `;
-            } else {
-                html = `
-                    <div style="display:flex; flex-direction:column; gap:${gap}px;">
-                        <div style="${cardCss} padding:8px 12px; display:flex; justify-content:space-between;"><span style="font-size:11px; font-weight:800;">VIBE.SAAS</span><span style="${btnCss} padding:2px 8px; font-size:9px;">Старт</span></div>
-                        <div style="${cardCss} padding:12px;">
-                            <span style="font-size:9px; font-weight:700; color:${p};">✨ AI ENGINE 2.0</span>
-                            <div style="font-size:13px; font-weight:800; margin:4px 0;">Запускай продукты в 10 раз быстрее с ИИ</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            mount.innerHTML = html;
-            const palName = UI_PALETTES.find(x => x.id === builderState.paletteId)?.name || builderState.primaryColor;
-            document.getElementById('summary-style-pill').textContent = `${builderState.styleName} • ${palName}`;
-            document.getElementById('summary-metrics-pill').textContent = `R: ${builderState.radius}px | Blur: ${builderState.blur}px | Op: ${builderState.opacity}%`;
+                </div>
+            `;
+            document.getElementById('summary-style-pill').textContent = `${builderState.styleName}`;
+            document.getElementById('summary-metrics-pill').textContent = `R: ${builderState.radius}px | Blur: ${builderState.blur}px`;
         }
 
         function generateVisualUIPrompt() {
@@ -1994,169 +2120,95 @@ ${enabledMods || '- Чистая архитектура на Router'}
             const fontObj = UI_FONTS.find(x => x.id === builderState.fontId) || UI_FONTS[0];
             const customNote = document.getElementById('ui-custom-note').value.trim();
 
-            const prompt = `Роль: Senior UI/UX Designer & Frontend Developer.
-Задача: Создай современный интерфейс для проекта «${typeObj.title}» (${typeObj.desc}).
-${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
-1. ДИЗАЙН-СИСТЕМА (${styleObj.name}):
-- Характер стиля: ${styleObj.desc}.
-- Тема: ${builderState.previewDark ? 'Тёмная' : 'Светлая'}, фон: ${builderState.previewDark ? builderState.bgDark : builderState.bgLight}.
-- Главный акцент: ${builderState.primaryColor}, вторичный: ${builderState.secondaryColor}.
-- Скругление (border-radius): ${builderState.radius}px, размытие (backdrop-filter): blur(${builderState.blur}px), плотность карточек: ${builderState.opacity}%.
-
-2. ТИПОГРАФИКА И БЛОКИ:
-- Шрифт: ${fontObj.name} (${fontObj.css}).
-- Секции: ${builderState.sections.join(', ')}.
-
-3. ФОРМАТ КОДА:
-- Один файл index.html (HTML5 + Tailwind CSS CDN + чистый Vanilla JS), полный код без сокращений.`;
-
+            const prompt = `Роль: Senior UI/UX Designer & Frontend Developer.\nЗадача: Создай современный интерфейс для проекта «${typeObj.title}» (${typeObj.desc}).${customNote ? `\nСпецифика проекта: ${customNote}` : ''}\nДизайн-система: ${styleObj.name} (${styleObj.desc}).\nЦвета: фон ${builderState.bgDark}, основной акцент ${builderState.primaryColor}, вторичный ${builderState.secondaryColor}.\nГеометрия: border-radius ${builderState.radius}px, backdrop-filter blur(${builderState.blur}px), плотность карточек ${builderState.opacity}%.\nШрифт: ${fontObj.name}.\nСекции: ${builderState.sections.join(', ')}.\nВыдай полный рабочий файл index.html на Tailwind CSS без сокращений.`;
             runWithSkeleton('ui-out-wrap', 'ui-skeleton', 'ui-result-card', 'ui-code', prompt, `UI Промт: ${typeObj.title}`);
         }
 
-        /* ==================== 7. СЕЙФ, БАЗА И ОСТАЛЬНЫЕ ФУНКЦИИ ==================== */
+        /* ==================== 7. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==================== */
         const GOLDEN_VIP_PROMPTS = [
-            { title: '👑 [VIP] Анти-сокращение кода (100% Full-File Protocol)', text: 'КРИТИЧЕСКАЯ ИНСТРУКЦИЯ: Ты работаешь в режиме Full-File Output. Тебе строго запрещено использовать комментарии "// ... остальной код" или пропускать импорты. Всегда возвращай каждый файл от первой до последней строчки.' },
-            { title: '👑 [VIP] Промт на создание 3D WebGL-сайта в 1 файл', text: 'Роль: Creative WebGL & Three.js Developer. Создай интерактивный 3D-лендинг в одном файле index.html с реакцией на курсор и гироскоп (60 FPS) и карточками из матового стекла.' },
-            { title: '👑 [VIP] Архитектор Telegram Mini App + Бота под ключ', text: 'Роль: Principal Telegram Mini App Architect. Спроектируй связку из бота на Python (aiogram 3 + aiosqlite WAL) и Mini App (index.html + Telegram WebApp SDK).' },
-            { title: '👑 [VIP] Глубокий рефакторинг и ускорение до 60 FPS', text: 'Проведи аудит производительности фронтенд-кода: устрани лишние перерисовки DOM, замени тяжелые фильтры blur на радиальные градиенты и выдай полный оптимизированный файл.' }
+            { title: '👑 [VIP] Анти-сокращение кода (100% Full-File Protocol)', text: 'КРИТИЧЕСКАЯ ИНСТРУКЦИЯ: Ты работаешь в режиме Full-File Output. Тебе строго запрещено использовать комментарии "// ... остальной код". Всегда возвращай каждый файл от первой до последней строчки.' },
+            { title: '👑 [VIP] Промт на создание 3D WebGL-сайта в 1 файл', text: 'Роль: Creative WebGL & Three.js Developer. Создай интерактивный 3D-лендинг в одном файле index.html с реакцией на курсор и гироскоп (60 FPS).' }
         ];
 
         const STACKS_DATA = [
             { id: 'python_tg', title: 'Python 3.11 + Aiogram 3.x + aiosqlite', desc: 'Асинхронный Telegram-бот с Роутерами и WAL БД' },
             { id: 'python_fastapi', title: 'Python + FastAPI + SQLAlchemy 2.0 + Postgres', desc: 'Высоконагруженный REST API сервис' },
-            { id: 'nextjs_full', title: 'Next.js 14 + Tailwind + Prisma + Supabase', desc: 'Полноценный AI Micro-SaaS с авторизацией' },
-            { id: 'html_tma', title: 'HTML5 + Tailwind + Vanilla JS (Telegram Mini App)', desc: 'Молниеносный сингл-файл апп в стиле visionOS' }
+            { id: 'nextjs_full', title: 'Next.js 14 + Tailwind + Prisma + Supabase', desc: 'Полноценный AI Micro-SaaS с авторизацией' }
         ];
         let selectedStackId = 'python_tg';
-
-        function getCurrentStackTitle() {
-            return STACKS_DATA.find(s => s.id === selectedStackId)?.title || selectedStackId;
-        }
-
+        function getCurrentStackTitle() { return STACKS_DATA.find(s => s.id === selectedStackId)?.title || selectedStackId; }
         function openStackSheet() {
-            const html = STACKS_DATA.map(s => `
-                <button onclick="selectedStackId='${s.id}'; document.getElementById('selected-stack-label').textContent='${s.title}'; closeBottomSheet();" class="w-full p-3.5 rounded-2xl border ${s.id === selectedStackId ? 'border-indigo-400 bg-indigo-500/15' : 'border-white/10 bg-white/[0.03]'} text-left">
+            openBottomSheet('Выберите стек проекта', STACKS_DATA.map(s => `
+                <button onclick="selectedStackId='${s.id}'; document.getElementById('selected-stack-label').textContent='${s.title}'; closeBottomSheet();" class="w-full p-3.5 rounded-2xl border border-white/10 bg-white/[0.03] text-left">
                     <div class="text-xs font-semibold text-dynamic">${s.title}</div>
                     <p class="text-[11px] text-muted-dynamic mt-0.5">${s.desc}</p>
                 </button>
-            `).join('');
-            openBottomSheet('Выберите стек проекта', html);
-        }
-
-        const PROJECT_TEMPLATES = {
-            saas: { title: 'Шаблон: AI Micro-SaaS', tree: 'saas-app/\n├── app/\n├── components/\n└── prisma/schema.prisma', prompt: 'Создай каркас AI Micro-SaaS приложения на Next.js 14, Tailwind и Prisma.' },
-            tgbot: { title: 'Шаблон: Модульный Telegram-бот', tree: 'tg-bot/\n├── bot.py\n├── db.py (WAL)\n├── handlers/\n└── keyboards.py', prompt: 'Напиши модульного Telegram-бота на aiogram 3 с реферальной системой и WebApp.' },
-            landing: { title: 'Шаблон: 3D-Лендинг', tree: 'landing-3d/\n└── index.html (Three.js + Tailwind)', prompt: 'Создай одностраничный сайт в стиле Apple visionOS с интерактивной 3D-сценой Three.js.' }
-        };
-
-        function openTemplateSheet(key) {
-            const tpl = PROJECT_TEMPLATES[key];
-            const enc = encodeURIComponent(tpl.prompt);
-            openBottomSheet(tpl.title, `
-                <div class="space-y-3">
-                    <pre class="p-3 rounded-2xl code-surface font-mono text-[11px] text-dynamic">${tpl.tree}</pre>
-                    <p class="p-3 rounded-2xl code-surface font-mono text-[11px] text-dynamic">${tpl.prompt}</p>
-                    <button onclick="copyDirectText('${enc}', this)" class="btn-primary w-full min-h-[44px] rounded-2xl text-xs font-semibold">📋 Скопировать промт</button>
-                </div>
-            `);
+            `).join(''));
         }
 
         function runWithSkeleton(wrapId, skeletonId, cardId, codeId, text, historyTitle) {
             const wrap = document.getElementById(wrapId);
             const skel = document.getElementById(skeletonId);
             const card = document.getElementById(cardId);
-            wrap.classList.add('open');
-            skel.classList.remove('hidden');
-            card.classList.add('hidden');
+            wrap.classList.add('open'); skel.classList.remove('hidden'); card.classList.add('hidden');
             setTimeout(() => {
-                skel.classList.add('hidden');
-                card.classList.remove('hidden');
+                skel.classList.add('hidden'); card.classList.remove('hidden');
                 const codeEl = document.getElementById(codeId);
-                codeEl.dataset.raw = text;
-                codeEl.textContent = text;
+                codeEl.dataset.raw = text; codeEl.textContent = text;
                 addHistoryItem(historyTitle, text);
             }, 220);
         }
 
         function generateArchitecture() {
             Haptic.success();
-            const prompt = `Роль: Senior Architect.\nСтек: ${getCurrentStackTitle()}.\nЗадача: Спроектируй модульную файловую структуру и выдай полный рабочий код каждого файла без заглушек.`;
-            runWithSkeleton('arch-out-wrap', 'arch-skeleton', 'arch-result-card', 'arch-code', prompt, `Архитектура: ${getCurrentStackTitle()}`);
+            runWithSkeleton('arch-out-wrap', 'arch-skeleton', 'arch-result-card', 'arch-code', `Роль: Senior Architect.\nСтек: ${getCurrentStackTitle()}.\nСпроектируй модульную структуру и выдай полный код каждого файла.`, `Архитектура: ${getCurrentStackTitle()}`);
         }
 
         let currentErrorMode = 'fix';
         function setErrorMode(mode, btnEl) {
-            Haptic.selection();
-            currentErrorMode = mode;
+            Haptic.selection(); currentErrorMode = mode;
             document.querySelectorAll('.err-mode-btn').forEach(b => b.className = 'err-mode-btn min-h-[36px] rounded-xl text-xs font-medium text-muted-dynamic');
             btnEl.className = 'err-mode-btn min-h-[36px] rounded-xl text-xs font-semibold bg-indigo-500 text-white';
         }
-
         function handleErrorInput(textarea) {
             textarea.classList.remove('error-ring');
             const t = textarea.value.toLowerCase();
-            let lang = 'Auto';
-            if (t.includes('traceback') || t.includes('aiogram')) lang = 'Python';
-            else if (t.includes('react') || t.includes('typeerror')) lang = 'JS / React';
-            document.getElementById('detected-lang-badge').textContent = lang;
+            document.getElementById('detected-lang-badge').textContent = t.includes('traceback') ? 'Python' : (t.includes('react') ? 'React' : 'Auto');
         }
-
         function convertError() {
             const el = document.getElementById('err-input');
-            const val = el.value.trim();
-            if (!val) { Haptic.error(); el.classList.add('error-ring'); return; }
+            if (!el.value.trim()) { Haptic.error(); el.classList.add('error-ring'); return; }
             Haptic.success();
-            const prompt = `Роль: Senior Debugging Engineer.\nРежим: ${currentErrorMode.toUpperCase()}.\nПроанализируй Traceback, укажи причину сбоя и выдай полностью исправленный код:\n\`\`\`text\n${val}\n\`\`\``;
-            runWithSkeleton('err-out-wrap', 'err-skeleton', 'err-result-card', 'err-code', prompt, 'Отладка ошибки');
+            runWithSkeleton('err-out-wrap', 'err-skeleton', 'err-result-card', 'err-code', `Роль: Senior Debugging Engineer (${currentErrorMode}).\nИсправь ошибку и выдай полный рабочий код:\n\`\`\`text\n${el.value.trim()}\n\`\`\``, 'Отладка ошибки');
         }
-
         function optimizeRawPrompt() {
             const el = document.getElementById('opt-input');
-            const val = el.value.trim();
-            if (!val) { Haptic.error(); el.classList.add('error-ring'); return; }
+            if (!el.value.trim()) { Haptic.error(); el.classList.add('error-ring'); return; }
             Haptic.success();
-            const prompt = `РОЛЬ: Senior Software Architect.\nЗАДАЧА: «${val}»\nТРЕБОВАНИЯ: Предусмотри краевые случаи, безопасность и выдай полный модульный код без сокращений.`;
-            runWithSkeleton('opt-out-wrap', 'opt-skeleton', 'opt-result-card', 'opt-code', prompt, `Оптимизатор: ${val.slice(0, 20)}`);
+            runWithSkeleton('opt-out-wrap', 'opt-skeleton', 'opt-result-card', 'opt-code', `РОЛЬ: Senior Software Architect.\nЗАДАЧА: «${el.value.trim()}»\nТРЕБОВАНИЯ: Предусмотри краевые случаи, безопасность и выдай полный модульный код без сокращений.`, 'Оптимизированный промт');
         }
 
         const VAULT_KEY = 'vibe_vault_v3';
         let activeVaultTag = 'ALL';
-
-        function getVaultList() {
-            try { return JSON.parse(localStorage.getItem(VAULT_KEY) || '[]'); }
-            catch { return []; }
-        }
-
-        function persistVaultList(list) {
-            localStorage.setItem(VAULT_KEY, JSON.stringify(list));
-            document.getElementById('vault-count-badge').textContent = String(list.length);
-            updateVipUI();
-        }
-
+        function getVaultList() { try { return JSON.parse(localStorage.getItem(VAULT_KEY) || '[]'); } catch { return []; } }
+        function persistVaultList(list) { localStorage.setItem(VAULT_KEY, JSON.stringify(list)); document.getElementById('vault-count-badge').textContent = String(list.length); updateVipUI(); }
         function checkVaultCapacity() {
-            const list = getVaultList();
-            if (getRefsCount() < 2 && list.length >= 5) {
-                Haptic.error();
-                openVipModal();
-                showToast('🔒 В бесплатной версии лимит 5 сниппетов! Пригласи 2 друзей для безлимита.');
+            if (getRefsCount() < 2 && getVaultList().length >= 5) {
+                Haptic.error(); openVipModal();
+                showToast('🔒 В бесплатной версии лимит 5 сниппетов! Пригласи 2 друзей.');
                 return false;
             }
             return true;
         }
-
         function saveResultToVault(title, containerId, tag = 'Промты') {
             if (!checkVaultCapacity()) return;
             const el = document.getElementById(containerId);
             const text = (el.dataset.raw || el.textContent || '').trim();
             if (!text) return;
             const list = getVaultList();
-            list.unshift({ id: Date.now(), title, text, tag, date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' }) });
-            persistVaultList(list);
-            Haptic.success();
-            fireMiniConfetti();
-            showToast(`Сохранено в Сейф (${tag})!`);
+            list.unshift({ id: Date.now(), title, text, tag });
+            persistVaultList(list); Haptic.success(); fireMiniConfetti(); showToast(`Сохранено в Сейф (${tag})!`);
         }
-
         function addManualVaultItem() {
             if (!checkVaultCapacity()) return;
             const titleEl = document.getElementById('manual-vault-title');
@@ -2164,66 +2216,38 @@ ${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
             const tag = document.getElementById('manual-vault-tag').value;
             if (!titleEl.value.trim() || !bodyEl.value.trim()) { Haptic.error(); return; }
             const list = getVaultList();
-            list.unshift({ id: Date.now(), title: titleEl.value.trim(), text: bodyEl.value.trim(), tag, date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' }) });
-            persistVaultList(list);
-            titleEl.value = '';
-            bodyEl.value = '';
-            Haptic.success();
-            fireMiniConfetti();
-            renderVault();
-            showToast('Сниппет сохранён!');
+            list.unshift({ id: Date.now(), title: titleEl.value.trim(), text: bodyEl.value.trim(), tag });
+            persistVaultList(list); titleEl.value = ''; bodyEl.value = '';
+            Haptic.success(); renderVault(); showToast('Сниппет сохранён!');
         }
-
         function exportVaultJson() {
-            if (getRefsCount() < 2) {
-                Haptic.error();
-                openVipModal();
-                showToast('🔒 Экспорт в .JSON открывается за 2 приглашённых друзей!');
-                return;
-            }
-            const data = JSON.stringify(getVaultList(), null, 2);
-            const blob = new Blob([data], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'vibe_vault_backup.json';
-            a.click();
+            if (getRefsCount() < 2) { Haptic.error(); openVipModal(); showToast('🔒 Экспорт .JSON открывается за 2 друзей!'); return; }
+            const blob = new Blob([JSON.stringify(getVaultList(), null, 2)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vibe_vault.json'; a.click();
             Haptic.success();
-            showToast('Бэкап Сейфа скачан!');
         }
-
-        function deleteVaultItem(id) {
-            Haptic.light();
-            persistVaultList(getVaultList().filter(x => x.id !== id));
-            renderVault();
-        }
-
+        function deleteVaultItem(id) { Haptic.light(); persistVaultList(getVaultList().filter(x => x.id !== id)); renderVault(); }
         function setVaultTagFilter(tag, btnEl) {
-            Haptic.selection();
-            activeVaultTag = tag;
+            Haptic.selection(); activeVaultTag = tag;
             document.querySelectorAll('.vault-tag-chip').forEach(b => b.className = 'vault-tag-chip min-h-[36px] px-3.5 rounded-full text-xs font-medium btn-glass shrink-0');
             if (btnEl) btnEl.className = 'vault-tag-chip min-h-[36px] px-3.5 rounded-full text-xs font-semibold bg-indigo-500 text-white shrink-0';
             renderVault();
         }
-
         function renderVault() {
             const list = getVaultList().filter(x => activeVaultTag === 'ALL' || x.tag === activeVaultTag);
             const box = document.getElementById('vault-cards');
-            if (list.length === 0) {
-                box.innerHTML = `<div class="frosted-card rounded-3xl p-8 text-center lg:col-span-2 text-xs text-muted-dynamic">В этой папке Сейфа пока пусто.</div>`;
-                return;
-            }
+            if (list.length === 0) { box.innerHTML = `<div class="frosted-card p-8 text-center lg:col-span-2 text-xs text-muted-dynamic">В этой папке Сейфа пока пусто.</div>`; return; }
             box.innerHTML = list.map(item => {
                 const enc = encodeURIComponent(item.text);
                 return `
-                    <article class="frosted-card rounded-3xl p-4 flex flex-col justify-between animate-pop">
+                    <article class="frosted-card p-4 flex flex-col justify-between">
                         <div>
-                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-500/15 text-indigo-400">${escapeHtml(item.tag)}</span>
+                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-indigo-500/15 accent-text">${escapeHtml(item.tag)}</span>
                             <h4 class="text-sm font-semibold text-dynamic mt-1 mb-2">${escapeHtml(item.title)}</h4>
                             <p class="font-mono text-[11px] text-muted-dynamic line-clamp-3 code-surface rounded-xl p-2.5 mb-3">${escapeHtml(item.text)}</p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="copyDirectText('${enc}', this)" class="btn-glass flex-1 min-h-[38px] rounded-xl text-xs font-semibold text-indigo-400">Копировать</button>
+                            <button onclick="copyDirectText('${enc}', this)" class="btn-glass flex-1 min-h-[38px] rounded-xl text-xs font-semibold accent-text">Копировать</button>
                             <button onclick="deleteVaultItem(${item.id})" class="btn-glass min-h-[38px] px-3 rounded-xl text-xs text-rose-400">Удалить</button>
                         </div>
                     </article>
@@ -2232,57 +2256,29 @@ ${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
         }
 
         const ALL_500_IDEAS = [];
-        const DOMAINS = ['TG Mini App трекер', 'AI Micro-SaaS сервис', 'Telegram-бот автоматизатор', 'Three.js 3D конфигуратор', 'Биржа микро-задач', 'Анализатор договоров на ИИ', 'Турнирный бот с сеткой', 'Конструктор резюме', 'Мониторинг цен селлеров', 'Генератор обложек и карточек'];
-        for (let i = 1; i <= 50; i++) DOMAINS.forEach(d => ALL_500_IDEAS.push({ id: ALL_500_IDEAS.length + 1, title: `${d} — концепт #${i} (Stars оплата + AI)` }));
+        const DOMAINS = ['TG Mini App трекер', 'AI Micro-SaaS сервис', 'Telegram-бот автоматизатор', 'Three.js 3D конфигуратор', 'Биржа микро-задач', 'Анализатор договоров на ИИ', 'Турнирный бот с сеткой', 'Конструктор резюме', 'Мониторинг цен селлеров', 'Генератор обложек'];
+        for (let i = 1; i <= 50; i++) DOMAINS.forEach(d => ALL_500_IDEAS.push({ id: ALL_500_IDEAS.length + 1, title: `${d} — концепт #${i} (Stars + AI)` }));
 
         function renderBotHub() {
             const goldenUnlocked = getRefsCount() >= 3;
             const goldenBox = document.getElementById('sub-golden');
-
             if (!goldenUnlocked) {
                 goldenBox.innerHTML = `
-                    <div class="frosted-card rounded-3xl p-6 text-center lg:col-span-2 border border-amber-400/30">
+                    <div class="frosted-card p-6 text-center lg:col-span-2 border border-amber-400/30">
                         <div class="text-3xl mb-2 animate-float">🔒👑</div>
                         <h3 class="text-base font-bold text-dynamic">Закрытый архив «Golden Prompts»</h3>
-                        <p class="text-xs text-muted-dynamic mt-1 max-w-md mx-auto">Секретные системные промты для создания 3D-сайтов в один файл, обхода лени нейросетей и проектирования ботов открываются за 3 приглашённых друзей (сейчас: ${getRefsCount()}/3).</p>
-                        <div class="flex justify-center gap-2 mt-4">
-                            <button onclick="shareInviteLink()" class="btn-gold min-h-[42px] px-5 rounded-xl text-xs font-bold">🚀 Пригласить друзей</button>
-                            <button onclick="copyInviteLink()" class="btn-glass min-h-[42px] px-4 rounded-xl text-xs font-semibold text-amber-300">📋 Скопировать ссылку</button>
-                        </div>
+                        <p class="text-xs text-muted-dynamic mt-1">Открывается за 3 приглашённых друзей (сейчас: ${getRefsCount()}/3).</p>
+                        <button onclick="shareInviteLink()" class="btn-gold min-h-[42px] px-5 rounded-xl text-xs font-bold mt-3">🚀 Пригласить друзей</button>
                     </div>
                 `;
             } else {
-                goldenBox.innerHTML = GOLDEN_VIP_PROMPTS.map(p => {
-                    const enc = encodeURIComponent(p.text);
-                    return `
-                        <article class="frosted-card rounded-3xl p-4 border border-amber-400/30 flex flex-col justify-between">
-                            <div>
-                                <h4 class="text-sm font-bold text-amber-400 mb-2">${p.title}</h4>
-                                <p class="font-mono text-[11px] text-dynamic code-surface p-3 rounded-2xl mb-3">${p.text}</p>
-                            </div>
-                            <button onclick="copyDirectText('${enc}', this)" class="btn-gold w-full min-h-[40px] rounded-xl text-xs font-bold">Копировать VIP-промт</button>
-                        </article>
-                    `;
-                }).join('');
-            }
-
-            const basePrompts = [
-                { title: 'Senior Security Audit', text: 'Проверь этот код на уязвимости, SQL-инъекции и гонки данных. Выдай исправленную версию.' },
-                { title: 'Декомпозиция MVP по шагам', text: 'Разбей разработку этого проекта на 4 последовательных шага с проверкой каждого модуля.' }
-            ];
-            document.getElementById('sub-prompts').innerHTML = basePrompts.map(p => {
-                const enc = encodeURIComponent(p.text);
-                return `
-                    <article class="frosted-card rounded-3xl p-4 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-sm font-semibold text-dynamic mb-2">${p.title}</h4>
-                            <p class="font-mono text-[11px] text-muted-dynamic code-surface p-3 rounded-2xl mb-3">${p.text}</p>
-                        </div>
-                        <button onclick="copyDirectText('${enc}', this)" class="btn-glass w-full min-h-[40px] rounded-xl text-xs font-semibold text-indigo-400">Копировать</button>
+                goldenBox.innerHTML = GOLDEN_VIP_PROMPTS.map(p => `
+                    <article class="frosted-card p-4 border border-amber-400/30 flex flex-col justify-between">
+                        <div><h4 class="text-sm font-bold text-amber-400 mb-2">${p.title}</h4><p class="font-mono text-[11px] text-dynamic code-surface p-3 rounded-2xl mb-3">${p.text}</p></div>
+                        <button onclick="copyDirectText('${encodeURIComponent(p.text)}', this)" class="btn-gold w-full min-h-[40px] rounded-xl text-xs font-bold">Копировать VIP-промт</button>
                     </article>
-                `;
-            }).join('');
-
+                `).join('');
+            }
             renderIdeasList();
         }
 
@@ -2290,18 +2286,12 @@ ${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
             const q = (document.getElementById('idea-search')?.value || '').trim().toLowerCase();
             let list = ALL_500_IDEAS.filter(x => !q || x.title.toLowerCase().includes(q) || String(x.id) === q);
             if (highlightItem) list = [highlightItem, ...list.filter(x => x.id !== highlightItem.id)];
-            document.getElementById('ideas-container').innerHTML = list.slice(0, 12).map(item => {
-                const enc = encodeURIComponent(`Спроектируй MVP для идеи #${item.id}: ${item.title}. Выдай структуру и полный код.`);
-                return `
-                    <article class="frosted-card rounded-2xl p-3.5 flex items-center justify-between gap-3">
-                        <div>
-                            <span class="text-[10px] font-mono text-indigo-400">#${item.id}</span>
-                            <h5 class="text-xs font-medium text-dynamic mt-0.5">${escapeHtml(item.title)}</h5>
-                        </div>
-                        <button onclick="copyDirectText('${enc}', this)" class="btn-glass min-h-[36px] px-3 rounded-xl text-[11px] font-semibold text-indigo-400 shrink-0">ТЗ в ИИ</button>
-                    </article>
-                `;
-            }).join('');
+            document.getElementById('ideas-container').innerHTML = list.slice(0, 12).map(item => `
+                <article class="frosted-card p-3.5 flex items-center justify-between gap-3">
+                    <div><span class="text-[10px] font-mono accent-text">#${item.id}</span><h5 class="text-xs font-medium text-dynamic mt-0.5">${escapeHtml(item.title)}</h5></div>
+                    <button onclick="copyDirectText('${encodeURIComponent(`Спроектируй MVP для идеи #${item.id}: ${item.title}`)}', this)" class="btn-glass min-h-[36px] px-3 rounded-xl text-[11px] font-semibold accent-text shrink-0">ТЗ в ИИ</button>
+                </article>
+            `).join('');
         }
 
         function pickRandomIdea() {
@@ -2310,7 +2300,6 @@ ${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
             if (currentTabIndex !== 2) switchTab(2, 'view-hub');
             switchHubSub('sub-ideas', document.querySelectorAll('.hub-sub-btn')[2]);
             renderIdeasList(item);
-            showToast(`🎲 Идея #${item.id}`);
         }
 
         function switchHubSub(subId, btnEl) {
@@ -2335,20 +2324,17 @@ ${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
         }
 
         function switchTab(index, viewId) {
-            Haptic.selection();
-            currentTabIndex = index;
+            Haptic.selection(); currentTabIndex = index;
             document.getElementById('bottom-nav-pill').style.transform = `translate3d(${index * 100}%, 0, 0)`;
             ['view-studio', 'view-tools', 'view-hub', 'view-vault'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById(viewId).classList.remove('hidden');
-
             [0, 1, 2, 3].forEach(i => {
                 const btn = document.getElementById(`nav-btn-${i}`);
                 const active = i === index;
-                btn.classList.toggle('text-indigo-400', active);
+                btn.classList.toggle('accent-text', active);
                 btn.classList.toggle('font-semibold', active);
                 btn.classList.toggle('text-muted-dynamic', !active);
             });
-
             renderQuickBreadcrumbs();
             if (viewId === 'view-vault') renderVault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2356,47 +2342,26 @@ ${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
 
         function openBottomSheet(title, htmlContent) {
             Haptic.light();
-            activeSheetOpen = true;
             document.getElementById('sheet-title').textContent = title;
             document.getElementById('sheet-body').innerHTML = htmlContent;
             document.getElementById('sheet-backdrop').classList.add('open');
             document.getElementById('bottom-sheet').classList.add('open');
         }
-
         function closeBottomSheet() {
-            activeSheetOpen = false;
             document.getElementById('sheet-backdrop').classList.remove('open');
             document.getElementById('bottom-sheet').classList.remove('open');
         }
-
-        function toggleAccordion(id) {
-            Haptic.light();
-            document.getElementById(id).classList.toggle('open');
-        }
-
+        function toggleAccordion(id) { Haptic.light(); document.getElementById(id).classList.toggle('open'); }
         function copyResult(containerId, btnEl) {
             const el = document.getElementById(containerId);
             const text = el.dataset.raw || el.textContent || '';
             if (!text) return;
             navigator.clipboard.writeText(text).then(() => {
-                Haptic.success();
-                showToast('Скопировано!');
-                if (btnEl) {
-                    const prev = btnEl.textContent;
-                    btnEl.textContent = 'Готово ✓';
-                    setTimeout(() => { btnEl.textContent = prev; }, 1400);
-                }
+                Haptic.success(); showToast('Скопировано!');
+                if (btnEl) { const prev = btnEl.textContent; btnEl.textContent = 'Готово ✓'; setTimeout(() => { btnEl.textContent = prev; }, 1400); }
             });
         }
-
-        function shareResult(containerId) {
-            Haptic.light();
-            const el = document.getElementById(containerId);
-            const text = el.dataset.raw || el.textContent || '';
-            if (tg?.switchInlineQuery) tg.switchInlineQuery(text.slice(0, 200));
-            else copyResult(containerId);
-        }
-
+        function shareResult(containerId) { Haptic.light(); copyResult(containerId); }
         function quickExportAI(target, containerId) {
             const el = document.getElementById(containerId);
             const text = el.dataset.raw || el.textContent || '';
@@ -2408,60 +2373,40 @@ ${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
                 setTimeout(() => window.open(urls[target], '_blank'), 300);
             });
         }
-
         function copyDirectText(enc, btnEl) {
             navigator.clipboard.writeText(decodeURIComponent(enc)).then(() => {
-                Haptic.success();
-                showToast('Скопировано!');
-                if (btnEl) {
-                    const prev = btnEl.textContent;
-                    btnEl.textContent = 'Готово ✓';
-                    setTimeout(() => { btnEl.textContent = prev; }, 1400);
-                }
+                Haptic.success(); showToast('Скопировано!');
+                if (btnEl) { const prev = btnEl.textContent; btnEl.textContent = 'Готово ✓'; setTimeout(() => { btnEl.textContent = prev; }, 1400); }
             });
         }
 
         const HISTORY_KEY = 'vibe_history_v2';
-        function getHistory() {
-            try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
-            catch { return []; }
-        }
+        function getHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; } }
         function addHistoryItem(title, text) {
             const list = getHistory().filter(x => x.text !== text);
             list.unshift({ id: Date.now(), title, text });
             localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 8)));
             renderHistory();
         }
-        function clearHistory() {
-            Haptic.light();
-            localStorage.removeItem(HISTORY_KEY);
-            renderHistory();
-        }
+        function clearHistory() { Haptic.light(); localStorage.removeItem(HISTORY_KEY); renderHistory(); }
         function renderHistory() {
             const list = getHistory();
             const box = document.getElementById('history-list');
             if (!box) return;
-            if (list.length === 0) {
-                box.innerHTML = `<div class="p-3 rounded-2xl code-surface text-center text-xs text-muted-dynamic">История пуста</div>`;
-                return;
-            }
-            box.innerHTML = list.map(item => {
-                const enc = encodeURIComponent(item.text);
-                return `
-                    <div onclick="copyDirectText('${enc}')" class="p-2.5 rounded-2xl code-surface border border-white/10 cursor-pointer">
-                        <div class="text-xs font-semibold text-dynamic truncate">${escapeHtml(item.title)}</div>
-                        <p class="text-[10px] text-muted-dynamic truncate font-mono">${escapeHtml(item.text)}</p>
-                    </div>
-                `;
-            }).join('');
+            if (list.length === 0) { box.innerHTML = `<div class="p-3 rounded-2xl code-surface text-center text-xs text-muted-dynamic">История пуста</div>`; return; }
+            box.innerHTML = list.map(item => `
+                <div onclick="copyDirectText('${encodeURIComponent(item.text)}')" class="p-2.5 rounded-2xl code-surface border border-white/10 cursor-pointer">
+                    <div class="text-xs font-semibold text-dynamic truncate">${escapeHtml(item.title)}</div>
+                    <p class="text-[10px] text-muted-dynamic truncate font-mono">${escapeHtml(item.text)}</p>
+                </div>
+            `).join('');
         }
 
         function fireMiniConfetti() {
             const canvas = document.getElementById('confetti-canvas');
             canvas.classList.remove('hidden');
             const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             const colors = ['#6366f1', '#f59e0b', '#10b981', '#ec4899'];
             const particles = Array.from({ length: 24 }, () => ({
                 x: canvas.width / 2, y: canvas.height * 0.7,
@@ -2474,11 +2419,7 @@ ${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 if (elapsed > 550) { canvas.classList.add('hidden'); return; }
                 ctx.globalAlpha = Math.max(0, 1 - elapsed / 550);
-                particles.forEach(p => {
-                    p.x += p.vx; p.y += p.vy; p.vy += 0.35;
-                    ctx.fillStyle = p.color;
-                    ctx.fillRect(p.x, p.y, p.size, p.size);
-                });
+                particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.35; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); });
                 requestAnimationFrame(frame);
             }
             requestAnimationFrame(frame);
@@ -2500,13 +2441,12 @@ ${customNote ? `\nСпецифика проекта: ${customNote}\n` : ''}
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('sound-toggle-btn').textContent = SoundFX.muted ? '🔇' : '🔊';
-            if (tg) {
-                try { tg.ready(); tg.expand(); tg.disableVerticalSwipes?.(); } catch (_) {}
-            }
-            syncRefsFromCloudStorage();
+            if (tg) { try { tg.ready(); tg.expand(); tg.disableVerticalSwipes?.(); } catch (_) {} }
+            applyUserSiteTheme(loadUserSiteTheme());
             updateVipUI();
             initVisualStudio();
             renderBotBuilderEditor();
+            initIdeRulesBuilder();
             renderQuickBreadcrumbs();
             renderBotHub();
             renderHistory();
