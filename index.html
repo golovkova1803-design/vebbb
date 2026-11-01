@@ -1,460 +1,1351 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Claude Code // Vibe App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CLAUDE_CODE // VIBE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(4px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     },
-                    animation: {
-                        fadeIn: 'fadeIn 0.25s ease-out forwards',
+                    transitionTimingFunction: {
+                        'ios': 'cubic-bezier(0.22, 1, 0.36, 1)',
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap');
-        
-        body {
-            background-color: #050505;
-            color: #e5e5e5;
-            font-family: 'Fira Code', monospace;
+        :root {
+            --ease-ios: cubic-bezier(0.22, 1, 0.36, 1);
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
+        }
+
+        * {
             -webkit-tap-highlight-color: transparent;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        *::-webkit-scrollbar {
+            display: none;
         }
 
-        .glass-panel {
-            background: rgba(14, 14, 18, 0.78);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(12px);
+        body {
+            background-color: #0b0d14;
+            color: #f3f4f6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow-x: hidden;
+            padding-bottom: calc(var(--safe-bottom) + 28px);
         }
 
-        .neon-text {
-            color: #00f0ff;
-            text-shadow: 0 0 8px rgba(0, 240, 255, 0.45);
+        /* Карточки из матового стекла (visionOS style) */
+        .frosted-card {
+            background: rgba(255, 255, 255, 0.055);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
         }
 
-        .tab-btn.active {
-            border-bottom: 2px solid #00f0ff;
-            color: #00f0ff;
-            background: linear-gradient(0deg, rgba(0, 240, 255, 0.08) 0%, transparent 100%);
+        .frosted-header {
+            background: rgba(11, 13, 20, 0.72);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* 3. Glitch-эффект на заголовке при тапе */
-        .glitch-wrapper {
-            position: relative;
-            display: inline-block;
-            user-select: none;
+        .frosted-input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+            transition: all 250ms var(--ease-ios);
         }
-        .glitch-wrapper::before,
-        .glitch-wrapper::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        .frosted-input:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(129, 140, 248, 0.65);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.2);
+            outline: none;
+        }
+        .frosted-input.error-ring {
+            border-color: rgba(248, 113, 113, 0.75);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            transition: transform 220ms var(--ease-ios), opacity 220ms var(--ease-ios), box-shadow 220ms var(--ease-ios);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 220ms var(--ease-ios);
+        }
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .btn-glass:active {
+            transform: scale(0.96);
+        }
+
+        /* Появление карточек со staggered-задержкой */
+        @keyframes cardEnter {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stagger-item {
             opacity: 0;
-            pointer-events: none;
+            animation: cardEnter 380ms var(--ease-ios) forwards;
         }
-        .glitch-active::before {
-            color: #ef4444;
-            transform: translate(3px, -1px);
-            opacity: 0.85;
+        .delay-1 { animation-delay: 40ms; }
+        .delay-2 { animation-delay: 90ms; }
+        .delay-3 { animation-delay: 140ms; }
+        .delay-4 { animation-delay: 190ms; }
+        .delay-5 { animation-delay: 240ms; }
+
+        /* Плавное раскрытие по высоте (аккордеоны и блоки вывода) */
+        .expand-grid {
+            display: grid;
+            grid-template-rows: 0fr;
+            opacity: 0;
+            transition: grid-template-rows 340ms var(--ease-ios), opacity 280ms var(--ease-ios), margin-top 340ms var(--ease-ios);
         }
-        .glitch-active::after {
-            color: #22d3ee;
-            transform: translate(-3px, 1px);
-            opacity: 0.85;
+        .expand-grid.open {
+            grid-template-rows: 1fr;
+            opacity: 1;
+        }
+        .expand-inner {
+            overflow: hidden;
         }
 
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #22d3ee44; }
+        /* Плавное построчное появление кода */
+        @keyframes lineFade {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .code-line {
+            opacity: 0;
+            animation: lineFade 260ms var(--ease-ios) forwards;
+        }
+
+        /* Уважение системной настройки уменьшения движения */
+        @media (prefers-reduced-motion: reduce) {
+            *, ::before, ::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
     </style>
 </head>
-<!-- 4. Фон-сетка с радиальным свечением -->
-<body class="min-h-screen flex flex-col relative overflow-x-hidden bg-[#050505] bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:24px_24px]">
+<body class="min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200">
 
-    <!-- Верхнее радиальное фиолетовое свечение -->
-    <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.16),transparent_65%)] z-0"></div>
+    <!-- Мягкий глубокий фон с 3 размытыми цветовыми пятнами -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+        <div class="absolute -top-24 -left-20 w-80 h-80 rounded-full bg-indigo-600/20 blur-3xl"></div>
+        <div class="absolute top-1/3 -right-24 w-72 h-72 rounded-full bg-violet-600/15 blur-3xl"></div>
+        <div class="absolute -bottom-24 left-1/4 w-80 h-80 rounded-full bg-slate-500/10 blur-3xl"></div>
+    </div>
 
-    <!-- 1. CRT Сканлайны поверх экрана -->
-    <div class="pointer-events-none fixed inset-0 z-50 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.025)_0,rgba(255,255,255,0.025)_1px,transparent_1px,transparent_3px)]"></div>
+    <!-- Sticky-шапка + Навигация со скользящей капсулой -->
+    <header class="frosted-header sticky top-0 z-30 px-4 pt-3.5 pb-3">
+        <div class="max-w-md mx-auto">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500/25 to-violet-500/25 border border-white/15 flex items-center justify-center shadow-inner">
+                        <svg class="w-5 h-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-[15px] font-semibold tracking-tight text-white leading-tight">CLAUDE_CODE // VIBE</h1>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                            <p id="user-status" class="text-xs text-slate-400 font-medium">Vibe Workspace</p>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="closeMiniApp()" aria-label="Закрыть приложение" class="btn-glass min-w-[44px] min-h-[44px] px-3 rounded-2xl flex items-center justify-center text-xs font-medium text-slate-300 focus-visible:ring-2 focus-visible:ring-indigo-400">
+                    Закрыть
+                </button>
+            </div>
 
-    <!-- Header -->
-    <header class="p-4 border-b border-gray-800/80 glass-panel sticky top-0 z-20">
-        <div class="flex justify-between items-center">
-            <!-- Заголовок с Glitch-эффектом при нажатии -->
-            <h1 id="main-title" onclick="triggerGlitch()" data-text="CLAUDE_CODE // VIBE" class="glitch-wrapper text-lg font-bold neon-text cursor-pointer tracking-wider">
-                CLAUDE_CODE // VIBE
-            </h1>
-            <button onclick="tg.close()" class="text-gray-500 hover:text-cyan-400 px-2 py-0.5 border border-transparent hover:border-cyan-500/40 text-sm transition">
-                [ESC]
-            </button>
-        </div>
-        
-        <!-- Бонус: Индикатор статуса ONLINE с animate-ping -->
-        <div class="flex items-center space-x-2 mt-1.5 text-[11px] text-gray-400">
-            <span id="user-greeting" class="truncate max-w-[200px]">USER: @guest</span>
-            <span class="text-gray-700">|</span>
-            <span class="flex items-center text-emerald-400 font-semibold tracking-wider">
-                <span class="relative flex h-2 w-2 mr-1.5">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                ONLINE
-            </span>
+            <!-- Переключатель вкладок со скользящей пилюлей -->
+            <nav class="relative grid grid-cols-3 p-1 rounded-2xl bg-white/[0.04] border border-white/10" role="tablist" aria-label="Основные разделы">
+                <div id="tab-pill" class="absolute top-1 bottom-1 left-1 w-[calc(33.333%-2.67px)] rounded-xl bg-white/[0.11] border border-white/15 shadow-sm transition-transform duration-300 ease-ios pointer-events-none"></div>
+                
+                <button onclick="switchTab(0, 'view-tools')" role="tab" id="tab-btn-0" aria-selected="true" class="relative z-10 min-h-[40px] text-xs font-semibold text-white transition-colors duration-200 rounded-xl focus-visible:outline-none">
+                    Инструменты
+                </button>
+                <button onclick="switchTab(1, 'view-hub')" role="tab" id="tab-btn-1" aria-selected="false" class="relative z-10 min-h-[40px] text-xs font-medium text-slate-400 transition-colors duration-200 rounded-xl focus-visible:outline-none">
+                    База и 500 идей
+                </button>
+                <button onclick="switchTab(2, 'view-vault')" role="tab" id="tab-btn-2" aria-selected="false" class="relative z-10 min-h-[40px] text-xs font-medium text-slate-400 transition-colors duration-200 rounded-xl focus-visible:outline-none flex items-center justify-center gap-1.5">
+                    <span>Мой Сейф</span>
+                    <span id="vault-count-badge" class="px-1.5 py-0.5 text-[10px] rounded-full bg-indigo-500/25 text-indigo-200 border border-indigo-400/20">0</span>
+                </button>
+            </nav>
         </div>
     </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="flex border-b border-gray-800/80 text-xs glass-panel sticky top-[69px] z-20">
-        <button onclick="switchTab('tab-tools', this)" class="tab-btn active py-3 font-semibold flex-1 tracking-wider transition">
-            [🛠 ИНСТРУМЕНТЫ]
-        </button>
-        <button onclick="switchTab('tab-vault', this)" class="tab-btn py-3 font-semibold flex-1 tracking-wider text-gray-400 transition">
-            [🔐 МОЙ СЕЙФ]
-        </button>
-    </nav>
+    <!-- Основной контент -->
+    <main class="flex-1 px-4 pt-4 max-w-md mx-auto w-full relative z-10">
 
-    <!-- Content Area -->
-    <main class="flex-1 p-4 space-y-5 relative z-10 pb-12">
-        
-        <!-- Вкладка: Инструменты -->
-        <div id="tab-tools" class="tab-content space-y-5">
-            
-            <!-- Карточка 1: Конструктор Архитектуры с HUD-уголками -->
-            <div class="relative glass-panel p-4 rounded-sm">
-                <!-- 5. HUD Уголки-скобки (Фиолетово-голубые) -->
-                <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-cyan-400/80 pointer-events-none"></div>
-                <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-cyan-400/80 pointer-events-none"></div>
-                <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-cyan-400/80 pointer-events-none"></div>
-                <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-cyan-400/80 pointer-events-none"></div>
+        <!-- ==================== ВКЛАДКА 1: ИНСТРУМЕНТЫ ==================== -->
+        <section id="view-tools" class="space-y-4">
 
-                <div class="flex items-center justify-between mb-1.5">
-                    <h3 class="font-bold text-purple-400 text-sm tracking-wide flex items-center">
-                        <span class="mr-2 text-base">🏗</span> КОНСТРУКТОР АРХИТЕКТУРЫ
-                    </h3>
-                    <span class="text-[10px] text-purple-400/60 border border-purple-500/30 px-1.5 py-0.5">SYS_GEN</span>
+            <!-- 1. Конструктор Архитектуры -->
+            <article class="frosted-card rounded-3xl p-5 stagger-item delay-1">
+                <div class="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-300/90">System Blueprint</span>
+                        <h2 class="text-base font-semibold text-white mt-0.5">Конструктор архитектуры</h2>
+                    </div>
+                    <div class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-400/20 flex items-center justify-center text-indigo-300 shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
                 </div>
-                <p class="text-[11px] text-gray-400 mb-3 leading-relaxed">Выберите стек проекта для генерации продакшен-промта по канонам вайбкодинга.</p>
-                
-                <select id="stack-select" class="w-full bg-black/90 border border-gray-700 text-xs text-cyan-300 rounded-sm p-2.5 focus:border-cyan-400 outline-none mb-3">
-                    <option value="python_tg">Python 3.11 + Aiogram 3.x + aiosqlite (Telegram Bot)</option>
-                    <option value="python_fastapi">Python + FastAPI + SQLAlchemy + PostgreSQL (Backend)</option>
-                    <option value="js_react">React + Tailwind CSS + Vite (Modern Web App)</option>
-                    <option value="html_tg">HTML5 + Tailwind + Vanilla JS (Telegram Mini App)</option>
-                    <option value="three_web">Three.js + WebGL + GSAP (Interactive 3D Site)</option>
-                </select>
-                
-                <button onclick="generateArchitecture()" class="w-full bg-purple-950/80 hover:bg-purple-900 border border-purple-500/60 text-purple-200 font-bold py-2.5 rounded-sm text-xs tracking-wider uppercase transition active:scale-[0.99]">
-                    ⚡ Сгенерировать ТЗ
+                <p class="text-xs text-slate-300/80 mb-3.5 leading-relaxed">Выберите стек проекта, чтобы получить готовый системный промт с чистой структурой папок.</p>
+
+                <label for="arch-select" class="sr-only">Выбор стека технологий</label>
+                <div class="relative mb-3.5">
+                    <select id="arch-select" onchange="Haptic.selection()" class="frosted-input w-full min-h-[46px] rounded-2xl px-4 pr-10 text-xs font-medium text-slate-100 appearance-none cursor-pointer">
+                        <option value="python_tg" class="bg-[#121521] text-white">Python 3.11 + Aiogram 3.x + aiosqlite (Telegram Bot)</option>
+                        <option value="python_fastapi" class="bg-[#121521] text-white">Python + FastAPI + SQLAlchemy 2.0 + PostgreSQL</option>
+                        <option value="nextjs_full" class="bg-[#121521] text-white">Next.js 14 + Tailwind + Prisma + Supabase (SaaS)</option>
+                        <option value="html_tma" class="bg-[#121521] text-white">HTML5 + Tailwind + Vanilla JS (Telegram Mini App)</option>
+                        <option value="three_webgl" class="bg-[#121521] text-white">Three.js + WebGL + GSAP (Интерактивный 3D-сайт)</option>
+                    </select>
+                    <svg class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+
+                <button onclick="generateArchitecture()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold text-white flex items-center justify-center gap-2">
+                    <span>Сгенерировать архитектуру</span>
                 </button>
 
-                <!-- Блок вывода с эффектом печатной машинки -->
-                <div id="arch-result" class="hidden mt-3.5">
-                    <div class="bg-black/95 border border-purple-500/40 rounded-sm p-3 text-xs text-gray-200 font-mono whitespace-pre-wrap break-words leading-relaxed"><span id="arch-output"></span><span id="arch-cursor" class="inline-block w-2 h-4 bg-cyan-400 animate-pulse align-middle ml-1"></span></div>
-                    <button onclick="copyToClipboard('arch-output')" class="w-full mt-2 bg-cyan-950/40 border border-cyan-500/60 text-cyan-300 hover:bg-cyan-900/60 py-2 rounded-sm text-xs font-semibold tracking-wider transition">
-                        [📋 СКОПИРОВАТЬ ПРОМТ]
-                    </button>
+                <!-- Вывод результата -->
+                <div id="arch-out-wrap" class="expand-grid">
+                    <div class="expand-inner">
+                        <div class="mt-4 pt-4 border-t border-white/10">
+                            <div class="rounded-2xl bg-black/30 border border-white/10 overflow-hidden">
+                                <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.04] border-b border-white/10">
+                                    <span class="text-xs font-semibold text-indigo-200">Архитектура</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <button onclick="copyResult('arch-code', this)" class="btn-glass min-h-[34px] px-3 rounded-xl text-[11px] font-medium text-slate-200">Копировать</button>
+                                        <button onclick="shareResult('arch-code')" aria-label="Поделиться" class="btn-glass min-h-[34px] px-2.5 rounded-xl text-[11px] font-medium text-slate-300">Поделиться</button>
+                                    </div>
+                                </div>
+                                <div id="arch-code" class="p-3.5 font-mono text-[11px] text-slate-200/90 leading-relaxed whitespace-pre-wrap break-words max-h-60 overflow-y-auto"></div>
+                            </div>
+                            <button onclick="saveResultToVault('Архитектура: ' + getSelectLabel('arch-select'), 'arch-code')" class="btn-glass w-full min-h-[44px] mt-2.5 rounded-2xl text-xs font-medium text-indigo-200 flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                                <span>Сохранить в сейф</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 2. Конвертер ошибок -->
+            <article class="frosted-card rounded-3xl p-5 stagger-item delay-2">
+                <div class="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-rose-300/90">Smart Debug</span>
+                        <h2 class="text-base font-semibold text-white mt-0.5">Конвертер ошибок</h2>
+                    </div>
+                    <div class="w-9 h-9 rounded-xl bg-rose-500/15 border border-rose-400/20 flex items-center justify-center text-rose-300 shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-300/80 mb-3.5 leading-relaxed">Вставьте лог ошибки (Traceback), чтобы упаковать его в точный отладочный запрос для Claude.</p>
+
+                <label for="err-input" class="sr-only">Лог ошибки</label>
+                <textarea id="err-input" oninput="clearErrorRing(this)" rows="3" placeholder="Traceback (most recent call last): ..." class="frosted-input w-full rounded-2xl p-3.5 text-xs font-mono text-slate-100 placeholder-slate-500 mb-2 resize-none"></textarea>
+                <p id="err-msg" class="hidden text-[11px] text-rose-400 mb-2.5 pl-1">Пожалуйста, вставьте текст ошибки перед конвертацией.</p>
+
+                <button onclick="convertError()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold text-white flex items-center justify-center gap-2">
+                    <span>Обернуть для Claude</span>
+                </button>
+
+                <!-- Вывод результата -->
+                <div id="err-out-wrap" class="expand-grid">
+                    <div class="expand-inner">
+                        <div class="mt-4 pt-4 border-t border-white/10">
+                            <div class="rounded-2xl bg-black/30 border border-white/10 overflow-hidden">
+                                <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.04] border-b border-white/10">
+                                    <span class="text-xs font-semibold text-indigo-200">Промт для Claude</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <button onclick="copyResult('err-code', this)" class="btn-glass min-h-[34px] px-3 rounded-xl text-[11px] font-medium text-slate-200">Копировать</button>
+                                        <button onclick="shareResult('err-code')" aria-label="Поделиться" class="btn-glass min-h-[34px] px-2.5 rounded-xl text-[11px] font-medium text-slate-300">Поделиться</button>
+                                    </div>
+                                </div>
+                                <div id="err-code" class="p-3.5 font-mono text-[11px] text-slate-200/90 leading-relaxed whitespace-pre-wrap break-words max-h-60 overflow-y-auto"></div>
+                            </div>
+                            <button onclick="saveResultToVault('Отладка ошибки', 'err-code')" class="btn-glass w-full min-h-[44px] mt-2.5 rounded-2xl text-xs font-medium text-indigo-200 flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                                <span>Сохранить в сейф</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 3. Модуль-аккордеон: Генератор промта для Cursor -->
+            <article class="frosted-card rounded-3xl overflow-hidden stagger-item delay-3">
+                <button onclick="toggleAccordion('acc-cursor', 'chev-cursor')" aria-expanded="false" class="w-full min-h-[60px] p-5 flex items-center justify-between text-left focus-visible:outline-none">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-9 h-9 rounded-xl bg-violet-500/15 border border-violet-400/20 flex items-center justify-center text-violet-300 shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-white">Генератор промта для Cursor</h3>
+                            <p class="text-xs text-slate-400">Правила .cursorrules и фокусные фичи</p>
+                        </div>
+                    </div>
+                    <svg id="chev-cursor" class="w-5 h-5 text-slate-400 transition-transform duration-300 ease-ios shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
+                <div id="acc-cursor" class="expand-grid">
+                    <div class="expand-inner">
+                        <div class="px-5 pb-5 pt-1 border-t border-white/10 space-y-3">
+                            <div>
+                                <label for="cur-task" class="block text-xs font-medium text-slate-300 mb-1.5">Что разрабатываем?</label>
+                                <input id="cur-task" oninput="clearErrorRing(this)" type="text" placeholder="Напр.: Модуль авторизации через Telegram и JWT" class="frosted-input w-full min-h-[44px] rounded-2xl px-3.5 text-xs text-white placeholder-slate-500">
+                            </div>
+                            <div>
+                                <label for="cur-stack" class="block text-xs font-medium text-slate-300 mb-1.5">Стек и библиотеки</label>
+                                <input id="cur-stack" type="text" value="Python 3.11, Aiogram 3, aiosqlite" class="frosted-input w-full min-h-[44px] rounded-2xl px-3.5 text-xs text-white placeholder-slate-500">
+                            </div>
+
+                            <!-- Переключатели: Тесты, Типизация, Комментарии -->
+                            <div class="grid grid-cols-3 gap-2 pt-1">
+                                <button type="button" onclick="toggleChip(this)" data-active="true" id="chip-types" class="min-h-[44px] rounded-2xl border border-indigo-400/50 bg-indigo-500/20 text-xs font-medium text-indigo-200 transition-all">
+                                    ✓ Типизация
+                                </button>
+                                <button type="button" onclick="toggleChip(this)" data-active="false" id="chip-tests" class="min-h-[44px] rounded-2xl border border-white/10 bg-white/[0.04] text-xs font-medium text-slate-400 transition-all">
+                                    Unit-тесты
+                                </button>
+                                <button type="button" onclick="toggleChip(this)" data-active="true" id="chip-comments" class="min-h-[44px] rounded-2xl border border-indigo-400/50 bg-indigo-500/20 text-xs font-medium text-indigo-200 transition-all">
+                                    ✓ Докстринги
+                                </button>
+                            </div>
+
+                            <button onclick="generateCursorPrompt()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold text-white">
+                                Собрать промт для Cursor
+                            </button>
+
+                            <div id="cur-out-wrap" class="expand-grid">
+                                <div class="expand-inner">
+                                    <div class="pt-3">
+                                        <div class="rounded-2xl bg-black/30 border border-white/10 overflow-hidden">
+                                            <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.04] border-b border-white/10">
+                                                <span class="text-xs font-semibold text-indigo-200">Cursor Composer Prompt</span>
+                                                <div class="flex items-center gap-1.5">
+                                                    <button onclick="copyResult('cur-code', this)" class="btn-glass min-h-[34px] px-3 rounded-xl text-[11px] font-medium text-slate-200">Копировать</button>
+                                                    <button onclick="shareResult('cur-code')" class="btn-glass min-h-[34px] px-2.5 rounded-xl text-[11px] font-medium text-slate-300">Поделиться</button>
+                                                </div>
+                                            </div>
+                                            <div id="cur-code" class="p-3.5 font-mono text-[11px] text-slate-200/90 leading-relaxed whitespace-pre-wrap break-words max-h-60 overflow-y-auto"></div>
+                                        </div>
+                                        <button onclick="saveResultToVault('Cursor: ' + (document.getElementById('cur-task').value || 'Промт'), 'cur-code')" class="btn-glass w-full min-h-[44px] mt-2.5 rounded-2xl text-xs font-medium text-indigo-200 flex items-center justify-center gap-2">
+                                            <span>Сохранить в сейф</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 4. Модуль-аккордеон: Prompt Optimizer (Аналог генератора из бота) -->
+            <article class="frosted-card rounded-3xl overflow-hidden stagger-item delay-4">
+                <button onclick="toggleAccordion('acc-opt', 'chev-opt')" aria-expanded="false" class="w-full min-h-[60px] p-5 flex items-center justify-between text-left focus-visible:outline-none">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-400/20 flex items-center justify-center text-indigo-300 shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-white">Prompt Optimizer</h3>
+                            <p class="text-xs text-slate-400">Из сырой мысли в структуру Роль / Задача / Формат</p>
+                        </div>
+                    </div>
+                    <svg id="chev-opt" class="w-5 h-5 text-slate-400 transition-transform duration-300 ease-ios shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
+                <div id="acc-opt" class="expand-grid">
+                    <div class="expand-inner">
+                        <div class="px-5 pb-5 pt-1 border-t border-white/10 space-y-3">
+                            <label for="opt-input" class="block text-xs font-medium text-slate-300">Сырой запрос своими словами</label>
+                            <textarea id="opt-input" oninput="clearErrorRing(this)" rows="3" placeholder="Напр.: Сделай парсер тг каналов на питоне с сохранением в базу и защитой от флуда..." class="frosted-input w-full rounded-2xl p-3.5 text-xs text-white placeholder-slate-500 resize-none"></textarea>
+
+                            <button onclick="optimizeRawPrompt()" class="btn-primary w-full min-h-[46px] rounded-2xl text-xs font-semibold text-white">
+                                Усилить и структурировать
+                            </button>
+
+                            <div id="opt-out-wrap" class="expand-grid">
+                                <div class="expand-inner">
+                                    <div class="pt-3">
+                                        <div class="rounded-2xl bg-black/30 border border-white/10 overflow-hidden">
+                                            <div class="flex items-center justify-between px-3.5 py-2.5 bg-white/[0.04] border-b border-white/10">
+                                                <span class="text-xs font-semibold text-indigo-200">Промт для Claude</span>
+                                                <div class="flex items-center gap-1.5">
+                                                    <button onclick="copyResult('opt-code', this)" class="btn-glass min-h-[34px] px-3 rounded-xl text-[11px] font-medium text-slate-200">Копировать</button>
+                                                    <button onclick="shareResult('opt-code')" class="btn-glass min-h-[34px] px-2.5 rounded-xl text-[11px] font-medium text-slate-300">Поделиться</button>
+                                                </div>
+                                            </div>
+                                            <div id="opt-code" class="p-3.5 font-mono text-[11px] text-slate-200/90 leading-relaxed whitespace-pre-wrap break-words max-h-60 overflow-y-auto"></div>
+                                        </div>
+                                        <button onclick="saveResultToVault('Оптимизированный промт', 'opt-code')" class="btn-glass w-full min-h-[44px] mt-2.5 rounded-2xl text-xs font-medium text-indigo-200 flex items-center justify-center gap-2">
+                                            <span>Сохранить в сейф</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 5. Модуль-аккордеон: Чек-лист деплоя -->
+            <article class="frosted-card rounded-3xl overflow-hidden stagger-item delay-5">
+                <button onclick="toggleAccordion('acc-deploy', 'chev-deploy')" aria-expanded="false" class="w-full min-h-[60px] p-5 flex items-center justify-between text-left focus-visible:outline-none">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-400/20 flex items-center justify-center text-emerald-300 shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-white">Чек-лист деплоя</h3>
+                            <p id="deploy-sub" class="text-xs text-slate-400">Vercel / Netlify / VPS — 0 из 6 готово</p>
+                        </div>
+                    </div>
+                    <svg id="chev-deploy" class="w-5 h-5 text-slate-400 transition-transform duration-300 ease-ios shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
+                <div id="acc-deploy" class="expand-grid">
+                    <div class="expand-inner">
+                        <div class="px-5 pb-5 pt-2 border-t border-white/10">
+                            <!-- Прогресс-бар -->
+                            <div class="flex items-center justify-between text-xs mb-1.5">
+                                <span class="text-slate-300 font-medium">Готовность к продакшену</span>
+                                <span id="deploy-pct" class="text-indigo-300 font-semibold">0%</span>
+                            </div>
+                            <div class="w-full h-2 rounded-full bg-white/[0.07] overflow-hidden mb-4">
+                                <div id="deploy-bar" class="h-full w-0 bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300 ease-ios"></div>
+                            </div>
+
+                            <div id="checklist-items" class="space-y-2"></div>
+
+                            <button onclick="resetChecklist()" class="btn-glass w-full min-h-[44px] mt-3 rounded-2xl text-xs font-medium text-slate-300">
+                                Сбросить чек-лист
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- ==================== ВКЛАДКА 2: БАЗА И 500 ИДЕЙ (ВСЕ ФУНКЦИИ БОТА) ==================== -->
+        <section id="view-hub" class="hidden space-y-4">
+
+            <!-- Под-навигация внутри базы знаний -->
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="switchHubSub('sub-prompts', this)" class="hub-sub-btn min-h-[44px] rounded-2xl text-xs font-semibold bg-indigo-500/20 border border-indigo-400/40 text-indigo-200 transition-all">
+                    ⚡ Промты
+                </button>
+                <button onclick="switchHubSub('sub-ideas', this)" class="hub-sub-btn min-h-[44px] rounded-2xl text-xs font-medium bg-white/[0.04] border border-white/10 text-slate-300 transition-all">
+                    📚 500 Идей
+                </button>
+                <button onclick="switchHubSub('sub-nets', this)" class="hub-sub-btn min-h-[44px] rounded-2xl text-xs font-medium bg-white/[0.04] border border-white/10 text-slate-300 transition-all">
+                    🤖 Каталог ИИ
+                </button>
+            </div>
+
+            <!-- Подраздел 1: Готовые промты для Claude -->
+            <div id="sub-prompts" class="space-y-3">
+                <div id="bot-prompts-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Подраздел 2: Генератор и поиск по базе 500 идей вайбкодинга -->
+            <div id="sub-ideas" class="hidden space-y-3">
+                <div class="frosted-card rounded-3xl p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <input id="idea-search" oninput="renderIdeasList()" type="text" placeholder="Поиск идеи (бот, SaaS, 3D, парсер)..." class="frosted-input flex-1 min-h-[44px] rounded-2xl px-3.5 text-xs text-white placeholder-slate-400">
+                        <button onclick="pickRandomIdea()" aria-label="Случайная идея" class="btn-primary min-h-[44px] px-3.5 rounded-2xl text-xs font-semibold text-white shrink-0">
+                            🎲 Случайная
+                        </button>
+                    </div>
+                    <div class="flex gap-1.5 overflow-x-auto pb-1">
+                        <button onclick="setIdeaCategory('ALL', this)" class="idea-cat-chip px-3 min-h-[34px] rounded-xl text-[11px] font-medium bg-indigo-500/25 text-indigo-200 border border-indigo-400/30 shrink-0">Все ниши</button>
+                        <button onclick="setIdeaCategory('TG Mini Apps', this)" class="idea-cat-chip px-3 min-h-[34px] rounded-xl text-[11px] font-medium bg-white/[0.04] text-slate-400 border border-white/10 shrink-0">TG Mini Apps</button>
+                        <button onclick="setIdeaCategory('Telegram Боты', this)" class="idea-cat-chip px-3 min-h-[34px] rounded-xl text-[11px] font-medium bg-white/[0.04] text-slate-400 border border-white/10 shrink-0">Боты и Автоматизация</button>
+                        <button onclick="setIdeaCategory('AI Micro-SaaS', this)" class="idea-cat-chip px-3 min-h-[34px] rounded-xl text-[11px] font-medium bg-white/[0.04] text-slate-400 border border-white/10 shrink-0">AI Micro-SaaS</button>
+                        <button onclick="setIdeaCategory('WebGL & 3D', this)" class="idea-cat-chip px-3 min-h-[34px] rounded-xl text-[11px] font-medium bg-white/[0.04] text-slate-400 border border-white/10 shrink-0">WebGL & 3D</button>
+                    </div>
+                </div>
+                <div id="ideas-container" class="space-y-2.5"></div>
+            </div>
+
+            <!-- Подраздел 3: Каталог нейросетей -->
+            <div id="sub-nets" class="hidden space-y-3">
+                <div id="bot-nets-list" class="space-y-3"></div>
+            </div>
+
+        </section>
+
+        <!-- ==================== ВКЛАДКА 3: МОЙ СЕЙФ ==================== -->
+        <section id="view-vault" class="hidden space-y-4">
+
+            <!-- Поиск в стеклянной капсуле + кнопка ручного добавления -->
+            <div class="flex items-center gap-2">
+                <div class="relative flex-1">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input id="vault-search" oninput="renderVault()" type="text" placeholder="Поиск по сохранённым сниппетам..." class="frosted-input w-full min-h-[46px] rounded-full pl-10 pr-4 text-xs text-white placeholder-slate-400">
+                </div>
+                <button onclick="toggleAccordion('acc-new-vault', 'chev-vault')" aria-label="Добавить свой сниппет" class="btn-primary min-w-[46px] min-h-[46px] rounded-full flex items-center justify-center text-white shrink-0">
+                    <svg id="chev-vault" class="w-5 h-5 transition-transform duration-300 ease-ios" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Форма ручного добавления сниппета -->
+            <div id="acc-new-vault" class="expand-grid">
+                <div class="expand-inner">
+                    <div class="frosted-card rounded-3xl p-4 space-y-3">
+                        <h3 class="text-xs font-semibold text-indigo-200">Новый сниппет в Сейф</h3>
+                        <input id="manual-vault-title" type="text" placeholder="Название (напр.: Системный промт FastAPI)" class="frosted-input w-full min-h-[44px] rounded-2xl px-3.5 text-xs text-white placeholder-slate-500">
+                        <textarea id="manual-vault-body" rows="3" placeholder="Текст промта или фрагмент кода..." class="frosted-input w-full rounded-2xl p-3.5 text-xs font-mono text-white placeholder-slate-500 resize-none"></textarea>
+                        <button onclick="addManualVaultItem()" class="btn-primary w-full min-h-[44px] rounded-2xl text-xs font-semibold text-white">
+                            Сохранить сниппет
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Карточка 2: Конвертер Ошибок с HUD-уголками -->
-            <div id="error-card" class="relative glass-panel p-4 rounded-sm transition-shadow duration-300">
-                <!-- 5. HUD Уголки-скобки (Красные для дебаггера) -->
-                <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-red-500/80 pointer-events-none"></div>
-                <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-red-500/80 pointer-events-none"></div>
-                <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-red-500/80 pointer-events-none"></div>
-                <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-red-500/80 pointer-events-none"></div>
+            <!-- Список карточек Сейфа -->
+            <div id="vault-cards" class="space-y-3"></div>
 
-                <div class="flex items-center justify-between mb-1.5">
-                    <h3 id="error-title" class="font-bold text-red-400 text-sm tracking-wide flex items-center transition-all">
-                        <span class="mr-2 text-base">🐛</span> КОНВЕРТЕР ОШИБОК
-                    </h3>
-                    <span class="text-[10px] text-red-400/60 border border-red-500/30 px-1.5 py-0.5">DEBUG_MODE</span>
-                </div>
-                <p class="text-[11px] text-gray-400 mb-3 leading-relaxed">Вставьте сырой Traceback из консоли, чтобы упаковать его в точный запрос для отладки.</p>
-                
-                <textarea id="error-input" oninput="resetErrorState()" class="w-full bg-black/90 border border-gray-700 text-xs rounded-sm p-2.5 h-24 outline-none focus:border-red-500 text-red-300 placeholder-gray-600 transition-all" placeholder="Traceback (most recent call last): ..."></textarea>
-                
-                <button onclick="convertError()" class="w-full bg-red-950/80 hover:bg-red-900 border border-red-500/60 text-red-200 font-bold py-2.5 rounded-sm text-xs tracking-wider uppercase mt-2.5 transition active:scale-[0.99]">
-                    🔥 Обернуть для Claude
-                </button>
-
-                <!-- Блок вывода с эффектом печатной машинки -->
-                <div id="error-result" class="hidden mt-3.5">
-                    <div class="bg-black/95 border border-red-500/40 rounded-sm p-3 text-xs text-gray-200 font-mono whitespace-pre-wrap break-words leading-relaxed"><span id="error-output"></span><span id="error-cursor" class="inline-block w-2 h-4 bg-red-400 animate-pulse align-middle ml-1"></span></div>
-                    <button onclick="copyToClipboard('error-output')" class="w-full mt-2 bg-red-950/40 border border-red-500/60 text-red-300 hover:bg-red-900/60 py-2 rounded-sm text-xs font-semibold tracking-wider transition">
-                        [📋 СКОПИРОВАТЬ ДЛЯ ИИ]
-                    </button>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Вкладка: Сейф сниппетов (С рабочим сохранением в localStorage) -->
-        <div id="tab-vault" class="tab-content hidden space-y-4">
-            <div class="relative glass-panel p-4 rounded-sm">
-                <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-cyan-400/80 pointer-events-none"></div>
-                <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-cyan-400/80 pointer-events-none"></div>
-                <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-cyan-400/80 pointer-events-none"></div>
-                <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-cyan-400/80 pointer-events-none"></div>
-
-                <h3 class="font-bold text-cyan-400 text-sm mb-2">➕ ДОБАВИТЬ В СЕЙФ</h3>
-                <input id="snippet-title" type="text" placeholder="Название (напр. Фикс скролла)" class="w-full bg-black/90 border border-gray-700 text-xs rounded-sm p-2 mb-2 outline-none focus:border-cyan-400 text-gray-200">
-                <textarea id="snippet-text" placeholder="Текст промта или кусок кода..." class="w-full bg-black/90 border border-gray-700 text-xs rounded-sm p-2 h-20 outline-none focus:border-cyan-400 text-gray-300"></textarea>
-                <button onclick="saveSnippet()" class="w-full mt-2 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/60 text-cyan-200 font-bold py-2 rounded-sm text-xs uppercase tracking-wider transition">
-                    💾 Сохранить в память
-                </button>
-            </div>
-
-            <div id="vault-list" class="space-y-3"></div>
-        </div>
+        </section>
 
     </main>
 
-    <!-- Всплывающее системное уведомление (Toast) -->
-    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-black/95 border border-cyan-400 text-cyan-300 px-4 py-2 rounded-sm shadow-[0_0_15px_rgba(34,211,238,0.4)] text-xs font-bold tracking-wider opacity-0 transition-opacity pointer-events-none z-50">
-        [ СИСТЕМА: СКОПИРОВАНО В БУФЕР ]
+    <!-- Стеклянная пилюля Toast снизу с учётом safe area -->
+    <div id="toast-pill" role="status" aria-live="polite" class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,16px)+16px)] z-50 pointer-events-none opacity-0 translate-y-3 scale-95 transition-all duration-300 ease-ios">
+        <div class="frosted-card px-4 py-2.5 rounded-full flex items-center gap-2.5 shadow-2xl border border-white/20">
+            <span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+            </span>
+            <span id="toast-text" class="text-xs font-semibold text-white tracking-tight">Скопировано!</span>
+        </div>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.setHeaderColor('#050505');
-        tg.setBackgroundColor('#050505');
+        /* ==================== 1. TELEGRAM WEBAPP & БЕЗОПАСНАЯ ОБЁРТКА HAPTIC ==================== */
+        const tg = window.Telegram?.WebApp;
 
-        // Инициализация пользователя
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('user-greeting').innerText = `USER: @${user.username || user.first_name}`;
-        }
-
-        // Таймеры для печатной машинки
-        const typeTimers = {};
-
-        // 3. Функция Glitch-эффекта на заголовке при тапе
-        function triggerGlitch() {
-            const title = document.getElementById('main-title');
-            title.classList.add('glitch-active');
-            tg.HapticFeedback.notificationOccurred('warning');
-            setTimeout(() => {
-                title.classList.remove('glitch-active');
-            }, 150);
-        }
-
-        // 2. Функция эффекта «печатной машинки»
-        function typeWriterEffect(elementId, text, speed = 8) {
-            const el = document.getElementById(elementId);
-            if (typeTimers[elementId]) {
-                clearInterval(typeTimers[elementId]);
+        const Haptic = {
+            selection() {
+                try { tg?.HapticFeedback?.selectionChanged(); } catch (_) {}
+            },
+            light() {
+                try { tg?.HapticFeedback?.impactOccurred('light'); } catch (_) {}
+            },
+            success() {
+                try { tg?.HapticFeedback?.notificationOccurred('success'); } catch (_) {}
+            },
+            error() {
+                try { tg?.HapticFeedback?.notificationOccurred('error'); } catch (_) {}
             }
-            el.innerText = '';
-            let i = 0;
-            typeTimers[elementId] = setInterval(() => {
-                // Печатаем по 2 символа за тик для динамичной консольной скорости
-                el.innerText += text.slice(i, i + 2);
-                i += 2;
-                if (i >= text.length) {
-                    el.innerText = text;
-                    clearInterval(typeTimers[elementId]);
-                }
-            }, speed);
-        }
-
-        // Переключение вкладок
-        function switchTab(tabId, btnEl) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('active');
-                el.classList.add('text-gray-400');
-            });
-            
-            document.getElementById(tabId).classList.remove('hidden');
-            btnEl.classList.add('active');
-            btnEl.classList.remove('text-gray-400');
-            
-            if (tabId === 'tab-vault') {
-                renderVault();
-            }
-            tg.HapticFeedback.selectionChanged();
-        }
-
-        // База архитектурных промтов
-        const archPrompts = {
-            "python_tg": "Роль: Senior Python Developer.\nСтек: Python 3.11+, aiogram 3.x, aiosqlite.\nЗадача: Спроектируй модульную архитектуру Telegram-бота.\nТребования:\n1. Разделение на роутеры (handlers/user.py, handlers/admin.py), клавиатуры (keyboards.py) и слой БД (db.py).\n2. Асинхронные запросы к SQLite с включенным WAL-режимом.\n3. Выдай дерево файлов и полностью готовый к запуску код без заглушек.",
-            "python_fastapi": "Роль: System Architect & Backend Developer.\nСтек: Python, FastAPI, SQLAlchemy 2.0 (async), PostgreSQL, Pydantic v2.\nЗадача: Напиши каркас высоконагруженного REST API.\nТребования: Асинхронные эндпоинты, Dependency Injection, чистая схема БД и обработка исключений. Выдай полную структуру и код main.py.",
-            "js_react": "Роль: Senior Frontend Engineer.\nСтек: React 18, Tailwind CSS, Vite, Lucide Icons.\nЗадача: Создай современный интерфейс приложения в темном киберпанк-стиле.\nТребования: Компонентный подход, кастомные хуки, плавные микроанимации и полная адаптивность под мобильные устройства.",
-            "html_tg": "Роль: Эксперт по Telegram Mini Apps.\nСтек: HTML5, Tailwind CSS (CDN), Vanilla JS, Telegram WebApp SDK.\nЗадача: Напиши одностраничное Web App в один файл index.html.\nТребования: Использование tg.expand(), HapticFeedback, адаптация под темную тему мессенджера и сохранение состояния в localStorage.",
-            "three_web": "Роль: Creative WebGL Developer.\nСтек: Three.js, WebGL, HTML5/CSS3, GSAP.\nЗадача: Создай интерактивную 3D-сцену, работающую прямо в браузере в одном файле index.html.\nТребования: Оптимизированный рендер (60 FPS), реакция камеры на движение мыши/гироскопа, неоновое освещение и пост-обработка."
         };
 
-        // Генерация ТЗ с анимацией появления и печатной машинкой
-        function generateArchitecture() {
-            const selected = document.getElementById('stack-select').value;
-            const resultContainer = document.getElementById('arch-result');
-            
-            resultContainer.classList.remove('hidden', 'animate-fadeIn');
-            void resultContainer.offsetWidth; // Перезапуск CSS-анимации
-            resultContainer.classList.add('animate-fadeIn');
-            
-            tg.HapticFeedback.impactOccurred('medium');
-            typeWriterEffect('arch-output', archPrompts[selected], 8);
+        function initTelegramApp() {
+            if (!tg) return;
+            try {
+                tg.ready();
+                tg.expand();
+                tg.setHeaderColor?.('#0b0d14');
+                tg.setBackgroundColor?.('#0b0d14');
+
+                const user = tg.initDataUnsafe?.user;
+                if (user) {
+                    const name = user.username ? `@${user.username}` : user.first_name;
+                    document.getElementById('user-status').textContent = `${name} • Vibe Ready`;
+                }
+            } catch (_) {}
         }
 
-        // Сброс красного свечения ошибки при вводе текста
-        function resetErrorState() {
-            const inputEl = document.getElementById('error-input');
-            const titleEl = document.getElementById('error-title');
-            inputEl.classList.remove('border-red-500', 'shadow-[0_0_12px_rgba(239,68,68,0.6)]');
-            titleEl.classList.remove('text-red-500', 'shadow-[0_0_12px_rgba(239,68,68,0.6)]');
-        }
-
-        // Конвертер ошибок с подсветкой состояния ошибки и печатной машинкой
-        function convertError() {
-            const inputEl = document.getElementById('error-input');
-            const titleEl = document.getElementById('error-title');
-            const resultContainer = document.getElementById('error-result');
-            const input = inputEl.value.trim();
-
-            if (!input) {
-                // Бонус: Подсветка красным состоянием ошибки + вибрация
-                tg.HapticFeedback.notificationOccurred('error');
-                inputEl.classList.add('border-red-500', 'shadow-[0_0_12px_rgba(239,68,68,0.6)]');
-                titleEl.classList.add('text-red-500', 'shadow-[0_0_12px_rgba(239,68,68,0.6)]');
-                
-                resultContainer.classList.remove('hidden', 'animate-fadeIn');
-                void resultContainer.offsetWidth;
-                resultContainer.classList.add('animate-fadeIn');
-                
-                typeWriterEffect('error-output', "[ СИСТЕМНЫЙ СБОЙ ]: Поле ввода пустое. Вставьте лог ошибки (Traceback) для анализа.", 10);
-                return;
+        function closeMiniApp() {
+            Haptic.light();
+            if (tg?.close) {
+                tg.close();
+            } else {
+                showToast('Закрытие доступно внутри Telegram');
             }
-
-            resetErrorState();
-            const promptText = `У меня возникла ошибка при выполнении кода. Проанализируй стек-трейс шаг за шагом, укажи точную причину сбоя и выдай полностью исправленный код без сокращений.\n\nЛог ошибки:\n\`\`\`text\n${input}\n\`\`\``;
-            
-            resultContainer.classList.remove('hidden', 'animate-fadeIn');
-            void resultContainer.offsetWidth;
-            resultContainer.classList.add('animate-fadeIn');
-            
-            tg.HapticFeedback.impactOccurred('heavy');
-            typeWriterEffect('error-output', promptText, 6);
         }
 
-        // Копирование текста (даже если печатная машинка еще печатает)
-        function copyToClipboard(elementId) {
-            const textToCopy = document.getElementById(elementId).innerText;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                tg.HapticFeedback.notificationOccurred('success');
-                showToast("[ СИСТЕМА: СКОПИРОВАНО В БУФЕР ]");
-            }).catch(() => {
-                tg.HapticFeedback.notificationOccurred('error');
+        /* ==================== 2. TOAST И НАВИГАЦИЯ ==================== */
+        let toastTimer = null;
+        function showToast(message = 'Скопировано!') {
+            const pill = document.getElementById('toast-pill');
+            document.getElementById('toast-text').textContent = message;
+            pill.classList.remove('opacity-0', 'translate-y-3', 'scale-95');
+            pill.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                pill.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+                pill.classList.add('opacity-0', 'translate-y-3', 'scale-95');
+            }, 2000);
+        }
+
+        function switchTab(index, viewId) {
+            Haptic.selection();
+            const pill = document.getElementById('tab-pill');
+            pill.style.transform = `translateX(${index * 100}%)`;
+
+            ['view-tools', 'view-hub', 'view-vault'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+
+            [0, 1, 2].forEach(i => {
+                const btn = document.getElementById(`tab-btn-${i}`);
+                const active = i === index;
+                btn.setAttribute('aria-selected', active ? 'true' : 'false');
+                btn.classList.toggle('text-white', active);
+                btn.classList.toggle('font-semibold', active);
+                btn.classList.toggle('text-slate-400', !active);
+                btn.classList.toggle('font-medium', !active);
+            });
+
+            if (viewId === 'view-vault') renderVault();
+        }
+
+        function toggleAccordion(contentId, chevronId) {
+            Haptic.light();
+            const box = document.getElementById(contentId);
+            const chev = document.getElementById(chevronId);
+            const isOpen = box.classList.toggle('open');
+            if (chev) chev.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        function toggleChip(btn) {
+            Haptic.selection();
+            const isActive = btn.getAttribute('data-active') === 'true';
+            const next = !isActive;
+            btn.setAttribute('data-active', String(next));
+            const label = btn.textContent.replace('✓ ', '').trim();
+            btn.textContent = next ? `✓ ${label}` : label;
+
+            btn.classList.toggle('border-indigo-400/50', next);
+            btn.classList.toggle('bg-indigo-500/20', next);
+            btn.classList.toggle('text-indigo-200', next);
+            btn.classList.toggle('border-white/10', !next);
+            btn.classList.toggle('bg-white/[0.04]', !next);
+            btn.classList.toggle('text-slate-400', !next);
+        }
+
+        /* ==================== 3. ВЫВОД РЕЗУЛЬТАТА (FADE ПО СТРОКАМ), КОПИРОВАНИЕ И ШЕРИНГ ==================== */
+        function renderLinesFade(containerId, rawText) {
+            const container = document.getElementById(containerId);
+            container.dataset.raw = rawText;
+            container.innerHTML = '';
+            const lines = rawText.split('\n');
+            lines.forEach((line, idx) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.style.animationDelay = `${Math.min(idx * 25, 280)}ms`;
+                div.textContent = line || ' ';
+                container.appendChild(div);
             });
         }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.style.opacity = '1';
-            setTimeout(() => { toast.style.opacity = '0'; }, 1800);
+        function getRawOutput(containerId) {
+            const el = document.getElementById(containerId);
+            return el.dataset.raw || el.innerText || '';
         }
 
-        // Логика работы Личного Сейфа (localStorage)
-        function getVaultItems() {
-            try {
-                return JSON.parse(localStorage.getItem('vibe_vault') || '[]');
-            } catch {
-                return [];
+        function copyResult(containerId, btnEl) {
+            const text = getRawOutput(containerId);
+            if (!text) return;
+
+            navigator.clipboard.writeText(text).then(() => {
+                Haptic.success();
+                showToast('Скопировано!');
+                if (btnEl) {
+                    const prev = btnEl.textContent;
+                    btnEl.textContent = 'Готово ✓';
+                    btnEl.classList.add('text-emerald-300', 'border-emerald-400/40');
+                    setTimeout(() => {
+                        btnEl.textContent = prev;
+                        btnEl.classList.remove('text-emerald-300', 'border-emerald-400/40');
+                    }, 1500);
+                }
+            }).catch(() => {
+                Haptic.error();
+            });
+        }
+
+        function shareResult(containerId) {
+            Haptic.light();
+            const text = getRawOutput(containerId);
+            if (!text) return;
+
+            if (navigator.share) {
+                navigator.share({ title: 'CLAUDE_CODE // VIBE Prompt', text }).catch(() => {});
+            } else if (tg?.switchInlineQuery) {
+                tg.switchInlineQuery(text.slice(0, 200));
+            } else {
+                copyResult(containerId);
             }
         }
 
-        function saveSnippet() {
-            const titleEl = document.getElementById('snippet-title');
-            const textEl = document.getElementById('snippet-text');
+        function getSelectLabel(selectId) {
+            const sel = document.getElementById(selectId);
+            return sel.options[sel.selectedIndex].text.split('(')[0].trim();
+        }
+
+        function clearErrorRing(inputEl) {
+            inputEl.classList.remove('error-ring');
+            const errMsg = document.getElementById('err-msg');
+            if (errMsg) errMsg.classList.add('hidden');
+        }
+
+        /* ==================== 4. ЛОГИКА ИНСТРУМЕНТОВ ==================== */
+        const ARCH_PROMPTS = {
+            python_tg: `Роль: Senior Python Backend & Telegram Bot Architect.
+Стек: Python 3.11+, aiogram 3.x, aiosqlite, Pydantic.
+
+Задача: Спроектируй чистую модульную архитектуру Telegram-бота, готовую к высоким нагрузкам.
+Структура проекта:
+- bot.py (точка входа, инициализация пула и мидлварей)
+- config.py (чтение .env)
+- db.py (асинхронный слой aiosqlite в режиме WAL)
+- handlers/ (user.py, admin.py на Router)
+- keyboards.py (InlineKeyboardBuilder)
+
+Требования к коду:
+1. Полная асинхронность и строгая типизация (Type Hints).
+2. Выдай дерево файлов и полностью рабочие исходники без заглушек.`,
+
+            python_fastapi: `Роль: Principal Backend Architect.
+Стек: Python 3.11+, FastAPI, SQLAlchemy 2.0 (Async), PostgreSQL, Pydantic v2.
+
+Задача: Напиши продакшен-каркас REST API сервиса.
+Требования:
+1. Разделение на слои: api/routers, core/config, db/session, models, schemas, services.
+2. Dependency Injection через AsyncSession.
+3. Единый обработчик исключений и корректные HTTP-статусы.
+4. Выдай структуру директорий и полный код основных модулей.`,
+
+            nextjs_full: `Роль: Senior Fullstack Engineer.
+Стек: Next.js 14 (App Router), TypeScript, Tailwind CSS, Prisma ORM, Supabase.
+
+Задача: Спроектируй архитектуру современного AI Micro-SaaS приложения.
+Требования:
+1. Server Actions для мутаций и Route Handlers для вебхуков.
+2. Чистый UI с поддержкой Dark Mode и скелетонами загрузки.
+3. Выдай схему schema.prisma и код ключевых страниц.`,
+
+            html_tma: `Роль: Senior Telegram Mini Apps Developer & UI/UX Designer.
+Стек: HTML5, Tailwind CSS (CDN), Vanilla JS, Telegram WebApp SDK.
+
+Задача: Создай одностраничное Telegram Mini App в одном файле index.html в эстетике iOS / visionOS (матовое стекло).
+Требования:
+1. Инициализация Telegram.WebApp.expand(), учёт safe-area и HapticFeedback через безопасную обёртку.
+2. Сохранение пользовательских данных в CloudStorage / localStorage.
+3. Полный самодостаточный код без внешних сборок.`,
+
+            three_webgl: `Роль: Creative Technologist & WebGL Developer.
+Стек: Three.js, WebGL, GSAP, HTML5/Tailwind CSS.
+
+Задача: Создай интерактивную 3D-сцену в одном файле index.html с плавным откликом на движение курсора и гироскопа смартфона.
+Требования:
+1. Стабильные 60 FPS на мобильных устройствах, адаптивный ресайз рендера.
+2. Мягкое студийное освещение, плавная инерция камеры (lerp).
+3. Полностью готовый к запуску код.`
+        };
+
+        function generateArchitecture() {
+            Haptic.light();
+            const key = document.getElementById('arch-select').value;
+            renderLinesFade('arch-code', ARCH_PROMPTS[key]);
+            document.getElementById('arch-out-wrap').classList.add('open');
+        }
+
+        function convertError() {
+            const inputEl = document.getElementById('err-input');
+            const val = inputEl.value.trim();
+
+            if (!val) {
+                Haptic.error();
+                inputEl.classList.add('error-ring');
+                document.getElementById('err-msg').classList.remove('hidden');
+                inputEl.focus();
+                return;
+            }
+
+            Haptic.light();
+            const prompt = `Роль: Senior Debugging Engineer.
+Контекст: При выполнении моего кода возникло исключение.
+
+Задача:
+1. Укажи точную строку и корневую причину сбоя простыми словами.
+2. Предложи исправленный, полностью рабочий фрагмент кода без сокращений.
+3. Добавь защиту от повторения этой ошибки (валидация / обработка исключений).
+
+Лог ошибки (Traceback):
+\`\`\`text
+${val}
+\`\`\``;
+
+            renderLinesFade('err-code', prompt);
+            document.getElementById('err-out-wrap').classList.add('open');
+        }
+
+        function generateCursorPrompt() {
+            const taskEl = document.getElementById('cur-task');
+            const task = taskEl.value.trim();
+            const stack = document.getElementById('cur-stack').value.trim() || 'Современный стек по умолчанию';
+
+            if (!task) {
+                Haptic.error();
+                taskEl.classList.add('error-ring');
+                taskEl.focus();
+                return;
+            }
+
+            Haptic.light();
+            const useTypes = document.getElementById('chip-types').getAttribute('data-active') === 'true';
+            const useTests = document.getElementById('chip-tests').getAttribute('data-active') === 'true';
+            const useComments = document.getElementById('chip-comments').getAttribute('data-active') === 'true';
+
+            const rules = [
+                useTypes ? '- Обязательно используй строгую типизацию (Type Hints / TypeScript interfaces).' : '- Без избыточных сложных типов, фокус на лаконичности.',
+                useTests ? '- Напиши модульные unit-тесты для проверки ключевых граничных случаев.' : '- Тесты писать не нужно, сфокусируйся на основной реализации.',
+                useComments ? '- Добавь краткие информативные docstrings к функциям и сложным блокам.' : '- Код должен быть самодокументируемым, без лишних комментариев.'
+            ].join('\n');
+
+            const prompt = `@Codebase Мы реализуем новую функциональность в проекте.
+
+ЦЕЛЬ:
+${task}
+
+СТЕК И ОКРУЖЕНИЕ:
+${stack}
+
+ПРАВИЛА ГЕНЕРАЦИИ КОДА (.cursorrules):
+${rules}
+- Не удаляй существующую рабочую логику в соседних функциях.
+- Возвращай полные блоки кода для каждого изменяемого файла.
+- Перед написанием кода кратко перечисли 3 шага плана имплементации.`;
+
+            renderLinesFade('cur-code', prompt);
+            document.getElementById('cur-out-wrap').classList.add('open');
+        }
+
+        function optimizeRawPrompt() {
+            const inputEl = document.getElementById('opt-input');
+            const raw = inputEl.value.trim();
+
+            if (!raw) {
+                Haptic.error();
+                inputEl.classList.add('error-ring');
+                inputEl.focus();
+                return;
+            }
+
+            Haptic.light();
+            const structured = `РОЛЬ:
+Ты — Senior Software Architect и практик вайбкодинга с 10-летним опытом создания продакшен-систем.
+
+КОНТЕКСТ И ИСХОДНЫЙ ЗАПРОС:
+«${raw}»
+
+ЗАДАЧА:
+1. Спроектируй оптимальное техническое решение для описанной задачи.
+2. Предусмотри краевые случаи (edge cases), безопасность и обработку ошибок.
+3. Напиши чистый, модульный и полностью готовый к запуску код.
+
+ФОРМАТ ОТВЕТА:
+- Архитектурный обзор (3-4 пункта).
+- Полный код каждого файла без пропусков вида "// остальной код".
+- Краткая инструкция по запуску и проверке.`;
+
+            renderLinesFade('opt-code', structured);
+            document.getElementById('opt-out-wrap').classList.add('open');
+        }
+
+        /* ==================== 5. ЧЕК-ЛИСТ ДЕПЛОЯ ==================== */
+        const DEPLOY_TASKS = [
+            { id: 'env', text: 'Секреты и токены вынесены в .env (не в Git)' },
+            { id: 'https', text: 'Проверен HTTPS-домен для WebAppInfo в Telegram' },
+            { id: 'cors', text: 'Настроены CORS и валидация Telegram initData' },
+            { id: 'err', text: 'Добавлено логирование и глобальный перехват ошибок' },
+            { id: 'mobile', text: 'Проверена вёрстка на экранах 320–430px и safe-area' },
+            { id: 'wal', text: 'База данных переведена в режим WAL / настроен бэкап' }
+        ];
+
+        function getChecklistState() {
+            try { return JSON.parse(localStorage.getItem('vibe_deploy_check') || '{}'); }
+            catch { return {}; }
+        }
+
+        function toggleCheckItem(id) {
+            Haptic.selection();
+            const state = getChecklistState();
+            state[id] = !state[id];
+            localStorage.setItem('vibe_deploy_check', JSON.stringify(state));
+            renderChecklist();
+        }
+
+        function resetChecklist() {
+            Haptic.light();
+            localStorage.removeItem('vibe_deploy_check');
+            renderChecklist();
+            showToast('Чек-лист сброшен');
+        }
+
+        function renderChecklist() {
+            const state = getChecklistState();
+            const container = document.getElementById('checklist-items');
+            let doneCount = 0;
+
+            container.innerHTML = DEPLOY_TASKS.map(item => {
+                const checked = !!state[item.id];
+                if (checked) doneCount++;
+                return `
+                    <button type="button" onclick="toggleCheckItem('${item.id}')" class="w-full min-h-[46px] px-3.5 py-2.5 rounded-2xl border ${checked ? 'bg-indigo-500/15 border-indigo-400/35 text-white' : 'bg-white/[0.03] border-white/10 text-slate-300'} flex items-center gap-3 text-left transition-all duration-200">
+                        <span class="w-5 h-5 rounded-lg flex items-center justify-center border ${checked ? 'bg-indigo-500 border-indigo-400 text-white' : 'border-white/25 bg-black/20'} shrink-0 transition-colors">
+                            ${checked ? '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+                        </span>
+                        <span class="text-xs font-medium leading-snug ${checked ? 'line-through text-slate-400' : ''}">${item.text}</span>
+                    </button>
+                `;
+            }).join('');
+
+            const pct = Math.round((doneCount / DEPLOY_TASKS.length) * 100);
+            document.getElementById('deploy-pct').textContent = `${pct}%`;
+            document.getElementById('deploy-bar').style.width = `${pct}%`;
+            document.getElementById('deploy-sub').textContent = `Vercel / Netlify / VPS — ${doneCount} из ${DEPLOY_TASKS.length} готово`;
+        }
+
+        /* ==================== 6. МОЙ СЕЙФ (LOCALSTORAGE + TELEGRAM CLOUDSTORAGE) ==================== */
+        const VAULT_KEY = 'vibe_vault_v2';
+
+        function getVaultList() {
+            try { return JSON.parse(localStorage.getItem(VAULT_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function persistVaultList(list) {
+            const raw = JSON.stringify(list);
+            localStorage.setItem(VAULT_KEY, raw);
+            try {
+                if (tg?.CloudStorage && raw.length < 4000) {
+                    tg.CloudStorage.setItem(VAULT_KEY, raw);
+                }
+            } catch (_) {}
+            updateVaultBadge();
+        }
+
+        function updateVaultBadge() {
+            const count = getVaultList().length;
+            document.getElementById('vault-count-badge').textContent = String(count);
+        }
+
+        function saveResultToVault(title, codeContainerId) {
+            const text = getRawOutput(codeContainerId).trim();
+            if (!text) return;
+
+            const list = getVaultList();
+            list.unshift({
+                id: Date.now(),
+                title: title || 'Сниппет',
+                text,
+                date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+            });
+            persistVaultList(list);
+            Haptic.success();
+            showToast('Сохранено в Мой Сейф');
+        }
+
+        function addManualVaultItem() {
+            const titleEl = document.getElementById('manual-vault-title');
+            const bodyEl = document.getElementById('manual-vault-body');
             const title = titleEl.value.trim();
-            const text = textEl.value.trim();
+            const text = bodyEl.value.trim();
 
             if (!title || !text) {
-                tg.HapticFeedback.notificationOccurred('error');
-                showToast("[ ОШИБКА: ЗАПОЛНИТЕ ОБА ПОЛЯ ]");
+                Haptic.error();
+                if (!title) titleEl.classList.add('error-ring');
+                if (!text) bodyEl.classList.add('error-ring');
                 return;
             }
 
-            const items = getVaultItems();
-            items.unshift({ id: Date.now(), title, text });
-            localStorage.setItem('vibe_vault', JSON.stringify(items));
-
-            titleEl.value = '';
-            textEl.value = '';
-            tg.HapticFeedback.notificationOccurred('success');
-            showToast("[ СОХРАНЕНО В СЕЙФ ]");
-            renderVault();
-        }
-
-        function deleteSnippet(id) {
-            const items = getVaultItems().filter(item => item.id !== id);
-            localStorage.setItem('vibe_vault', JSON.stringify(items));
-            tg.HapticFeedback.impactOccurred('light');
-            renderVault();
-        }
-
-        function copyRawText(encodedText) {
-            const text = decodeURIComponent(encodedText);
-            navigator.clipboard.writeText(text).then(() => {
-                tg.HapticFeedback.notificationOccurred('success');
-                showToast("[ СНИППЕТ СКОПИРОВАН ]");
+            const list = getVaultList();
+            list.unshift({
+                id: Date.now(),
+                title,
+                text,
+                date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
             });
+            persistVaultList(list);
+            titleEl.value = '';
+            bodyEl.value = '';
+            Haptic.success();
+            showToast('Сниппет добавлен');
+            renderVault();
+        }
+
+        function copyVaultItem(id, btnEl) {
+            const item = getVaultList().find(x => x.id === id);
+            if (!item) return;
+            navigator.clipboard.writeText(item.text).then(() => {
+                Haptic.success();
+                showToast('Скопировано!');
+                if (btnEl) {
+                    const prev = btnEl.textContent;
+                    btnEl.textContent = 'Готово ✓';
+                    setTimeout(() => { btnEl.textContent = prev; }, 1400);
+                }
+            });
+        }
+
+        function confirmDeleteVaultItem(id) {
+            Haptic.light();
+            const executeRemove = () => {
+                const cardEl = document.getElementById(`vault-card-${id}`);
+                if (cardEl) {
+                    cardEl.style.transition = 'all 250ms cubic-bezier(0.22, 1, 0.36, 1)';
+                    cardEl.style.opacity = '0';
+                    cardEl.style.transform = 'scale(0.94)';
+                }
+                setTimeout(() => {
+                    const next = getVaultList().filter(x => x.id !== id);
+                    persistVaultList(next);
+                    renderVault();
+                }, 230);
+            };
+
+            if (tg?.showConfirm) {
+                tg.showConfirm('Удалить этот сниппет из Сейфа?', (ok) => {
+                    if (ok) executeRemove();
+                });
+            } else {
+                if (confirm('Удалить этот сниппет из Сейфа?')) executeRemove();
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
         }
 
         function renderVault() {
-            const container = document.getElementById('vault-list');
-            const items = getVaultItems();
+            updateVaultBadge();
+            const query = (document.getElementById('vault-search')?.value || '').trim().toLowerCase();
+            const all = getVaultList();
+            const filtered = query
+                ? all.filter(item => item.title.toLowerCase().includes(query) || item.text.toLowerCase().includes(query))
+                : all;
 
-            if (items.length === 0) {
+            const container = document.getElementById('vault-cards');
+
+            if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div class="glass-panel p-6 text-center text-xs text-gray-500 border border-dashed border-gray-800">
-                        Сейф пуст. Сохраните сюда свои лучшие промты или куски кода для быстрого доступа.
+                    <div class="frosted-card rounded-3xl p-8 text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center mx-auto mb-3 text-slate-400">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-semibold text-white">Здесь пока пусто, сохрани первый результат</p>
+                        <p class="text-xs text-slate-400 mt-1">Генерируй архитектуру или промты во вкладке «Инструменты» и нажимай «Сохранить в сейф».</p>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = items.map(item => {
-                const safeTitle = item.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                const safeText = item.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                const encoded = encodeURIComponent(item.text);
-                return `
-                    <div class="relative glass-panel p-3.5 rounded-sm animate-fadeIn">
-                        <div class="absolute top-0 left-0 w-2 h-2 border-t border-l border-cyan-400/60"></div>
-                        <div class="absolute top-0 right-0 w-2 h-2 border-t border-r border-cyan-400/60"></div>
-                        <div class="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-cyan-400/60"></div>
-                        <div class="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-cyan-400/60"></div>
-                        
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-cyan-300 text-xs">${safeTitle}</span>
-                            <button onclick="deleteSnippet(${item.id})" class="text-[10px] text-red-400 hover:text-red-300">[УДАЛИТЬ]</button>
+            container.innerHTML = filtered.map(item => `
+                <article id="vault-card-${item.id}" class="frosted-card rounded-3xl p-4">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                            <h4 class="text-sm font-semibold text-white leading-snug">${escapeHtml(item.title)}</h4>
+                            <span class="text-[11px] text-slate-400">${escapeHtml(item.date || '')}</span>
                         </div>
-                        <pre class="bg-black/90 p-2 text-[11px] text-gray-300 overflow-x-auto whitespace-pre-wrap break-words border border-gray-800/80 mb-2 max-h-32">${safeText}</pre>
-                        <button onclick="copyRawText('${encoded}')" class="w-full border border-cyan-500/40 text-cyan-300 hover:bg-cyan-950/50 py-1.5 text-[11px] font-semibold transition">
-                            📋 Скопировать
+                    </div>
+                    <p class="font-mono text-[11px] text-slate-300/90 line-clamp-2 bg-black/25 border border-white/5 rounded-xl p-2.5 mb-3">${escapeHtml(item.text)}</p>
+                    <div class="flex items-center gap-2">
+                        <button onclick="copyVaultItem(${item.id}, this)" class="btn-glass flex-1 min-h-[42px] rounded-xl text-xs font-medium text-indigo-200">
+                            Копировать
+                        </button>
+                        <button onclick="confirmDeleteVaultItem(${item.id})" class="btn-glass min-h-[42px] px-3.5 rounded-xl text-xs font-medium text-rose-300 hover:bg-rose-500/15">
+                            Удалить
                         </button>
                     </div>
+                </article>
+            `).join('');
+        }
+
+        /* ==================== 7. БАЗА ЗНАНИЙ БОТА (ПРОМТЫ, 500 ИДЕЙ, КАТАЛОГ ИИ) ==================== */
+        const BOT_PROMPTS = [
+            {
+                title: 'Full-File Режим (Без пропусков кода)',
+                badge: 'Must-Have',
+                prompt: 'Важное правило: при любых изменениях всегда выдавай полный и готовый к копированию код файла целиком от первой до последней строчки. Никогда не используй комментарии вроде "// ... остальной код без изменений".'
+            },
+            {
+                title: 'Ревью архитектуры и безопасности',
+                badge: 'Security',
+                prompt: 'Проведи аудит моего кода как Senior Security & Performance Engineer. Найди потенциальные утечки памяти, SQL-инъекции, гонки данных (race conditions) и узкие места. Выдай список исправлений с полным кодом.'
+            },
+            {
+                title: 'UI/UX Редизайн в стиле Apple visionOS',
+                badge: 'Frontend',
+                prompt: 'Перепиши интерфейс этого компонента на Tailwind CSS в эстетике Apple visionOS: матовое стекло (backdrop-blur-xl, bg-white/[0.06], border-white/10), мягкие тени, скругления 20-24px и плавные переходы cubic-bezier(0.22, 1, 0.36, 1).'
+            },
+            {
+                title: 'Декомпозиция MVP на 5 шагов',
+                badge: 'Product',
+                prompt: 'Разбей разработку этого проекта на 5 последовательных итераций (от базового каркаса и БД до финального UI), чтобы мы могли писать и тестировать код пошагово без потери контекста.'
+            }
+        ];
+
+        const BOT_NETS = [
+            { name: 'Claude 3.5 / 3.7 Sonnet', role: 'Эталон для написания кода, верстки и сложных архитектур', url: 'https://claude.ai' },
+            { name: 'Cursor AI IDE', role: 'Редактор кода с режимом Composer для работы со всем проектом', url: 'https://cursor.com' },
+            { name: 'v0 by Vercel', role: 'Мгновенная генерация UI-компонентов на Tailwind и React', url: 'https://v0.dev' },
+            { name: 'DeepSeek Coder / Chat', role: 'Мощная и доступная модель для алгоритмов и рефакторинга', url: 'https://chat.deepseek.com' }
+        ];
+
+        // Генератор 500 практических идей вайбкодинга (25 тем × 20 механик = 500 уникальных идей с готовым ТЗ)
+        const IDEA_DOMAINS = [
+            { cat: 'TG Mini Apps', title: 'Трекер привычек с геймификацией' },
+            { cat: 'TG Mini Apps', title: 'Биржа микро-задач и фриланса' },
+            { cat: 'TG Mini Apps', title: 'Карманный сканер чеков и подписок' },
+            { cat: 'TG Mini Apps', title: 'Турнирная платформа для киберспорта' },
+            { cat: 'TG Mini Apps', title: 'Интерактивный конструктор резюме' },
+            { cat: 'TG Mini Apps', title: 'Сейф промтов и сниппетов для разработчиков' },
+            { cat: 'TG Mini Apps', title: 'Калькулятор юнит-экономики для селлеров' },
+            { cat: 'Telegram Боты', title: 'Агрегатор горящих заказов с бирж' },
+            { cat: 'Telegram Боты', title: 'Авто-постер и рерайтер контента на ИИ' },
+            { cat: 'Telegram Боты', title: 'Мониторинг падения цен на маркетплейсах' },
+            { cat: 'Telegram Боты', title: 'Бот-ассистент для проведения розыгрышей' },
+            { cat: 'Telegram Боты', title: 'Умный фильтр резюме и заявок в команду' },
+            { cat: 'Telegram Боты', title: 'Конвертер голосовых сообщений в саммари-задачи' },
+            { cat: 'AI Micro-SaaS', title: 'Генератор карточек товаров с удалением фона' },
+            { cat: 'AI Micro-SaaS', title: 'Анализатор договоров и юридических рисков' },
+            { cat: 'AI Micro-SaaS', title: 'Сервис превращения длинных видео в шортсы' },
+            { cat: 'AI Micro-SaaS', title: 'ИИ-ревьюер пулл-реквестов на GitHub' },
+            { cat: 'AI Micro-SaaS', title: 'Генератор лендингов по одному текстовому абзацу' },
+            { cat: 'AI Micro-SaaS', title: 'Тренажёр технических собеседований с голосом' },
+            { cat: 'WebGL & 3D', title: '3D-визуализатор аудио-треков на Three.js' },
+            { cat: 'WebGL & 3D', title: 'Интерактивный 3D-конфигуратор кастомного мерча' },
+            { cat: 'WebGL & 3D', title: 'Портфолио разработчика с физикой объектов' },
+            { cat: 'WebGL & 3D', title: 'Генератор шейдерных фонов для презентаций' },
+            { cat: 'WebGL & 3D', title: 'Виртуальная 3D-витрина цифровых товаров' },
+            { cat: 'WebGL & 3D', title: 'Космическая карта коммитов GitHub в WebGL' }
+        ];
+
+        const IDEA_TWISTS = [
+            'с оплатой в Telegram Stars и реферальной системой',
+            'с мгновенным экспортом отчётов в PDF и Notion',
+            'с оффлайн-режимом и синхронизацией через CloudStorage',
+            'с командным доступом и лидербордом участников',
+            'с аналитикой удержания и воронкой конверсий',
+            'с голосовой постановкой задач через Whisper API',
+            'с автоматическими смарт-уведомлениями по расписанию',
+            'с кастомными темами оформления в стиле матового стекла',
+            'с встроенным конструктором шаблонов без кода',
+            'с интеграцией вебхуков для внешних CRM',
+            'с системой достижений, уровней и ежедневных стриков',
+            'с режимом A/B тестирования заголовков и офферов',
+            'с автоматической генерацией чек-листов под задачу',
+            'с защитой от спама и умным лимитированием запросов',
+            'с виджетом для встраивания на внешние сайты',
+            'с поддержкой мульти-аккаунтов и быстрым переключением',
+            'с живым предпросмотром изменений в реальном времени',
+            'с импортом данных по ссылке в один клик',
+            'с ИИ-подсказками на каждом шаге онбординга',
+            'с открытым API и документацией Swagger'
+        ];
+
+        const ALL_500_IDEAS = [];
+        let ideaCounter = 1;
+        IDEA_DOMAINS.forEach(dom => {
+            IDEA_TWISTS.forEach(twist => {
+                ALL_500_IDEAS.push({
+                    id: ideaCounter++,
+                    cat: dom.cat,
+                    title: `${dom.title} ${twist}`
+                });
+            });
+        });
+
+        let activeIdeaCategory = 'ALL';
+
+        function switchHubSub(subId, btnEl) {
+            Haptic.selection();
+            ['sub-prompts', 'sub-ideas', 'sub-nets'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(subId).classList.remove('hidden');
+
+            document.querySelectorAll('.hub-sub-btn').forEach(b => {
+                b.className = 'hub-sub-btn min-h-[44px] rounded-2xl text-xs font-medium bg-white/[0.04] border border-white/10 text-slate-300 transition-all';
+            });
+            btnEl.className = 'hub-sub-btn min-h-[44px] rounded-2xl text-xs font-semibold bg-indigo-500/20 border border-indigo-400/40 text-indigo-200 transition-all';
+        }
+
+        function setIdeaCategory(cat, btnEl) {
+            Haptic.selection();
+            activeIdeaCategory = cat;
+            document.querySelectorAll('.idea-cat-chip').forEach(b => {
+                b.className = 'idea-cat-chip px-3 min-h-[34px] rounded-xl text-[11px] font-medium bg-white/[0.04] text-slate-400 border border-white/10 shrink-0';
+            });
+            btnEl.className = 'idea-cat-chip px-3 min-h-[34px] rounded-xl text-[11px] font-medium bg-indigo-500/25 text-indigo-200 border border-indigo-400/30 shrink-0';
+            renderIdeasList();
+        }
+
+        function copyDirectText(encoded, btnEl) {
+            const text = decodeURIComponent(encoded);
+            navigator.clipboard.writeText(text).then(() => {
+                Haptic.success();
+                showToast('Скопировано!');
+                if (btnEl) {
+                    const prev = btnEl.textContent;
+                    btnEl.textContent = 'Готово ✓';
+                    setTimeout(() => { btnEl.textContent = prev; }, 1400);
+                }
+            });
+        }
+
+        function renderBotHub() {
+            const promptsBox = document.getElementById('bot-prompts-list');
+            promptsBox.innerHTML = BOT_PROMPTS.map(p => {
+                const enc = encodeURIComponent(p.prompt);
+                return `
+                    <article class="frosted-card rounded-3xl p-4">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <h3 class="text-sm font-semibold text-white">${escapeHtml(p.title)}</h3>
+                            <span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-400/20">${escapeHtml(p.badge)}</span>
+                        </div>
+                        <p class="font-mono text-[11px] text-slate-300/90 bg-black/25 border border-white/5 rounded-2xl p-3 mb-3 leading-relaxed">${escapeHtml(p.prompt)}</p>
+                        <button onclick="copyDirectText('${enc}', this)" class="btn-glass w-full min-h-[42px] rounded-xl text-xs font-medium text-indigo-200">
+                            Копировать промт
+                        </button>
+                    </article>
+                `;
+            }).join('');
+
+            const netsBox = document.getElementById('bot-nets-list');
+            netsBox.innerHTML = BOT_NETS.map(n => `
+                <article class="frosted-card rounded-3xl p-4 flex items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-semibold text-white">${escapeHtml(n.name)}</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">${escapeHtml(n.role)}</p>
+                    </div>
+                    <a href="${n.url}" target="_blank" rel="noopener" onclick="Haptic.light()" class="btn-glass min-h-[42px] px-3.5 rounded-xl text-xs font-medium text-indigo-200 flex items-center shrink-0">
+                        Открыть ↗
+                    </a>
+                </article>
+            `).join('');
+
+            renderIdeasList();
+        }
+
+        function renderIdeasList(randomItem = null) {
+            const q = (document.getElementById('idea-search')?.value || '').trim().toLowerCase();
+            let list = ALL_500_IDEAS.filter(item => {
+                const matchCat = activeIdeaCategory === 'ALL' || item.cat === activeIdeaCategory;
+                const matchQ = !q || item.title.toLowerCase().includes(q) || String(item.id) === q;
+                return matchCat && matchQ;
+            });
+
+            if (randomItem) {
+                list = [randomItem, ...list.filter(x => x.id !== randomItem.id)];
+            }
+
+            const slice = list.slice(0, 20);
+            const box = document.getElementById('ideas-container');
+
+            box.innerHTML = slice.map(item => {
+                const promptForIdea = `Роль: Senior Fullstack Developer.\nЗадача: Спроектируй MVP для проекта №${item.id}: «${item.title}» (Категория: ${item.cat}).\nВыдай структуру БД, стек технологий и полный код стартового прототипа.`;
+                const enc = encodeURIComponent(promptForIdea);
+                return `
+                    <article class="frosted-card rounded-2xl p-3.5 flex items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] font-mono text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded-md">#${item.id}</span>
+                                <span class="text-[11px] text-slate-400">${escapeHtml(item.cat)}</span>
+                            </div>
+                            <h4 class="text-xs font-medium text-white leading-snug">${escapeHtml(item.title)}</h4>
+                        </div>
+                        <button onclick="copyDirectText('${enc}', this)" class="btn-glass min-h-[40px] px-3 rounded-xl text-[11px] font-medium text-indigo-200 shrink-0">
+                            ТЗ в ИИ
+                        </button>
+                    </article>
                 `;
             }).join('');
         }
+
+        function pickRandomIdea() {
+            Haptic.light();
+            const random = ALL_500_IDEAS[Math.floor(Math.random() * ALL_500_IDEAS.length)];
+            renderIdeasList(random);
+            showToast(`Выбрана идея #${random.id}`);
+        }
+
+        /* ==================== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ==================== */
+        document.addEventListener('DOMContentLoaded', () => {
+            initTelegramApp();
+            renderChecklist();
+            renderBotHub();
+            updateVaultBadge();
+        });
     </script>
 </body>
 </html>
