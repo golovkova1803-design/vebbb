@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Claude Code // Vibe App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(4px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    },
+                    animation: {
+                        fadeIn: 'fadeIn 0.25s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap');
+        
+        body {
+            background-color: #050505;
+            color: #e5e5e5;
+            font-family: 'Fira Code', monospace;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-panel {
+            background: rgba(14, 14, 18, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
+        }
+
+        .neon-text {
+            color: #00f0ff;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.45);
+        }
+
+        .tab-btn.active {
+            border-bottom: 2px solid #00f0ff;
+            color: #00f0ff;
+            background: linear-gradient(0deg, rgba(0, 240, 255, 0.08) 0%, transparent 100%);
+        }
+
+        /* 3. Glitch-эффект на заголовке при тапе */
+        .glitch-wrapper {
+            position: relative;
+            display: inline-block;
+            user-select: none;
+        }
+        .glitch-wrapper::before,
+        .glitch-wrapper::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .glitch-active::before {
+            color: #ef4444;
+            transform: translate(3px, -1px);
+            opacity: 0.85;
+        }
+        .glitch-active::after {
+            color: #22d3ee;
+            transform: translate(-3px, 1px);
+            opacity: 0.85;
+        }
+
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #22d3ee44; }
+    </style>
+</head>
+<!-- 4. Фон-сетка с радиальным свечением -->
+<body class="min-h-screen flex flex-col relative overflow-x-hidden bg-[#050505] bg-[linear-gradient(rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:24px_24px]">
+
+    <!-- Верхнее радиальное фиолетовое свечение -->
+    <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.16),transparent_65%)] z-0"></div>
+
+    <!-- 1. CRT Сканлайны поверх экрана -->
+    <div class="pointer-events-none fixed inset-0 z-50 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.025)_0,rgba(255,255,255,0.025)_1px,transparent_1px,transparent_3px)]"></div>
+
+    <!-- Header -->
+    <header class="p-4 border-b border-gray-800/80 glass-panel sticky top-0 z-20">
+        <div class="flex justify-between items-center">
+            <!-- Заголовок с Glitch-эффектом при нажатии -->
+            <h1 id="main-title" onclick="triggerGlitch()" data-text="CLAUDE_CODE // VIBE" class="glitch-wrapper text-lg font-bold neon-text cursor-pointer tracking-wider">
+                CLAUDE_CODE // VIBE
+            </h1>
+            <button onclick="tg.close()" class="text-gray-500 hover:text-cyan-400 px-2 py-0.5 border border-transparent hover:border-cyan-500/40 text-sm transition">
+                [ESC]
+            </button>
+        </div>
+        
+        <!-- Бонус: Индикатор статуса ONLINE с animate-ping -->
+        <div class="flex items-center space-x-2 mt-1.5 text-[11px] text-gray-400">
+            <span id="user-greeting" class="truncate max-w-[200px]">USER: @guest</span>
+            <span class="text-gray-700">|</span>
+            <span class="flex items-center text-emerald-400 font-semibold tracking-wider">
+                <span class="relative flex h-2 w-2 mr-1.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                ONLINE
+            </span>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="flex border-b border-gray-800/80 text-xs glass-panel sticky top-[69px] z-20">
+        <button onclick="switchTab('tab-tools', this)" class="tab-btn active py-3 font-semibold flex-1 tracking-wider transition">
+            [🛠 ИНСТРУМЕНТЫ]
+        </button>
+        <button onclick="switchTab('tab-vault', this)" class="tab-btn py-3 font-semibold flex-1 tracking-wider text-gray-400 transition">
+            [🔐 МОЙ СЕЙФ]
+        </button>
+    </nav>
+
+    <!-- Content Area -->
+    <main class="flex-1 p-4 space-y-5 relative z-10 pb-12">
+        
+        <!-- Вкладка: Инструменты -->
+        <div id="tab-tools" class="tab-content space-y-5">
+            
+            <!-- Карточка 1: Конструктор Архитектуры с HUD-уголками -->
+            <div class="relative glass-panel p-4 rounded-sm">
+                <!-- 5. HUD Уголки-скобки (Фиолетово-голубые) -->
+                <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-cyan-400/80 pointer-events-none"></div>
+                <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-cyan-400/80 pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-cyan-400/80 pointer-events-none"></div>
+                <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-cyan-400/80 pointer-events-none"></div>
+
+                <div class="flex items-center justify-between mb-1.5">
+                    <h3 class="font-bold text-purple-400 text-sm tracking-wide flex items-center">
+                        <span class="mr-2 text-base">🏗</span> КОНСТРУКТОР АРХИТЕКТУРЫ
+                    </h3>
+                    <span class="text-[10px] text-purple-400/60 border border-purple-500/30 px-1.5 py-0.5">SYS_GEN</span>
+                </div>
+                <p class="text-[11px] text-gray-400 mb-3 leading-relaxed">Выберите стек проекта для генерации продакшен-промта по канонам вайбкодинга.</p>
+                
+                <select id="stack-select" class="w-full bg-black/90 border border-gray-700 text-xs text-cyan-300 rounded-sm p-2.5 focus:border-cyan-400 outline-none mb-3">
+                    <option value="python_tg">Python 3.11 + Aiogram 3.x + aiosqlite (Telegram Bot)</option>
+                    <option value="python_fastapi">Python + FastAPI + SQLAlchemy + PostgreSQL (Backend)</option>
+                    <option value="js_react">React + Tailwind CSS + Vite (Modern Web App)</option>
+                    <option value="html_tg">HTML5 + Tailwind + Vanilla JS (Telegram Mini App)</option>
+                    <option value="three_web">Three.js + WebGL + GSAP (Interactive 3D Site)</option>
+                </select>
+                
+                <button onclick="generateArchitecture()" class="w-full bg-purple-950/80 hover:bg-purple-900 border border-purple-500/60 text-purple-200 font-bold py-2.5 rounded-sm text-xs tracking-wider uppercase transition active:scale-[0.99]">
+                    ⚡ Сгенерировать ТЗ
+                </button>
+
+                <!-- Блок вывода с эффектом печатной машинки -->
+                <div id="arch-result" class="hidden mt-3.5">
+                    <div class="bg-black/95 border border-purple-500/40 rounded-sm p-3 text-xs text-gray-200 font-mono whitespace-pre-wrap break-words leading-relaxed"><span id="arch-output"></span><span id="arch-cursor" class="inline-block w-2 h-4 bg-cyan-400 animate-pulse align-middle ml-1"></span></div>
+                    <button onclick="copyToClipboard('arch-output')" class="w-full mt-2 bg-cyan-950/40 border border-cyan-500/60 text-cyan-300 hover:bg-cyan-900/60 py-2 rounded-sm text-xs font-semibold tracking-wider transition">
+                        [📋 СКОПИРОВАТЬ ПРОМТ]
+                    </button>
+                </div>
+            </div>
+
+            <!-- Карточка 2: Конвертер Ошибок с HUD-уголками -->
+            <div id="error-card" class="relative glass-panel p-4 rounded-sm transition-shadow duration-300">
+                <!-- 5. HUD Уголки-скобки (Красные для дебаггера) -->
+                <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-red-500/80 pointer-events-none"></div>
+                <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-red-500/80 pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-red-500/80 pointer-events-none"></div>
+                <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-red-500/80 pointer-events-none"></div>
+
+                <div class="flex items-center justify-between mb-1.5">
+                    <h3 id="error-title" class="font-bold text-red-400 text-sm tracking-wide flex items-center transition-all">
+                        <span class="mr-2 text-base">🐛</span> КОНВЕРТЕР ОШИБОК
+                    </h3>
+                    <span class="text-[10px] text-red-400/60 border border-red-500/30 px-1.5 py-0.5">DEBUG_MODE</span>
+                </div>
+                <p class="text-[11px] text-gray-400 mb-3 leading-relaxed">Вставьте сырой Traceback из консоли, чтобы упаковать его в точный запрос для отладки.</p>
+                
+                <textarea id="error-input" oninput="resetErrorState()" class="w-full bg-black/90 border border-gray-700 text-xs rounded-sm p-2.5 h-24 outline-none focus:border-red-500 text-red-300 placeholder-gray-600 transition-all" placeholder="Traceback (most recent call last): ..."></textarea>
+                
+                <button onclick="convertError()" class="w-full bg-red-950/80 hover:bg-red-900 border border-red-500/60 text-red-200 font-bold py-2.5 rounded-sm text-xs tracking-wider uppercase mt-2.5 transition active:scale-[0.99]">
+                    🔥 Обернуть для Claude
+                </button>
+
+                <!-- Блок вывода с эффектом печатной машинки -->
+                <div id="error-result" class="hidden mt-3.5">
+                    <div class="bg-black/95 border border-red-500/40 rounded-sm p-3 text-xs text-gray-200 font-mono whitespace-pre-wrap break-words leading-relaxed"><span id="error-output"></span><span id="error-cursor" class="inline-block w-2 h-4 bg-red-400 animate-pulse align-middle ml-1"></span></div>
+                    <button onclick="copyToClipboard('error-output')" class="w-full mt-2 bg-red-950/40 border border-red-500/60 text-red-300 hover:bg-red-900/60 py-2 rounded-sm text-xs font-semibold tracking-wider transition">
+                        [📋 СКОПИРОВАТЬ ДЛЯ ИИ]
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Вкладка: Сейф сниппетов (С рабочим сохранением в localStorage) -->
+        <div id="tab-vault" class="tab-content hidden space-y-4">
+            <div class="relative glass-panel p-4 rounded-sm">
+                <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-cyan-400/80 pointer-events-none"></div>
+                <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-cyan-400/80 pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-cyan-400/80 pointer-events-none"></div>
+                <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-cyan-400/80 pointer-events-none"></div>
+
+                <h3 class="font-bold text-cyan-400 text-sm mb-2">➕ ДОБАВИТЬ В СЕЙФ</h3>
+                <input id="snippet-title" type="text" placeholder="Название (напр. Фикс скролла)" class="w-full bg-black/90 border border-gray-700 text-xs rounded-sm p-2 mb-2 outline-none focus:border-cyan-400 text-gray-200">
+                <textarea id="snippet-text" placeholder="Текст промта или кусок кода..." class="w-full bg-black/90 border border-gray-700 text-xs rounded-sm p-2 h-20 outline-none focus:border-cyan-400 text-gray-300"></textarea>
+                <button onclick="saveSnippet()" class="w-full mt-2 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/60 text-cyan-200 font-bold py-2 rounded-sm text-xs uppercase tracking-wider transition">
+                    💾 Сохранить в память
+                </button>
+            </div>
+
+            <div id="vault-list" class="space-y-3"></div>
+        </div>
+
+    </main>
+
+    <!-- Всплывающее системное уведомление (Toast) -->
+    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-black/95 border border-cyan-400 text-cyan-300 px-4 py-2 rounded-sm shadow-[0_0_15px_rgba(34,211,238,0.4)] text-xs font-bold tracking-wider opacity-0 transition-opacity pointer-events-none z-50">
+        [ СИСТЕМА: СКОПИРОВАНО В БУФЕР ]
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#050505');
+        tg.setBackgroundColor('#050505');
+
+        // Инициализация пользователя
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('user-greeting').innerText = `USER: @${user.username || user.first_name}`;
+        }
+
+        // Таймеры для печатной машинки
+        const typeTimers = {};
+
+        // 3. Функция Glitch-эффекта на заголовке при тапе
+        function triggerGlitch() {
+            const title = document.getElementById('main-title');
+            title.classList.add('glitch-active');
+            tg.HapticFeedback.notificationOccurred('warning');
+            setTimeout(() => {
+                title.classList.remove('glitch-active');
+            }, 150);
+        }
+
+        // 2. Функция эффекта «печатной машинки»
+        function typeWriterEffect(elementId, text, speed = 8) {
+            const el = document.getElementById(elementId);
+            if (typeTimers[elementId]) {
+                clearInterval(typeTimers[elementId]);
+            }
+            el.innerText = '';
+            let i = 0;
+            typeTimers[elementId] = setInterval(() => {
+                // Печатаем по 2 символа за тик для динамичной консольной скорости
+                el.innerText += text.slice(i, i + 2);
+                i += 2;
+                if (i >= text.length) {
+                    el.innerText = text;
+                    clearInterval(typeTimers[elementId]);
+                }
+            }, speed);
+        }
+
+        // Переключение вкладок
+        function switchTab(tabId, btnEl) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active');
+                el.classList.add('text-gray-400');
+            });
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            btnEl.classList.add('active');
+            btnEl.classList.remove('text-gray-400');
+            
+            if (tabId === 'tab-vault') {
+                renderVault();
+            }
+            tg.HapticFeedback.selectionChanged();
+        }
+
+        // База архитектурных промтов
+        const archPrompts = {
+            "python_tg": "Роль: Senior Python Developer.\nСтек: Python 3.11+, aiogram 3.x, aiosqlite.\nЗадача: Спроектируй модульную архитектуру Telegram-бота.\nТребования:\n1. Разделение на роутеры (handlers/user.py, handlers/admin.py), клавиатуры (keyboards.py) и слой БД (db.py).\n2. Асинхронные запросы к SQLite с включенным WAL-режимом.\n3. Выдай дерево файлов и полностью готовый к запуску код без заглушек.",
+            "python_fastapi": "Роль: System Architect & Backend Developer.\nСтек: Python, FastAPI, SQLAlchemy 2.0 (async), PostgreSQL, Pydantic v2.\nЗадача: Напиши каркас высоконагруженного REST API.\nТребования: Асинхронные эндпоинты, Dependency Injection, чистая схема БД и обработка исключений. Выдай полную структуру и код main.py.",
+            "js_react": "Роль: Senior Frontend Engineer.\nСтек: React 18, Tailwind CSS, Vite, Lucide Icons.\nЗадача: Создай современный интерфейс приложения в темном киберпанк-стиле.\nТребования: Компонентный подход, кастомные хуки, плавные микроанимации и полная адаптивность под мобильные устройства.",
+            "html_tg": "Роль: Эксперт по Telegram Mini Apps.\nСтек: HTML5, Tailwind CSS (CDN), Vanilla JS, Telegram WebApp SDK.\nЗадача: Напиши одностраничное Web App в один файл index.html.\nТребования: Использование tg.expand(), HapticFeedback, адаптация под темную тему мессенджера и сохранение состояния в localStorage.",
+            "three_web": "Роль: Creative WebGL Developer.\nСтек: Three.js, WebGL, HTML5/CSS3, GSAP.\nЗадача: Создай интерактивную 3D-сцену, работающую прямо в браузере в одном файле index.html.\nТребования: Оптимизированный рендер (60 FPS), реакция камеры на движение мыши/гироскопа, неоновое освещение и пост-обработка."
+        };
+
+        // Генерация ТЗ с анимацией появления и печатной машинкой
+        function generateArchitecture() {
+            const selected = document.getElementById('stack-select').value;
+            const resultContainer = document.getElementById('arch-result');
+            
+            resultContainer.classList.remove('hidden', 'animate-fadeIn');
+            void resultContainer.offsetWidth; // Перезапуск CSS-анимации
+            resultContainer.classList.add('animate-fadeIn');
+            
+            tg.HapticFeedback.impactOccurred('medium');
+            typeWriterEffect('arch-output', archPrompts[selected], 8);
+        }
+
+        // Сброс красного свечения ошибки при вводе текста
+        function resetErrorState() {
+            const inputEl = document.getElementById('error-input');
+            const titleEl = document.getElementById('error-title');
+            inputEl.classList.remove('border-red-500', 'shadow-[0_0_12px_rgba(239,68,68,0.6)]');
+            titleEl.classList.remove('text-red-500', 'shadow-[0_0_12px_rgba(239,68,68,0.6)]');
+        }
+
+        // Конвертер ошибок с подсветкой состояния ошибки и печатной машинкой
+        function convertError() {
+            const inputEl = document.getElementById('error-input');
+            const titleEl = document.getElementById('error-title');
+            const resultContainer = document.getElementById('error-result');
+            const input = inputEl.value.trim();
+
+            if (!input) {
+                // Бонус: Подсветка красным состоянием ошибки + вибрация
+                tg.HapticFeedback.notificationOccurred('error');
+                inputEl.classList.add('border-red-500', 'shadow-[0_0_12px_rgba(239,68,68,0.6)]');
+                titleEl.classList.add('text-red-500', 'shadow-[0_0_12px_rgba(239,68,68,0.6)]');
+                
+                resultContainer.classList.remove('hidden', 'animate-fadeIn');
+                void resultContainer.offsetWidth;
+                resultContainer.classList.add('animate-fadeIn');
+                
+                typeWriterEffect('error-output', "[ СИСТЕМНЫЙ СБОЙ ]: Поле ввода пустое. Вставьте лог ошибки (Traceback) для анализа.", 10);
+                return;
+            }
+
+            resetErrorState();
+            const promptText = `У меня возникла ошибка при выполнении кода. Проанализируй стек-трейс шаг за шагом, укажи точную причину сбоя и выдай полностью исправленный код без сокращений.\n\nЛог ошибки:\n\`\`\`text\n${input}\n\`\`\``;
+            
+            resultContainer.classList.remove('hidden', 'animate-fadeIn');
+            void resultContainer.offsetWidth;
+            resultContainer.classList.add('animate-fadeIn');
+            
+            tg.HapticFeedback.impactOccurred('heavy');
+            typeWriterEffect('error-output', promptText, 6);
+        }
+
+        // Копирование текста (даже если печатная машинка еще печатает)
+        function copyToClipboard(elementId) {
+            const textToCopy = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                tg.HapticFeedback.notificationOccurred('success');
+                showToast("[ СИСТЕМА: СКОПИРОВАНО В БУФЕР ]");
+            }).catch(() => {
+                tg.HapticFeedback.notificationOccurred('error');
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 1800);
+        }
+
+        // Логика работы Личного Сейфа (localStorage)
+        function getVaultItems() {
+            try {
+                return JSON.parse(localStorage.getItem('vibe_vault') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function saveSnippet() {
+            const titleEl = document.getElementById('snippet-title');
+            const textEl = document.getElementById('snippet-text');
+            const title = titleEl.value.trim();
+            const text = textEl.value.trim();
+
+            if (!title || !text) {
+                tg.HapticFeedback.notificationOccurred('error');
+                showToast("[ ОШИБКА: ЗАПОЛНИТЕ ОБА ПОЛЯ ]");
+                return;
+            }
+
+            const items = getVaultItems();
+            items.unshift({ id: Date.now(), title, text });
+            localStorage.setItem('vibe_vault', JSON.stringify(items));
+
+            titleEl.value = '';
+            textEl.value = '';
+            tg.HapticFeedback.notificationOccurred('success');
+            showToast("[ СОХРАНЕНО В СЕЙФ ]");
+            renderVault();
+        }
+
+        function deleteSnippet(id) {
+            const items = getVaultItems().filter(item => item.id !== id);
+            localStorage.setItem('vibe_vault', JSON.stringify(items));
+            tg.HapticFeedback.impactOccurred('light');
+            renderVault();
+        }
+
+        function copyRawText(encodedText) {
+            const text = decodeURIComponent(encodedText);
+            navigator.clipboard.writeText(text).then(() => {
+                tg.HapticFeedback.notificationOccurred('success');
+                showToast("[ СНИППЕТ СКОПИРОВАН ]");
+            });
+        }
+
+        function renderVault() {
+            const container = document.getElementById('vault-list');
+            const items = getVaultItems();
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-panel p-6 text-center text-xs text-gray-500 border border-dashed border-gray-800">
+                        Сейф пуст. Сохраните сюда свои лучшие промты или куски кода для быстрого доступа.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = items.map(item => {
+                const safeTitle = item.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const safeText = item.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const encoded = encodeURIComponent(item.text);
+                return `
+                    <div class="relative glass-panel p-3.5 rounded-sm animate-fadeIn">
+                        <div class="absolute top-0 left-0 w-2 h-2 border-t border-l border-cyan-400/60"></div>
+                        <div class="absolute top-0 right-0 w-2 h-2 border-t border-r border-cyan-400/60"></div>
+                        <div class="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-cyan-400/60"></div>
+                        <div class="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-cyan-400/60"></div>
+                        
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-cyan-300 text-xs">${safeTitle}</span>
+                            <button onclick="deleteSnippet(${item.id})" class="text-[10px] text-red-400 hover:text-red-300">[УДАЛИТЬ]</button>
+                        </div>
+                        <pre class="bg-black/90 p-2 text-[11px] text-gray-300 overflow-x-auto whitespace-pre-wrap break-words border border-gray-800/80 mb-2 max-h-32">${safeText}</pre>
+                        <button onclick="copyRawText('${encoded}')" class="w-full border border-cyan-500/40 text-cyan-300 hover:bg-cyan-950/50 py-1.5 text-[11px] font-semibold transition">
+                            📋 Скопировать
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
