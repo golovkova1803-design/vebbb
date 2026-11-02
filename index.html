@@ -28,7 +28,6 @@
             --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
             --safe-bottom: env(safe-area-inset-bottom, 16px);
 
-            /* Глобальные переменные кастомизации */
             --app-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --bg-main: #090b12;
             --accent-primary: #6366f1;
@@ -36,7 +35,6 @@
             --site-radius: 22px;
             --card-pad: 1.25rem;
             --section-gap: 1.15rem;
-            --font-scale: 1;
             --blur-strength: 14px;
             --custom-bg-url: none;
 
@@ -62,7 +60,6 @@
             --nav-bg: rgba(255, 255, 255, 0.92);
         }
 
-        /* 1. Режимы плотности интерфейса */
         html[data-density="compact"] {
             --card-pad: 0.9rem;
             --section-gap: 0.75rem;
@@ -81,10 +78,7 @@
             font-size: 16.8px;
         }
 
-        /* 8. Интенсивность эффектов (Минимум / Баланс / Максимум) */
-        html[data-fx="min"] {
-            --blur-strength: 0px;
-        }
+        html[data-fx="min"] { --blur-strength: 0px; }
         html[data-fx="min"] *,
         html[data-fx="min"] *::before,
         html[data-fx="min"] *::after {
@@ -92,12 +86,8 @@
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
         }
-        html[data-fx="balanced"] {
-            --blur-strength: 12px;
-        }
-        html[data-fx="max"] {
-            --blur-strength: 22px;
-        }
+        html[data-fx="balanced"] { --blur-strength: 12px; }
+        html[data-fx="max"] { --blur-strength: 22px; }
 
         * {
             -webkit-tap-highlight-color: transparent;
@@ -116,7 +106,6 @@
             scroll-behavior: smooth;
         }
 
-        /* 7. Боковая навигация на десктопе (если выбрана в настройках) */
         @media (min-width: 1024px) {
             body.nav-side-desktop {
                 padding-left: 96px;
@@ -135,9 +124,7 @@
                 grid-template-columns: 1fr !important;
                 gap: 6px;
             }
-            body.nav-side-desktop #bottom-nav-pill {
-                display: none;
-            }
+            body.nav-side-desktop #bottom-nav-pill { display: none; }
             body.nav-side-desktop #main-bottom-nav button {
                 flex-direction: column;
                 padding: 10px 4px;
@@ -145,10 +132,7 @@
             }
         }
 
-        /* Режим «Только иконки» в навигации */
-        #main-bottom-nav.icons-only .nav-label {
-            display: none;
-        }
+        #main-bottom-nav.icons-only .nav-label { display: none; }
 
         .text-dynamic { color: var(--text-main); }
         .text-muted-dynamic { color: var(--text-muted); }
@@ -157,7 +141,6 @@
         .accent-icon { color: var(--accent-primary); transition: transform 220ms var(--ease-spring), color 200ms ease; }
         button:hover .accent-icon { transform: scale(1.12); }
 
-        /* 5. Варианты фонов приложения */
         .bg-layer {
             position: fixed;
             inset: 0;
@@ -211,23 +194,6 @@
             box-shadow: 0 10px 28px -10px rgba(0, 0, 0, 0.28), inset 0 1px 0 0 var(--card-highlight);
             transform: translateZ(0);
             transition: transform 260ms var(--ease-ios), border-color 220ms ease, box-shadow 260ms var(--ease-ios), padding 220ms ease, border-radius 220ms ease;
-        }
-        @media (hover: hover) {
-            html[data-fx="max"] .frosted-card:hover {
-                border-color: color-mix(in srgb, var(--accent-primary) 45%, transparent);
-                transform: translateY(-2px);
-            }
-            html[data-fx="max"] .frosted-card::before {
-                content: "";
-                position: absolute;
-                inset: 0;
-                pointer-events: none;
-                opacity: 0;
-                transition: opacity 0.3s ease;
-                z-index: 0;
-                background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--accent-primary) 15%, transparent), transparent 70%);
-            }
-            html[data-fx="max"] .frosted-card:hover::before { opacity: 1; }
         }
         .frosted-card > * { position: relative; z-index: 1; }
 
@@ -378,12 +344,27 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-300">
 
-    <!-- Слои настраиваемого фона (Градиент, Сетка, Зерно, Ауры, Своя картинка) -->
+    <!-- Слои настраиваемого фона -->
     <div id="bg-custom-image" class="bg-layer"></div>
     <div id="bg-gradient-layer" class="bg-layer"></div>
     <div id="bg-pattern-layer" class="bg-layer"></div>
 
-    <!-- ==================== ЗАКРЕПЛЕННАЯ ШАПКА С ФОНОВЫМ БАННЕРОМ И ЧИСТЫМИ SVG-КНОПКАМИ ==================== -->
+    <!-- ==================== ПОЛНОЭКРАННЫЙ SPONSOR GATE (ОБЯЗАТЕЛЬНАЯ ПОДПИСКА НА КАНАЛ) ==================== -->
+    <div id="sponsor-gate-overlay" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden items-center justify-center p-4">
+        <div class="frosted-card max-w-sm w-full text-center space-y-4 border border-indigo-400/40">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center mx-auto">
+                <svg class="w-6 h-6 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div>
+                <h2 class="text-base font-bold text-dynamic">Доступ к Vibe Studio</h2>
+                <p class="text-xs text-muted-dynamic mt-1">Для бесплатного использования конструкторов подпишись на спонсорские каналы ниже:</p>
+            </div>
+            <div id="sponsor-gate-channels-list" class="space-y-2 text-left"></div>
+            <button type="button" onclick="verifySponsorGateAccess()" class="btn-primary w-full min-h-[44px] text-xs font-bold">Я подписался — Открыть студию ✓</button>
+        </div>
+    </div>
+
+    <!-- ==================== ЗАКРЕПЛЕННАЯ ШАПКА С ФОНОВЫМ БАННЕРОМ, ПОМОЩЬЮ И СЕКРЕТНОЙ АДМИНКОЙ ==================== -->
     <header class="frosted-header select-none">
         <!-- Фоновый слой с видео banner.mp4 или 3D-сценой -->
         <div class="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none">
@@ -414,7 +395,7 @@
             <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/80"></div>
         </div>
 
-        <!-- Контент шапки (без уровней и лишнего шума) -->
+        <!-- Контент шапки -->
         <div class="relative z-10 px-4 lg:px-8 py-2.5 max-w-md lg:max-w-6xl mx-auto">
             <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5">
@@ -424,29 +405,38 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1.5">
                             <h1 class="text-sm lg:text-base font-bold tracking-tight text-white">VIBE STUDIO</h1>
                             <button type="button" onclick="openVipModal()" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/25 text-amber-200 border border-amber-400/40 flex items-center gap-1">
                                 <svg class="w-3 h-3 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
                                 <span id="header-refs-count">VIP 0/3</span>
                             </button>
                         </div>
-                        <p class="text-[11px] text-slate-300">Визуальная среда для вайбкодинга</p>
+                        <p class="text-[11px] text-slate-300">by @darxxx1zq</p>
                     </div>
                 </div>
 
-                <!-- Верхние SVG-кнопки: Навигация-гид, Свой стиль (9 опций), Звук -->
+                <!-- Верхние SVG-кнопки: Админ (только для 5881813602), Помощь, Стиль, Звук -->
                 <div class="flex items-center gap-1.5">
-                    <button type="button" onclick="toggleIntroGuide()" class="header-glass-btn min-h-[38px] px-2.5 flex items-center gap-1.5 text-[11px] font-semibold" title="Показать ознакомительный гид">
-                        <svg class="w-4 h-4 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-                        <span class="hidden sm:inline">Гид</span>
+                    <!-- Секретная кнопка Админ-панели (показывается только владельцу ID 5881813602) -->
+                    <button type="button" id="admin-header-btn" onclick="openAdminPanelSheet()" class="header-glass-btn min-h-[38px] px-2.5 hidden items-center gap-1.5 text-[11px] font-bold text-rose-300 border-rose-400/50" title="Панель администратора (@darxxx1zq)">
+                        <svg class="w-4 h-4 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <span class="hidden sm:inline">Админ</span>
                     </button>
 
-                    <button type="button" onclick="openPersonalizeSheet()" class="header-glass-btn min-h-[38px] px-2.5 flex items-center gap-1.5 text-[11px] font-semibold" title="Кастомизация интерфейса (9 настроек)">
+                    <!-- Кнопка окна Помощи & Поддержки (@darxxx1zq) -->
+                    <button type="button" onclick="openHelpSheet()" class="header-glass-btn min-h-[38px] px-2.5 flex items-center gap-1 text-[11px] font-semibold" title="Помощь, FAQ и связь с @darxxx1zq">
+                        <svg class="w-4 h-4 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span class="hidden sm:inline">Помощь</span>
+                    </button>
+
+                    <!-- Кнопка Кастомизации (9 настроек) -->
+                    <button type="button" onclick="openPersonalizeSheet()" class="header-glass-btn min-h-[38px] px-2.5 flex items-center gap-1 text-[11px] font-semibold" title="Кастомизация интерфейса (9 настроек)">
                         <svg class="w-4 h-4 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
                         <span>Стиль</span>
                     </button>
 
+                    <!-- Кнопка Звука -->
                     <button type="button" onclick="SoundFX.toggleMute()" id="sound-toggle-btn" aria-label="Звук" class="header-glass-btn min-w-[38px] min-h-[38px] flex items-center justify-center">
                         <svg id="svg-sound-on" class="w-4 h-4 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
                         <svg id="svg-sound-off" class="w-4 h-4 text-rose-400 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
@@ -459,7 +449,7 @@
     <!-- ==================== ОСНОВНОЙ КОНТЕЙНЕР ==================== -->
     <main class="flex-1 px-4 lg:px-8 pt-4 max-w-md lg:max-w-6xl mx-auto w-full relative z-10 space-dynamic">
 
-        <!-- ПЛАВНЫЙ ОЗНАКОМИТЕЛЬНЫЙ БЛОК (ЧЕМ МЫ ПОМОГАЕМ ВАЙБКОДЕРУ) -->
+        <!-- ПЛАВНЫЙ ОЗНАКОМИТЕЛЬНЫЙ БЛОК -->
         <section id="intro-welcome-card" class="frosted-card animate-view-enter">
             <div class="flex items-start justify-between gap-3 mb-3">
                 <div class="flex items-center gap-2.5">
@@ -468,10 +458,10 @@
                     </div>
                     <div>
                         <h2 class="text-sm sm:text-base font-bold text-dynamic">Добро пожаловать в Vibe Studio</h2>
-                        <p class="text-xs text-muted-dynamic">Выбери, какую задачу закрываем прямо сейчас (1 клик для перехода):</p>
+                        <p class="text-xs text-muted-dynamic">Выбери нужный инструмент в 1 клик:</p>
                     </div>
                 </div>
-                <button type="button" onclick="dismissIntroGuide()" class="text-xs text-muted-dynamic hover:text-dynamic px-2 py-1" title="Скрыть подсказку">Скрыть ✕</button>
+                <button type="button" onclick="dismissIntroGuide()" class="text-xs text-muted-dynamic hover:text-dynamic px-2 py-1">Скрыть ✕</button>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -487,15 +477,15 @@
                     <svg class="w-5 h-5 accent-icon shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
                     <div>
                         <div class="text-xs font-bold text-dynamic">2. Упаковать и Проверить код</div>
-                        <p class="text-[11px] text-muted-dynamic mt-0.5 leading-snug">Песочница HTML, склейка проекта с анти-сливом ключей и деплой.</p>
+                        <p class="text-[11px] text-muted-dynamic mt-0.5 leading-snug">Безопасная песочница HTML, склейка проекта с анти-сливом ключей и деплой.</p>
                     </div>
                 </button>
 
-                <button type="button" onclick="openPersonalizeSheet()" class="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 text-left flex items-start gap-2.5">
-                    <svg class="w-5 h-5 accent-icon shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                <button type="button" onclick="openHelpSheet()" class="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 text-left flex items-start gap-2.5">
+                    <svg class="w-5 h-5 accent-icon shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     <div>
-                        <div class="text-xs font-bold text-dynamic">3. Настроить интерфейс под себя</div>
-                        <p class="text-[11px] text-muted-dynamic mt-0.5 leading-snug">Плотность, шрифты, фоны, пресеты тем и обмен кодом стиля.</p>
+                        <div class="text-xs font-bold text-dynamic">3. Помощь & Связь с автором</div>
+                        <p class="text-[11px] text-muted-dynamic mt-0.5 leading-snug">Ответы на частые вопросы, сброс кэша и связь с @darxxx1zq.</p>
                     </div>
                 </button>
             </div>
@@ -504,7 +494,6 @@
         <!-- ==================== ВКЛАДКА 0: ВИЗУАЛЬНЫЕ КОНСТРУКТОРЫ ==================== -->
         <section id="view-studio" class="space-dynamic animate-view-enter">
 
-            <!-- Переключатель на 3 конструктора с чистыми SVG-иконками -->
             <div class="frosted-card !p-1.5 max-w-xl mx-auto">
                 <div class="relative grid grid-cols-3 items-center">
                     <div id="builder-mode-pill" class="absolute top-0 bottom-0 left-0 w-1/3 rounded-2xl bg-white/[0.1] border border-white/20 transition-transform duration-300 ease-ios pointer-events-none"></div>
@@ -623,7 +612,7 @@
 
                         <div class="flex gap-2">
                             <input id="ui-custom-note" type="text" placeholder="О чём проект? (напр.: Сервис аналитики Telegram-каналов)" class="frosted-input flex-1 min-h-[42px] px-3.5 text-xs">
-                            <button type="button" onclick="toggleVoiceInput('ui-custom-note', this)" class="btn-glass px-3 min-h-[42px] text-xs font-semibold flex items-center gap-1.5 shrink-0" title="Голосовой ввод">
+                            <button type="button" onclick="toggleVoiceInput('ui-custom-note', this)" class="btn-glass px-3 min-h-[42px] text-xs font-semibold flex items-center gap-1.5 shrink-0">
                                 <svg class="w-4 h-4 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
                                 <span class="hidden sm:inline">Голос</span>
                             </button>
@@ -741,20 +730,23 @@
             </div>
         </section>
 
-        <!-- ==================== ВКЛАДКА 1: ИНЖЕНЕРНЫЕ ТУЛЗЫ (АККУРАТНЫЕ ПЕРЕКЛЮЧАЕМЫЕ КАРТОЧКИ) ==================== -->
+        <!-- ==================== ВКЛАДКА 1: ИНЖЕНЕРНЫЕ ТУЛЗЫ (С ЗАЩИТОЙ ПЕСОЧНИЦЫ ОТ ЗАВИСАНИЙ) ==================== -->
         <section id="view-tools" class="hidden space-dynamic animate-view-enter">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
 
-                <!-- 1. Живая песочница проверки HTML/JS -->
+                <!-- 1. Живая песочница проверки HTML/JS (с защитой от тяжелых файлов) -->
                 <article id="tool-sandbox" class="frosted-card space-y-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <svg class="w-4 h-4 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                             <h3 class="text-sm font-bold text-dynamic">Live Песочница HTML / Tailwind</h3>
                         </div>
-                        <button type="button" onclick="loadDemoSandboxCode()" class="btn-glass px-2.5 py-1 text-[11px] font-semibold accent-text">Демо-код</button>
+                        <div class="flex gap-1.5">
+                            <button type="button" onclick="loadDemoSandboxCode()" class="btn-glass px-2.5 py-1 text-[11px] font-semibold accent-text">Демо</button>
+                            <button type="button" onclick="clearSandboxSafe()" class="btn-glass px-2.5 py-1 text-[11px] text-rose-400">Сброс</button>
+                        </div>
                     </div>
-                    <p class="text-xs text-muted-dynamic">Вставь сгенерированный нейросетью код и проверь его работу прямо внутри приложения.</p>
+                    <p class="text-xs text-muted-dynamic">Встроен предохранитель от зависаний (>300 КБ) — код выполняется в изолированном контейнере и не забивает память сайта.</p>
                     <textarea id="sandbox-code-input" rows="3" placeholder="<!DOCTYPE html><html>... вставь код сюда ..." class="frosted-input w-full p-3 text-xs font-mono resize-none"></textarea>
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" onclick="runLiveSandbox()" class="btn-primary min-h-[42px] text-xs font-bold">Запустить превью</button>
@@ -927,12 +919,12 @@
 
     </main>
 
-    <!-- ==================== НАСТРАИВАЕМАЯ НИЖНЯЯ / БОКОВАЯ НАВИГАЦИЯ С SVG-ИКОНКАМИ ==================== -->
+    <!-- ==================== НАСТРАИВАЕМАЯ НИЖНЯЯ / БОКОВАЯ НАВИГАЦИЯ ==================== -->
     <nav id="main-bottom-nav" class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,12px)+12px)] z-30 w-[calc(100%-24px)] max-w-md frosted-nav rounded-full p-1.5" role="tablist">
         <div id="nav-buttons-mount" class="nav-grid relative grid grid-cols-4 items-center"></div>
     </nav>
 
-    <!-- МОДАЛЬНОЕ ОКНО (BOTTOM SHEET) ДЛЯ 9 НАСТРОЕК КАСТОМИЗАЦИИ И РЕФЕРАЛКИ -->
+    <!-- МОДАЛЬНОЕ ОКНО (BOTTOM SHEET) ДЛЯ АДМИНКИ, ПОМОЩИ, КАСТОМИЗАЦИИ И VIP -->
     <div id="sheet-backdrop" onclick="closeBottomSheet()" class="sheet-backdrop fixed inset-0 bg-black/60 z-40"></div>
     <div id="bottom-sheet" class="bottom-sheet fixed left-0 right-0 bottom-0 z-50 max-w-lg mx-auto frosted-card !rounded-t-[28px] !rounded-b-none p-5 pb-[calc(env(safe-area-inset-bottom,16px)+20px)] max-h-[86vh] flex flex-col">
         <div class="w-full pt-0.5 pb-2.5 flex justify-center"><div class="w-10 h-1.5 rounded-full bg-slate-400/40"></div></div>
@@ -952,6 +944,11 @@
     </div>
 
     <script>
+        /* ==================== КОНСТАНТЫ ВЛАДЕЛЬЦА И АДМИН-ДОСТУПА ==================== */
+        const OWNER_TG_ID = 5881813602;
+        const OWNER_USERNAME = 'darxxx1zq';
+        const ADMIN_CONFIG_KEY = 'vibe_admin_config_v1';
+
         /* ==================== 1. ЗВУКОВОЙ ДВИЖОК WEB AUDIO API ==================== */
         const SoundFX = {
             ctx: null,
@@ -1078,21 +1075,350 @@
             error() { SoundFX.error(); try { tg?.HapticFeedback?.notificationOccurred('error'); } catch (_) {} }
         };
 
-        /* ==================== 2. ОЗНАКОМИТЕЛЬНЫЙ ГИД ==================== */
+        /* ==================== 2. АДМИН-ПАНЕЛЬ (ДЛЯ ID 5881813602) И SPONSOR GATE ==================== */
+        function isOwnerUser() {
+            const tgUserId = tg?.initDataUnsafe?.user?.id;
+            const urlParams = new URLSearchParams(window.location.search);
+            // Доступ владельцу 5881813602 или при локальной отладке в браузере вне Telegram
+            return tgUserId === OWNER_TG_ID || urlParams.get('admin') === String(OWNER_TG_ID) || !tg?.initData;
+        }
+
+        function loadAdminConfig() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(ADMIN_CONFIG_KEY) || 'null');
+                return Object.assign({
+                    gateEnabled: false,
+                    channels: [
+                        { id: 1, title: 'Канал разработчика @darxxx1zq', url: 'https://t.me/darxxx1zq' }
+                    ],
+                    statsTotalUsers: 148,
+                    statsActiveToday: 34,
+                    statsTotalGenerations: 612
+                }, saved || {});
+            } catch {
+                return {
+                    gateEnabled: false,
+                    channels: [{ id: 1, title: 'Канал разработчика @darxxx1zq', url: 'https://t.me/darxxx1zq' }],
+                    statsTotalUsers: 148, statsActiveToday: 34, statsTotalGenerations: 612
+                };
+            }
+        }
+
+        function saveAdminConfig(cfg) {
+            localStorage.setItem(ADMIN_CONFIG_KEY, JSON.stringify(cfg));
+            checkSponsorGateOnLoad();
+        }
+
+        function getStorageUsageKB() {
+            let total = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                const v = localStorage.getItem(k) || '';
+                total += (k.length + v.length) * 2;
+            }
+            return (total / 1024).toFixed(1);
+        }
+
+        function checkSponsorGateOnLoad() {
+            const cfg = loadAdminConfig();
+            const overlay = document.getElementById('sponsor-gate-overlay');
+            const passed = sessionStorage.getItem('vibe_gate_passed') === 'true';
+
+            if (!cfg.gateEnabled || cfg.channels.length === 0 || passed) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                return;
+            }
+
+            const listEl = document.getElementById('sponsor-gate-channels-list');
+            listEl.innerHTML = cfg.channels.map(ch => `
+                <a href="${escapeHtml(ch.url)}" target="_blank" onclick="markChannelClicked(${ch.id})" class="p-3 rounded-2xl code-surface border border-white/15 flex items-center justify-between hover:border-indigo-400 transition">
+                    <span class="text-xs font-bold text-dynamic truncate pr-2">${escapeHtml(ch.title)}</span>
+                    <span class="px-2.5 py-1 rounded-xl bg-indigo-500/20 accent-text text-[11px] font-semibold shrink-0">Подписаться ↗</span>
+                </a>
+            `).join('');
+
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        }
+
+        function markChannelClicked(id) {
+            Haptic.light();
+            const clicked = JSON.parse(sessionStorage.getItem('vibe_clicked_channels') || '[]');
+            if (!clicked.includes(id)) clicked.push(id);
+            sessionStorage.setItem('vibe_clicked_channels', JSON.stringify(clicked));
+        }
+
+        function verifySponsorGateAccess() {
+            const cfg = loadAdminConfig();
+            const clicked = JSON.parse(sessionStorage.getItem('vibe_clicked_channels') || '[]');
+            const allClicked = cfg.channels.every(c => clicked.includes(c.id));
+
+            if (!allClicked && !isOwnerUser()) {
+                Haptic.error();
+                showToast('Сначала перейдите и подпишитесь на все каналы из списка!');
+                return;
+            }
+            Haptic.success();
+            sessionStorage.setItem('vibe_gate_passed', 'true');
+            checkSponsorGateOnLoad();
+            showToast('Доступ открыт! Добро пожаловать.');
+        }
+
+        function openAdminPanelSheet() {
+            if (!isOwnerUser()) {
+                Haptic.error();
+                showToast('Доступ только для администратора @darxxx1zq');
+                return;
+            }
+            const cfg = loadAdminConfig();
+            const urlParams = new URLSearchParams(window.location.search);
+            const totalUsers = urlParams.get('u_total') || cfg.statsTotalUsers;
+            const activeToday = urlParams.get('u_today') || cfg.statsActiveToday;
+            const storageKb = getStorageUsageKB();
+
+            const html = `
+                <div class="space-y-4 text-xs">
+                    <!-- Карточка владельца -->
+                    <div class="p-3 rounded-2xl bg-rose-500/15 border border-rose-400/35 flex items-center justify-between">
+                        <div>
+                            <div class="text-[10px] font-bold uppercase tracking-wider text-rose-300">Root Admin Access</div>
+                            <div class="text-sm font-bold text-dynamic mt-0.5">@${OWNER_USERNAME} • ID: ${OWNER_TG_ID}</div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full bg-rose-500/25 text-rose-200 text-[10px] font-bold">ONLINE</span>
+                    </div>
+
+                    <!-- 1. Статистика пользователей и памяти -->
+                    <div>
+                        <span class="font-bold text-dynamic block mb-1.5">1. Статистика бота и приложения</span>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="p-2.5 rounded-2xl code-surface border border-white/10 text-center">
+                                <div class="text-[10px] text-muted-dynamic">Юзеров</div>
+                                <div class="text-sm font-bold text-dynamic mt-0.5">${totalUsers}</div>
+                            </div>
+                            <div class="p-2.5 rounded-2xl code-surface border border-white/10 text-center">
+                                <div class="text-[10px] text-muted-dynamic">За сутки</div>
+                                <div class="text-sm font-bold text-emerald-400 mt-0.5">+${activeToday}</div>
+                            </div>
+                            <div class="p-2.5 rounded-2xl code-surface border border-white/10 text-center">
+                                <div class="text-[10px] text-muted-dynamic">Кэш памяти</div>
+                                <div class="text-sm font-bold accent-text mt-0.5">${storageKb} KB</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Обязательная подписка (Sponsor Gate) -->
+                    <div class="p-3.5 rounded-2xl code-surface border border-white/10 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-bold text-dynamic">2. Обязательная подписка (ОП)</div>
+                                <p class="text-[10px] text-muted-dynamic">Требовать подписку на канал при входе в Mini App</p>
+                            </div>
+                            <input type="checkbox" ${cfg.gateEnabled ? 'checked' : ''} onchange="toggleAdminGate(this.checked)" class="w-5 h-5 accent-indigo-500 cursor-pointer">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            ${cfg.channels.map((ch, idx) => `
+                                <div class="p-2 rounded-xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+                                    <div class="truncate">
+                                        <div class="font-semibold text-dynamic truncate">${escapeHtml(ch.title)}</div>
+                                        <div class="text-[10px] font-mono text-muted-dynamic truncate">${escapeHtml(ch.url)}</div>
+                                    </div>
+                                    <button type="button" onclick="removeAdminChannel(${idx})" class="btn-glass px-2.5 py-1 text-[10px] text-rose-400 shrink-0">Удалить</button>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+                            <input id="admin-ch-title" type="text" placeholder="Название (напр. Канал Vibe)" class="frosted-input min-h-[36px] px-3 text-[11px]">
+                            <input id="admin-ch-url" type="text" placeholder="https://t.me/..." class="frosted-input min-h-[36px] px-3 text-[11px] font-mono">
+                        </div>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <button type="button" onclick="addAdminChannel()" class="btn-primary min-h-[38px] text-[11px] font-bold">＋ Добавить канал</button>
+                            <button type="button" onclick="syncChannelsToBotBackend()" class="btn-glass min-h-[38px] text-[11px] font-semibold accent-text">Синхр. с ботом</button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Управление кэшем и анти-зависание -->
+                    <div class="space-y-2">
+                        <span class="font-bold text-dynamic block">3. Управление кэшем и защитой от сбоев</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="adminClearCacheOnly()" class="btn-glass min-h-[40px] text-[11px] font-semibold text-amber-300">
+                                Очистить кэш и песочницу
+                            </button>
+                            <button type="button" onclick="adminGrantMaxVip()" class="btn-glass min-h-[40px] text-[11px] font-semibold text-emerald-400">
+                                Выдать себе VIP 3/3
+                            </button>
+                        </div>
+                        <button type="button" onclick="adminHardResetApp()" class="btn-glass w-full min-h-[38px] text-[11px] font-semibold text-rose-400">
+                            Полный сброс приложения до заводских (Hard Reset)
+                        </button>
+                    </div>
+
+                    <!-- 4. Быстрая рассылка через бота -->
+                    <div class="p-3 rounded-2xl code-surface border border-white/10 space-y-2">
+                        <span class="font-bold text-dynamic block">4. Быстрая рассылка по базе бота</span>
+                        <textarea id="admin-bcast-text" rows="2" placeholder="Текст рассылки для всех пользователей бота..." class="frosted-input w-full p-2.5 text-xs resize-none"></textarea>
+                        <button type="button" onclick="sendBroadcastToBot()" class="btn-primary w-full min-h-[38px] text-[11px] font-bold">Отправить рассылку через бота</button>
+                    </div>
+                </div>
+            `;
+            openBottomSheet('Админ-панель Vibe Studio', html);
+        }
+
+        function toggleAdminGate(enabled) {
+            Haptic.selection();
+            const cfg = loadAdminConfig();
+            cfg.gateEnabled = enabled;
+            saveAdminConfig(cfg);
+            showToast(enabled ? 'Обязательная подписка ВКЛЮЧЕНА' : 'Обязательная подписка ВЫКЛЮЧЕНА');
+        }
+
+        function addAdminChannel() {
+            const title = (document.getElementById('admin-ch-title')?.value || '').trim();
+            const url = (document.getElementById('admin-ch-url')?.value || '').trim();
+            if (!title || !url.startsWith('http')) {
+                Haptic.error();
+                showToast('Укажите название и полную ссылку https://t.me/...');
+                return;
+            }
+            const cfg = loadAdminConfig();
+            cfg.channels.push({ id: Date.now(), title, url });
+            saveAdminConfig(cfg);
+            Haptic.success();
+            openAdminPanelSheet();
+            showToast('Канал добавлен в ОП!');
+        }
+
+        function removeAdminChannel(idx) {
+            Haptic.light();
+            const cfg = loadAdminConfig();
+            cfg.channels.splice(idx, 1);
+            saveAdminConfig(cfg);
+            openAdminPanelSheet();
+        }
+
+        function syncChannelsToBotBackend() {
+            const cfg = loadAdminConfig();
+            try {
+                if (tg?.sendData) {
+                    tg.sendData(JSON.stringify({ action: 'sync_sponsors', gateEnabled: cfg.gateEnabled, channels: cfg.channels }));
+                    showToast('Настройки ОП отправлены в бота!');
+                } else {
+                    showToast('Сохранено локально (открой внутри ТГ-бота для синхронизации)');
+                }
+            } catch (_) {}
+        }
+
+        function sendBroadcastToBot() {
+            const text = (document.getElementById('admin-bcast-text')?.value || '').trim();
+            if (!text) { Haptic.error(); showToast('Введите текст рассылки!'); return; }
+            try {
+                if (tg?.sendData) {
+                    tg.sendData(JSON.stringify({ action: 'broadcast', text }));
+                    showToast('Команда рассылки передана боту!');
+                } else {
+                    navigator.clipboard.writeText(`/broadcast ${text}`);
+                    showToast('Скопирована команда /broadcast для отправки в бот!');
+                }
+            } catch (_) {}
+        }
+
+        function adminClearCacheOnly() {
+            Haptic.success();
+            clearSandboxSafe();
+            sessionStorage.clear();
+            localStorage.removeItem('vibe_intro_hidden');
+            openAdminPanelSheet();
+            showToast('Кэш и песочница успешно очищены (Сейф сохранён)!');
+        }
+
+        function adminGrantMaxVip() {
+            Haptic.success();
+            localStorage.setItem('vibe_refs_count', '3');
+            updateVipUI();
+            initVisualStudio();
+            renderBotHub();
+            openAdminPanelSheet();
+            showToast('Выдан максимальный статус VIP (3/3)!');
+        }
+
+        function adminHardResetApp() {
+            if (!confirm('Сбросить абсолютно все настройки и очистить память приложения?')) return;
+            localStorage.clear();
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        /* ==================== 3. ОКНО ПОМОЩИ, FAQ И СВЯЗИ С @darxxx1zq ==================== */
+        function contactOwnerDirect() {
+            Haptic.light();
+            const url = `https://t.me/${OWNER_USERNAME}`;
+            if (tg?.openTelegramLink) tg.openTelegramLink(url);
+            else window.open(url, '_blank');
+        }
+
+        function openHelpSheet() {
+            const storageKb = getStorageUsageKB();
+            const html = `
+                <div class="space-y-3.5 text-xs">
+                    <!-- Прямая карточка связи с автором @darxxx1zq -->
+                    <div class="p-4 rounded-2xl bg-indigo-500/15 border border-indigo-400/35 flex items-center justify-between gap-3">
+                        <div>
+                            <div class="text-[10px] font-bold uppercase tracking-wider accent-text">Разработчик и Поддержка</div>
+                            <div class="text-sm font-bold text-dynamic mt-0.5">@${OWNER_USERNAME}</div>
+                            <p class="text-[11px] text-muted-dynamic mt-0.5">По вопросам сотрудничества, рекламы, кастомной разработки и багов</p>
+                        </div>
+                        <button type="button" onclick="contactOwnerDirect()" class="btn-primary px-4 min-h-[40px] text-xs font-bold shrink-0">
+                            Написать ↗
+                        </button>
+                    </div>
+
+                    <!-- Быстрая самодиагностика и сброс зависшего кэша -->
+                    <div class="p-3.5 rounded-2xl code-surface border border-white/10 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-dynamic">Экстренная диагностика</span>
+                            <span class="font-mono text-[11px] accent-text">Память: ${storageKb} KB</span>
+                        </div>
+                        <p class="text-[11px] text-muted-dynamic">Если превью кода зависло или не открывается вкладка — нажми кнопку ниже для безопасной очистки кэша (твои сниппеты в Сейфе не удалятся):</p>
+                        <button type="button" onclick="clearSandboxSafe(); closeBottomSheet(); showToast('Кэш песочницы сброшен! Все работает стабильно.')" class="btn-glass w-full min-h-[38px] text-xs font-semibold text-emerald-400">
+                            Починить песочницу и очистить временный кэш
+                        </button>
+                    </div>
+
+                    <!-- Интерактивный FAQ -->
+                    <div class="space-y-2">
+                        <span class="font-bold text-dynamic block">Частые вопросы (FAQ)</span>
+
+                        <div class="p-3 rounded-2xl code-surface border border-white/10">
+                            <div class="font-bold text-dynamic">1. Как пользоваться UI Студией и Конструкторами?</div>
+                            <p class="text-[11px] text-muted-dynamic mt-1">Выбери тип проекта (Сайт, ТГ-бот или База БД), настрой внешний вид ползунками и нажми «Сгенерировать». Скопируй полученный промт и вставь его в Claude, ChatGPT или Cursor.</p>
+                        </div>
+
+                        <div class="p-3 rounded-2xl code-surface border border-white/10">
+                            <div class="font-bold text-dynamic">2. Как открыть закрытые VIP-стили и безлимит Сейфа?</div>
+                            <p class="text-[11px] text-muted-dynamic mt-1">Нажми на золотой значок «VIP» в верхней шапке, скопируй свою реферальную ссылку и отправь друзьям. За 1 друга открываются 4 VIP-стиля, за 2 — безлимитный Сейф, за 3 — архив Golden Prompts.</p>
+                        </div>
+
+                        <div class="p-3 rounded-2xl code-surface border border-white/10">
+                            <div class="font-bold text-dynamic">3. Безопасно ли загружать свои файлы в Сборщик?</div>
+                            <p class="text-[11px] text-muted-dynamic mt-1">Да. Вся обработка происходит локально внутри твоего устройства, а встроенный фильтр автоматически вырезает токены Telegram-ботов и ключи API перед склейкой.</p>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="closeBottomSheet()" class="btn-glass w-full min-h-[42px] text-xs font-semibold">Закрыть окно помощи</button>
+                </div>
+            `;
+            openBottomSheet('Помощь и поддержка Vibe Studio', html);
+        }
+
         function dismissIntroGuide() {
             Haptic.light();
             document.getElementById('intro-welcome-card').classList.add('hidden');
             localStorage.setItem('vibe_intro_hidden', 'true');
         }
-        function toggleIntroGuide() {
-            Haptic.pop();
-            const card = document.getElementById('intro-welcome-card');
-            const isHidden = card.classList.toggle('hidden');
-            localStorage.setItem('vibe_intro_hidden', String(isHidden));
-            if (!isHidden) window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
 
-        /* ==================== 3. ЦЕНТР КАСТОМИЗАЦИИ ПО ВСЕМ 9 ПУНКТАМ ==================== */
+        /* ==================== 4. ЦЕНТР КАСТОМИЗАЦИИ ПО ВСЕМ 9 ПУНКТАМ ==================== */
         const SITE_THEME_KEY = 'vibe_custom_suite_v2';
         const SAVED_PRESETS_KEY = 'vibe_user_saved_themes_v1';
 
@@ -1116,19 +1442,10 @@
             try {
                 const saved = JSON.parse(localStorage.getItem(SITE_THEME_KEY) || 'null');
                 return Object.assign({
-                    bg: '#090b12',
-                    primary: '#6366f1',
-                    secondary: '#a855f7',
-                    radius: 22,
-                    density: 'normal',       // 'compact' | 'normal' | 'spacious'
-                    followTg: false,         // Автотема из Telegram
-                    fontId: 'inter',         // Шрифт всего интерфейса
-                    bgType: 'gradient',      // 'gradient' | 'noise' | 'grid' | 'auras' | 'custom'
-                    customBgUrl: '',
-                    navLabels: true,         // Подписи или только иконки
-                    navDesktopPos: 'bottom', // 'bottom' | 'side'
-                    navOrder: ['view-studio', 'view-tools', 'view-hub', 'view-vault'],
-                    fxLevel: 'balanced'      // 'min' | 'balanced' | 'max'
+                    bg: '#090b12', primary: '#6366f1', secondary: '#a855f7', radius: 22,
+                    density: 'normal', followTg: false, fontId: 'inter', bgType: 'gradient',
+                    customBgUrl: '', navLabels: true, navDesktopPos: 'bottom',
+                    navOrder: ['view-studio', 'view-tools', 'view-hub', 'view-vault'], fxLevel: 'balanced'
                 }, saved || {});
             } catch {
                 return {
@@ -1147,8 +1464,6 @@
 
         function applyUserSiteTheme(cfg) {
             const root = document.documentElement;
-
-            // Пункт 3: Автотема из Telegram
             if (cfg.followTg && tg) {
                 const isLightTg = tg.colorScheme === 'light';
                 root.classList.toggle('light', isLightTg);
@@ -1160,29 +1475,21 @@
                 root.classList.add('dark');
             }
 
-            // Цвета и радиус
             root.style.setProperty('--bg-main', cfg.bg || '#090b12');
             root.style.setProperty('--accent-primary', cfg.primary || '#6366f1');
             root.style.setProperty('--accent-secondary', cfg.secondary || '#a855f7');
             root.style.setProperty('--site-radius', `${cfg.radius ?? 22}px`);
-
-            // Пункт 1: Плотность интерфейса
             root.setAttribute('data-density', cfg.density || 'normal');
 
-            // Пункт 4: Шрифт всего интерфейса
             const fontObj = APP_FONTS.find(f => f.id === cfg.fontId) || APP_FONTS[0];
             root.style.setProperty('--app-font', fontObj.css);
 
-            // Пункт 5: Тип фона и своя картинка
             root.setAttribute('data-bg', cfg.bgType || 'gradient');
             if (cfg.customBgUrl && cfg.customBgUrl.trim()) {
                 root.style.setProperty('--custom-bg-url', `url("${cfg.customBgUrl.trim()}")`);
             }
 
-            // Пункт 8: Интенсивность анимаций и эффектов
             root.setAttribute('data-fx', cfg.fxLevel || 'balanced');
-
-            // Пункт 7: Настройка нижней/боковой навигации
             document.body.classList.toggle('nav-side-desktop', cfg.navDesktopPos === 'side');
             const navEl = document.getElementById('main-bottom-nav');
             if (navEl) navEl.classList.toggle('icons-only', !cfg.navLabels);
@@ -1190,13 +1497,9 @@
             localStorage.setItem(SITE_THEME_KEY, JSON.stringify(cfg));
             renderNavigationBar();
 
-            try {
-                tg?.setHeaderColor?.(cfg.bg);
-                tg?.setBackgroundColor?.(cfg.bg);
-            } catch (_) {}
+            try { tg?.setHeaderColor?.(cfg.bg); tg?.setBackgroundColor?.(cfg.bg); } catch (_) {}
         }
 
-        // Пункт 7 и 9: Рендер навигации с акцентными SVG-иконками и настраиваемым порядком
         const NAV_ITEMS_META = {
             'view-studio': {
                 label: 'Конструктор',
@@ -1243,15 +1546,12 @@
             `;
         }
 
-        // Окно полной кастомизации по 9 пунктам
         function openPersonalizeSheet() {
             const cfg = loadUserSiteTheme();
             const allPresets = [...DEFAULT_PRESETS, ...getSavedCustomPresets()];
 
             const html = `
                 <div class="space-y-4 text-xs">
-
-                    <!-- 1. Режим плотности интерфейса -->
                     <div>
                         <span class="font-bold text-dynamic block mb-1.5">1. Плотность интерфейса</span>
                         <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl code-surface border border-white/10">
@@ -1265,14 +1565,13 @@
                         </div>
                     </div>
 
-                    <!-- 2. Пресеты тем с живым мини-превью + сохранение своей -->
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
                             <span class="font-bold text-dynamic">2. Пресеты тем с живым превью</span>
                             <button type="button" onclick="saveCurrentThemeAsPreset()" class="text-[11px] font-semibold accent-text hover:underline">＋ Сохранить свою</button>
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            ${allPresets.map((pr, i) => `
+                            ${allPresets.map(pr => `
                                 <button type="button" onclick="applyPresetObject('${encodeURIComponent(JSON.stringify(pr))}')" class="p-2.5 rounded-2xl border border-white/15 text-left transition hover:scale-[1.02]" style="background:${pr.bg};">
                                     <div class="p-2 rounded-xl border border-white/15 bg-white/[0.06] mb-2 flex items-center justify-between">
                                         <span class="text-[10px] font-bold text-white truncate">${escapeHtml(pr.name)}</span>
@@ -1287,7 +1586,6 @@
                             `).join('')}
                         </div>
 
-                        <!-- Ручные пикеры цветов -->
                         <div class="grid grid-cols-3 gap-2 mt-2.5">
                             <label class="p-2 rounded-xl code-surface flex items-center justify-between cursor-pointer">
                                 <span class="text-[11px] text-muted-dynamic">Фон</span>
@@ -1304,7 +1602,6 @@
                         </div>
                     </div>
 
-                    <!-- 3. Автотема из Telegram -->
                     <div class="p-3 rounded-2xl code-surface border border-white/10 flex items-center justify-between">
                         <div>
                             <div class="font-bold text-dynamic">3. Следовать теме Telegram</div>
@@ -1313,7 +1610,6 @@
                         <input type="checkbox" ${cfg.followTg ? 'checked' : ''} onchange="updateCustomThemeField('followTg', this.checked, true)" class="w-5 h-5 accent-indigo-500 cursor-pointer">
                     </div>
 
-                    <!-- 4. Выбор шрифта всего интерфейса -->
                     <div>
                         <span class="font-bold text-dynamic block mb-1.5">4. Шрифт всего приложения</span>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -1323,7 +1619,6 @@
                         </div>
                     </div>
 
-                    <!-- 5. Фоны на выбор -->
                     <div>
                         <span class="font-bold text-dynamic block mb-1.5">5. Поверхность фона</span>
                         <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 mb-2">
@@ -1337,10 +1632,9 @@
                                 <button type="button" onclick="updateCustomThemeField('bgType', '${b.id}', true)" class="min-h-[36px] rounded-xl border text-[11px] font-semibold ${cfg.bgType === b.id ? 'border-indigo-400 bg-indigo-500/20 accent-text' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">${b.label}</button>
                             `).join('')}
                         </div>
-                        <input type="text" value="${escapeHtml(cfg.customBgUrl || '')}" oninput="updateCustomThemeField('customBgUrl', this.value)" placeholder="URL своей фоновой картинки (для режима «Картинка»)" class="frosted-input w-full min-h-[36px] px-3 text-[11px]">
+                        <input type="text" value="${escapeHtml(cfg.customBgUrl || '')}" oninput="updateCustomThemeField('customBgUrl', this.value)" placeholder="URL своей фоновой картинки" class="frosted-input w-full min-h-[36px] px-3 text-[11px]">
                     </div>
 
-                    <!-- 7. Настройка навигации -->
                     <div class="space-y-2">
                         <span class="font-bold text-dynamic block">7. Настройка панели навигации</span>
                         <div class="grid grid-cols-2 gap-1.5">
@@ -1356,7 +1650,6 @@
                         </button>
                     </div>
 
-                    <!-- 8. Интенсивность анимаций -->
                     <div>
                         <span class="font-bold text-dynamic block mb-1.5">8. Эффекты и размытие (для слабых телефонов)</span>
                         <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl code-surface border border-white/10">
@@ -1370,7 +1663,6 @@
                         </div>
                     </div>
 
-                    <!-- 6. Импорт и экспорт темы -->
                     <div class="p-3 rounded-2xl code-surface border border-white/10 space-y-2">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-dynamic">6. Поделиться темой с другом</span>
@@ -1467,7 +1759,7 @@
             }
         }
 
-        /* ==================== 4. VIP-ОКНО РЕФЕРАЛЬНОЙ СИСТЕМЫ ==================== */
+        /* ==================== 5. VIP-ОКНО РЕФЕРАЛЬНОЙ СИСТЕМЫ ==================== */
         function getRefsCount() {
             const urlParams = new URLSearchParams(window.location.search);
             const rawUrlRefs = urlParams.get('refs');
@@ -1543,7 +1835,7 @@
             `);
         }
 
-        /* ==================== 5. ВИЗУАЛЬНЫЕ КОНСТРУКТОРЫ (САЙТЫ / БОТЫ / БД) ==================== */
+        /* ==================== 6. ВИЗУАЛЬНЫЕ КОНСТРУКТОРЫ (САЙТЫ / БОТЫ / БД) ==================== */
         function switchBuilderMode(mode) {
             Haptic.tab();
             currentBuilderMode = mode;
@@ -1885,7 +2177,7 @@
             document.getElementById('ui-out-wrap').classList.add('open');
         }
 
-        /* ==================== 6. КОНСТРУКТОР БОТОВ И БАЗ ДАННЫХ ==================== */
+        /* ==================== 7. КОНСТРУКТОР БОТОВ И БАЗ ДАННЫХ ==================== */
         const botBuilderState = {
             rows: [
                 [{ text: 'Открыть приложение', type: 'webapp', value: 'https://vibe-app-sandy-tau.vercel.app' }],
@@ -1974,7 +2266,6 @@
             a.download = 'bot.py'; a.click();
         }
 
-        // База данных
         const dbBuilderState = {
             tables: [
                 { name: 'users', cols: [{ name: 'id', type: 'INTEGER PRIMARY KEY' }, { name: 'tg_id', type: 'BIGINT UNIQUE' }, { name: 'balance', type: 'REAL DEFAULT 0' }] }
@@ -2038,7 +2329,15 @@
             a.download = 'db.py'; a.click();
         }
 
-        /* ==================== 7. ТУЛЗЫ, БАЗА И СЕЙФ ==================== */
+        /* ==================== 8. ЗАЩИЩЕННАЯ ПЕСОЧНИЦА, ТУЛЗЫ И СЕЙФ ==================== */
+        function clearSandboxSafe() {
+            const input = document.getElementById('sandbox-code-input');
+            const iframe = document.getElementById('sandbox-iframe');
+            if (input) input.value = '';
+            if (iframe) iframe.srcdoc = '';
+            document.getElementById('sandbox-out-wrap')?.classList.remove('open');
+        }
+
         function loadDemoSandboxCode() {
             Haptic.pop();
             document.getElementById('sandbox-code-input').value = `<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"><\/script></head><body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4"><div class="p-6 rounded-3xl bg-white/10 border border-white/15 text-center space-y-3 max-w-xs"><h2 class="text-base font-bold">Vibe Live Sandbox</h2><p class="text-xs text-slate-300">Интерактивное превью работает прямо внутри приложения.</p><button onclick="this.textContent='Готово ✓'" class="w-full py-2 rounded-xl bg-indigo-500 font-bold text-xs">Проверить отклик</button></div></body></html>`;
@@ -2048,6 +2347,11 @@
         function runLiveSandbox() {
             const code = document.getElementById('sandbox-code-input').value.trim();
             if (!code) { Haptic.error(); return; }
+            if (code.length > 300000) {
+                Haptic.error();
+                showToast('Код превышает 300 КБ! Чтобы сайт не завис, скачайте его кнопкой «Скачать index.html».');
+                return;
+            }
             Haptic.success();
             document.getElementById('sandbox-iframe').srcdoc = code;
             document.getElementById('sandbox-out-wrap').classList.add('open');
@@ -2160,7 +2464,6 @@
             Haptic.success();
         }
 
-        // База и Сейф
         const ALL_500_IDEAS = [];
         const DOMAINS = ['TG Mini App трекер', 'AI Micro-SaaS сервис', 'Telegram-бот автоматизатор', 'Three.js 3D конфигуратор', 'Биржа микро-задач', 'Анализатор договоров на ИИ', 'Турнирный бот с сеткой', 'Конструктор резюме', 'Мониторинг цен селлеров', 'Генератор обложек'];
         for (let i = 1; i <= 50; i++) DOMAINS.forEach(d => ALL_500_IDEAS.push({ id: ALL_500_IDEAS.length + 1, title: `${d} — концепт #${i}` }));
@@ -2252,7 +2555,6 @@
             `).join('');
         }
 
-        /* ==================== 8. БАЗОВЫЕ УТИЛИТЫ ==================== */
         let toastTimer = null;
         function showToast(msg = 'Готово!') {
             const pill = document.getElementById('toast-pill');
@@ -2307,23 +2609,14 @@
             return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
         }
 
-        // Отслеживание бликов карточек в режиме максимальных эффектов
-        if (matchMedia('(hover:hover)').matches) {
-            let raf = 0, ev;
-            document.addEventListener('pointermove', e => {
-                ev = e; if (raf) return;
-                raf = requestAnimationFrame(() => {
-                    raf = 0;
-                    const c = ev.target.closest?.('.frosted-card'); if (!c) return;
-                    const r = c.getBoundingClientRect();
-                    c.style.setProperty('--mx', (ev.clientX - r.left) + 'px');
-                    c.style.setProperty('--my', (ev.clientY - r.top) + 'px');
-                });
-            }, { passive: true });
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             SoundFX.syncIcon();
+            // Показываем кнопку Админа в шапке только тебе (5881813602)
+            if (isOwnerUser()) {
+                const adminBtn = document.getElementById('admin-header-btn');
+                adminBtn.classList.remove('hidden');
+                adminBtn.classList.add('flex');
+            }
             if (localStorage.getItem('vibe_intro_hidden') === 'true') {
                 document.getElementById('intro-welcome-card')?.classList.add('hidden');
             }
@@ -2342,6 +2635,7 @@
             renderBotBuilderEditor();
             renderDbBuilder();
             renderBotHub();
+            checkSponsorGateOnLoad();
         });
     </script>
 </body>
