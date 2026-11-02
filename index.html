@@ -462,7 +462,7 @@
                     <svg class="w-5 h-5 accent-icon shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                     <div>
                         <div class="text-xs font-bold text-dynamic">1. 2D / 3D Сайты, Боты и БД</div>
-                        <p class="text-[11px] text-muted-dynamic mt-0.5 leading-snug">Включай 3D-режим в конструкторе сайтов и настраивай WebGL-сцены.</p>
+                        <p class="text-[11px] text-muted-dynamic mt-0.5 leading-snug">11 живых 3D-моделей (Феррофлюид, Нейросеть, Чёрная дыра и др.) прямо в конструкторе.</p>
                     </div>
                 </button>
 
@@ -505,10 +505,10 @@
                 </div>
             </div>
 
-            <!-- РЕЖИМ A: КОНСТРУКТОР САЙТОВ (С ПЕРЕКЛЮЧАТЕЛЕМ 2D / 3D И ВСТРОЕННЫМ 3D-КОНФИГУРАТОРОМ) -->
+            <!-- РЕЖИМ A: КОНСТРУКТОР САЙТОВ (С ПЕРЕКЛЮЧАТЕЛЕМ 2D / 3D И 11 МОДЕЛЯМИ В 3D-КОНФИГУРАТОРЕ) -->
             <div id="sub-builder-web" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-                <!-- Левая колонка: Живое превью (с интерактивным 3D-Canvas на фоне в режиме 3D) -->
+                <!-- Левая колонка: Живое превью -->
                 <div class="lg:col-span-5 lg:sticky lg:top-24 space-y-3.5">
                     <article class="frosted-card">
                         <div class="flex items-center justify-between mb-3">
@@ -523,12 +523,10 @@
                             </div>
                         </div>
 
-                        <!-- Холст превью: внутри него лежит #preview-3d-canvas (активен в режиме 3D) и #prev-dynamic-mount поверх -->
                         <div id="live-preview-canvas" class="rounded-2xl overflow-hidden border border-white/15 transition-all duration-300 relative select-none" style="background: #090b12; color: #f8fafc; min-height: 320px;">
                             <div id="prev-glow-orb" class="absolute -top-12 right-4 w-40 h-40 rounded-full pointer-events-none z-0"></div>
-                            <!-- Интерактивный 3D-холст (включается при выборе 3D формата) -->
+                            <!-- Интерактивный 3D-холст (11 моделей) -->
                             <canvas id="preview-3d-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0 hidden"></canvas>
-                            <!-- Слой UI-карточек поверх 3D-сцены -->
                             <div id="prev-dynamic-mount" class="relative z-10"></div>
                         </div>
 
@@ -543,7 +541,6 @@
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>
                             <span id="gen-site-btn-label">Сгенерировать промт этого сайта</span>
                         </button>
-                        <!-- Кнопка прямого скачивания готового 3D-сайта (появляется в 3D режиме) -->
                         <button type="button" id="download-3d-site-btn" onclick="downloadReady3dSiteHtml()" class="btn-glass w-full min-h-[44px] text-xs font-bold text-emerald-400 hidden items-center justify-center gap-2">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             <span>Скачать готовый 3D-сайт (index.html + Three.js)</span>
@@ -551,7 +548,7 @@
                     </div>
                 </div>
 
-                <!-- Правая колонка: Шаги конструктора + раскрывающиеся окна 3D-конфигуратора -->
+                <!-- Правая колонка -->
                 <div class="lg:col-span-7 space-dynamic">
 
                     <!-- Шаг 1: Выбор режима (2D / 3D), Формата и Дизайн-системы -->
@@ -561,7 +558,6 @@
                                 <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Шаг 1 • Режим и Архитектура</span>
                                 <h3 class="text-sm font-bold text-dynamic mt-0.5">Формат сайта (2D / 3D) и стиль</h3>
                             </div>
-                            <!-- Главный переключатель 2D / 3D -->
                             <div class="grid grid-cols-2 p-1 rounded-xl code-surface border border-white/15">
                                 <button type="button" id="dim-btn-2d" onclick="setSiteDimensionMode('2d')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-500 text-white transition">
                                     2D Классика
@@ -582,40 +578,40 @@
                         <div id="ui-style-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
                     </article>
 
-                    <!-- РАСКРЫВАЮЩИЕСЯ ОКНА 3D-КОНФИГУРАТОРА (Открываются автоматически при выборе 3D WebGL) -->
+                    <!-- РАСКРЫВАЮЩИЕСЯ ОКНА 3D-КОНФИГУРАТОРА (5 НОВЫХ ШЕЙДЕРНЫХ СЦЕН + 6 КЛАССИЧЕСКИХ) -->
                     <div id="studio-3d-windows" class="expand-grid">
                         <div class="expand-inner space-dynamic pt-1">
 
-                            <!-- Окно 3D #1: Выбор 3D-геометрии и шейдера материала -->
+                            <!-- Окно 3D #1: Все 11 3D-моделей и шейдеры материала -->
                             <article class="frosted-card border border-indigo-400/40 space-y-3.5">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
                                         <svg class="w-4 h-4 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                                         <div>
                                             <span class="text-[10px] font-bold uppercase tracking-wider accent-text">3D Конфигуратор • Окно 1</span>
-                                            <h3 class="text-sm font-bold text-dynamic">Геометрия объекта и Материал (Three.js)</h3>
+                                            <h3 class="text-sm font-bold text-dynamic">Коллекция 3D-сцен (5 PRO шейдеров + 6 базовых)</h3>
                                         </div>
                                     </div>
-                                    <button type="button" onclick="randomize3dScene()" class="btn-glass px-2.5 py-1 text-[11px] font-semibold accent-text">Случайная 3D-сцена</button>
+                                    <button type="button" onclick="randomize3dScene()" class="btn-glass px-2.5 py-1 text-[11px] font-semibold accent-text">Случайная 3D</button>
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-semibold text-dynamic mb-1.5">1. Центральный 3D-объект сцены:</label>
+                                    <label class="block text-xs font-semibold text-dynamic mb-1.5">1. Выбери 3D-сцену (PRO-эффекты помечены значком NEW):</label>
                                     <div id="three-shape-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-semibold text-dynamic mb-1.5">2. Поверхность и шейдер материала:</label>
+                                    <label class="block text-xs font-semibold text-dynamic mb-1.5">2. Поверхность и шейдер отрисовки:</label>
                                     <div id="three-mat-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
                                 </div>
                             </article>
 
-                            <!-- Окно 3D #2: Камера, физика вращения и интерактивность курсора/гироскопа -->
+                            <!-- Окно 3D #2: Камера, физика вращения, бит-пульс и гироскоп -->
                             <article class="frosted-card border border-indigo-400/40 space-y-3.5">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <span class="text-[10px] font-bold uppercase tracking-wider accent-text">3D Конфигуратор • Окно 2</span>
-                                        <h3 class="text-sm font-bold text-dynamic">Физика камеры, частицы и гироскоп</h3>
+                                        <h3 class="text-sm font-bold text-dynamic">Физика камеры, частицы и аудио-пульс</h3>
                                     </div>
                                     <span id="three-fps-pill" class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">60 FPS WebGL</span>
                                 </div>
@@ -623,14 +619,14 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                                     <div>
                                         <div class="flex justify-between text-xs mb-1">
-                                            <span class="text-dynamic">Скорость вращения</span>
+                                            <span class="text-dynamic">Скорость динамики</span>
                                             <span id="val-3d-speed" class="font-mono accent-text font-semibold">1.0x</span>
                                         </div>
                                         <input type="range" id="slider-3d-speed" min="2" max="30" step="2" value="10" oninput="update3dSliders()" class="ios-slider">
                                     </div>
                                     <div>
                                         <div class="flex justify-between text-xs mb-1">
-                                            <span class="text-dynamic">Масштаб 3D-модели</span>
+                                            <span class="text-dynamic">Масштаб 3D-сцены</span>
                                             <span id="val-3d-scale" class="font-mono accent-text font-semibold">100%</span>
                                         </div>
                                         <input type="range" id="slider-3d-scale" min="60" max="150" step="10" value="100" oninput="update3dSliders()" class="ios-slider">
@@ -644,14 +640,18 @@
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                                     <button type="button" onclick="toggle3dOption('mouseTilt')" id="btn-3d-tilt" class="p-2.5 rounded-xl border border-indigo-400 bg-indigo-500/20 text-left text-xs font-semibold text-dynamic flex items-center justify-between">
-                                        <span>Наклон за мышью / гироскопом</span>
+                                        <span>Отклик на курсор</span>
                                         <span class="accent-text">Вкл ✓</span>
                                     </button>
                                     <button type="button" onclick="toggle3dOption('floatWave')" id="btn-3d-wave" class="p-2.5 rounded-xl border border-indigo-400 bg-indigo-500/20 text-left text-xs font-semibold text-dynamic flex items-center justify-between">
-                                        <span>Плавная левитация по синусоиде</span>
+                                        <span>Плавная левитация</span>
                                         <span class="accent-text">Вкл ✓</span>
+                                    </button>
+                                    <button type="button" onclick="toggle3dOption('beatPulse')" id="btn-3d-beat" class="p-2.5 rounded-xl border border-white/10 bg-white/[0.03] text-left text-xs font-medium text-muted-dynamic flex items-center justify-between">
+                                        <span>Ритм-пульс (Beat)</span>
+                                        <span>Выкл</span>
                                     </button>
                                 </div>
                             </article>
@@ -1479,7 +1479,7 @@
 
                         <div class="p-3 rounded-2xl code-surface border border-white/10">
                             <div class="font-bold text-dynamic">1. Как включить 3D-конфигуратор сцен?</div>
-                            <p class="text-[11px] text-muted-dynamic mt-1">В конструкторе сайтов в Шаге 1 переключи тумблер с «2D Классика» на «3D WebGL». Сразу под ним плавно раскроются окна выбора 3D-объекта, шейдера и физики камеры.</p>
+                            <p class="text-[11px] text-muted-dynamic mt-1">В конструкторе сайтов в Шаге 1 переключи тумблер с «2D Классика» на «3D WebGL». Сразу под ним плавно раскроются окна выбора 11 3D-моделей (Феррофлюид, Нейросеть, Чёрная дыра и др.).</p>
                         </div>
 
                         <div class="p-3 rounded-2xl code-surface border border-white/10">
@@ -1500,37 +1500,85 @@
             localStorage.setItem('vibe_intro_hidden', 'true');
         }
 
-        /* ==================== 4. ВСТРОЕННЫЙ 3D WEBGL КОНФИГУРАТОР В ОКОШКЕ САЙТОВ ==================== */
+        /* ==================== 4. ВСТРОЕННЫЙ 3D WEBGL КОНФИГУРАТОР (5 НОВЫХ PRO СЦЕН + 6 БАЗОВЫХ = 11 СЦЕН) ==================== */
         const THREE_SHAPES = [
-            { id: 'torus', title: 'Тор-Узел (TorusKnot)', desc: 'Переплетённый неоновый узел в центре сцены' },
-            { id: 'sphere', title: 'Кибер-Сфера', desc: 'Геодезическая сфера с силовыми меридианами' },
-            { id: 'icosa', title: 'Кристалл (Icosahedron)', desc: 'Гранёный вращающийся кристалл с острыми рёбрами' },
-            { id: 'galaxy', title: 'Галактика частиц', desc: 'Спиральное облако из сотен светящихся точек' },
-            { id: 'waves', title: 'Волновая сетка', desc: 'Киберпанк-ландшафт с живыми синусоидальными волнами' },
-            { id: 'rings', title: 'Орбитальные кольца', desc: 'Тройной гироскоп из пересекающихся светящихся колец' }
+            // 5 новых нешаблонных PRO-сцен
+            { id: 'ferrofluid', title: 'Феррофлюид Капля', badge: 'NEW', desc: 'Жидкая магнитная сфера с живыми морфинг-шипами по алгоритму шума' },
+            { id: 'synapse', title: 'Нейросеть (Synapse)', badge: 'NEW', desc: 'Парящее 3D-облако нейронов с бегущими световыми импульсами между узлами' },
+            { id: 'lorenz', title: 'Аттрактор Лоренца', badge: 'NEW', desc: 'Хаотическая 3D-лента в форме бабочки с летящими неоновыми кометами' },
+            { id: 'blackhole', title: 'Чёрная дыра', badge: 'NEW', desc: 'Гравитационная воронка с тёмным ядром и спиральным аккреционным диском' },
+            { id: 'voxels', title: 'Воксель-Матрица', badge: 'NEW', desc: 'Поле из 3D-кубов (вокселей), качающихся на волнах в реальном времени' },
+            // 6 классических моделей (сохранены полностью)
+            { id: 'torus', title: 'Тор-Узел (TorusKnot)', badge: '', desc: 'Переплетённый неоновый узел в центре сцены' },
+            { id: 'sphere', title: 'Кибер-Сфера', badge: '', desc: 'Геодезическая сфера с силовыми меридианами' },
+            { id: 'icosa', title: 'Кристалл (Icosahedron)', badge: '', desc: 'Гранёный вращающийся кристалл с острыми рёбрами' },
+            { id: 'galaxy', title: 'Галактика частиц', badge: '', desc: 'Спиральное облако из сотен светящихся точек' },
+            { id: 'waves', title: 'Волновая сетка', badge: '', desc: 'Киберпанк-ландшафт с живыми синусоидальными волнами' },
+            { id: 'rings', title: 'Орбитальные кольца', badge: '', desc: 'Тройной гироскоп из пересекающихся светящихся колец' }
         ];
 
         const THREE_MATERIALS = [
             { id: 'wireframe', title: 'Wireframe Неон' },
             { id: 'hologram', title: 'Голограмма' },
             { id: 'points', title: 'Облако точек' },
-            { id: 'glass3d', title: 'Глянец + Грани' }
+            { id: 'glass3d', title: 'Глянец + Ядро' }
         ];
 
         const threeState = {
-            enabled: false, // false = 2D, true = 3D
-            shapeId: 'torus',
+            enabled: false,
+            shapeId: 'ferrofluid',
             matId: 'wireframe',
             speed: 1.0,
             scale: 1.0,
             particles: 60,
             mouseTilt: true,
             floatWave: true,
+            beatPulse: false,
             pointerX: 0,
             pointerY: 0,
             rafId: 0,
             angle: 0
         };
+
+        // Предвычисленные пулы для сложных 3D-сцен (чтобы 60 FPS держались даже на слабых телефонах)
+        const starPool = Array.from({ length: 140 }, () => ({
+            x: (Math.random() - 0.5) * 260,
+            y: (Math.random() - 0.5) * 260,
+            z: (Math.random() - 0.5) * 200
+        }));
+
+        const synapseNodes = Array.from({ length: 28 }, (_, i) => {
+            const phi = Math.acos(1 - 2 * (i + 0.5) / 28);
+            const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+            const r = 55 + (i % 3) * 18;
+            return {
+                x: r * Math.sin(phi) * Math.cos(theta),
+                y: r * Math.cos(phi),
+                z: r * Math.sin(phi) * Math.sin(theta),
+                phase: i * 0.7
+            };
+        });
+
+        const lorenzTrail = (() => {
+            const pts = [];
+            let x = 0.1, y = 0, z = 0;
+            const dt = 0.0085, sigma = 10, rho = 28, beta = 8 / 3;
+            for (let i = 0; i < 240; i++) {
+                const dx = sigma * (y - x) * dt;
+                const dy = (x * (rho - z) - y) * dt;
+                const dz = (x * y - beta * z) * dt;
+                x += dx; y += dy; z += dz;
+                pts.push({ x: x * 4.2, y: y * 4.2, z: (z - 25) * 4.2 });
+            }
+            return pts;
+        })();
+
+        const accretionParticles = Array.from({ length: 130 }, (_, i) => ({
+            r: 28 + (i / 130) * 78,
+            angle: (i * 2.4) % (Math.PI * 2),
+            speed: 0.6 + (130 - i) * 0.012,
+            tilt: ((i % 5) - 2) * 2.5
+        }));
 
         function setSiteDimensionMode(mode) {
             Haptic.pop();
@@ -1544,7 +1592,6 @@
                 ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-500 text-white flex items-center gap-1 transition'
                 : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-muted-dynamic flex items-center gap-1 transition';
 
-            // Плавно раскрываем или прячем окна 3D конфигуратора
             document.getElementById('studio-3d-windows').classList.toggle('open', is3d);
             document.getElementById('preview-3d-badge').classList.toggle('hidden', !is3d);
             document.getElementById('preview-3d-canvas').classList.toggle('hidden', !is3d);
@@ -1560,7 +1607,7 @@
             if (is3d) {
                 render3dConfiguratorControls();
                 start3dPreviewLoop();
-                showToast('Включён режим 3D WebGL! Окна конфигуратора открыты.');
+                showToast('3D-режим активен! Выбирай из 11 сцен ниже.');
             } else {
                 stop3dPreviewLoop();
             }
@@ -1569,8 +1616,9 @@
 
         function render3dConfiguratorControls() {
             document.getElementById('three-shape-grid').innerHTML = THREE_SHAPES.map(s => `
-                <button type="button" onclick="select3dShape('${s.id}')" class="min-h-[40px] px-3 py-2 rounded-xl border text-left transition ${s.id === threeState.shapeId ? 'border-indigo-400 bg-indigo-500/20 text-dynamic font-bold' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">
-                    <span class="text-xs block truncate">${s.title}</span>
+                <button type="button" onclick="select3dShape('${s.id}')" class="min-h-[42px] px-2.5 py-2 rounded-xl border text-left transition flex items-center justify-between gap-1 ${s.id === threeState.shapeId ? 'border-indigo-400 bg-indigo-500/20 text-dynamic font-bold' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">
+                    <span class="text-xs truncate">${s.title}</span>
+                    ${s.badge ? `<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 shrink-0">${s.badge}</span>` : ''}
                 </button>
             `).join('');
 
@@ -1608,13 +1656,18 @@
         function toggle3dOption(key) {
             Haptic.selection();
             threeState[key] = !threeState[key];
-            const btnId = key === 'mouseTilt' ? 'btn-3d-tilt' : 'btn-3d-wave';
-            const label = key === 'mouseTilt' ? 'Наклон за мышью / гироскопом' : 'Плавная левитация по синусоиде';
-            const btn = document.getElementById(btnId);
+            const map = {
+                mouseTilt: { id: 'btn-3d-tilt', label: 'Отклик на курсор' },
+                floatWave: { id: 'btn-3d-wave', label: 'Плавная левитация' },
+                beatPulse: { id: 'btn-3d-beat', label: 'Ритм-пульс (Beat)' }
+            };
+            const meta = map[key];
+            if (!meta) return;
+            const btn = document.getElementById(meta.id);
             btn.className = threeState[key]
                 ? 'p-2.5 rounded-xl border border-indigo-400 bg-indigo-500/20 text-left text-xs font-semibold text-dynamic flex items-center justify-between'
                 : 'p-2.5 rounded-xl border border-white/10 bg-white/[0.03] text-left text-xs font-medium text-muted-dynamic flex items-center justify-between';
-            btn.innerHTML = `<span>${label}</span><span class="${threeState[key] ? 'accent-text' : ''}">${threeState[key] ? 'Вкл ✓' : 'Выкл'}</span>`;
+            btn.innerHTML = `<span>${meta.label}</span><span class="${threeState[key] ? 'accent-text' : ''}">${threeState[key] ? 'Вкл ✓' : 'Выкл'}</span>`;
         }
 
         function randomize3dScene() {
@@ -1624,15 +1677,9 @@
             threeState.shapeId = rShape.id;
             threeState.matId = rMat.id;
             render3dConfiguratorControls();
+            updateLivePreview();
             showToast(`3D: ${rShape.title} • ${rMat.title}`);
         }
-
-        // Интерактивный 3D-движок внутри окна превью (работает мгновенно, 0 внешних зависимостей)
-        const starPool = Array.from({ length: 140 }, () => ({
-            x: (Math.random() - 0.5) * 260,
-            y: (Math.random() - 0.5) * 260,
-            z: (Math.random() - 0.5) * 200
-        }));
 
         function start3dPreviewLoop() {
             stop3dPreviewLoop();
@@ -1643,8 +1690,8 @@
             container.onpointermove = (e) => {
                 if (!threeState.mouseTilt) return;
                 const r = container.getBoundingClientRect();
-                threeState.pointerX = ((e.clientX - r.left) / r.width - 0.5) * 1.2;
-                threeState.pointerY = ((e.clientY - r.top) / r.height - 0.5) * 1.2;
+                threeState.pointerX = ((e.clientX - r.left) / r.width - 0.5) * 1.3;
+                threeState.pointerY = ((e.clientY - r.top) / r.height - 0.5) * 1.3;
             };
 
             function renderFrame() {
@@ -1655,6 +1702,9 @@
                 ctx.clearRect(0, 0, w, h);
 
                 threeState.angle += 0.018 * threeState.speed;
+                const beatBoost = threeState.beatPulse ? (1 + Math.pow(Math.sin(threeState.angle * 3.2), 6) * 0.24) : 1;
+                const activeScale = threeState.scale * beatBoost;
+
                 const ax = threeState.angle + (threeState.mouseTilt ? threeState.pointerY : 0);
                 const ay = threeState.angle * 0.8 + (threeState.mouseTilt ? threeState.pointerX : 0);
                 const waveY = threeState.floatWave ? Math.sin(threeState.angle * 1.6) * 8 : 0;
@@ -1664,7 +1714,6 @@
                 const pColor = builderState.primaryColor;
                 const sColor = builderState.secondaryColor;
 
-                // 3D-проекция точки
                 function project3D(x, y, z) {
                     const cosX = Math.cos(ax), sinX = Math.sin(ax);
                     const cosY = Math.cos(ay), sinY = Math.sin(ay);
@@ -1672,8 +1721,8 @@
                     let z1 = y * sinX + z * cosX;
                     let x2 = x * cosY + z1 * sinY;
                     let z2 = -x * sinY + z1 * cosY;
-                    const fov = 260 / (260 + z2 + 90);
-                    return { x: cx + x2 * fov * threeState.scale, y: cy + y1 * fov * threeState.scale, s: fov, z: z2 };
+                    const fov = 260 / (260 + z2 + 95);
+                    return { x: cx + x2 * fov * activeScale, y: cy + y1 * fov * activeScale, s: fov, z: z2 };
                 }
 
                 // 1. Фоновые частицы звёздной пыли
@@ -1687,11 +1736,162 @@
                     ctx.fill();
                 }
 
-                // 2. Генерация вершин выбранной 3D-фигуры
                 const verts = [];
                 const edges = [];
 
-                if (threeState.shapeId === 'sphere') {
+                /* ====== НОВЫЕ 5 PRO-МОДЕЛЕЙ ====== */
+                if (threeState.shapeId === 'ferrofluid') {
+                    // 1. Жидкая ферромагнитная капля с живыми морфинг-шипами
+                    const rings = 10, segs = 14;
+                    for (let r = 0; r <= rings; r++) {
+                        const phi = (r / rings) * Math.PI;
+                        for (let s = 0; s < segs; s++) {
+                            const theta = (s / segs) * Math.PI * 2;
+                            const spike = Math.sin(phi * 4 + threeState.angle * 2.5) * Math.cos(theta * 3 - threeState.angle * 2) * 24;
+                            const rad = 64 + spike;
+                            verts.push({
+                                x: rad * Math.sin(phi) * Math.cos(theta),
+                                y: rad * Math.cos(phi),
+                                z: rad * Math.sin(phi) * Math.sin(theta)
+                            });
+                            const cur = r * segs + s;
+                            edges.push([cur, r * segs + ((s + 1) % segs)]);
+                            if (r < rings) edges.push([cur, (r + 1) * segs + s]);
+                        }
+                    }
+                } else if (threeState.shapeId === 'synapse') {
+                    // 2. Нейросеть (AI Synapse Plexus) с бегущими импульсами
+                    synapseNodes.forEach(n => {
+                        const drift = Math.sin(threeState.angle * 1.5 + n.phase) * 7;
+                        verts.push({ x: n.x + drift, y: n.y - drift, z: n.z });
+                    });
+                    const projectedNodes = verts.map(v => project3D(v.x, v.y, v.z));
+
+                    ctx.lineWidth = 1.1;
+                    for (let i = 0; i < projectedNodes.length; i++) {
+                        for (let j = i + 1; j < projectedNodes.length; j++) {
+                            const dist3d = Math.hypot(verts[i].x - verts[j].x, verts[i].y - verts[j].y, verts[i].z - verts[j].z);
+                            if (dist3d < 68) {
+                                const p1 = projectedNodes[i], p2 = projectedNodes[j];
+                                ctx.strokeStyle = pColor;
+                                ctx.globalAlpha = 0.35;
+                                ctx.beginPath();
+                                ctx.moveTo(p1.x, p1.y);
+                                ctx.lineTo(p2.x, p2.y);
+                                ctx.stroke();
+
+                                // Бегущий световой синапс-импульс по грани
+                                const t = ((threeState.angle * 1.2 + i * 0.3) % 1);
+                                const ix = p1.x + (p2.x - p1.x) * t;
+                                const iy = p1.y + (p2.y - p1.y) * t;
+                                ctx.fillStyle = '#ffffff';
+                                ctx.globalAlpha = 0.9;
+                                ctx.beginPath();
+                                ctx.arc(ix, iy, 1.9, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        }
+                    }
+                    ctx.fillStyle = pColor;
+                    ctx.globalAlpha = 0.95;
+                    projectedNodes.forEach(pt => {
+                        ctx.beginPath();
+                        ctx.arc(pt.x, pt.y, 3.2 * pt.s, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    ctx.globalAlpha = 1;
+                    threeState.rafId = requestAnimationFrame(renderFrame);
+                    return;
+                } else if (threeState.shapeId === 'lorenz') {
+                    // 3. Странный аттрактор Лоренца с летящими кометами
+                    const projectedTrail = lorenzTrail.map(v => project3D(v.x, v.y, v.z));
+                    ctx.strokeStyle = pColor;
+                    ctx.lineWidth = 1.6;
+                    ctx.globalAlpha = 0.65;
+                    ctx.beginPath();
+                    projectedTrail.forEach((pt, idx) => {
+                        if (idx === 0) ctx.moveTo(pt.x, pt.y);
+                        else ctx.lineTo(pt.x, pt.y);
+                    });
+                    ctx.stroke();
+
+                    // 3 быстрые кометы вдоль траектории
+                    for (let c = 0; c < 3; c++) {
+                        const headIdx = Math.floor((threeState.angle * 28 + c * 80) % projectedTrail.length);
+                        const head = projectedTrail[headIdx];
+                        if (head) {
+                            ctx.fillStyle = '#ffffff';
+                            ctx.globalAlpha = 1;
+                            ctx.beginPath();
+                            ctx.arc(head.x, head.y, 3.6, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                    ctx.globalAlpha = 1;
+                    threeState.rafId = requestAnimationFrame(renderFrame);
+                    return;
+                } else if (threeState.shapeId === 'blackhole') {
+                    // 4. Чёрная дыра с гравитационной линзой и аккреционным диском
+                    accretionParticles.forEach(p => {
+                        const curAngle = p.angle + threeState.angle * p.speed;
+                        const x = Math.cos(curAngle) * p.r;
+                        const z = Math.sin(curAngle) * p.r;
+                        const y = p.tilt * Math.sin(curAngle * 2);
+                        const pt = project3D(x, y, z);
+                        ctx.fillStyle = p.r < 48 ? '#ffffff' : pColor;
+                        ctx.globalAlpha = Math.min(0.95, (115 - p.r) / 70);
+                        ctx.beginPath();
+                        ctx.arc(pt.x, pt.y, Math.max(1.2, pt.s * 2.4), 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+
+                    // Тёмное ядро сингулярности и кольцо горизонта событий
+                    const coreRadius = 22 * activeScale;
+                    const grad = ctx.createRadialGradient(cx, cy, coreRadius * 0.6, cx, cy, coreRadius * 1.9);
+                    grad.addColorStop(0, '#000000');
+                    grad.addColorStop(0.55, '#000000');
+                    grad.addColorStop(0.75, pColor);
+                    grad.addColorStop(1, 'transparent');
+                    ctx.globalAlpha = 0.92;
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, coreRadius * 1.9, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.globalAlpha = 1;
+                    threeState.rafId = requestAnimationFrame(renderFrame);
+                    return;
+                } else if (threeState.shapeId === 'voxels') {
+                    // 5. Воксельная 3D-матрица
+                    const grid = 5, spacing = 26;
+                    for (let x = -2; x <= 2; x++) {
+                        for (let z = -2; z <= 2; z++) {
+                            const hWave = Math.sin(threeState.angle * 2.2 + x * 0.8 + z * 0.8) * 20;
+                            const vx = x * spacing;
+                            const vz = z * spacing;
+                            const ptTop = project3D(vx, hWave - 10, vz);
+                            const ptBot = project3D(vx, hWave + 10, vz);
+                            const size = Math.max(4, 11 * ptTop.s * activeScale);
+
+                            ctx.strokeStyle = pColor;
+                            ctx.fillStyle = pColor + '33';
+                            ctx.lineWidth = 1.2;
+                            ctx.globalAlpha = 0.85;
+                            ctx.strokeRect(ptTop.x - size / 2, ptTop.y - size / 2, size, size);
+                            ctx.fillRect(ptTop.x - size / 2, ptTop.y - size / 2, size, size);
+
+                            ctx.beginPath();
+                            ctx.moveTo(ptTop.x, ptTop.y);
+                            ctx.lineTo(ptBot.x, ptBot.y);
+                            ctx.stroke();
+                        }
+                    }
+                    ctx.globalAlpha = 1;
+                    threeState.rafId = requestAnimationFrame(renderFrame);
+                    return;
+
+                /* ====== 6 КЛАССИЧЕСКИХ МОДЕЛЕЙ (СОХРАНЕНЫ) ====== */
+                } else if (threeState.shapeId === 'sphere') {
                     const rings = 8, segs = 12, rad = 85;
                     for (let r = 0; r <= rings; r++) {
                         const phi = (r / rings) * Math.PI;
@@ -1757,7 +1957,6 @@
                         verts.push({ x: Math.cos(a) * dist, y: (Math.random() - 0.5) * 16, z: Math.sin(a) * dist });
                     }
                 } else {
-                    // Тор-узел (TorusKnot) по умолчанию
                     const steps = 64;
                     for (let i = 0; i < steps; i++) {
                         const t = (i / steps) * Math.PI * 2;
@@ -1774,7 +1973,17 @@
 
                 const projected = verts.map(v => project3D(v.x, v.y, v.z));
 
-                // Отрисовка выбранного шейдера/материала
+                // Внутреннее светящееся ядро для режима Глянец + Ядро или Феррофлюида
+                if (threeState.matId === 'glass3d' || threeState.shapeId === 'ferrofluid') {
+                    const coreGrad = ctx.createRadialGradient(cx, cy, 4, cx, cy, 65 * activeScale);
+                    coreGrad.addColorStop(0, pColor + '66');
+                    coreGrad.addColorStop(1, 'transparent');
+                    ctx.fillStyle = coreGrad;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 65 * activeScale, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
                 ctx.strokeStyle = pColor;
                 ctx.fillStyle = pColor;
                 ctx.lineWidth = threeState.matId === 'hologram' ? 1 : 1.45;
@@ -1815,11 +2024,17 @@
             }
         }
 
-        // Генерация и скачивание готового автономного 3D-сайта на Three.js в 1 клик
+        // Скачивание готового автономного 3D-сайта (поддерживает все 11 сцен)
         function downloadReady3dSiteHtml() {
             Haptic.success();
             const typeObj = UI_PROJECT_TYPES.find(x => x.id === builderState.typeId) || UI_PROJECT_TYPES[0];
+            const shapeObj = THREE_SHAPES.find(x => x.id === threeState.shapeId) || THREE_SHAPES[0];
             const geomMap = {
+                ferrofluid: 'new THREE.IcosahedronGeometry(2.2, 6)',
+                synapse: 'new THREE.IcosahedronGeometry(2.3, 2)',
+                lorenz: 'new THREE.TorusKnotGeometry(1.7, 0.28, 180, 16, 2, 5)',
+                blackhole: 'new THREE.RingGeometry(0.9, 2.8, 64, 8)',
+                voxels: 'new THREE.BoxGeometry(2.4, 2.4, 2.4, 4, 4, 4)',
                 torus: 'new THREE.TorusKnotGeometry(1.5, 0.42, 120, 18)',
                 sphere: 'new THREE.IcosahedronGeometry(2.1, 3)',
                 icosa: 'new THREE.IcosahedronGeometry(2.2, 0)',
@@ -1834,7 +2049,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${typeObj.title} // 3D WebGL</title>
+  <title>${typeObj.title} // ${shapeObj.title}</title>
   <script src="https://cdn.tailwindcss.com"><\/script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
 </head>
@@ -1842,7 +2057,7 @@
   <canvas id="webgl-bg" style="position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
   <main class="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
     <div style="background:rgba(255,255,255,${(builderState.opacity/100).toFixed(2)}); backdrop-filter:blur(${builderState.blur}px); border:1px solid ${builderState.primaryColor}55; border-radius:${builderState.radius}px;" class="max-w-lg w-full p-8 text-center space-y-4 shadow-2xl">
-      <span style="color:${builderState.primaryColor};" class="text-xs font-bold uppercase tracking-widest">3D WebGL Experience</span>
+      <span style="color:${builderState.primaryColor};" class="text-xs font-bold uppercase tracking-widest">${shapeObj.title}</span>
       <h1 class="text-3xl font-extrabold">${typeObj.title}</h1>
       <p class="text-sm text-slate-300">${typeObj.desc}</p>
       <button style="background:linear-gradient(135deg, ${builderState.primaryColor}, ${builderState.secondaryColor}); border-radius:${Math.max(4, builderState.radius - 4)}px;" class="px-6 py-3 font-bold text-sm text-white shadow-lg">Запустить проект 🚀</button>
@@ -1858,11 +2073,12 @@
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 
     const geometry = ${geomCode};
-    const material = new THREE.MeshBasicMaterial({ color: '${builderState.primaryColor}', wireframe: ${threeState.matId !== 'glass3d'} });
+    const origPos = geometry.attributes.position.clone();
+    const material = new THREE.MeshBasicMaterial({ color: '${builderState.primaryColor}', wireframe: true });
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    let mx = 0, my = 0;
+    let mx = 0, my = 0, clock = 0;
     addEventListener('pointermove', e => {
       mx = (e.clientX / innerWidth - 0.5) * 1.2;
       my = (e.clientY / innerHeight - 0.5) * 1.2;
@@ -1874,6 +2090,16 @@
     });
     function animate() {
       requestAnimationFrame(animate);
+      clock += 0.02 * ${threeState.speed.toFixed(1)};
+      if ('${threeState.shapeId}' === 'ferrofluid') {
+        const pos = geometry.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const ox = origPos.getX(i), oy = origPos.getY(i), oz = origPos.getZ(i);
+          const n = 1 + 0.22 * Math.sin(ox * 2.5 + clock) * Math.cos(oy * 2.5 - clock);
+          pos.setXYZ(i, ox * n, oy * n, oz * n);
+        }
+        pos.needsUpdate = true;
+      }
       mesh.rotation.x += 0.006 * ${threeState.speed.toFixed(1)} + (my - mesh.rotation.x) * 0.05;
       mesh.rotation.y += 0.008 * ${threeState.speed.toFixed(1)} + (mx - mesh.rotation.y) * 0.05;
       renderer.render(scene, camera);
@@ -1887,7 +2113,7 @@
             a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
             a.download = 'index_3d.html';
             a.click();
-            showToast('Готовый 3D-сайт (index_3d.html) скачан!');
+            showToast(`Скачан 3D-сайт: ${shapeObj.title}!`);
         }
 
         /* ==================== 5. ЦЕНТР КАСТОМИЗАЦИИ ПО ВСЕМ 9 ПУНКТАМ ==================== */
@@ -2649,7 +2875,7 @@
             if (threeState.enabled) {
                 const shapeObj = THREE_SHAPES.find(x => x.id === threeState.shapeId) || THREE_SHAPES[0];
                 const matObj = THREE_MATERIALS.find(x => x.id === threeState.matId) || THREE_MATERIALS[0];
-                threeBlock = `\n3D WEBGL СЦЕНА НА ФОНЕ (Three.js):\n- 3D-объект: ${shapeObj.title} (${shapeObj.desc}).\n- Шейдер и материал: ${matObj.title}, цвет линий: ${builderState.primaryColor}.\n- Физика: скорость вращения ${threeState.speed}x, масштаб ${Math.round(threeState.scale * 100)}%, частиц вокруг: ${threeState.particles} шт.\n- Интерактивность: ${threeState.mouseTilt ? 'плавный наклон камеры за курсором мыши и гироскопом телефона (lerp)' : 'автономное вращение'}, ${threeState.floatWave ? 'левитация по синусоиде' : 'фиксированный центр'}.\n`;
+                threeBlock = `\n3D WEBGL СЦЕНА НА ФОНЕ (Three.js):\n- 3D-модель: ${shapeObj.title} (${shapeObj.desc}).\n- Шейдер и материал: ${matObj.title}, цвет акцента: ${builderState.primaryColor}.\n- Физика: скорость ${threeState.speed}x, масштаб ${Math.round(threeState.scale * 100)}%, частиц вокруг: ${threeState.particles} шт.\n- Интерактивность: ${threeState.mouseTilt ? 'плавный наклон за курсором и гироскопом' : 'автономное вращение'}, ${threeState.floatWave ? 'левитация по синусоиде' : 'фиксированный центр'}, ${threeState.beatPulse ? 'ритмичная пульсация геометрии в такт биту' : 'равномерный ход'}.\n`;
             }
 
             const prompt = `Роль: Senior UI/UX Designer & ${threeState.enabled ? 'Creative WebGL (Three.js) ' : ''}Frontend Developer.\nЗадача: Создай современный ${threeState.enabled ? '3D-' : ''}интерфейс для проекта «${typeObj.title}» (${typeObj.desc}).${customNote ? `\nКонтекст проекта: ${customNote}` : ''}\nДизайн-система: ${styleObj.name} (${styleObj.desc}).\nЦвета: фон ${builderState.bgDark}, основной акцент ${builderState.primaryColor}, вторичный ${builderState.secondaryColor}.\nГеометрия карточек: border-radius ${builderState.radius}px, backdrop-filter blur(${builderState.blur}px), плотность ${builderState.opacity}%.${threeBlock}\nСекции: ${builderState.sections.join(', ') || 'Базовые'}.\nВыдай полный рабочий файл index.html на Tailwind CSS${threeState.enabled ? ' + Three.js CDN' : ''} без сокращений.`;
