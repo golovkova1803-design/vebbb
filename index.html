@@ -730,7 +730,7 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
                             </div>
                             <label class="btn-glass px-3 py-1.5 text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer">
                                 <span>Пипетка</span>
-                                <input type="color" id="custom-color-picker" value="#6366f1" oninput="setCustomAccentColor(this.value)" class="w-4 h-4 border-0 bg-transparent cursor-pointer">
+                                <input type="color" id="custom-color-picker" value="#10b981" oninput="setCustomAccentColor(this.value)" class="w-4 h-4 border-0 bg-transparent cursor-pointer">
                             </label>
                         </div>
 
@@ -1261,9 +1261,7 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
         let adminUserSearchQuery = '';
 
         function isOwnerUser() {
-            const tgUserId = tg?.initDataUnsafe?.user?.id;
-            const urlParams = new URLSearchParams(window.location.search);
-            return tgUserId === OWNER_TG_ID || urlParams.get('admin') === String(OWNER_TG_ID) || !tg?.initData;
+            return tg?.initDataUnsafe?.user?.id === OWNER_TG_ID;
         }
 
         function getDefaultUsersList() {
@@ -1407,17 +1405,6 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
             const vipUsers = cfg.users.filter(u => u.vip).length;
             const bannedUsers = cfg.users.filter(u => u.banned).length;
 
-            // Фильтрация списка каждого юзера
-            const filteredUsers = cfg.users.filter(u => {
-                if (adminUserFilter === 'VIP' && !u.vip) return false;
-                if (adminUserFilter === 'BANNED' && !u.banned) return false;
-                if (adminUserSearchQuery) {
-                    const q = adminUserSearchQuery.toLowerCase();
-                    return String(u.id).includes(q) || (u.username || '').toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q);
-                }
-                return true;
-            });
-
             let tabContentHtml = '';
 
             if (tab === 'users') {
@@ -1425,7 +1412,7 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
                     <div class="space-y-3">
                         <!-- Поиск и фильтры по юзерам -->
                         <div class="flex gap-1.5">
-                            <input type="text" value="${escapeHtml(adminUserSearchQuery)}" oninput="adminUserSearchQuery=this.value; openAdminPanelSheet('users')" placeholder="Поиск по @username, имени или ID..." class="frosted-input flex-1 min-h-[38px] px-3 text-xs">
+                            <input type="text" value="${escapeHtml(adminUserSearchQuery)}" oninput="adminUserSearchQuery=this.value; refreshAdminUsersList()" placeholder="Поиск по @username, имени или ID..." class="frosted-input flex-1 min-h-[38px] px-3 text-xs">
                             <button type="button" onclick="promptAddManualUser()" class="btn-primary px-3 min-h-[38px] text-[11px] font-bold shrink-0">＋ Юзер</button>
                         </div>
 
@@ -1435,50 +1422,7 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
                             <button type="button" onclick="adminUserFilter='BANNED'; openAdminPanelSheet('users')" class="min-h-[32px] rounded-xl text-[11px] font-semibold ${adminUserFilter === 'BANNED' ? 'bg-rose-500 text-white' : 'btn-glass text-rose-300'}">🚫 Бан (${bannedUsers})</button>
                         </div>
 
-                        <!-- Карточки каждого пользователя отдельно -->
-                        <div class="space-y-2 max-h-[320px] overflow-y-auto pr-0.5">
-                            ${filteredUsers.map(u => `
-                                <div class="p-3 rounded-2xl code-surface border ${u.banned ? 'border-rose-500/40 opacity-75' : (u.vip ? 'border-amber-400/40' : 'border-white/10')} space-y-2">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <div class="flex items-center gap-2 min-w-0">
-                                            <div class="w-8 h-8 rounded-xl ${u.vip ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 accent-text'} flex items-center justify-center font-bold text-xs shrink-0">
-                                                ${escapeHtml((u.name || 'U')[0].toUpperCase())}
-                                            </div>
-                                            <div class="truncate">
-                                                <div class="flex items-center gap-1.5">
-                                                    <span class="font-bold text-dynamic truncate">${escapeHtml(u.name)}</span>
-                                                    ${u.online ? '<span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Онлайн"></span>' : ''}
-                                                    ${u.vip ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/25 text-amber-300">VIP</span>' : ''}
-                                                    ${u.banned ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-500/25 text-rose-300">BANNED</span>' : ''}
-                                                </div>
-                                                <div class="text-[10px] font-mono text-muted-dynamic truncate">@${escapeHtml(u.username)} • ID: ${u.id}</div>
-                                            </div>
-                                        </div>
-                                        <span class="text-[10px] text-muted-dynamic shrink-0">${escapeHtml(u.joined)}</span>
-                                    </div>
-
-                                    <div class="flex items-center justify-between pt-1.5 border-t border-white/10 text-[10px]">
-                                        <div class="flex gap-3 text-muted-dynamic">
-                                            <span>Рефералов: <b class="text-dynamic">${u.refs}</b></span>
-                                            <span>Генераций: <b class="text-dynamic">${u.gens}</b></span>
-                                        </div>
-                                        <div class="flex items-center gap-1">
-                                            <button type="button" onclick="adminToggleUserVip(${u.id})" class="btn-glass px-2 py-1 rounded-lg text-[10px] font-semibold ${u.vip ? 'text-amber-300' : 'text-emerald-400'}">
-                                                ${u.vip ? 'Снять VIP' : '＋VIP'}
-                                            </button>
-                                            ${u.id !== OWNER_TG_ID ? `
-                                                <button type="button" onclick="adminToggleUserBan(${u.id})" class="btn-glass px-2 py-1 rounded-lg text-[10px] font-semibold ${u.banned ? 'text-emerald-400' : 'text-rose-400'}">
-                                                    ${u.banned ? 'Разбан' : 'Бан'}
-                                                </button>
-                                            ` : ''}
-                                            <button type="button" onclick="window.open('https://t.me/${escapeHtml(u.username)}', '_blank')" class="btn-glass px-2 py-1 rounded-lg text-[10px] accent-text">
-                                                ЛС ↗
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
+                        <div id="admin-users-list" class="max-h-[320px] overflow-y-auto">${adminUsersTableHtml(adminFilteredUsers(cfg))}</div>
                     </div>
                 `;
             } else if (tab === 'stats') {
@@ -1543,6 +1487,8 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
                             </div>
                         </div>
 
+                        ${adminFunnelHtml(m)}
+
                         <div class="grid grid-cols-2 gap-2">
                             <button type="button" onclick="requestBotStatsSync()" class="btn-primary min-h-[38px] text-[11px] font-bold">Запросить свежий отчёт из БД</button>
                             <button type="button" onclick="exportUsersJson()" class="btn-glass min-h-[38px] text-[11px] font-semibold text-emerald-400">Скачать базу юзеров .JSON</button>
@@ -1591,8 +1537,10 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="exportUsersJson()" class="btn-glass min-h-[38px] text-[11px] font-semibold text-emerald-400">Экспорт юзеров .JSON</button>
                             <button type="button" onclick="adminClearCacheOnly()" class="btn-glass min-h-[38px] text-[11px] font-semibold text-amber-300">Очистить кэш</button>
                             <button type="button" onclick="adminGrantMaxVip()" class="btn-glass min-h-[38px] text-[11px] font-semibold text-emerald-400">Выдать себе VIP 3/3</button>
+                            <button type="button" onclick="adminEmergencyReset()" class="btn-glass min-h-[38px] text-[11px] font-semibold text-rose-400">Экстренный сброс</button>
                         </div>
                     </div>
                 `;
@@ -2308,71 +2256,295 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
             const typeObj = UI_PROJECT_TYPES.find(x => x.id === builderState.typeId) || UI_PROJECT_TYPES[0];
             const shapeObj = THREE_SHAPES.find(x => x.id === threeState.shapeId) || THREE_SHAPES[0];
             const matObj = THREE_MATERIALS.find(x => x.id === threeState.matId) || THREE_MATERIALS[0];
-            const isPoints = threeState.matId === 'points' || threeState.matId === 'matrix';
+            const { cardCss: exCard, btnCss: exBtn, titleCss: exTitle } = computePreviewSurfaceCSS();
+
+            const cfg = JSON.stringify({
+                shape: threeState.shapeId,
+                mat: threeState.matId,
+                speed: threeState.speed,
+                scale: threeState.scale,
+                stars: threeState.particles,
+                tilt: threeState.mouseTilt,
+                wave: threeState.floatWave,
+                beat: threeState.beatPulse,
+                p: builderState.primaryColor,
+                s: builderState.secondaryColor
+            });
 
             const html = `<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${typeObj.title} // ${shapeObj.title} (${matObj.title})</title>
-  <script src="https://cdn.tailwindcss.com"><\/script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
-</head>
-<body style="background:${builderState.bgDark}; color:#fff; margin:0; overflow-x:hidden; font-family:Inter,sans-serif;">
-  <canvas id="webgl-bg" style="position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
-  <main class="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
-    <div style="background:rgba(255,255,255,${(builderState.opacity/100).toFixed(2)}); backdrop-filter:blur(${builderState.blur}px); border:1px solid ${builderState.primaryColor}55; border-radius:${builderState.radius}px;" class="max-w-lg w-full p-8 text-center space-y-4 shadow-2xl">
-      <span style="color:${builderState.primaryColor}; background:${builderState.primaryColor}22;" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest inline-block">${shapeObj.title} • ${matObj.title}</span>
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">${typeObj.title}</h1>
-      <p class="text-sm text-slate-300 leading-relaxed">${typeObj.desc}</p>
-      <button style="background:linear-gradient(135deg, ${builderState.primaryColor}, ${builderState.secondaryColor}); border-radius:${Math.max(6, builderState.radius - 4)}px;" class="px-6 py-3 font-bold text-sm text-white shadow-lg">Запустить проект 🚀</button>
-    </div>
-  </main>
-  <script>
-    const canvas = document.getElementById('webgl-bg');
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
-    camera.position.z = 5.8;
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        <html lang="ru">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${typeObj.title} // ${shapeObj.title} (${matObj.title})</title>
+          <script src="https://cdn.tailwindcss.com"><\/script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
+        </head>
+        <body style="background:${builderState.bgDark}; color:#fff; margin:0; overflow-x:hidden; font-family:Inter,sans-serif;">
+          <canvas id="webgl-bg" style="position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;"></canvas>
+          <main class="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
+            <div style="${exCard}" class="max-w-lg w-full p-8 text-center space-y-4 shadow-2xl">
+              <span style="color:${builderState.primaryColor}; background:${builderState.primaryColor}22; border-radius:10px;" class="px-3 py-1 text-xs font-bold uppercase tracking-widest inline-block">${shapeObj.title} • ${matObj.title}</span>
+              <h1 style="${exTitle}" class="text-3xl sm:text-4xl font-extrabold tracking-tight">${typeObj.title}</h1>
+              <p class="text-sm text-slate-300 leading-relaxed">${typeObj.desc}</p>
+              <button style="${exBtn}" class="px-6 py-3 font-bold text-sm shadow-lg">Запустить проект</button>
+            </div>
+          </main>
+          <script>
+            var C = ${cfg};
+            var PI2 = Math.PI * 2;
 
-    const geo = new THREE.IcosahedronGeometry(2.2, '${threeState.shapeId}' === 'ferrofluid' ? 5 : 2);
-    const orig = geo.attributes.position.clone();
-    const mat = ${isPoints}
-      ? new THREE.PointsMaterial({ color: '${builderState.primaryColor}', size: 0.06 })
-      : new THREE.MeshBasicMaterial({ color: '${builderState.primaryColor}', wireframe: true, transparent: true, opacity: 0.8 });
-    const mesh = ${isPoints} ? new THREE.Points(geo, mat) : new THREE.Mesh(geo, mat);
-    scene.add(mesh);
+            function sph(rings, segs, rad, fn) {
+              var v = [], e = [];
+              for (var r = 0; r <= rings; r++) {
+                var ph = r / rings * Math.PI;
+                for (var s = 0; s < segs; s++) {
+                  var th = s / segs * PI2;
+                  var d = rad + (fn ? fn(ph, th) : 0);
+                  v.push([d * Math.sin(ph) * Math.cos(th), d * Math.cos(ph), d * Math.sin(ph) * Math.sin(th)]);
+                  var c = r * segs + s;
+                  e.push([c, r * segs + (s + 1) % segs]);
+                  if (r < rings) e.push([c, (r + 1) * segs + s]);
+                }
+              }
+              return { v: v, e: e };
+            }
 
-    let mx = 0, my = 0, clock = 0;
-    addEventListener('pointermove', e => { mx = (e.clientX / innerWidth - 0.5) * 1.2; my = (e.clientY / innerHeight - 0.5) * 1.2; });
-    addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-    function animate() {
-      requestAnimationFrame(animate);
-      clock += 0.02 * ${threeState.speed.toFixed(1)};
-      const pos = geo.attributes.position;
-      for (let i = 0; i < pos.count; i++) {
-        const ox = orig.getX(i), oy = orig.getY(i), oz = orig.getZ(i);
-        const s = 1 + 0.22 * Math.sin(ox * 2.4 + clock) * Math.cos(oy * 2.4 - clock);
-        pos.setXYZ(i, ox * s, oy * s, oz * s);
-      }
-      pos.needsUpdate = true;
-      mesh.rotation.x += 0.006 * ${threeState.speed.toFixed(1)} + (my - mesh.rotation.x) * 0.05;
-      mesh.rotation.y += 0.008 * ${threeState.speed.toFixed(1)} + (mx - mesh.rotation.y) * 0.05;
-      renderer.render(scene, camera);
-    }
-    animate();
-  <\/script>
-</body>
-</html>`;
+            var LZ = (function () {
+              var p = [], x = 0.1, y = 0, z = 0;
+              for (var i = 0; i < 260; i++) {
+                x += 10 * (y - x) * 0.0085;
+                y += (x * (28 - z) - y) * 0.0085;
+                z += (x * y - 2.667 * z) * 0.0085;
+                p.push([x * 0.105, y * 0.105, (z - 25) * 0.105]);
+              }
+              return p;
+            })();
+
+            var SY = [];
+            for (var si = 0; si < 28; si++) {
+              var sphi = Math.acos(1 - 2 * (si + 0.5) / 28);
+              var sth = Math.PI * (1 + Math.sqrt(5)) * si;
+              var sr = 1.4 + (si % 3) * 0.45;
+              SY.push([sr * Math.sin(sphi) * Math.cos(sth), sr * Math.cos(sphi), sr * Math.sin(sphi) * Math.sin(sth), si * 0.7]);
+            }
+
+            var BH = [];
+            for (var bi = 0; bi < 140; bi++) BH.push({ r: 0.7 + bi / 140 * 1.95, a: (bi * 2.4) % PI2, sp: 0.6 + (140 - bi) * 0.01, tl: ((bi % 5) - 2) * 0.06 });
+
+            var TT = (1 + Math.sqrt(5)) / 2;
+            var IC = [[-1,TT,0],[1,TT,0],[-1,-TT,0],[1,-TT,0],[0,-1,TT],[0,1,TT],[0,-1,-TT],[0,1,-TT],[TT,0,-1],[TT,0,1],[-TT,0,-1],[-TT,0,1]];
+
+            function dist3(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]); }
+            function nearEdges(v, lim) {
+              var e = [];
+              for (var i = 0; i < v.length; i++) for (var j = i + 1; j < v.length; j++) if (dist3(v[i], v[j]) < lim) e.push([i, j]);
+              return e;
+            }
+            function grid(cols, rows, fn) {
+              var v = [], e = [];
+              for (var r = 0; r < rows; r++) for (var c = 0; c < cols; c++) {
+                v.push(fn(c, r));
+                var i = r * cols + c;
+                if (c < cols - 1) e.push([i, i + 1]);
+                if (r < rows - 1) e.push([i, i + cols]);
+              }
+              return { v: v, e: e };
+            }
+
+            var SH = {
+              ferrofluid: function (t) { return sph(14, 20, 1.6, function (p, h) { return Math.sin(p * 4 + t * 2.5) * Math.cos(h * 3 - t * 2) * 0.6; }); },
+              sphere: function () { return sph(10, 16, 2.1); },
+              synapse: function (t) {
+                var v = SY.map(function (n) { var d = Math.sin(t * 1.5 + n[3]) * 0.18; return [n[0] + d, n[1] - d, n[2]]; });
+                return { v: v, e: nearEdges(v, 1.7) };
+              },
+              lorenz: function () {
+                var e = [];
+                for (var i = 1; i < LZ.length; i++) e.push([i - 1, i]);
+                return { v: LZ, e: e };
+              },
+              blackhole: function (t) {
+                var v = [], e = [];
+                BH.forEach(function (p, i) {
+                  var a = p.a + t * p.sp;
+                  v.push([Math.cos(a) * p.r, p.tl * Math.sin(a * 2), Math.sin(a) * p.r]);
+                  if (i > 0 && i % 6 !== 0) e.push([i - 1, i]);
+                });
+                return { v: v, e: e };
+              },
+              voxels: function (t) {
+                var v = [], e = [];
+                for (var x = -2; x <= 2; x++) for (var z = -2; z <= 2; z++) {
+                  var h = Math.sin(t * 2.2 + x * 0.8 + z * 0.8) * 0.5;
+                  var i = v.length;
+                  v.push([x * 0.68, h - 0.25, z * 0.68], [x * 0.68, h + 0.25, z * 0.68]);
+                  e.push([i, i + 1]);
+                  if (x > -2) e.push([i + 1, i + 1 - 10]);
+                  if (z > -2) e.push([i + 1, i - 1]);
+                }
+                return { v: v, e: e };
+              },
+              torus: function () {
+                var v = [], e = [], n = 120;
+                for (var i = 0; i < n; i++) {
+                  var a = i / n * PI2, r = 1.3 + 0.55 * Math.cos(3 * a);
+                  v.push([r * Math.cos(2 * a), r * Math.sin(2 * a), 0.7 * Math.sin(3 * a)]);
+                  e.push([i, (i + 1) % n], [i, (i + 6) % n]);
+                }
+                return { v: v, e: e };
+              },
+              icosa: function () {
+                var v = IC.map(function (p) { return [p[0] * 1.15, p[1] * 1.15, p[2] * 1.15]; });
+                return { v: v, e: nearEdges(v, 2.6) };
+              },
+              galaxy: function () {
+                var v = [], e = [], n = 400;
+                for (var i = 0; i < n; i++) {
+                  var d = i / n * 2.4, a = d * 3.2 + (i % 3) * 2.094;
+                  v.push([Math.cos(a) * d, Math.sin(i) * 0.3, Math.sin(a) * d]);
+                  if (i > 3) e.push([i - 3, i]);
+                }
+                return { v: v, e: e };
+              },
+              waves: function (t) {
+                return grid(24, 24, function (c, r) {
+                  return [(c - 12) * 0.2, Math.sin((c * 0.4 + t * 3) * 0.6) * 0.45 + Math.cos((r * 0.4 + t * 2) * 0.6) * 0.45, (r - 12) * 0.2];
+                });
+              },
+              rings: function () {
+                var v = [], e = [], n = 64;
+                for (var k = 0; k < 3; k++) for (var i = 0; i < n; i++) {
+                  var a = i / n * PI2, R = 2.2 - k * 0.35, c = Math.cos(a) * R, s = Math.sin(a) * R;
+                  v.push(k === 0 ? [c, s, 0] : (k === 1 ? [c, 0, s] : [0, c, s]));
+                  e.push([k * n + i, k * n + (i + 1) % n]);
+                }
+                return { v: v, e: e };
+              }
+            };
+            var build = SH[C.shape] || SH.ferrofluid;
+
+            var renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-bg'), alpha: true, antialias: true });
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            renderer.setSize(innerWidth, innerHeight);
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
+            camera.position.z = 6.2;
+            var group = new THREE.Group();
+            scene.add(group);
+
+            var first = build(0), EDG = first.e, N = first.v.length;
+            var posArr = new Float32Array(N * 3), lineArr = new Float32Array(EDG.length * 6);
+            var posAttr = new THREE.BufferAttribute(posArr, 3), lineAttr = new THREE.BufferAttribute(lineArr, 3);
+            posAttr.setUsage(THREE.DynamicDrawUsage); lineAttr.setUsage(THREE.DynamicDrawUsage);
+            var pg = new THREE.BufferGeometry(); pg.setAttribute('position', posAttr);
+            var lg = new THREE.BufferGeometry(); lg.setAttribute('position', lineAttr);
+
+            function fill(r) {
+              for (var i = 0; i < N; i++) { posArr[i * 3] = r.v[i][0]; posArr[i * 3 + 1] = r.v[i][1]; posArr[i * 3 + 2] = r.v[i][2]; }
+              for (var k = 0; k < EDG.length; k++) {
+                var a = r.v[EDG[k][0]], b = r.v[EDG[k][1]];
+                lineArr.set([a[0], a[1], a[2], b[0], b[1], b[2]], k * 6);
+              }
+              posAttr.needsUpdate = true; lineAttr.needsUpdate = true;
+            }
+            fill(first);
+
+            var pc = new THREE.Color(C.p), sc = new THREE.Color(C.s);
+            function LM(col, op, add) {
+              return new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: op, depthWrite: false, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending });
+            }
+            function PM(col, size, add, map) {
+              return new THREE.PointsMaterial({ color: col, size: size, transparent: true, depthWrite: false, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending, map: map || null, alphaTest: map ? 0.3 : 0 });
+            }
+            function glyph(ch) {
+              var cv = document.createElement('canvas'); cv.width = cv.height = 64;
+              var x = cv.getContext('2d'); x.fillStyle = '#fff'; x.font = 'bold 56px monospace'; x.textAlign = 'center'; x.textBaseline = 'middle';
+              x.fillText(ch, 32, 34);
+              return new THREE.CanvasTexture(cv);
+            }
+
+            var scan = null;
+            var m = C.mat;
+            if (m === 'wireframe') {
+              group.add(new THREE.LineSegments(lg, LM(pc, 0.8)));
+            } else if (m === 'hologram') {
+              group.add(new THREE.LineSegments(lg, LM(pc, 0.55, true)));
+              scan = new THREE.Mesh(new THREE.PlaneGeometry(9, 0.12), new THREE.MeshBasicMaterial({ color: pc, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false }));
+              scene.add(scan);
+            } else if (m === 'points') {
+              group.add(new THREE.Points(pg, PM(pc, 0.07)));
+            } else if (m === 'chrome') {
+              var col = new Float32Array(EDG.length * 6), cw = new THREE.Color('#ffffff'), tmp = new THREE.Color();
+              for (var k = 0; k < EDG.length * 2; k++) {
+                var f = k / (EDG.length * 2);
+                if (f < 0.5) tmp.copy(cw).lerp(pc, f * 2); else tmp.copy(pc).lerp(sc, (f - 0.5) * 2);
+                col[k * 3] = tmp.r; col[k * 3 + 1] = tmp.g; col[k * 3 + 2] = tmp.b;
+              }
+              lg.setAttribute('color', new THREE.BufferAttribute(col, 3));
+              group.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.95 })));
+              group.add(new THREE.Points(pg, PM(0xffffff, 0.05, true)));
+            } else if (m === 'plasma') {
+              group.add(new THREE.LineSegments(lg, LM(sc, 0.85, true)));
+              group.add(new THREE.Points(pg, PM(pc, 0.08, true)));
+              group.add(new THREE.Mesh(new THREE.SphereGeometry(1.2, 24, 24), new THREE.MeshBasicMaterial({ color: sc, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false })));
+            } else if (m === 'polygons') {
+              var idx = [];
+              for (var q = 0; q < EDG.length - 1; q += 2) idx.push(EDG[q][0], EDG[q][1], EDG[q + 1][1]);
+              var tg = new THREE.BufferGeometry(); tg.setAttribute('position', posAttr); tg.setIndex(idx);
+              group.add(new THREE.Mesh(tg, new THREE.MeshBasicMaterial({ color: pc, transparent: true, opacity: 0.14, side: THREE.DoubleSide, depthWrite: false })));
+              group.add(new THREE.LineSegments(lg, LM(pc, 0.7)));
+            } else if (m === 'matrix') {
+              var even = [], odd = [];
+              for (var z = 0; z < N; z++) (z % 2 ? odd : even).push(z);
+              var ga = new THREE.BufferGeometry(); ga.setAttribute('position', posAttr); ga.setIndex(even);
+              var gb = new THREE.BufferGeometry(); gb.setAttribute('position', posAttr); gb.setIndex(odd);
+              group.add(new THREE.Points(ga, PM(0x10b981, 0.2, true, glyph('1'))));
+              group.add(new THREE.Points(gb, PM(0x10b981, 0.2, true, glyph('0'))));
+            } else {
+              group.add(new THREE.LineSegments(lg, LM(0x38bdf8, 0.85, true)));
+              group.add(new THREE.Points(pg, PM(0xffffff, 0.05, true)));
+            }
+
+            if (C.shape === 'blackhole') {
+              group.add(new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 32), new THREE.MeshBasicMaterial({ color: 0x000000 })));
+            }
+
+            if (C.stars > 0) {
+              var sp = new Float32Array(C.stars * 3);
+              for (var w = 0; w < sp.length; w++) sp[w] = (Math.random() - 0.5) * 14;
+              var sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+              scene.add(new THREE.Points(sg, PM(m === 'matrix' ? 0x10b981 : sc, 0.05)));
+            }
+
+            var t = 0, mx = 0, my = 0;
+            addEventListener('pointermove', function (e) { mx = (e.clientX / innerWidth - 0.5) * 1.3; my = (e.clientY / innerHeight - 0.5) * 1.3; });
+            addEventListener('resize', function () {
+              camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight);
+            });
+
+            function frame(now) {
+              requestAnimationFrame(frame);
+              t += 0.018 * C.speed;
+              fill(build(t));
+              var beat = C.beat ? 1 + Math.pow(Math.max(0, Math.sin(now / 1000 * PI2)), 8) * 0.2 : 1;
+              group.scale.setScalar(C.scale * beat);
+              group.rotation.x = t * 0.6 + (C.tilt ? my : 0);
+              group.rotation.y = t * 0.8 + (C.tilt ? mx : 0);
+              group.position.y = C.wave ? Math.sin(t * 1.6) * 0.2 : 0;
+              if (scan) scan.position.y = ((t * 1.6) % 6) - 3;
+              renderer.render(scene, camera);
+            }
+            requestAnimationFrame(frame);
+          <\/script>
+        </body>
+        </html>`;
 
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-            a.download = `vibe_3d_${threeState.shapeId}.html`;
+            a.download = 'index_3d.html';
             a.click();
-            showToast(`Скачан 3D-сайт: ${shapeObj.title} (${matObj.title})!`);
+            showToast(`Скачан index_3d.html: ${shapeObj.title} (${matObj.title})`);
         }
 
         /* ==================== 5. ЦЕНТР КАСТОМИЗАЦИИ ПРИЛОЖЕНИЯ ==================== */
@@ -2380,7 +2552,7 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
         const SAVED_PRESETS_KEY = 'vibe_user_saved_themes_v1';
 
         const DEFAULT_PRESETS = [
-            { name: 'Indigo Vision', bg: '#090b12', primary: '#6366f1', secondary: '#a855f7', radius: 22 },
+            { name: 'Emerald Graphite', bg: '#09090b', primary: '#10b981', secondary: '#06b6d4', radius: 20 },
             { name: 'Cyber Emerald', bg: '#06100e', primary: '#10b981', secondary: '#06b6d4', radius: 18 },
             { name: 'Crimson Sunset', bg: '#12070b', primary: '#f43f5e', secondary: '#fb923c', radius: 24 },
             { name: 'Onyx Gold', bg: '#0c0a06', primary: '#f59e0b', secondary: '#eab308', radius: 20 },
@@ -2399,14 +2571,14 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
             try {
                 const saved = JSON.parse(localStorage.getItem(SITE_THEME_KEY) || 'null');
                 return Object.assign({
-                    bg: '#090b12', primary: '#6366f1', secondary: '#a855f7', radius: 22,
+                    bg: '#09090b', primary: '#10b981', secondary: '#06b6d4', radius: 20,
                     density: 'normal', followTg: false, fontId: 'inter', bgType: 'gradient',
                     customBgUrl: '', navLabels: true, navDesktopPos: 'bottom',
                     navOrder: ['view-studio', 'view-tools', 'view-hub', 'view-vault'], fxLevel: 'balanced'
                 }, saved || {});
             } catch {
                 return {
-                    bg: '#090b12', primary: '#6366f1', secondary: '#a855f7', radius: 22,
+                    bg: '#09090b', primary: '#10b981', secondary: '#06b6d4', radius: 20,
                     density: 'normal', followTg: false, fontId: 'inter', bgType: 'gradient',
                     customBgUrl: '', navLabels: true, navDesktopPos: 'bottom',
                     navOrder: ['view-studio', 'view-tools', 'view-hub', 'view-vault'], fxLevel: 'balanced'
@@ -2432,10 +2604,10 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
                 root.classList.add('dark');
             }
 
-            root.style.setProperty('--bg-main', cfg.bg || '#090b12');
-            root.style.setProperty('--accent-primary', cfg.primary || '#6366f1');
-            root.style.setProperty('--accent-secondary', cfg.secondary || '#a855f7');
-            root.style.setProperty('--site-radius', `${cfg.radius ?? 22}px`);
+            root.style.setProperty('--bg-main', cfg.bg || '#09090b');
+            root.style.setProperty('--accent-primary', cfg.primary || '#10b981');
+            root.style.setProperty('--accent-secondary', cfg.secondary || '#06b6d4');
+            root.style.setProperty('--site-radius', `${cfg.radius ?? 20}px`);
             root.setAttribute('data-density', cfg.density || 'normal');
 
             const fontObj = APP_FONTS.find(f => f.id === cfg.fontId) || APP_FONTS[0];
@@ -2835,8 +3007,8 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
         ];
 
         const UI_PALETTES = [
-            { id: 'indigo', name: 'Indigo', primary: '#6366f1', secondary: '#a855f7', bgDark: '#090b12', bgLight: '#f8fafc' },
             { id: 'emerald', name: 'Emerald', primary: '#10b981', secondary: '#06b6d4', bgDark: '#06110e', bgLight: '#f0fdf4' },
+            { id: 'indigo', name: 'Indigo', primary: '#6366f1', secondary: '#a855f7', bgDark: '#090b12', bgLight: '#f8fafc' },
             { id: 'sunset', name: 'Sunset', primary: '#f43f5e', secondary: '#fb923c', bgDark: '#13080c', bgLight: '#fff1f2' },
             { id: 'gold', name: 'Amber', primary: '#f59e0b', secondary: '#eab308', bgDark: '#120e06', bgLight: '#fffbeb' },
             { id: 'arctic', name: 'Arctic', primary: '#0ea5e9', secondary: '#3b82f6', bgDark: '#060d17', bgLight: '#f0f9ff' },
@@ -2877,8 +3049,8 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
         const UI_SECTIONS = ['Калькулятор прибыли', 'Тарифы (Pricing)', 'Отзывы клиентов', 'FAQ-аккордеон', 'Бегущая строка (Marquee)', 'Блок партнёров'];
 
         const builderState = {
-            typeId: 'tma', styleId: 'linear', styleName: 'Linear Dark', paletteId: 'indigo',
-            primaryColor: '#6366f1', secondaryColor: '#a855f7', bgDark: '#090b12', bgLight: '#f8fafc',
+            typeId: 'tma', styleId: 'linear', styleName: 'Linear Dark', paletteId: 'emerald',
+            primaryColor: '#10b981', secondaryColor: '#06b6d4', bgDark: '#09090b', bgLight: '#f8fafc',
             previewDark: true, radius: 10, blur: 8, opacity: 5, spacing: 2,
             btnStyle: 'gradient', borderFx: 'subtle', cardTex: 'clean', heroFx: 'solid',
             sections: ['Тарифы (Pricing)']
@@ -3700,6 +3872,254 @@ input[type="range"].ios-slider::-webkit-slider-thumb { border-color: var(--accen
             renderBotHub();
             checkSponsorGateOnLoad();
         });
+
+/* ===== МИГРАЦИЯ СТАРОЙ ТЕМЫ (индиго -> изумруд), один раз ===== */
+try {
+    const tk = 'vibe_custom_suite_v2';
+    const saved = JSON.parse(localStorage.getItem(tk) || 'null');
+    if (saved && saved.primary === '#6366f1' && saved.secondary === '#a855f7') {
+        Object.assign(saved, { bg: '#09090b', primary: '#10b981', secondary: '#06b6d4', radius: 20 });
+        localStorage.setItem(tk, JSON.stringify(saved));
+    }
+} catch (_) {}
+
+/* ===== АДМИНКА: таблица юзеров, поиск, воронка, экстренный сброс ===== */
+function adminFilteredUsers(cfg) {
+    const q = adminUserSearchQuery.trim().toLowerCase().replace(/^@/, '');
+    return cfg.users.filter(u => {
+        if (adminUserFilter === 'VIP' && !u.vip) return false;
+        if (adminUserFilter === 'BANNED' && !u.banned) return false;
+        if (!q) return true;
+        return String(u.id).includes(q) || (u.username || '').toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q);
+    });
+}
+
+function adminUsersTableHtml(list) {
+    if (!list.length) return '<div class="p-4 text-center text-muted-dynamic">Никого не найдено</div>';
+    const rows = list.map(u => `
+        <tr class="${u.banned ? 'opacity-60' : ''}">
+            <td class="py-2 pr-3">
+                <div class="flex items-center gap-1.5">
+                    <span class="font-semibold text-dynamic whitespace-nowrap">${escapeHtml(u.name)}</span>
+                    ${u.online ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>' : ''}
+                    ${u.vip ? '<span class="px-1.5 rounded text-[9px] font-bold bg-amber-500/25 text-amber-300">VIP</span>' : ''}
+                    ${u.banned ? '<span class="px-1.5 rounded text-[9px] font-bold bg-rose-500/25 text-rose-300">BAN</span>' : ''}
+                </div>
+                <div class="text-[10px] font-mono text-muted-dynamic whitespace-nowrap">@${escapeHtml(u.username)} • ${escapeHtml(u.joined)}</div>
+            </td>
+            <td class="py-2 pr-3 font-mono text-[10px] text-muted-dynamic">${u.id}</td>
+            <td class="py-2 pr-3 text-center">${u.refs}</td>
+            <td class="py-2 pr-3 text-center">${u.gens}</td>
+            <td class="py-2">
+                <div class="flex gap-1">
+                    <button type="button" onclick="adminToggleUserVip(${u.id})" class="btn-glass px-2 py-1 text-[10px] font-semibold whitespace-nowrap ${u.vip ? 'text-amber-300' : 'text-emerald-400'}">${u.vip ? 'Снять VIP' : '＋VIP'}</button>
+                    ${u.id !== OWNER_TG_ID ? `<button type="button" onclick="adminToggleUserBan(${u.id})" class="btn-glass px-2 py-1 text-[10px] font-semibold ${u.banned ? 'text-emerald-400' : 'text-rose-400'}">${u.banned ? 'Разбан' : 'Бан'}</button>` : ''}
+                    <button type="button" onclick="contactUserDm('${escapeHtml(u.username)}')" class="btn-glass px-2 py-1 text-[10px] accent-text">ЛС ↗</button>
+                </div>
+            </td>
+        </tr>`).join('');
+    return `<div class="overflow-x-auto rounded-[var(--r-inner)] bg-[var(--bg-main)] px-3">
+        <table class="w-full text-[11px] text-left">
+            <thead class="text-[10px] uppercase tracking-wider text-muted-dynamic">
+                <tr><th class="py-2 pr-3 font-semibold">Юзер</th><th class="py-2 pr-3 font-semibold">ID</th><th class="py-2 pr-3 font-semibold text-center">Реф.</th><th class="py-2 pr-3 font-semibold text-center">Ген.</th><th class="py-2"></th></tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">${rows}</tbody>
+        </table>
+    </div>`;
+}
+
+function refreshAdminUsersList() {
+    const box = document.getElementById('admin-users-list');
+    if (box) box.innerHTML = adminUsersTableHtml(adminFilteredUsers(loadAdminConfig()));
+}
+
+function contactUserDm(username) {
+    Haptic.light();
+    const url = `https://t.me/${encodeURIComponent(username)}`;
+    if (tg?.openTelegramLink) tg.openTelegramLink(url);
+    else window.open(url, '_blank');
+}
+
+function adminFunnelHtml(m) {
+    const conv = parseFloat(m.convRate) || 0;
+    const steps = [
+        { label: 'Открыли Mini App', v: m.mau },
+        { label: 'Сделали генерацию', v: Math.round(m.mau * 0.62) },
+        { label: 'Сохранили в Сейф', v: Math.round(m.mau * 0.31) },
+        { label: 'Пригласили друга', v: Math.round(m.mau * 0.14) },
+        { label: 'Получили VIP', v: Math.round(m.mau * conv / 100) }
+    ];
+    const top = steps[0].v || 1;
+    return `<div class="p-3.5 rounded-2xl code-surface space-y-2">
+        <span class="font-bold text-dynamic block">Воронка конверсии (MAU)</span>
+        <div class="space-y-1.5 text-[11px]">
+            ${steps.map((s, i) => `
+                <div class="flex justify-between"><span>${i + 1}. ${s.label}</span><span class="font-mono accent-text">${s.v} (${Math.round(s.v / top * 100)}%)</span></div>
+                <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden"><div class="h-full" style="width:${Math.max(2, Math.round(s.v / top * 100))}%;background:linear-gradient(90deg,#10b981,#06b6d4)"></div></div>
+            `).join('')}
+        </div>
+    </div>`;
+}
+
+function adminEmergencyReset() {
+    if (!isOwnerUser()) { Haptic.error(); return; }
+    if (!confirm('Экстренный сброс удалит ВСЕ локальные данные Vibe Studio: сейф, темы, настройки админки и ОП. Продолжить?')) return;
+    Object.keys(localStorage).filter(k => k.startsWith('vibe_')).forEach(k => localStorage.removeItem(k));
+    sessionStorage.clear();
+    Haptic.error();
+    location.reload();
+}
+
+/* ===== 2. СЛАЙДОВЫЙ ОНБОРДИНГ ===== */
+const ONBOARD_SLIDES = [
+    { icon: '🧩', title: 'Собери сайт за минуту', text: '2D и 3D сайты, боты и базы данных — выбирай стиль, цвета и секции.' },
+    { icon: '🛠', title: 'Проверь и упакуй код', text: 'Песочница, склейка файлов и скрытие токенов перед отправкой в ИИ.' },
+    { icon: '🚀', title: 'Получи готовый промт', text: 'Один клик — и промт или файл index.html у тебя. Кнопка «Гид» откроет эти слайды снова.' }
+];
+let obIndex = 0, obTouchX = null;
+
+function openOnboarding(i = 0) {
+    obIndex = i;
+    renderOnboarding();
+    document.getElementById('onboard-overlay').classList.add('open');
+}
+function closeOnboarding() {
+    document.getElementById('onboard-overlay').classList.remove('open');
+    localStorage.setItem('vibe_onboard_done', '1');
+}
+function renderOnboarding() {
+    const track = document.getElementById('onboard-track');
+    if (!track.children.length) {
+        track.innerHTML = ONBOARD_SLIDES.map(s => `
+            <div class="ob-slide">
+                <div style="font-size:64px;line-height:1">${s.icon}</div>
+                <h3 class="text-base font-bold text-dynamic mt-4">${s.title}</h3>
+                <p class="text-xs text-muted-dynamic mt-2 leading-relaxed">${s.text}</p>
+            </div>`).join('');
+        track.addEventListener('touchstart', e => { obTouchX = e.touches[0].clientX; }, { passive: true });
+        track.addEventListener('touchend', e => {
+            if (obTouchX === null) return;
+            const dx = e.changedTouches[0].clientX - obTouchX;
+            obTouchX = null;
+            if (Math.abs(dx) > 45) onboardStep(dx < 0 ? 1 : -1);
+        }, { passive: true });
+    }
+    track.style.transform = `translate3d(${-obIndex * 100}%,0,0)`;
+    document.getElementById('onboard-dots').innerHTML = ONBOARD_SLIDES.map((_, i) => `<span class="ob-dot ${i === obIndex ? 'active' : ''}"></span>`).join('');
+    document.getElementById('ob-prev').style.visibility = obIndex === 0 ? 'hidden' : 'visible';
+    document.getElementById('ob-next').textContent = obIndex === ONBOARD_SLIDES.length - 1 ? 'Начать' : 'Далее';
+}
+function onboardStep(dir) {
+    Haptic.selection();
+    const next = obIndex + dir;
+    if (next >= ONBOARD_SLIDES.length) { closeOnboarding(); return; }
+    if (next < 0) return;
+    obIndex = next;
+    renderOnboarding();
+}
+window.addEventListener('load', () => {
+    if (!localStorage.getItem('vibe_onboard_done')) openOnboarding(0);
+});
+
+/* ===== 3. ПЛАВАЮЩЕЕ PiP-ОКНО С DRAG & DROP ===== */
+(function initPip() {
+    const slot = document.getElementById('pip-slot');
+    const win = document.getElementById('pip-window');
+    const handle = document.getElementById('pip-handle');
+    const minBtn = document.getElementById('pip-min');
+    if (!slot || !win || !handle) return;
+    const M = 8;
+    let floating = false, offX = 0, offY = 0, drag = false;
+
+    function clamp() {
+        const r = win.getBoundingClientRect();
+        const x = Math.min(Math.max(M, r.left), window.innerWidth - r.width - M);
+        const y = Math.min(Math.max(M, r.top), window.innerHeight - r.height - M);
+        win.style.left = x + 'px';
+        win.style.top = y + 'px';
+    }
+    function float() {
+        if (floating) return;
+        floating = true;
+        slot.style.minHeight = slot.offsetHeight + 'px';
+        win.classList.add('pip');
+        win.style.left = (window.innerWidth - 210 - 12) + 'px';
+        win.style.top = (window.innerHeight - 150 - 150) + 'px';
+        clamp();
+    }
+    function dock() {
+        if (!floating) return;
+        floating = false;
+        win.classList.remove('pip', 'mini');
+        win.style.left = win.style.top = '';
+        slot.style.minHeight = '';
+        minBtn.textContent = '—';
+    }
+
+    new IntersectionObserver(([e]) => {
+        const passedDown = e.boundingClientRect.bottom < 0;
+        if (!e.isIntersecting && passedDown && currentBuilderMode === 'web' && currentTabId === 'view-studio') float();
+        else if (e.isIntersecting || !passedDown) dock();
+    }, { threshold: 0 }).observe(slot);
+
+    handle.addEventListener('pointerdown', e => {
+        if (e.target === minBtn) return;
+        drag = true;
+        const r = win.getBoundingClientRect();
+        offX = e.clientX - r.left;
+        offY = e.clientY - r.top;
+        win.classList.add('dragging');
+        handle.setPointerCapture(e.pointerId);
+    });
+    handle.addEventListener('pointermove', e => {
+        if (!drag) return;
+        win.style.left = (e.clientX - offX) + 'px';
+        win.style.top = (e.clientY - offY) + 'px';
+        clamp();
+    });
+    const stop = () => { drag = false; win.classList.remove('dragging'); };
+    handle.addEventListener('pointerup', stop);
+    handle.addEventListener('pointercancel', stop);
+
+    minBtn.addEventListener('click', () => {
+        Haptic.selection();
+        win.classList.toggle('mini');
+        minBtn.textContent = win.classList.contains('mini') ? '+' : '—';
+        clamp();
+    });
+    window.addEventListener('resize', () => { if (floating) clamp(); });
+})();
+
+/* ===== 4. ЗАЩИТА ПОЛЗУНКОВ ОТ СКРОЛЛА ===== */
+(function guardSliders() {
+    let sx = 0, sy = 0, startVal = null, vertical = false, active = null;
+    document.addEventListener('touchstart', e => {
+        const el = e.target.closest?.('input[type="range"].ios-slider');
+        if (!el) return;
+        active = el;
+        startVal = el.value;
+        vertical = false;
+        sx = e.touches[0].clientX;
+        sy = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener('touchmove', e => {
+        if (!active) return;
+        const dx = Math.abs(e.touches[0].clientX - sx);
+        const dy = Math.abs(e.touches[0].clientY - sy);
+        if (!vertical && dy > 6 && dy > dx) vertical = true;
+        if (vertical) active.value = startVal;
+    }, { passive: true });
+    const end = () => { if (active && vertical) active.value = startVal; active = null; vertical = false; };
+    document.addEventListener('touchend', end, { passive: true });
+    document.addEventListener('touchcancel', end, { passive: true });
+    document.addEventListener('input', e => {
+        if (vertical && e.target === active) {
+            e.target.value = startVal;
+            e.stopImmediatePropagation();
+        }
+    }, true);
+})();
+
     </script>
 </body>
 </html>
