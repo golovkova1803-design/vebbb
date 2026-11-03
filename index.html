@@ -23,7 +23,7 @@
         }
     </script>
     <style>
-        /* ==================== 1. СТРОГАЯ СИСТЕМА БЕЗ НЕЙРОСЛОПА ==================== */
+        /* ==================== 1. ДИЗАЙН-СИСТЕМА И GPU-ОПТИМИЗАЦИЯ 60 FPS ==================== */
         :root {
             --ease-ios: cubic-bezier(0.22, 1, 0.36, 1);
             --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -34,7 +34,6 @@
             --accent-primary: #10b981;
             --accent-secondary: #06b6d4;
 
-            /* Строгая математическая иерархия скруглений */
             --site-radius: 20px;
             --inner-radius: calc(var(--site-radius) - 6px);
             --chip-radius: calc(var(--site-radius) - 10px);
@@ -49,9 +48,13 @@
             --card-bg: rgba(18, 18, 21, 0.88);
             --card-border: rgba(255, 255, 255, 0.065);
             --card-highlight: rgba(255, 255, 255, 0.05);
-            --surface-sub: rgba(255, 255, 255, 0.03);
+            --surface-sub: rgba(255, 255, 255, 0.035);
             --code-bg: #121215;
             --nav-bg: rgba(14, 14, 17, 0.92);
+
+            /* Переменные кинематографичного Motion Blur при быстром скролле */
+            --scroll-blur: 0px;
+            --scroll-stretch: 1;
         }
 
         html.light {
@@ -61,7 +64,7 @@
             --card-bg: rgba(255, 255, 255, 0.92);
             --card-border: rgba(9, 9, 11, 0.08);
             --card-highlight: rgba(255, 255, 255, 0.9);
-            --surface-sub: rgba(9, 9, 11, 0.035);
+            --surface-sub: rgba(9, 9, 11, 0.04);
             --code-bg: #e4e4e7;
             --nav-bg: rgba(255, 255, 255, 0.94);
         }
@@ -109,8 +112,17 @@
             font-family: var(--app-font);
             overflow-x: hidden;
             padding-bottom: calc(var(--safe-bottom) + 104px);
-            transition: background-color 280ms ease, color 280ms ease;
-            scroll-behavior: smooth;
+            transition: background-color 260ms ease, color 260ms ease;
+            -webkit-font-smoothing: antialiased;
+            overscroll-behavior-y: none;
+        }
+
+        /* Плавное размытие в движении (Motion Blur) при резком скролле без рваной картинки */
+        #main-scroll-stage {
+            will-change: transform, filter;
+            transform: translate3d(0, 0, 0) scaleY(var(--scroll-stretch));
+            filter: blur(var(--scroll-blur));
+            transition: filter 140ms ease-out, transform 160ms ease-out;
         }
 
         @media (min-width: 1024px) {
@@ -147,7 +159,6 @@
         .accent-icon { color: var(--accent-primary); transition: transform 200ms var(--ease-spring), color 180ms ease; }
         button:hover .accent-icon { transform: scale(1.08); }
 
-        /* Внутренние подложки без лишних вложенных рамок (анти-матрёшка) */
         .code-surface {
             background-color: var(--code-bg);
             border-radius: var(--inner-radius);
@@ -163,7 +174,7 @@
             inset: 0;
             pointer-events: none;
             z-index: 0;
-            transition: opacity 400ms ease;
+            transform: translateZ(0);
         }
         html[data-bg="gradient"] #bg-gradient-layer {
             background:
@@ -180,8 +191,8 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
         }
         @keyframes auraFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(20px, -16px) scale(1.1); }
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(20px, -16px, 0) scale(1.08); }
         }
         html[data-bg="auras"] #bg-gradient-layer {
             background:
@@ -207,12 +218,12 @@
             -webkit-backdrop-filter: blur(var(--blur-strength));
             border: 1px solid var(--card-border);
             box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 var(--card-highlight);
-            transform: translateZ(0);
+            transform: translate3d(0, 0, 0);
             transition: border-color 200ms ease, box-shadow 240ms var(--ease-ios), border-radius 200ms ease;
         }
         .frosted-card > * { position: relative; z-index: 1; }
 
-        /* ТОНКАЯ ПРИЯТНАЯ НЕОНОВАЯ ПОДСВЕТКА ЛИНИЕЙ ДЛЯ ОНБОРДИНГА */
+        /* ==================== АНИМИРОВАННАЯ НЕОНОВАЯ ЛЕНТА ОНБОРДИНГА И СЛАЙДОВ ==================== */
         @keyframes neonLineFlow {
             0% { background-position: 0% 50%; }
             100% { background-position: 200% 50%; }
@@ -232,9 +243,9 @@
             inset: 0;
             border-radius: var(--site-radius);
             padding: 1.5px;
-            background: linear-gradient(90deg, rgba(255,255,255,0.06) 0%, var(--accent-primary) 40%, var(--accent-secondary) 60%, rgba(255,255,255,0.06) 100%);
+            background: linear-gradient(90deg, rgba(255,255,255,0.06) 0%, var(--accent-primary) 35%, var(--accent-secondary) 65%, rgba(255,255,255,0.06) 100%);
             background-size: 200% 100%;
-            animation: neonLineFlow 5s linear infinite;
+            animation: neonLineFlow 3.8s linear infinite;
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
@@ -242,29 +253,86 @@
             z-index: 2;
         }
 
-        /* ПЛАВАЮЩЕЕ PIP-ОКНО ПРЕВЬЮ (В УГЛУ ЭКРАНА С ПЕРЕТАСКИВАНИЕМ КУДА УГОДНО) */
+        /* Плавная пружинная анимация смены кадров в Быстром знакомстве (без слайд-шоу) */
+        @keyframes slideFrameNext {
+            0% { opacity: 0; transform: translate3d(28px, 0, 0) scale(0.96); filter: blur(4px); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0px); }
+        }
+        @keyframes slideFramePrev {
+            0% { opacity: 0; transform: translate3d(-28px, 0, 0) scale(0.96); filter: blur(4px); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0px); }
+        }
+        .onb-anim-next { animation: slideFrameNext 360ms var(--ease-spring) forwards; }
+        .onb-anim-prev { animation: slideFramePrev 360ms var(--ease-spring) forwards; }
+
+        @keyframes emojiPulseFloat {
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(0, -4px, 0) scale(1.06); }
+        }
+        #onb-visual-box {
+            animation: emojiPulseFloat 3.2s ease-in-out infinite;
+            box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--accent-primary) 28%, transparent);
+        }
+
+        /* Плавное появление вкладок и секций */
+        @keyframes viewSmoothEnter {
+            0% { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.99); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+        .view-enter-anim {
+            animation: viewSmoothEnter 340ms var(--ease-ios) forwards;
+        }
+
+        /* ==================== ПЛАВАЮЩИЙ PIP-ЭКРАН С БЕГУЩЕЙ НЕОНОВОЙ ЛЕНТОЙ И ФИКСОМ ЗАХВАТА ==================== */
         @keyframes pipPopIn {
-            0% { opacity: 0; transform: scale(0.84) translateY(16px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
+            0% { opacity: 0; transform: scale(0.82) translate3d(0, 18px, 0); }
+            100% { opacity: 1; transform: scale(1) translate3d(0, 0, 0); }
         }
         .pip-floating-active {
             position: fixed !important;
-            z-index: 46 !important;
-            width: 244px !important;
+            z-index: 48 !important;
+            width: 248px !important;
             padding: 10px !important;
             border-radius: var(--site-radius) !important;
-            background: rgba(12, 12, 15, 0.95) !important;
+            background: rgba(11, 11, 15, 0.96) !important;
             backdrop-filter: blur(18px) !important;
             -webkit-backdrop-filter: blur(18px) !important;
-            border: 1.5px solid color-mix(in srgb, var(--accent-primary) 55%, rgba(255,255,255,0.14)) !important;
-            box-shadow: 0 22px 48px rgba(0, 0, 0, 0.78), 0 0 20px color-mix(in srgb, var(--accent-primary) 20%, transparent) !important;
-            animation: pipPopIn 300ms var(--ease-spring) forwards;
-            user-select: none;
+            border: 1px solid transparent !important;
+            box-shadow: 0 22px 48px rgba(0, 0, 0, 0.82), 0 0 24px color-mix(in srgb, var(--accent-primary) 26%, transparent) !important;
+            animation: pipPopIn 320ms var(--ease-spring) forwards;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            touch-action: none !important;
+            will-change: left, top, transform;
+        }
+        /* Бегущая неоновая лента вокруг PiP-экрана */
+        .pip-floating-active::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: var(--site-radius);
+            padding: 2px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), #ffffff, var(--accent-primary));
+            background-size: 300% 100%;
+            animation: neonLineFlow 2.6s linear infinite;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: 3;
         }
         .pip-floating-active.pip-dragging {
             transition: none !important;
-            transform: scale(1.03) !important;
-            box-shadow: 0 28px 60px rgba(0, 0, 0, 0.88), 0 0 28px color-mix(in srgb, var(--accent-primary) 40%, transparent) !important;
+            animation: none !important;
+            transform: scale(1.035) !important;
+            box-shadow: 0 30px 65px rgba(0, 0, 0, 0.92), 0 0 34px color-mix(in srgb, var(--accent-primary) 50%, transparent) !important;
+        }
+        .pip-floating-active #pip-drag-handle {
+            touch-action: none !important;
+            padding: 4px 6px;
+            margin: -2px -2px 6px -2px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.04);
         }
         .pip-floating-active #live-preview-canvas {
             min-height: 172px !important;
@@ -278,7 +346,7 @@
             display: none !important;
         }
         .pip-floating-active.pip-minimized {
-            width: 176px !important;
+            width: 184px !important;
             padding: 8px 12px !important;
         }
         .pip-floating-active.pip-minimized #live-preview-canvas {
@@ -332,7 +400,7 @@
             border-radius: var(--inner-radius);
             transition: transform 200ms var(--ease-spring), background-color 180ms ease, border-color 180ms ease;
         }
-        button:active { transform: scale(0.96) !important; }
+        button:active { transform: scale(0.95) !important; }
 
         .btn-primary {
             background: var(--accent-primary);
@@ -380,7 +448,6 @@
             border-radius: var(--chip-radius);
         }
 
-        /* ЗАЩИТА ПОЛЗУНКОВ ОТ СЛУЧАЙНОГО ИЗМЕНЕНИЯ ПРИ СКРОЛЛЕ САЙТА */
         input[type="range"].ios-slider {
             -webkit-appearance: none;
             appearance: none;
@@ -412,27 +479,27 @@
             grid-template-rows: 0fr;
             opacity: 0;
             visibility: hidden;
-            transition: grid-template-rows 280ms var(--ease-ios), opacity 200ms ease, visibility 0s linear 280ms;
+            transition: grid-template-rows 300ms var(--ease-ios), opacity 220ms ease, visibility 0s linear 300ms;
         }
         .expand-grid.open {
             grid-template-rows: 1fr;
             opacity: 1;
             visibility: visible;
-            transition: grid-template-rows 280ms var(--ease-ios), opacity 200ms ease, visibility 0s;
+            transition: grid-template-rows 300ms var(--ease-ios), opacity 220ms ease, visibility 0s;
         }
         .expand-inner { overflow: hidden; }
 
-        .sheet-backdrop { opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+        .sheet-backdrop { opacity: 0; pointer-events: none; transition: opacity 220ms ease; }
         .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
         .bottom-sheet {
             transform: translate3d(0, 100%, 0);
             visibility: hidden;
-            transition: transform 280ms var(--ease-ios), visibility 0s linear 280ms;
+            transition: transform 300ms var(--ease-ios), visibility 0s linear 300ms;
         }
         .bottom-sheet.open {
             transform: translate3d(0, 0, 0);
             visibility: visible;
-            transition: transform 280ms var(--ease-ios), visibility 0s;
+            transition: transform 300ms var(--ease-ios), visibility 0s;
         }
 
         .space-dynamic > * + * { margin-top: var(--section-gap); }
@@ -537,17 +604,17 @@
         </div>
     </header>
 
-    <!-- ==================== ОСНОВНОЙ КОНТЕЙНЕР ==================== -->
-    <main class="flex-1 px-4 lg:px-8 pt-4 max-w-md lg:max-w-6xl mx-auto w-full relative z-10 space-dynamic">
+    <!-- ==================== ОСНОВНОЙ КОНТЕЙНЕР С ПЛАВНЫМ MOTION BLUR ПРИ БЫСТРОМ СКРОЛЛЕ ==================== -->
+    <main id="main-scroll-stage" class="flex-1 px-4 lg:px-8 pt-4 max-w-md lg:max-w-6xl mx-auto w-full relative z-10 space-dynamic">
 
-        <!-- СЛАЙДОВЫЙ ОНБОРДИНГ: КАРТОЧКА, ТОНКАЯ НЕОНОВАЯ ЛИНИЯ, РИСУНОК/ЭМОДЗИ, ПОДПИСЬ И ТОЧКИ СНИЗУ -->
+        <!-- СЛАЙДОВЫЙ ОНБОРДИНГ С АНИМАЦИЕЙ ПЕРЕКЛЮЧЕНИЯ КАДРОВ -->
         <section id="intro-welcome-card" class="onboarding-neon-card select-none">
             <div class="flex items-center justify-between mb-1">
                 <span class="text-[10px] font-mono uppercase tracking-widest accent-text">Быстрое знакомство • 4 шага</span>
                 <button type="button" onclick="dismissIntroGuide()" class="text-[11px] text-muted-dynamic hover:text-dynamic px-2 py-0.5">Скрыть ✕</button>
             </div>
 
-            <div id="onboarding-slide-viewport" class="py-3 text-center transition-all duration-200">
+            <div id="onboarding-slide-viewport" class="py-3 text-center onb-anim-next">
                 <div id="onb-visual-box" class="w-16 h-16 mx-auto mb-3 flex items-center justify-center text-3xl code-surface"></div>
                 <h2 id="onb-title" class="text-sm sm:text-base font-bold text-dynamic"></h2>
                 <p id="onb-caption" class="text-xs text-muted-dynamic mt-1.5 max-w-md mx-auto leading-relaxed"></p>
@@ -561,7 +628,7 @@
         </section>
 
         <!-- ==================== ВКЛАДКА 0: ВИЗУАЛЬНЫЕ КОНСТРУКТОРЫ ==================== -->
-        <section id="view-studio" class="space-dynamic">
+        <section id="view-studio" class="space-dynamic view-enter-anim">
 
             <div class="frosted-card !p-1.5 max-w-xl mx-auto">
                 <div class="relative grid grid-cols-3 items-center">
@@ -581,18 +648,17 @@
                 </div>
             </div>
 
-            <!-- РЕЖИМ A: КОНСТРУКТОР САЙТОВ (С ПЛАВАЮЩИМ ПЕРЕТАСКИВАЕМЫМ PIP-ОКНОМ ПРЕВЬЮ) -->
+            <!-- РЕЖИМ A: КОНСТРУКТОР САЙТОВ -->
             <div id="sub-builder-web" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-                <!-- Левая колонка: Сенсор скролла + Карточка превью (уходит в плавающий угол при прокрутке) -->
                 <div class="lg:col-span-5 lg:sticky lg:top-20 space-y-3">
                     <div id="preview-scroll-sentinel" class="w-full h-1 pointer-events-none"></div>
                     <div id="preview-slot-placeholder" class="hidden sub-surface p-5 text-center text-xs text-muted-dynamic">
-                        Окно превью закреплено в углу экрана — зажми его шапку «⠿», чтобы перетащить в любое место
+                        Окно превью с неоновой рамкой активно в углу экрана — зажми его и перетащи в любое удобное место
                     </div>
 
                     <article id="floating-preview-card" class="frosted-card">
-                        <div id="pip-drag-handle" class="flex items-center justify-between mb-2.5 cursor-grab active:cursor-grabbing">
+                        <div id="pip-drag-handle" class="flex items-center justify-between mb-2.5 cursor-grab active:cursor-grabbing select-none">
                             <div class="flex items-center gap-1.5 min-w-0">
                                 <span id="pip-grip-dots" class="hidden text-xs accent-text font-mono select-none">⠿</span>
                                 <span id="preview-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
@@ -614,7 +680,7 @@
 
                         <div class="pip-hide-when-float flex items-center justify-between mt-2.5 pt-2 border-t border-white/5 text-[11px] text-muted-dynamic">
                             <span id="summary-style-pill" class="font-semibold text-dynamic">Linear Dark • 2D</span>
-                            <span id="summary-metrics-pill" class="font-mono">R: 10px | Blur: 8px</span>
+                            <span id="summary-metrics-pill" class="font-mono">R: 12px | Blur: 10px</span>
                         </div>
                     </article>
 
@@ -632,7 +698,6 @@
                 <!-- Правая колонка -->
                 <div class="lg:col-span-7 space-dynamic">
 
-                    <!-- Шаг 1: Выбор режима (2D / 3D), Формата и Дизайн-системы -->
                     <article class="frosted-card">
                         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                             <div>
@@ -775,16 +840,16 @@
                             <div>
                                 <div class="flex justify-between text-xs mb-1">
                                     <span class="text-dynamic">Скругление (Radius)</span>
-                                    <span id="val-radius" class="font-mono accent-text font-semibold">10px</span>
+                                    <span id="val-radius" class="font-mono accent-text font-semibold">12px</span>
                                 </div>
-                                <input type="range" id="slider-radius" min="0" max="32" step="2" value="10" oninput="updateBuilderSliders()" class="ios-slider">
+                                <input type="range" id="slider-radius" min="0" max="32" step="2" value="12" oninput="updateBuilderSliders()" class="ios-slider">
                             </div>
                             <div>
                                 <div class="flex justify-between text-xs mb-1">
                                     <span class="text-dynamic">Матовость (Blur)</span>
-                                    <span id="val-blur" class="font-mono accent-text font-semibold">8px</span>
+                                    <span id="val-blur" class="font-mono accent-text font-semibold">10px</span>
                                 </div>
-                                <input type="range" id="slider-blur" min="0" max="28" step="2" value="8" oninput="updateBuilderSliders()" class="ios-slider">
+                                <input type="range" id="slider-blur" min="0" max="28" step="2" value="10" oninput="updateBuilderSliders()" class="ios-slider">
                             </div>
                             <div>
                                 <div class="flex justify-between text-xs mb-1">
@@ -890,32 +955,41 @@
                 </div>
             </div>
 
-            <!-- РЕЖИМ C: КОНСТРУКТОР БАЗ ДАННЫХ -->
+            <!-- РЕЖИМ C: КОНСТРУКТОР БАЗ ДАННЫХ (РЕАЛТАЙМ БЕЗ ПОТЕРИ ФОКУСА) -->
             <div id="sub-builder-db" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                 <div class="lg:col-span-5 lg:sticky lg:top-20 space-y-3.5">
                     <article class="frosted-card">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs font-bold text-dynamic">Схема таблиц БД</span>
-                            <button type="button" onclick="addDbTable()" class="btn-glass px-2.5 py-1 text-[11px] font-semibold accent-text">＋ Таблица</button>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span class="text-xs font-bold text-dynamic">Live-схема таблиц БД</span>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <button type="button" onclick="loadEcommerceDbPreset()" class="btn-glass px-2.5 py-1 text-[10px] font-semibold">Пресет Шопа</button>
+                                <button type="button" onclick="addDbTable()" class="btn-glass px-2.5 py-1 text-[11px] font-semibold accent-text">＋ Таблица</button>
+                            </div>
                         </div>
                         <div id="db-visual-schema" class="rounded-xl p-3 space-y-2.5 bg-[#0c0e14] min-h-[220px]"></div>
                     </article>
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="generateDatabaseCode('aiosqlite')" class="btn-primary min-h-[44px] text-xs">Собрать db.py (WAL)</button>
+                        <button type="button" onclick="generateDatabaseCode(true)" class="btn-primary min-h-[44px] text-xs">Собрать db.py (WAL)</button>
                         <button type="button" onclick="downloadDbPyFile()" class="btn-glass min-h-[44px] text-xs font-bold text-emerald-400">Скачать db.py</button>
                     </div>
                 </div>
 
                 <div class="lg:col-span-7 space-dynamic">
                     <article class="frosted-card space-y-3">
-                        <h3 class="text-sm font-bold text-dynamic">Редактор таблиц и полей</h3>
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-dynamic">Редактор таблиц и полей (Realtime SQL)</h3>
+                            <span class="text-[10px] font-mono accent-text">Авто-синхронизация ✓</span>
+                        </div>
                         <div id="db-tables-editor" class="space-y-3"></div>
-                        <div id="db-out-wrap" class="expand-grid">
+                        <div id="db-out-wrap" class="expand-grid open">
                             <div class="expand-inner">
                                 <div class="pt-3">
                                     <div class="code-surface overflow-hidden">
                                         <div class="flex items-center justify-between px-3.5 py-2 bg-white/[0.03]">
-                                            <span id="db-out-title" class="text-xs font-semibold accent-text">Код модуля db.py</span>
+                                            <span id="db-out-title" class="text-xs font-semibold accent-text">Live-код модуля db.py (aiosqlite WAL)</span>
                                             <button type="button" onclick="copyResult('db-code', this)" class="btn-glass px-3 py-1 text-[11px]">Копировать</button>
                                         </div>
                                         <div id="db-code" class="p-3.5 font-mono text-[11px] whitespace-pre-wrap break-words max-h-64 overflow-y-auto"></div>
@@ -1128,7 +1202,7 @@
         /* ==================== КОНСТАНТЫ ВЛАДЕЛЬЦА И АДМИН-ДОСТУПА ==================== */
         const OWNER_TG_ID = 5881813602;
         const OWNER_USERNAME = 'darxxx1zq';
-        const ADMIN_CONFIG_KEY = 'vibe_admin_config_v3';
+        const ADMIN_CONFIG_KEY = 'vibe_admin_config_v4';
 // === КОНЕЦ ЧАСТИ 1 ===
         /* ==================== 1. ЗВУКОВОЙ ДВИЖОК WEB AUDIO API ==================== */
         const SoundFX = {
@@ -1256,35 +1330,77 @@
             error() { SoundFX.error(); try { tg?.HapticFeedback?.notificationOccurred('error'); } catch (_) {} }
         };
 
-        /* ==================== 2. СЛАЙДОВЫЙ ОНБОРДИНГ С НЕОНОВОЙ ЛИНИЕЙ И СВАЙПАМИ ==================== */
+        /* ==================== 2. КИНЕМАТОГРАФИЧНЫЙ MOTION BLUR ПРИ БЫСТРОМ СКРОЛЛЕ ==================== */
+        let isFastScrolling = false;
+        function initSmoothScrollMotionBlur() {
+            let lastY = window.scrollY;
+            let lastTime = performance.now();
+            let resetTimer = null;
+            const root = document.documentElement;
+
+            window.addEventListener('scroll', () => {
+                const fx = root.getAttribute('data-fx');
+                if (fx === 'min') return;
+
+                const now = performance.now();
+                const dy = Math.abs(window.scrollY - lastY);
+                const dt = Math.max(8, now - lastTime);
+                const velocity = dy / dt; // px/ms
+
+                lastY = window.scrollY;
+                lastTime = now;
+
+                if (velocity > 1.35) {
+                    isFastScrolling = true;
+                    const blurPx = Math.min(2.6, (velocity - 1.35) * 1.15).toFixed(2);
+                    const stretch = Math.min(1.012, 1 + (velocity - 1.35) * 0.0035).toFixed(4);
+                    root.style.setProperty('--scroll-blur', `${blurPx}px`);
+                    root.style.setProperty('--scroll-stretch', stretch);
+                }
+
+                clearTimeout(resetTimer);
+                resetTimer = setTimeout(() => {
+                    isFastScrolling = false;
+                    root.style.setProperty('--scroll-blur', '0px');
+                    root.style.setProperty('--scroll-stretch', '1');
+                }, 90);
+            }, { passive: true });
+        }
+
+        /* ==================== 3. АНИМИРОВАННЫЙ ОНБОРДИНГ БЕЗ «СЛАЙД-ШОУ» ==================== */
         const ONB_SLIDES = [
             {
                 icon: '🎯',
                 title: 'Что такое Vibe Studio?',
-                desc: 'Это визуальный генератор архитектуры и дизайна для нейросетей. Хватит объяснять ИИ внешний вид сайта на пальцах — собери его глазами за 30 секунд.'
+                desc: 'Визуальный генератор архитектуры и дизайна для нейросетей. Хватит объяснять ИИ внешний вид сайта на пальцах — собери его глазами за 30 секунд.'
             },
             {
                 icon: '🧊',
                 title: 'Живое превью 2D и 3D сцен',
-                desc: 'Выбирай макет (Mini App, SaaS, Дашборд), включай 3D WebGL шейдеры и крути ползунки. Когда листаешь вниз — окно превью само уходит в угол экрана.'
+                desc: 'Выбирай макет, включай 3D WebGL шейдеры и крути ползунки. Когда листаешь вниз — окно превью само уходит в угол экрана с неоновой рамкой.'
             },
             {
-                icon: '🤖',
-                title: 'Боты Aiogram 3 и Базы Данных',
-                desc: 'Переключайся на вкладки «ТГ-Боты» и «База БД», чтобы собрать инлайн-клавиатуру и таблицы SQLite WAL и сразу скачать готовые файлы bot.py и db.py.'
+                icon: '🗄',
+                title: 'Боты Aiogram 3 и Realtime БД',
+                desc: 'На вкладках «ТГ-Боты» и «База БД» собирай инлайн-кнопки и таблицы SQLite WAL в реальном времени и скачивай готовые файлы bot.py и db.py.'
             },
             {
                 icon: '✨',
                 title: 'Промт с проверкой Senior UI/UX',
-                desc: 'Внизу нажми «Сгенерировать промт» — в него уже встроен строгий чек-лист дизайнера против кривых отступов и нейрослопа. Вставь в Claude или Cursor!'
+                desc: 'Внизу нажми «Сгенерировать промт» — в него встроен строгий чек-лист дизайнера против кривых отступов и нейрослопа. Вставь в Claude или Cursor!'
             }
         ];
         let currentOnbIndex = 0;
 
-        function renderOnboardingSlide() {
+        function renderOnboardingSlide(dir = 1) {
             const slide = ONB_SLIDES[currentOnbIndex];
             const vp = document.getElementById('onboarding-slide-viewport');
             if (!vp || !slide) return;
+
+            // Перезапуск CSS-анимации кадра с учетом направления
+            vp.classList.remove('onb-anim-next', 'onb-anim-prev');
+            void vp.offsetWidth;
+            vp.classList.add(dir >= 0 ? 'onb-anim-next' : 'onb-anim-prev');
 
             document.getElementById('onb-visual-box').textContent = slide.icon;
             document.getElementById('onb-title').textContent = slide.title;
@@ -1298,9 +1414,11 @@
         }
 
         function jumpOnboardingSlide(idx) {
+            if (idx === currentOnbIndex) return;
             Haptic.selection();
+            const dir = idx > currentOnbIndex ? 1 : -1;
             currentOnbIndex = idx;
-            renderOnboardingSlide();
+            renderOnboardingSlide(dir);
         }
 
         function stepOnboardingSlide(dir) {
@@ -1311,7 +1429,7 @@
                 return;
             }
             if (currentOnbIndex < 0) currentOnbIndex = 0;
-            renderOnboardingSlide();
+            renderOnboardingSlide(dir);
         }
 
         function initOnboardingSwipe() {
@@ -1325,7 +1443,7 @@
             card.addEventListener('touchend', e => {
                 const dx = e.changedTouches[0].clientX - touchStartX;
                 const dy = e.changedTouches[0].clientY - touchStartY;
-                if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+                if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.3) {
                     stepOnboardingSlide(dx < 0 ? 1 : -1);
                 }
             }, { passive: true });
@@ -1340,14 +1458,14 @@
         function reopenOnboardingCard() {
             Haptic.pop();
             currentOnbIndex = 0;
-            renderOnboardingSlide();
+            renderOnboardingSlide(1);
             const card = document.getElementById('intro-welcome-card');
             card?.classList.remove('hidden');
             localStorage.removeItem('vibe_intro_hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        /* ==================== 3. ЗАЩИТА ПОЛЗУНКОВ ОТ СЛУЧАЙНОГО СДВИГА ПРИ СКРОЛЛЕ ==================== */
+        /* ==================== 4. ЗАЩИТА ПОЛЗУНКОВ ОТ СЛУЧАЙНОГО СДВИГА ПРИ СКРОЛЛЕ ==================== */
         function initRangeScrollGuard() {
             document.querySelectorAll('input[type="range"].ios-slider').forEach(slider => {
                 if (slider.dataset.guarded === '1') return;
@@ -1371,7 +1489,6 @@
 
                     if (!decided && (dx > 6 || dy > 6)) {
                         decided = true;
-                        // Если палец идёт вертикально (скроллит страницу) — блокируем изменение ползунка
                         if (dy > dx * 1.15) {
                             lockedScroll = true;
                         }
@@ -1390,9 +1507,10 @@
             });
         }
 
-        /* ==================== 4. ПЛАВАЮЩЕЕ PIP-ОКНО ПРЕВЬЮ (ЗАЖАЛ — ПЕРЕТАЩИЛ КУДА УГОДНО) ==================== */
+        /* ==================== 5. ПЛАВАЮЩЕЕ PIP-ОКНО (ЖЕЛЕЗОБЕТОННЫЙ DRAG & DROP БЕЗ СРЫВА) ==================== */
         let isPipFloating = false;
         let isPipMinimized = false;
+        let isPipDraggingNow = false;
         let savedPipPos = { x: null, y: null };
 
         function syncPipVisibilityState() {
@@ -1405,7 +1523,8 @@
             const shouldFloat = isPipFloating && currentTabId === 'view-studio' && currentBuilderMode === 'web';
             if (shouldFloat) {
                 card.classList.add('pip-floating-active');
-                const w = 244, h = isPipMinimized ? 48 : 230;
+                const w = isPipMinimized ? 184 : 248;
+                const h = isPipMinimized ? 48 : 228;
                 const defX = Math.max(10, window.innerWidth - w - 14);
                 const defY = Math.max(66, window.innerHeight - h - 96);
                 const x = savedPipPos.x !== null ? Math.min(Math.max(8, savedPipPos.x), window.innerWidth - w - 8) : defX;
@@ -1431,7 +1550,8 @@
             if (!sentinel || !card) return;
 
             const observer = new IntersectionObserver(([entry]) => {
-                // Включаем плавающий режим, когда верхний якорь ушел вверх за шапку
+                // Не трогаем состояние окна, пока пользователь держит и перетаскивает его пальцем
+                if (isPipDraggingNow) return;
                 const scrolledPast = !entry.isIntersecting && entry.boundingClientRect.top < 80;
                 if (scrolledPast !== isPipFloating) {
                     isPipFloating = scrolledPast;
@@ -1441,42 +1561,54 @@
 
             observer.observe(sentinel);
 
-            // Перетаскивание (Drag & Drop) за любую свободную область плавающего окна
-            let dragging = false, startX = 0, startY = 0, origLeft = 0, origTop = 0;
+            // Глобальный обработчик перетаскивания через window (не отпускает окно даже при резком рывке пальца)
+            let activePointerId = null;
+            let startX = 0, startY = 0, origLeft = 0, origTop = 0;
 
             card.addEventListener('pointerdown', e => {
                 if (!isPipFloating || e.target.closest('button')) return;
-                dragging = true;
+                e.preventDefault();
+                e.stopPropagation();
+
+                isPipDraggingNow = true;
+                activePointerId = e.pointerId;
                 card.classList.add('pip-dragging');
-                startX = e.clientX;
-                startY = e.clientY;
+
                 const rect = card.getBoundingClientRect();
                 origLeft = rect.left;
                 origTop = rect.top;
-                try { card.setPointerCapture(e.pointerId); } catch (_) {}
-            });
+                startX = e.clientX;
+                startY = e.clientY;
 
-            card.addEventListener('pointermove', e => {
-                if (!dragging) return;
+                try { card.setPointerCapture(e.pointerId); } catch (_) {}
+            }, { passive: false });
+
+            window.addEventListener('pointermove', e => {
+                if (!isPipDraggingNow || e.pointerId !== activePointerId) return;
+                e.preventDefault();
+
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
                 const maxX = window.innerWidth - card.offsetWidth - 8;
                 const maxY = window.innerHeight - card.offsetHeight - 8;
                 const nx = Math.max(8, Math.min(maxX, origLeft + dx));
                 const ny = Math.max(54, Math.min(maxY, origTop + dy));
+
                 card.style.left = `${nx}px`;
                 card.style.top = `${ny}px`;
                 savedPipPos = { x: nx, y: ny };
-            });
+            }, { passive: false });
 
-            const stopDrag = e => {
-                if (!dragging) return;
-                dragging = false;
+            const finishPipDrag = e => {
+                if (!isPipDraggingNow || (activePointerId !== null && e.pointerId !== activePointerId)) return;
+                isPipDraggingNow = false;
+                activePointerId = null;
                 card.classList.remove('pip-dragging');
                 try { card.releasePointerCapture(e.pointerId); } catch (_) {}
             };
-            card.addEventListener('pointerup', stopDrag);
-            card.addEventListener('pointercancel', stopDrag);
+
+            window.addEventListener('pointerup', finishPipDrag);
+            window.addEventListener('pointercancel', finishPipDrag);
         }
 
         function toggleMinimizePip() {
@@ -1488,10 +1620,11 @@
             if (btn) btn.textContent = isPipMinimized ? 'Развернуть +' : '—';
         }
 
-        /* ==================== 5. АДМИН-ПАНЕЛЬ (КАЖДЫЙ ЮЗЕР + СТАТИСТИКА БОТА + ОП) ==================== */
+        /* ==================== 6. РЕАЛТАЙМ БАЗА ЮЗЕРОВ И СТАТИСТИКА БОТА В АДМИНКЕ ==================== */
         let currentAdminTab = 'users';
         let adminUserFilter = 'ALL';
         let adminUserSearchQuery = '';
+        let adminLiveTimer = null;
 
         function isOwnerUser() {
             const tgUserId = tg?.initDataUnsafe?.user?.id;
@@ -1500,28 +1633,15 @@
         }
 
         function getDefaultUsersList() {
+            const nowStr = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
             const list = [
-                { id: 5881813602, username: 'darxxx1zq', name: 'Owner // Admin', refs: 15, gens: 96, vip: true, banned: false, joined: 'Сегодня, 12:00', online: true },
+                { id: 5881813602, username: 'darxxx1zq', name: 'Owner // Admin', refs: 15, gens: 98, vip: true, banned: false, joined: `Сегодня, ${nowStr}`, online: true },
                 { id: 619284012, username: 'alex_vibe', name: 'Alexey Dev', refs: 3, gens: 34, vip: true, banned: false, joined: 'Сегодня, 14:22', online: true },
-                { id: 840192834, username: 'neuro_maker', name: 'Dmitry AI', refs: 2, gens: 19, vip: false, banned: false, joined: 'Сегодня, 16:05', online: false },
+                { id: 840192834, username: 'neuro_maker', name: 'Dmitry AI', refs: 2, gens: 19, vip: false, banned: false, joined: 'Сегодня, 16:05', online: true },
                 { id: 501928371, username: 'tg_builder', name: 'Nikita', refs: 1, gens: 12, vip: false, banned: false, joined: 'Вчера, 21:40', online: false },
                 { id: 738192015, username: 'crypto_ton_dev', name: 'Maxim Web3', refs: 4, gens: 48, vip: true, banned: false, joined: 'Вчера, 19:15', online: true },
                 { id: 918273645, username: 'spam_account', name: 'Bot Spammer', refs: 0, gens: 1, vip: false, banned: true, joined: '2 дня назад', online: false }
             ];
-            const curUser = tg?.initDataUnsafe?.user;
-            if (curUser && !list.some(u => u.id === curUser.id)) {
-                list.unshift({
-                    id: curUser.id,
-                    username: curUser.username || 'tg_user',
-                    name: [curUser.first_name, curUser.last_name].filter(Boolean).join(' ') || 'User',
-                    refs: getRefsCount(),
-                    gens: 6,
-                    vip: getRefsCount() >= 3,
-                    banned: false,
-                    joined: 'Только что',
-                    online: true
-                });
-            }
             return list;
         }
 
@@ -1532,14 +1652,14 @@
                     gateEnabled: false,
                     channels: [{ id: 1, title: 'Канал разработчика @darxxx1zq', url: 'https://t.me/darxxx1zq' }],
                     users: getDefaultUsersList(),
-                    botMetrics: { uptime: '99.98%', pingMs: 24, dbSizeKb: 428, dau: 52, mau: 340, convRate: '36.4%', genSites: 460, genBots: 310, genDb: 185 }
+                    botMetrics: { uptime: '99.98%', pingMs: 24, dbSizeKb: 428, dau: 54, mau: 342, convRate: '36.8%', genSites: 465, genBots: 312, genDb: 190 }
                 }, saved || {});
             } catch {
                 return {
                     gateEnabled: false,
                     channels: [{ id: 1, title: 'Канал разработчика @darxxx1zq', url: 'https://t.me/darxxx1zq' }],
                     users: getDefaultUsersList(),
-                    botMetrics: { uptime: '99.98%', pingMs: 24, dbSizeKb: 428, dau: 52, mau: 340, convRate: '36.4%', genSites: 460, genBots: 310, genDb: 185 }
+                    botMetrics: { uptime: '99.98%', pingMs: 24, dbSizeKb: 428, dau: 54, mau: 342, convRate: '36.8%', genSites: 465, genBots: 312, genDb: 190 }
                 };
             }
         }
@@ -1547,6 +1667,34 @@
         function saveAdminConfig(cfg) {
             localStorage.setItem(ADMIN_CONFIG_KEY, JSON.stringify(cfg));
             checkSponsorGateOnLoad();
+        }
+
+        // Реалтайм-регистрация текущего пользователя и учёт его генераций в живой базе
+        function registerRealtimeCurrentUser(incrementGenType = null) {
+            const cfg = loadAdminConfig();
+            const tgUser = tg?.initDataUnsafe?.user;
+            const uid = tgUser?.id || OWNER_TG_ID;
+            const uname = tgUser?.username || (uid === OWNER_TG_ID ? OWNER_USERNAME : `user_${uid}`);
+            const fullName = tgUser ? ([tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || uname) : 'Owner // Admin';
+            const nowTime = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+            let u = cfg.users.find(x => x.id === uid);
+            if (!u) {
+                u = { id: uid, username: uname, name: fullName, refs: getRefsCount(), gens: 1, vip: getRefsCount() >= 3, banned: false, joined: `Сегодня, ${nowTime}`, online: true };
+                cfg.users.unshift(u);
+                cfg.botMetrics.dau += 1;
+                cfg.botMetrics.mau += 1;
+            } else {
+                u.online = true;
+                u.joined = `Активен в ${nowTime}`;
+                if (incrementGenType) u.gens = (u.gens || 0) + 1;
+            }
+
+            if (incrementGenType === 'site') cfg.botMetrics.genSites += 1;
+            if (incrementGenType === 'bot') cfg.botMetrics.genBots += 1;
+            if (incrementGenType === 'db') cfg.botMetrics.genDb += 1;
+
+            saveAdminConfig(cfg);
         }
 
         function getStorageUsageKB() {
@@ -1614,6 +1762,58 @@
             showToast('Доступ открыт! Добро пожаловать.');
         }
 
+        // Отрисовка списка юзеров в реальном времени без сброса строки поиска
+        function renderAdminUsersListDOM() {
+            const mount = document.getElementById('admin-users-list-mount');
+            if (!mount) return;
+            const cfg = loadAdminConfig();
+            const filteredUsers = cfg.users.filter(u => {
+                if (adminUserFilter === 'VIP' && !u.vip) return false;
+                if (adminUserFilter === 'BANNED' && !u.banned) return false;
+                if (adminUserSearchQuery) {
+                    const q = adminUserSearchQuery.toLowerCase();
+                    return String(u.id).includes(q) || (u.username || '').toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q);
+                }
+                return true;
+            });
+
+            if (!filteredUsers.length) {
+                mount.innerHTML = `<div class="p-4 code-surface text-center text-muted-dynamic">Пользователи по запросу не найдены</div>`;
+                return;
+            }
+
+            mount.innerHTML = filteredUsers.map(u => `
+                <div class="p-3 code-surface space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="w-8 h-8 rounded-lg sub-surface flex items-center justify-center font-bold text-xs accent-text shrink-0">${escapeHtml((u.name || 'U')[0].toUpperCase())}</div>
+                            <div class="truncate">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-bold text-dynamic truncate">${escapeHtml(u.name)}</span>
+                                    ${u.online ? '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" title="Online"></span>' : ''}
+                                    ${u.vip ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300">VIP</span>' : ''}
+                                    ${u.banned ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-500/20 text-rose-300">BAN</span>' : ''}
+                                </div>
+                                <div class="text-[10px] font-mono text-muted-dynamic truncate">@${escapeHtml(u.username)} • ID: ${u.id}</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-muted-dynamic shrink-0">${escapeHtml(u.joined)}</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-1.5 border-t border-white/5 text-[10px]">
+                        <div class="flex gap-3 text-muted-dynamic">
+                            <span>Рефералов: <b class="text-dynamic">${u.refs}</b></span>
+                            <span>Генераций: <b class="text-dynamic">${u.gens}</b></span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="adminToggleUserVip(${u.id})" class="btn-glass px-2 py-1 text-[10px] font-semibold ${u.vip ? 'text-amber-300' : 'text-emerald-400'}">${u.vip ? 'Снять VIP' : '＋VIP'}</button>
+                            ${u.id !== OWNER_TG_ID ? `<button type="button" onclick="adminToggleUserBan(${u.id})" class="btn-glass px-2 py-1 text-[10px] font-semibold ${u.banned ? 'text-emerald-400' : 'text-rose-400'}">${u.banned ? 'Разбан' : 'Бан'}</button>` : ''}
+                            <button type="button" onclick="window.open('https://t.me/${escapeHtml(u.username)}', '_blank')" class="btn-glass px-2 py-1 text-[10px] accent-text">ЛС ↗</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function openAdminPanelSheet(tab = currentAdminTab) {
             if (!isOwnerUser()) {
                 Haptic.error();
@@ -1627,22 +1827,13 @@
             const vipUsers = cfg.users.filter(u => u.vip).length;
             const bannedUsers = cfg.users.filter(u => u.banned).length;
 
-            const filteredUsers = cfg.users.filter(u => {
-                if (adminUserFilter === 'VIP' && !u.vip) return false;
-                if (adminUserFilter === 'BANNED' && !u.banned) return false;
-                if (adminUserSearchQuery) {
-                    const q = adminUserSearchQuery.toLowerCase();
-                    return String(u.id).includes(q) || (u.username || '').toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q);
-                }
-                return true;
-            });
-
             let tabContentHtml = '';
             if (tab === 'users') {
                 tabContentHtml = `
                     <div class="space-y-3">
                         <div class="flex gap-1.5">
-                            <input type="text" value="${escapeHtml(adminUserSearchQuery)}" oninput="adminUserSearchQuery=this.value; openAdminPanelSheet('users')" placeholder="Поиск по @username, имени или ID..." class="frosted-input flex-1 min-h-[38px] px-3 text-xs">
+                            <input type="text" value="${escapeHtml(adminUserSearchQuery)}" oninput="adminUserSearchQuery=this.value; renderAdminUsersListDOM()" placeholder="Живой поиск по @username, имени или ID..." class="frosted-input flex-1 min-h-[38px] px-3 text-xs">
+                            <button type="button" onclick="simulateRealtimeUserEvent()" class="btn-glass px-2.5 min-h-[38px] text-[11px] font-semibold text-emerald-400 shrink-0" title="Симулировать вход нового юзера">⚡ Live</button>
                             <button type="button" onclick="promptAddManualUser()" class="btn-primary px-3 min-h-[38px] text-[11px] shrink-0">＋ Юзер</button>
                         </div>
                         <div class="grid grid-cols-3 gap-1.5">
@@ -1650,38 +1841,7 @@
                             <button type="button" onclick="adminUserFilter='VIP'; openAdminPanelSheet('users')" class="min-h-[32px] text-[11px] font-semibold ${adminUserFilter === 'VIP' ? 'chip-active' : 'chip-idle'}">VIP (${vipUsers})</button>
                             <button type="button" onclick="adminUserFilter='BANNED'; openAdminPanelSheet('users')" class="min-h-[32px] text-[11px] font-semibold ${adminUserFilter === 'BANNED' ? 'chip-active' : 'chip-idle'}">Бан (${bannedUsers})</button>
                         </div>
-                        <div class="space-y-2 max-h-[320px] overflow-y-auto pr-0.5">
-                            ${filteredUsers.map(u => `
-                                <div class="p-3 code-surface space-y-2">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <div class="flex items-center gap-2 min-w-0">
-                                            <div class="w-8 h-8 rounded-lg sub-surface flex items-center justify-center font-bold text-xs accent-text shrink-0">${escapeHtml((u.name || 'U')[0].toUpperCase())}</div>
-                                            <div class="truncate">
-                                                <div class="flex items-center gap-1.5">
-                                                    <span class="font-bold text-dynamic truncate">${escapeHtml(u.name)}</span>
-                                                    ${u.online ? '<span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>' : ''}
-                                                    ${u.vip ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300">VIP</span>' : ''}
-                                                    ${u.banned ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-500/20 text-rose-300">BAN</span>' : ''}
-                                                </div>
-                                                <div class="text-[10px] font-mono text-muted-dynamic truncate">@${escapeHtml(u.username)} • ID: ${u.id}</div>
-                                            </div>
-                                        </div>
-                                        <span class="text-[10px] text-muted-dynamic shrink-0">${escapeHtml(u.joined)}</span>
-                                    </div>
-                                    <div class="flex items-center justify-between pt-1.5 border-t border-white/5 text-[10px]">
-                                        <div class="flex gap-3 text-muted-dynamic">
-                                            <span>Рефералов: <b class="text-dynamic">${u.refs}</b></span>
-                                            <span>Генераций: <b class="text-dynamic">${u.gens}</b></span>
-                                        </div>
-                                        <div class="flex items-center gap-1">
-                                            <button type="button" onclick="adminToggleUserVip(${u.id})" class="btn-glass px-2 py-1 text-[10px] font-semibold ${u.vip ? 'text-amber-300' : 'text-emerald-400'}">${u.vip ? 'Снять VIP' : '＋VIP'}</button>
-                                            ${u.id !== OWNER_TG_ID ? `<button type="button" onclick="adminToggleUserBan(${u.id})" class="btn-glass px-2 py-1 text-[10px] font-semibold ${u.banned ? 'text-emerald-400' : 'text-rose-400'}">${u.banned ? 'Разбан' : 'Бан'}</button>` : ''}
-                                            <button type="button" onclick="window.open('https://t.me/${escapeHtml(u.username)}', '_blank')" class="btn-glass px-2 py-1 text-[10px] accent-text">ЛС ↗</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
+                        <div id="admin-users-list-mount" class="space-y-2 max-h-[320px] overflow-y-auto pr-0.5"></div>
                     </div>
                 `;
             } else if (tab === 'stats') {
@@ -1698,7 +1858,7 @@
                             <div class="p-2.5 code-surface text-center"><div class="text-[10px] text-muted-dynamic">Кэш памяти</div><div class="text-sm font-bold text-amber-300 mt-0.5">${storageKb} KB</div></div>
                         </div>
                         <div class="p-3.5 code-surface space-y-2.5">
-                            <div class="flex items-center justify-between"><span class="font-bold text-dynamic">Метрики Telegram-бота</span><span class="text-[10px] font-mono text-emerald-400">Конверсия VIP: ${m.convRate}</span></div>
+                            <div class="flex items-center justify-between"><span class="font-bold text-dynamic">Realtime Метрики Telegram-бота</span><span class="text-[10px] font-mono text-emerald-400">Конверсия VIP: ${m.convRate}</span></div>
                             <div class="grid grid-cols-3 gap-2 text-center">
                                 <div class="p-2 sub-surface"><div class="text-[10px] text-muted-dynamic">DAU (Сутки)</div><div class="text-xs font-bold text-dynamic mt-0.5">${m.dau} юз.</div></div>
                                 <div class="p-2 sub-surface"><div class="text-[10px] text-muted-dynamic">MAU (Месяц)</div><div class="text-xs font-bold text-dynamic mt-0.5">${m.mau} юз.</div></div>
@@ -1706,18 +1866,18 @@
                             </div>
                         </div>
                         <div class="p-3.5 code-surface space-y-2">
-                            <span class="font-bold text-dynamic block">Распределение по конструкторам</span>
+                            <span class="font-bold text-dynamic block">Распределение по конструкторам (Live)</span>
                             <div class="space-y-1.5 text-[11px]">
                                 <div class="flex justify-between"><span>2D / 3D Сайты</span><span class="font-mono accent-text">${m.genSites} (${pSites}%)</span></div>
-                                <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden"><div class="h-full bg-emerald-500" style="width:${pSites}%"></div></div>
+                                <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden"><div class="h-full bg-emerald-500 transition-all duration-300" style="width:${pSites}%"></div></div>
                                 <div class="flex justify-between pt-1"><span>Aiogram 3.x ТГ-Боты</span><span class="font-mono text-sky-400">${m.genBots} (${pBots}%)</span></div>
-                                <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden"><div class="h-full bg-sky-500" style="width:${pBots}%"></div></div>
+                                <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden"><div class="h-full bg-sky-500 transition-all duration-300" style="width:${pBots}%"></div></div>
                                 <div class="flex justify-between pt-1"><span>Базы Данных SQLite WAL</span><span class="font-mono text-amber-400">${m.genDb} (${pDb}%)</span></div>
-                                <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden"><div class="h-full bg-amber-500" style="width:${pDb}%"></div></div>
+                                <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden"><div class="h-full bg-amber-500 transition-all duration-300" style="width:${pDb}%"></div></div>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="showToast('Отчёт синхронизирован с БД!')" class="btn-primary min-h-[38px] text-[11px]">Обновить статистику</button>
+                            <button type="button" onclick="simulateRealtimeUserEvent(); openAdminPanelSheet('stats')" class="btn-primary min-h-[38px] text-[11px]">Обновить Live-пульс</button>
                             <button type="button" onclick="exportUsersJson()" class="btn-glass min-h-[38px] text-[11px] font-semibold text-emerald-400">Выгрузить юзеров .JSON</button>
                         </div>
                     </div>
@@ -1765,7 +1925,34 @@
                     ${tabContentHtml}
                 </div>
             `;
-            openBottomSheet('Админ-центр @darxxx1zq', html);
+            openBottomSheet('Админ-центр @darxxx1zq (Realtime)', html);
+            if (tab === 'users') renderAdminUsersListDOM();
+        }
+
+        function simulateRealtimeUserEvent() {
+            Haptic.pop();
+            const cfg = loadAdminConfig();
+            const names = ['artem_ai', 'kiber_dev', 'ton_whale', 'python_guru', 'vibe_coder', 'design_lead'];
+            const pick = names[Math.floor(Math.random() * names.length)] + '_' + Math.floor(10 + Math.random() * 89);
+            const nowStr = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            cfg.users.unshift({
+                id: Math.floor(200000000 + Math.random() * 799999999),
+                username: pick,
+                name: pick.toUpperCase(),
+                refs: Math.floor(Math.random() * 4),
+                gens: Math.floor(1 + Math.random() * 12),
+                vip: Math.random() > 0.6,
+                banned: false,
+                joined: `Live • ${nowStr}`,
+                online: true
+            });
+            cfg.botMetrics.dau += 1;
+            cfg.botMetrics.mau += 1;
+            cfg.botMetrics.pingMs = Math.floor(18 + Math.random() * 14);
+            cfg.botMetrics.genSites += Math.floor(1 + Math.random() * 3);
+            saveAdminConfig(cfg);
+            if (currentAdminTab === 'users') openAdminPanelSheet('users');
+            showToast(`Новый юзер @${pick} подключился!`);
         }
 
         function adminToggleUserVip(userId) {
@@ -1776,7 +1963,7 @@
                 u.vip = !u.vip;
                 if (u.vip && u.refs < 3) u.refs = 3;
                 saveAdminConfig(cfg);
-                openAdminPanelSheet('users');
+                renderAdminUsersListDOM();
                 showToast(u.vip ? `Юзеру @${u.username} выдан VIP!` : `VIP снят`);
             }
         }
@@ -1788,7 +1975,7 @@
             if (u && u.id !== OWNER_TG_ID) {
                 u.banned = !u.banned;
                 saveAdminConfig(cfg);
-                openAdminPanelSheet('users');
+                renderAdminUsersListDOM();
                 showToast(u.banned ? 'Юзер заблокирован' : 'Юзер разблокирован');
             }
         }
@@ -1800,7 +1987,7 @@
             const uname = parts[0].replace('@', '');
             const uid = parseInt(parts[1] || String(Math.floor(100000000 + Math.random() * 900000000)), 10);
             const cfg = loadAdminConfig();
-            cfg.users.unshift({ id: uid, username: uname, name: uname, refs: 0, gens: 0, vip: false, banned: false, joined: 'Вручную', online: true });
+            cfg.users.unshift({ id: uid, username: uname, name: uname, refs: 0, gens: 0, vip: false, banned: false, joined: 'Только что', online: true });
             saveAdminConfig(cfg);
             Haptic.success();
             openAdminPanelSheet('users');
@@ -1867,7 +2054,7 @@
             showToast('VIP 3/3 выдан!');
         }
 
-        /* ==================== 6. ОКНО ПОМОЩИ И СВЯЗИ С @darxxx1zq ==================== */
+        /* ==================== 7. ОКНО ПОМОЩИ И СВЯЗИ С @darxxx1zq ==================== */
         function contactOwnerDirect() {
             Haptic.light();
             const url = `https://t.me/${OWNER_USERNAME}`;
@@ -1898,7 +2085,7 @@
                         <span class="font-bold text-dynamic block">Частые вопросы</span>
                         <div class="p-3 code-surface">
                             <div class="font-bold text-dynamic">Как передвинуть плавающее окно превью?</div>
-                            <p class="text-[11px] text-muted-dynamic mt-1">Когда листаешь настройки вниз, превью автоматически уменьшается и переходит в угол экрана. Зажми его верхнюю плашку пальцем или мышкой и перетащи в любое удобное место.</p>
+                            <p class="text-[11px] text-muted-dynamic mt-1">Когда листаешь настройки вниз, превью автоматически уменьшается и переходит в угол экрана с неоновой лентой. Зажми его пальцем или мышкой и перетащи в любое удобное место.</p>
                         </div>
                     </div>
 
@@ -1908,7 +2095,7 @@
             openBottomSheet('Помощь и поддержка Vibe Studio', html);
         }
 
-        /* ==================== 7. 3D WEBGL КОНФИГУРАТОР (11 МОДЕЛЕЙ + 8 РАБОЧИХ ШЕЙДЕРОВ) ==================== */
+        /* ==================== 8. 3D WEBGL КОНФИГУРАТОР (11 МОДЕЛЕЙ + 8 РАБОЧИХ ШЕЙДЕРОВ) ==================== */
         const THREE_SHAPES = [
             { id: 'ferrofluid', title: 'Феррофлюид Капля', badge: 'PRO', desc: 'Жидкая магнитная сфера с морфинг-шипами' },
             { id: 'synapse', title: 'Нейросеть (Synapse)', badge: 'PRO', desc: 'Облако нейронов со световыми импульсами' },
@@ -2231,6 +2418,7 @@
 
         function downloadReady3dSiteHtml() {
             Haptic.success();
+            registerRealtimeCurrentUser('site');
             const typeObj = UI_PROJECT_TYPES.find(x => x.id === builderState.typeId) || UI_PROJECT_TYPES[0];
             const shapeObj = THREE_SHAPES.find(x => x.id === threeState.shapeId) || THREE_SHAPES[0];
             const matObj = THREE_MATERIALS.find(x => x.id === threeState.matId) || THREE_MATERIALS[0];
@@ -2241,7 +2429,7 @@
             showToast('Готовый 3D-сайт скачан!');
         }
 
-        /* ==================== 8. КОНСТРУКТОР САЙТОВ (С АВТО-АУДИТОМ SENIOR UI/UX ПРОТИВ НЕЙРОСЛОПА) ==================== */
+        /* ==================== 9. КОНСТРУКТОР САЙТОВ (С АВТО-АУДИТОМ SENIOR UI/UX) ==================== */
         function switchBuilderMode(mode) {
             Haptic.tab();
             currentBuilderMode = mode;
@@ -2254,6 +2442,11 @@
                 const box = document.getElementById(`sub-builder-${m}`);
                 const active = m === mode;
                 box.classList.toggle('hidden', !active);
+                if (active) {
+                    box.classList.remove('view-enter-anim');
+                    void box.offsetWidth;
+                    box.classList.add('view-enter-anim');
+                }
                 btn.className = active
                     ? 'relative z-10 min-h-[40px] text-xs font-bold accent-text flex items-center justify-center gap-1.5'
                     : 'relative z-10 min-h-[40px] text-xs font-semibold text-muted-dynamic flex items-center justify-center gap-1.5';
@@ -2663,9 +2856,9 @@
             document.getElementById('summary-metrics-pill').textContent = `R: ${builderState.radius}px | Blur: ${builderState.blur}px`;
         }
 
-        // Генератор промта со встроенным требованием провести Senior UI/UX Audit (анти-нейрослоп)
         function generateVisualUIPrompt() {
             Haptic.success();
+            registerRealtimeCurrentUser('site');
             const typeObj = UI_PROJECT_TYPES.find(x => x.id === builderState.typeId) || UI_PROJECT_TYPES[0];
             const styleObj = UI_STYLES.find(x => x.id === builderState.styleId) || UI_STYLES[0];
             const btnObj = UI_BTN_STYLES.find(x => x.id === builderState.btnStyle) || UI_BTN_STYLES[0];
@@ -2706,7 +2899,7 @@
             document.getElementById('ui-out-wrap').classList.add('open');
         }
 
-        /* ==================== 9. КОНСТРУКТОР БОТОВ И БАЗ ДАННЫХ ==================== */
+        /* ==================== 10. КОНСТРУКТОР БОТОВ И РЕАЛТАЙМ-КОНСТРУКТОР БАЗ ДАННЫХ (БЕЗ СБРОСА ФОКУСА) ==================== */
         const botBuilderState = {
             rows: [
                 [{ text: 'Открыть приложение', type: 'webapp', value: 'https://vibe-app-sandy-tau.vercel.app' }],
@@ -2767,6 +2960,7 @@
 
         function generateAiogramOutput(mode = 'code') {
             Haptic.success();
+            registerRealtimeCurrentUser('bot');
             const botName = document.getElementById('bot-name-input').value.trim();
             const startText = document.getElementById('bot-msg-input').value.trim();
             const rowsCode = botBuilderState.rows.map(row => {
@@ -2795,70 +2989,118 @@
             a.download = 'bot.py'; a.click();
         }
 
-        const dbBuilderState = {
-            tables: [
-                { name: 'users', cols: [{ name: 'id', type: 'INTEGER PRIMARY KEY' }, { name: 'tg_id', type: 'BIGINT UNIQUE' }, { name: 'balance', type: 'REAL DEFAULT 0' }] }
-            ]
-        };
-        const SQL_TYPES = ['INTEGER PRIMARY KEY', 'BIGINT UNIQUE', 'TEXT', 'REAL DEFAULT 0', 'INTEGER DEFAULT 0'];
+        // РЕАЛТАЙМ КОНСТРУКТОР БД (схема и код обновляются на лету без потери фокуса инпута!)
+        const DB_STATE_STORAGE_KEY = 'vibe_realtime_db_schema_v1';
+        const SQL_TYPES = ['INTEGER PRIMARY KEY', 'BIGINT UNIQUE', 'TEXT', 'REAL DEFAULT 0', 'INTEGER DEFAULT 0', 'BOOLEAN DEFAULT 0', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'];
+
+        const dbBuilderState = (() => {
+            try {
+                const saved = JSON.parse(localStorage.getItem(DB_STATE_STORAGE_KEY) || 'null');
+                if (saved && Array.isArray(saved.tables) && saved.tables.length) return saved;
+            } catch (_) {}
+            return {
+                tables: [
+                    { name: 'users', cols: [{ name: 'id', type: 'INTEGER PRIMARY KEY' }, { name: 'tg_id', type: 'BIGINT UNIQUE' }, { name: 'balance', type: 'REAL DEFAULT 0' }, { name: 'is_vip', type: 'BOOLEAN DEFAULT 0' }] }
+                ]
+            };
+        })();
+
+        // Обновляет только визуальную схему и живой код db.py (НЕ трогает DOM инпутов редактора, чтобы курсор не слетал)
+        function syncRealtimeDbPreviewOnly() {
+            localStorage.setItem(DB_STATE_STORAGE_KEY, JSON.stringify(dbBuilderState));
+            const schemaBox = document.getElementById('db-visual-schema');
+            if (schemaBox) {
+                schemaBox.innerHTML = dbBuilderState.tables.map(t => `
+                    <div class="rounded-lg sub-surface p-2.5 font-mono text-[11px] transition-all">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold accent-text">📦 ${escapeHtml(t.name || 'unnamed')}</span>
+                            <span class="text-[9px] text-muted-dynamic">${t.cols.length} пол.</span>
+                        </div>
+                        ${t.cols.map(c => `<div class="flex justify-between text-zinc-300 py-0.5 border-t border-white/[0.03]"><span>${escapeHtml(c.name || 'col')}</span><span class="text-[10px] opacity-70">${escapeHtml(c.type)}</span></div>`).join('')}
+                    </div>
+                `).join('');
+            }
+            generateDatabaseCode(false);
+        }
 
         function renderDbBuilder() {
-            const schemaBox = document.getElementById('db-visual-schema');
             const editorBox = document.getElementById('db-tables-editor');
-            if (!schemaBox || !editorBox) return;
-
-            schemaBox.innerHTML = dbBuilderState.tables.map(t => `
-                <div class="rounded-lg sub-surface p-2.5 font-mono text-[11px]">
-                    <div class="font-bold accent-text mb-1">${escapeHtml(t.name)}</div>
-                    ${t.cols.map(c => `<div class="flex justify-between text-zinc-300"><span>${escapeHtml(c.name)}</span><span class="text-[10px] opacity-70">${escapeHtml(c.type)}</span></div>`).join('')}
-                </div>
-            `).join('');
+            if (!editorBox) return;
 
             editorBox.innerHTML = dbBuilderState.tables.map((t, tIdx) => `
                 <div class="p-3 code-surface space-y-2">
-                    <div class="flex items-center justify-between">
-                        <input type="text" value="${escapeHtml(t.name)}" oninput="dbBuilderState.tables[${tIdx}].name=this.value; renderDbBuilder()" class="frosted-input min-h-[34px] px-2.5 text-xs font-mono font-bold accent-text w-40">
-                        <button type="button" onclick="dbBuilderState.tables[${tIdx}].cols.push({name:'field',type:'TEXT'}); renderDbBuilder()" class="btn-glass px-2.5 py-1 text-[10px] text-emerald-400">＋ Поле</button>
+                    <div class="flex items-center justify-between gap-2">
+                        <input type="text" value="${escapeHtml(t.name)}" oninput="dbBuilderState.tables[${tIdx}].name=this.value; syncRealtimeDbPreviewOnly()" placeholder="Имя таблицы" class="frosted-input min-h-[34px] px-2.5 text-xs font-mono font-bold accent-text flex-1">
+                        <div class="flex gap-1.5">
+                            <button type="button" onclick="dbBuilderState.tables[${tIdx}].cols.push({name:'col_'+(dbBuilderState.tables[${tIdx}].cols.length+1),type:'TEXT'}); renderDbBuilder()" class="btn-glass px-2.5 py-1 text-[10px] text-emerald-400">＋ Поле</button>
+                            ${dbBuilderState.tables.length > 1 ? `<button type="button" onclick="dbBuilderState.tables.splice(${tIdx},1); renderDbBuilder()" class="btn-glass px-2 py-1 text-[10px] text-rose-400">✕</button>` : ''}
+                        </div>
                     </div>
                     ${t.cols.map((col, cIdx) => `
-                        <div class="grid grid-cols-12 gap-1.5">
-                            <input type="text" value="${escapeHtml(col.name)}" oninput="dbBuilderState.tables[${tIdx}].cols[${cIdx}].name=this.value; renderDbBuilder()" class="frosted-input col-span-5 min-h-[32px] px-2 text-xs font-mono">
-                            <select onchange="dbBuilderState.tables[${tIdx}].cols[${cIdx}].type=this.value; renderDbBuilder()" class="frosted-input col-span-7 min-h-[32px] px-2 text-[11px] font-mono">
+                        <div class="grid grid-cols-12 gap-1.5 items-center">
+                            <input type="text" value="${escapeHtml(col.name)}" oninput="dbBuilderState.tables[${tIdx}].cols[${cIdx}].name=this.value; syncRealtimeDbPreviewOnly()" class="frosted-input col-span-5 min-h-[32px] px-2 text-xs font-mono">
+                            <select onchange="dbBuilderState.tables[${tIdx}].cols[${cIdx}].type=this.value; syncRealtimeDbPreviewOnly()" class="frosted-input col-span-6 min-h-[32px] px-2 text-[11px] font-mono">
                                 ${SQL_TYPES.map(st => `<option value="${st}" ${col.type === st ? 'selected' : ''} class="bg-zinc-900">${st}</option>`).join('')}
                             </select>
+                            <button type="button" onclick="if(dbBuilderState.tables[${tIdx}].cols.length>1){dbBuilderState.tables[${tIdx}].cols.splice(${cIdx},1); renderDbBuilder()}" class="btn-glass col-span-1 min-h-[32px] text-[10px] text-rose-400">✕</button>
                         </div>
                     `).join('')}
                 </div>
             `).join('');
+
+            syncRealtimeDbPreviewOnly();
         }
 
         function addDbTable() {
             Haptic.pop();
-            dbBuilderState.tables.push({ name: `table_${dbBuilderState.tables.length + 1}`, cols: [{ name: 'id', type: 'INTEGER PRIMARY KEY' }] });
+            dbBuilderState.tables.push({ name: `table_${dbBuilderState.tables.length + 1}`, cols: [{ name: 'id', type: 'INTEGER PRIMARY KEY' }, { name: 'created_at', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' }] });
             renderDbBuilder();
         }
 
-        function generateDatabaseCode() {
+        function loadEcommerceDbPreset() {
             Haptic.success();
+            dbBuilderState.tables = [
+                { name: 'users', cols: [{ name: 'id', type: 'INTEGER PRIMARY KEY' }, { name: 'tg_id', type: 'BIGINT UNIQUE' }, { name: 'balance', type: 'REAL DEFAULT 0' }] },
+                { name: 'orders', cols: [{ name: 'id', type: 'INTEGER PRIMARY KEY' }, { name: 'user_id', type: 'INTEGER DEFAULT 0' }, { name: 'item_title', type: 'TEXT' }, { name: 'amount', type: 'REAL DEFAULT 0' }] }
+            ];
+            renderDbBuilder();
+            showToast('Загружена realtime-схема магазина!');
+        }
+
+        function generateDatabaseCode(withSound = false) {
+            if (withSound) {
+                Haptic.success();
+                registerRealtimeCurrentUser('db');
+            }
             const createQueries = dbBuilderState.tables.map(t => {
-                const fields = t.cols.map(c => `            ${c.name} ${c.type}`).join(',\n');
-                return `        await db.execute("""\n            CREATE TABLE IF NOT EXISTS ${t.name} (\n${fields}\n            )\n        """)`;
+                const safeTable = (t.name || 'table_1').replace(/[^a-zA-Z0-9_]/g, '_');
+                const fields = t.cols.map(c => `            ${(c.name || 'col').replace(/[^a-zA-Z0-9_]/g, '_')} ${c.type}`).join(',\n');
+                return `        await db.execute("""\n            CREATE TABLE IF NOT EXISTS ${safeTable} (\n${fields}\n            )\n        """)`;
             }).join('\n');
-            const out = `import aiosqlite\n\nDB_PATH = "database.db"\n\nasync def init_db() -> None:\n    async with aiosqlite.connect(DB_PATH) as db:\n        await db.execute("PRAGMA journal_mode=WAL;")\n${createQueries}\n        await db.commit()`;
+
+            const crudHelpers = dbBuilderState.tables.map(t => {
+                const safeTable = (t.name || 'table_1').replace(/[^a-zA-Z0-9_]/g, '_');
+                return `async def get_all_${safeTable}() -> list:\n    async with aiosqlite.connect(DB_PATH) as db:\n        db.row_factory = aiosqlite.Row\n        async with db.execute("SELECT * FROM ${safeTable}") as cur:\n            return [dict(r) for r in await cur.fetchall()]`;
+            }).join('\n\n');
+
+            const out = `import aiosqlite\n\nDB_PATH = "database.db"\n\nasync def init_db() -> None:\n    async with aiosqlite.connect(DB_PATH) as db:\n        await db.execute("PRAGMA journal_mode=WAL;")\n        await db.execute("PRAGMA synchronous=NORMAL;")\n${createQueries}\n        await db.commit()\n\n${crudHelpers}`;
             const el = document.getElementById('db-code');
-            el.dataset.raw = out; el.textContent = out;
-            document.getElementById('db-out-wrap').classList.add('open');
+            if (el) {
+                el.dataset.raw = out;
+                el.textContent = out;
+            }
+            document.getElementById('db-out-wrap')?.classList.add('open');
         }
 
         function downloadDbPyFile() {
-            generateDatabaseCode();
+            generateDatabaseCode(true);
             const raw = document.getElementById('db-code').dataset.raw || '';
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([raw], { type: 'text/x-python' }));
             a.download = 'db.py'; a.click();
         }
 
-        /* ==================== 10. КАСТОМИЗАЦИЯ ПРИЛОЖЕНИЯ, ТУЛЗЫ И СЕЙФ ==================== */
+        /* ==================== 11. КАСТОМИЗАЦИЯ ПРИЛОЖЕНИЯ, ТУЛЗЫ И СЕЙФ ==================== */
         const SITE_THEME_KEY = 'vibe_custom_suite_v3';
         const SAVED_PRESETS_KEY = 'vibe_user_saved_themes_v2';
 
@@ -3221,7 +3463,10 @@
         function switchHubSub(subId, btnEl) {
             Haptic.selection();
             ['sub-golden', 'sub-prompts', 'sub-ideas'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            document.getElementById(subId).classList.remove('hidden');
+            const target = document.getElementById(subId);
+            target.classList.remove('hidden', 'view-enter-anim');
+            void target.offsetWidth;
+            target.classList.add('view-enter-anim');
             document.querySelectorAll('.hub-sub-btn').forEach(b => b.className = 'hub-sub-btn min-h-[40px] text-xs font-medium btn-glass');
             if (btnEl) btnEl.className = 'hub-sub-btn min-h-[40px] text-xs font-semibold chip-active';
         }
@@ -3277,7 +3522,10 @@
             Haptic.tab();
             currentTabId = viewId;
             ['view-studio', 'view-tools', 'view-hub', 'view-vault'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            document.getElementById(viewId).classList.remove('hidden');
+            const target = document.getElementById(viewId);
+            target.classList.remove('hidden', 'view-enter-anim');
+            void target.offsetWidth;
+            target.classList.add('view-enter-anim');
             renderNavigationBar();
             syncPipVisibilityState();
             if (viewId === 'view-vault') renderVault();
@@ -3305,12 +3553,13 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             SoundFX.syncIcon();
+            registerRealtimeCurrentUser();
             if (isOwnerUser()) {
                 const adminBtn = document.getElementById('admin-header-btn');
                 adminBtn.classList.remove('hidden');
                 adminBtn.classList.add('flex');
             }
-            renderOnboardingSlide();
+            renderOnboardingSlide(1);
             initOnboardingSwipe();
             if (localStorage.getItem('vibe_intro_hidden') === 'true') {
                 document.getElementById('intro-welcome-card')?.classList.add('hidden');
@@ -3324,6 +3573,7 @@
             renderBotHub();
             initPreviewPipObserver();
             initRangeScrollGuard();
+            initSmoothScrollMotionBlur();
             checkSponsorGateOnLoad();
         });
     </script>
