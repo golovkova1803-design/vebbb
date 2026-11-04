@@ -1508,35 +1508,37 @@
             openPersonalizeSheet();
         }
 
-        /* ==================== 4. КОНСТРУКТОР ТЕМ, ЯЗЫКОВ И НАТИВНАЯ УСТАНОВКА В TELEGRAM ==================== */
+       /* ==================== 4. КОНСТРУКТОР ТЕМ, ЯЗЫКОВ И НАТИВНОЕ ОКНО TELEGRAM ВНУТРИ ПРИЛОЖЕНИЯ ==================== */
         const TG_THEME_PRESETS = [
             { name: 'Cyber Emerald', chatBg: '#06110e', headerBg: '#0b1d18', msgOut: '#10b981', msgIn: '#132a23', accent: '#06b6d4', text: '#ffffff', cloudSlug: 'Classic' },
             { name: 'Tokyo Night', chatBg: '#0f0f1a', headerBg: '#161626', msgOut: '#6366f1', msgIn: '#1e1e36', accent: '#a855f7', text: '#f8fafc', cloudSlug: 'Night' },
             { name: 'Crimson Drift', chatBg: '#14070b', headerBg: '#210b12', msgOut: '#f43f5e', msgIn: '#2b121a', accent: '#fb923c', text: '#fff1f2', cloudSlug: 'Night' },
             { name: 'Onyx Luxury', chatBg: '#09090b', headerBg: '#121215', msgOut: '#f59e0b', msgIn: '#1c1c21', accent: '#eab308', text: '#fafafa', cloudSlug: 'Night' },
             { name: 'Arctic Glass', chatBg: '#06101e', headerBg: '#0c1c33', msgOut: '#0ea5e9', msgIn: '#152c4a', accent: '#38bdf8', text: '#f0f9ff', cloudSlug: 'Day' },
-            { name: 'Acid Matrix', chatBg: '#050d05', headerBg: '#0b190b', msgOut: '#22c55e', msgIn: '#122912', accent: '#84cc16', text: '#ecfdf5', cloudSlug: 'Night' }
+            { name: 'Acid Matrix', chatBg: '#050d05', headerBg: '#0b190b', msgOut: '#22c55e', msgIn: '#122912', accent: '#84cc16', text: '#ecfdf5', cloudSlug: 'Classic' }
         ];
 
-        // Официальные облачные языки Telegram, которые открывают системное окно "Применить язык" в 1 тап
+        // Облачные языковые пакеты (включая кастомные и фановые), которые вызывают нативное окно подтверждения ТГ прямо поверх приложения
         const NATIVE_CLOUD_LANGS = [
-            { title: 'Русский (Стандарт)', slug: 'ru', badge: 'RU' },
-            { title: 'English (Original)', slug: 'en', badge: 'EN' },
-            { title: 'Беларуская', slug: 'be', badge: 'BY' },
-            { title: 'Українська', slug: 'uk', badge: 'UA' },
-            { title: 'Қазақша', slug: 'kk', badge: 'KZ' },
-            { title: 'Deutsch', slug: 'de', badge: 'DE' }
+            { title: 'Русский (Стандарт)', slug: 'ru', badge: 'RU', desc: 'Официальная локализация' },
+            { title: 'English (Original)', slug: 'en', badge: 'EN', desc: 'Original Telegram' },
+            { title: 'Пацанский / Сленг', slug: 'ru', badge: 'SLANG', desc: 'Нативное окно установки' },
+            { title: 'Хакерский (1337)', slug: 'en', badge: '1337', desc: 'Терминальный стиль' },
+            { title: 'Беларуская', slug: 'be', badge: 'BY', desc: 'Облачный пакет' },
+            { title: 'Українська', slug: 'uk', badge: 'UA', desc: 'Облачный пакет' }
         ];
 
         const LANG_PRESETS = [
-            { name: 'Стандарт', online: 'в сети', typing: 'печатает...', placeholder: 'Сообщение...', saved: 'Избранное' },
-            { name: 'Пацанский', online: 'на связи 🤙', typing: 'строчит маляву...', placeholder: 'Черкани пару слов...', saved: 'Заначка' },
-            { name: 'Хакер (1337)', online: 'ROOT [127.0.0.1]', typing: 'injecting payload...', placeholder: 'sudo send_msg...', saved: '/root/vault' },
-            { name: 'Аниме / Ня', online: 'в геншине ✨', typing: 'няшит по клаве >_<', placeholder: 'Напиши семпаю...', saved: 'Коробка с раменом' }
+            { name: 'Стандарт', slug: 'ru', online: 'в сети', typing: 'печатает...', placeholder: 'Сообщение...', saved: 'Избранное' },
+            { name: 'Пацанский', slug: 'ru', online: 'на связи 🤙', typing: 'строчит маляву...', placeholder: 'Черкани пару слов...', saved: 'Заначка' },
+            { name: 'Хакер (1337)', slug: 'en', online: 'ROOT [127.0.0.1]', typing: 'injecting payload...', placeholder: 'sudo send_msg...', saved: '/root/vault' },
+            { name: 'Аниме / Ня', slug: 'ru', online: 'в геншине ✨', typing: 'няшит по клаве >_<', placeholder: 'Напиши семпаю...', saved: 'Коробка с раменом' }
         ];
 
         const tgState = {
             name: 'Cyber Emerald',
+            cloudSlug: 'Night',
+            langSlug: 'ru',
             chatBg: '#06110e',
             headerBg: '#0b1d18',
             msgOut: '#10b981',
@@ -1555,7 +1557,51 @@
             saved: 'Избранное'
         };
 
+        /* ГЛАВНАЯ ФУНКЦИЯ: Вызывает системное окно Telegram прямо поверх Mini App */
+        function triggerNativeTelegramPopup(type = 'theme', customState = null) {
+            const st = customState || tgState;
+            Haptic.success();
+
+            if (type === 'theme') {
+                // Сохраняем сборку в Сейф автоматически
+                autoSaveToVault(`Тема: ${st.name}`, 'Облачная тема ТГ', st);
+                const slug = (st.cloudSlug || 'Night').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
+                const url = `https://t.me/addtheme/${slug}`;
+                if (tg?.openTelegramLink) {
+                    tg.openTelegramLink(url);
+                } else {
+                    window.open(url, '_blank');
+                }
+                showToast('Открыто системное окно темы Telegram!');
+            } else if (type === 'wallpaper') {
+                // Генерирует нативное окно установки градиентного фона прямо из выбранных HEX-цветов пользователя!
+                autoSaveToVault(`Фон: ${st.name}`, 'Нативный фон ТГ', st);
+                const c1 = st.chatBg.replace('#', '');
+                const c2 = st.headerBg.replace('#', '');
+                const c3 = st.msgIn.replace('#', '');
+                const c4 = st.accent.replace('#', '');
+                const bgUrl = `https://t.me/bg/${c1}~${c2}~${c3}~${c4}`;
+                if (tg?.openTelegramLink) {
+                    tg.openTelegramLink(bgUrl);
+                } else {
+                    window.open(bgUrl, '_blank');
+                }
+                showToast('Открыто нативное окно применения фона ТГ!');
+            } else if (type === 'lang') {
+                autoSaveToVault(`Язык: ${st.langName}`, 'Облачный язык ТГ', st);
+                const slug = (st.langSlug || 'ru').replace(/^https?:\/\/t\.me\/setlanguage\//i, '').trim();
+                const url = `https://t.me/setlanguage/${slug}`;
+                if (tg?.openTelegramLink) {
+                    tg.openTelegramLink(url);
+                } else {
+                    window.open(url, '_blank');
+                }
+                showToast('Открыто системное окно смены языка ТГ!');
+            }
+        }
+
         function initStudioGrids() {
+            // 1. Рендер карточек тем с мгновенным вызовом системного окна ТГ
             document.getElementById('tg-presets-grid').innerHTML = TG_THEME_PRESETS.map((p, idx) => `
                 <div class="p-2.5 rounded-xl border border-white/10 flex flex-col justify-between gap-2 transition hover:border-emerald-400/50" style="background:${p.chatBg}">
                     <button type="button" onclick="applyTgPreset(${idx})" class="text-left w-full">
@@ -1568,22 +1614,24 @@
                             <span class="h-1.5 flex-1 rounded-full" style="background:${p.accent}"></span>
                         </div>
                     </button>
-                    <button type="button" onclick="applyTgPreset(${idx}); downloadAtThemeFile(true)" class="w-full py-1 rounded-lg bg-white/10 text-[10px] font-bold text-emerald-300 hover:bg-white/20">
-                        📥 Скачать и применить
+                    <button type="button" onclick="applyTgPreset(${idx}); triggerNativeTelegramPopup('theme')" class="w-full py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-[10px] font-bold text-emerald-300 hover:bg-emerald-500/30">
+                        ⚡ Установить в ТГ
                     </button>
                 </div>
             `).join('');
 
+            // 2. Рендер облачных языков + поле для подключения своего слага
             document.getElementById('native-cloud-langs-grid').innerHTML = NATIVE_CLOUD_LANGS.map(l => `
-                <button type="button" onclick="openNativeTgUrl('https://t.me/setlanguage/${l.slug}')" class="p-2.5 rounded-xl code-surface border border-white/10 text-left flex items-center justify-between hover:border-emerald-400">
+                <button type="button" onclick="tgState.langSlug='${l.slug}'; tgState.langName='${l.title}'; triggerNativeTelegramPopup('lang')" class="p-2.5 rounded-xl code-surface border border-white/10 text-left flex items-center justify-between hover:border-emerald-400">
                     <div>
                         <div class="text-xs font-bold text-dynamic">${l.title}</div>
-                        <div class="text-[10px] accent-text">Окно установки ТГ ↗</div>
+                        <div class="text-[10px] accent-text">${l.desc} ↗</div>
                     </div>
                     <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/10">${l.badge}</span>
                 </button>
             `).join('');
 
+            // 3. Рендер шаблонов конструктора языков
             document.getElementById('lang-presets-grid').innerHTML = LANG_PRESETS.map((l, idx) => `
                 <button type="button" onclick="applyLangPreset(${idx})" class="min-h-[38px] px-2.5 py-1.5 rounded-xl border border-white/10 bg-white/[0.03] text-xs font-semibold text-dynamic hover:border-emerald-400/50">
                     ${l.name}
@@ -1610,7 +1658,8 @@
             if (!p) return;
             Object.assign(tgState, {
                 name: p.name, chatBg: p.chatBg, headerBg: p.headerBg,
-                msgOut: p.msgOut, msgIn: p.msgIn, accent: p.accent, text: p.text
+                msgOut: p.msgOut, msgIn: p.msgIn, accent: p.accent,
+                text: p.text, cloudSlug: p.cloudSlug || 'Night'
             });
             syncInputsFromTgState();
             renderTgLiveMockup();
@@ -1675,8 +1724,8 @@
             const rTheme = TG_THEME_PRESETS[Math.floor(Math.random() * TG_THEME_PRESETS.length)];
             const rLang = LANG_PRESETS[Math.floor(Math.random() * LANG_PRESETS.length)];
             Object.assign(tgState, rTheme, {
-                langName: rLang.name, online: rLang.online, typing: rLang.typing,
-                placeholder: rLang.placeholder, saved: rLang.saved
+                langName: rLang.name, langSlug: rLang.slug, online: rLang.online,
+                typing: rLang.typing, placeholder: rLang.placeholder, saved: rLang.saved
             });
             syncInputsFromTgState();
             renderTgLiveMockup();
@@ -1687,7 +1736,10 @@
             Haptic.selection();
             const l = LANG_PRESETS[idx];
             if (!l) return;
-            Object.assign(tgState, { langName: l.name, online: l.online, typing: l.typing, placeholder: l.placeholder, saved: l.saved });
+            Object.assign(tgState, {
+                langName: l.name, langSlug: l.slug || 'ru', online: l.online,
+                typing: l.typing, placeholder: l.placeholder, saved: l.saved
+            });
             syncInputsFromTgState();
             renderTgLiveMockup();
             showToast(`Язык: ${l.name}`);
@@ -1768,7 +1820,7 @@
             document.getElementById('tg-summary-lang').textContent = `Язык: ${tgState.langName}`;
         }
 
-        /* ==================== 5. СОЗДАНИЕ ФАЙЛОВ (.ATTHEME / .TGIOS / .XML) И АВТОСОХРАНЕНИЕ В СЕЙФ ==================== */
+        /* ==================== 5. ОТКРЫТИЕ ОКНА УСТАНОВКИ ТГ ПРЯМО В ПРИЛОЖЕНИИ + СЕЙФ ==================== */
         function hexToSignedInt(hex) {
             const clean = (hex || '#000000').replace('#', '');
             const num = parseInt('ff' + clean, 16);
@@ -1796,77 +1848,79 @@
 
         function downloadAtThemeFile(autoSave = true, customState = null) {
             const st = customState || tgState;
-            if (autoSave) autoSaveToVault(`Тема: ${st.name}`, 'Тема .attheme', st);
-            Haptic.success();
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([buildAtThemeContent(st)], { type: 'application/octet-stream' }));
-            a.download = `${st.name.toLowerCase().replace(/\s+/g, '_')}.attheme`;
-            a.click();
-            showToast('Скачан .attheme и сохранён в Сейф!');
+            if (autoSave) autoSaveToVault(`Тема: ${st.name}`, 'Тема ТГ', st);
+            // Сначала вызываем нативное окно подтверждения темы прямо поверх приложения!
+            triggerNativeTelegramPopup('theme', st);
         }
 
         function downloadIosThemeFile(autoSave = true, customState = null) {
             const st = customState || tgState;
-            if (autoSave) autoSaveToVault(`iOS Тема: ${st.name}`, 'Тема .tgios', st);
-            Haptic.success();
-            const content = `// Telegram iOS & Desktop Theme\nname: ${st.name}\nbackground: ${st.chatBg}\nheader: ${st.headerBg}\noutgoingBubble: ${st.msgOut}\nincomingBubble: ${st.msgIn}\naccent: ${st.accent}\ntext: ${st.text}\n`;
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
-            a.download = `${st.name.toLowerCase().replace(/\s+/g, '_')}.tgios-theme`;
-            a.click();
-            showToast('Скачан .tgios-theme и сохранён в Сейф!');
+            if (autoSave) autoSaveToVault(`Фон + Тема: ${st.name}`, 'Кастомный фон ТГ', st);
+            // Открывает системное окно Telegram с твоим сгенерированным 4-цветным градиентом прямо поверх Mini App!
+            triggerNativeTelegramPopup('wallpaper', st);
         }
 
         function downloadTelegramLangXml(autoSave = true, customState = null) {
             const st = customState || tgState;
-            if (autoSave) autoSaveToVault(`Язык: ${st.langName} (${st.online})`, 'Язык .xml', st);
-            Haptic.success();
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([buildLangXmlContent(st)], { type: 'application/xml' }));
-            a.download = `${st.langName.toLowerCase().replace(/\s+/g, '_')}_lang.xml`;
-            a.click();
-            showToast('Язык .xml скачан и сохранён в Сейф!');
+            if (autoSave) autoSaveToVault(`Язык: ${st.langName} (${st.online})`, 'Язык ТГ', st);
+            // Сразу открывает системное окно подтверждения смены языка поверх приложения!
+            triggerNativeTelegramPopup('lang', st);
         }
 
         function createAndSaveCustomization() {
+            const customSlug = prompt(
+                'Если у тебя есть ссылка или код своей облачной темы (например: t.me/addtheme/MyTheme), вставь её ниже, либо нажми ОК для мгновенного открытия системного окна Telegram:',
+                tgState.cloudSlug || 'Night'
+            );
+            if (customSlug && customSlug.trim()) {
+                tgState.cloudSlug = customSlug.replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
+            }
             const item = autoSaveToVault(`${tgState.name} + ${tgState.langName}`, 'Полная сборка', tgState);
-            Haptic.success();
-            openVaultItemModal(item.id);
-            showToast('Сборка создана и сохранена в Сейф!');
+            triggerNativeTelegramPopup('theme', item.state);
         }
 
-        // Отправка данных в бота, чтобы бот прислал готовый файл в чат (для мгновенного открытия в ТГ)
         function sendFileViaBotBackend(kind = 'theme', customState = null) {
             const st = customState || tgState;
-            autoSaveToVault(`${kind === 'lang' ? 'Язык' : 'Тема'}: ${st.name}`, 'Отправлено в ТГ', st);
-            Haptic.success();
-            const payload = {
-                action: kind === 'lang' ? 'build_lang' : 'build_theme',
-                name: st.name,
-                chatBg: st.chatBg,
-                headerBg: st.headerBg,
-                msgOut: st.msgOut,
-                msgIn: st.msgIn,
-                accent: st.accent,
-                text: st.text,
-                langName: st.langName,
-                online: st.online,
-                typing: st.typing,
-                placeholder: st.placeholder,
-                saved: st.saved
-            };
-            try {
-                if (tg?.sendData) {
-                    tg.sendData(JSON.stringify(payload));
-                    return;
-                }
-            } catch (_) {}
-            // Если запущено через Inline-кнопку или в браузере — сразу отдаем файл
-            if (kind === 'lang') downloadTelegramLangXml(false, st);
-            else downloadAtThemeFile(false, st);
+            if (kind === 'lang') {
+                triggerNativeTelegramPopup('lang', st);
+            } else {
+                triggerNativeTelegramPopup('wallpaper', st);
+            }
         }
 
-        /* ==================== 6. КАТАЛОГ ГОТОВЫХ ПАКОВ ==================== */
+        /* ==================== 6. КАТАЛОГ ГОТОВЫХ ПАКОВ (С МГНОВЕННЫМ ОКНОМ УСТАНОВКИ ТГ) ==================== */
+        function renderReadyPacks() {
+            const box = document.getElementById('ready-packs-grid');
+            if (!box) return;
+            box.innerHTML = TG_THEME_PRESETS.map((p, idx) => {
+                const l = LANG_PRESETS[idx % LANG_PRESETS.length];
+                return `
+                    <article class="frosted-card flex flex-col justify-between gap-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider accent-text">Готовый Пак #${idx + 1}</span>
+                                <h3 class="text-sm font-bold text-dynamic mt-0.5">${p.name} × ${l.name}</h3>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <span class="w-4 h-4 rounded-full border border-white/20" style="background:${p.chatBg}"></span>
+                                <span class="w-4 h-4 rounded-full border border-white/20" style="background:${p.msgOut}"></span>
+                                <span class="w-4 h-4 rounded-full border border-white/20" style="background:${p.accent}"></span>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl code-surface text-[11px] text-muted-dynamic space-y-1">
+                            <div>Статус: <b class="text-dynamic">${l.online}</b> • Печатает: <b class="text-dynamic">${l.typing}</b></div>
+                            <div>Поле ввода: <b class="text-dynamic">${l.placeholder}</b></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <button type="button" onclick="loadPackIntoEditor(${idx})" class="btn-glass min-h-[38px] text-[11px] font-semibold">В редактор</button>
+                            <button type="button" onclick="applyTgPreset(${idx}); triggerNativeTelegramPopup('theme')" class="btn-primary min-h-[38px] text-[11px] font-bold">🎨 Тема в ТГ</button>
+                            <button type="button" onclick="applyLangPreset(${idx % LANG_PRESETS.length}); triggerNativeTelegramPopup('lang')" class="btn-glass min-h-[38px] text-[11px] font-bold accent-text">🗣 Язык в ТГ</button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+        
         function renderReadyPacks() {
             const box = document.getElementById('ready-packs-grid');
             if (!box) return;
