@@ -45,14 +45,28 @@
 
             --text-main: #f4f4f5;
             --text-muted: #a1a1aa;
-            --card-bg: #121215;
-            --card-border: rgba(255, 255, 255, 0.07);
+            --card-bg: rgba(18, 18, 21, 0.88);
+            --card-border: rgba(255, 255, 255, 0.08);
             --card-highlight: rgba(255, 255, 255, 0.05);
             --input-bg: rgba(255, 255, 255, 0.04);
             --code-bg: #0c0c0f;
-            --nav-bg: rgba(18, 18, 21, 0.9);
+            --nav-bg: rgba(18, 18, 21, 0.92);
         }
 
+        html.light {
+            --bg-main: #f4f4f5;
+            --surface-1: #ffffff;
+            --text-main: #18181b;
+            --text-muted: #71717a;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(24, 24, 27, 0.09);
+            --card-highlight: rgba(255, 255, 255, 0.9);
+            --input-bg: rgba(24, 24, 27, 0.04);
+            --code-bg: rgba(24, 24, 27, 0.06);
+            --nav-bg: rgba(255, 255, 255, 0.92);
+        }
+
+        /* Режимы плотности */
         html[data-density="compact"] {
             --card-pad: 0.9rem;
             --section-gap: 0.75rem;
@@ -71,14 +85,18 @@
             font-size: 16.8px;
         }
 
+        /* Режимы графики (включая слабые устройства) */
         html[data-fx="min"] { --blur-strength: 0px; }
-        html[data-fx="min"] *, html[data-fx="min"] *::before, html[data-fx="min"] *::after {
+        html[data-fx="min"] *,
+        html[data-fx="min"] *::before,
+        html[data-fx="min"] *::after {
             animation: none !important;
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
         }
         html[data-fx="balanced"] { --blur-strength: 12px; }
-        html[data-fx="max"] { --blur-strength: 22px; }
+        html[data-fx="max"] { --blur-strength: 24px; }
 
         * {
             -webkit-tap-highlight-color: transparent;
@@ -97,13 +115,42 @@
             scroll-behavior: smooth;
         }
 
+        @media (min-width: 1024px) {
+            body.nav-side-desktop {
+                padding-left: 96px;
+                padding-bottom: 40px;
+            }
+            body.nav-side-desktop #main-bottom-nav {
+                left: 20px;
+                top: 50%;
+                bottom: auto;
+                transform: translateY(-50%);
+                width: 76px;
+                border-radius: 28px;
+                padding: 8px;
+            }
+            body.nav-side-desktop #main-bottom-nav .nav-grid {
+                grid-template-columns: 1fr !important;
+                gap: 6px;
+            }
+            body.nav-side-desktop #bottom-nav-pill { display: none; }
+            body.nav-side-desktop #main-bottom-nav button {
+                flex-direction: column;
+                padding: 10px 4px;
+                font-size: 10px;
+            }
+        }
+
+        #main-bottom-nav.icons-only .nav-label { display: none; }
+
         .text-dynamic { color: var(--text-main); }
         .text-muted-dynamic { color: var(--text-muted); }
-        .code-surface { background-color: var(--bg-main); }
+        .code-surface { background-color: var(--code-bg); }
         .accent-text { color: var(--accent-primary); }
         .accent-icon { color: var(--accent-primary); transition: transform 220ms var(--ease-spring), color 200ms ease; }
-        button:hover .accent-icon { transform: scale(1.12); }
+        button:hover .accent-icon { transform: scale(1.14); }
 
+        /* Слои фона сайта */
         .bg-layer {
             position: fixed;
             inset: 0;
@@ -137,6 +184,13 @@
                 radial-gradient(circle at 75% 70%, color-mix(in srgb, var(--accent-secondary) 26%, transparent) 0%, transparent 40%);
             animation: auraFloat 9s ease-in-out infinite;
         }
+        html[data-bg="custom"] #bg-custom-image {
+            background-image: var(--custom-bg-url);
+            background-size: cover;
+            background-position: center;
+            filter: blur(16px) brightness(0.42);
+            transform: scale(1.06);
+        }
 
         .frosted-card {
             position: relative;
@@ -147,31 +201,22 @@
             backdrop-filter: blur(var(--blur-strength));
             -webkit-backdrop-filter: blur(var(--blur-strength));
             border: 1px solid var(--card-border);
-            box-shadow: 0 12px 32px -14px rgba(0,0,0,.6), inset 0 1px 0 0 var(--card-highlight);
+            box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.55), inset 0 1px 0 0 var(--card-highlight);
             transform: translateZ(0);
             transition: transform 260ms var(--ease-ios), border-color 220ms ease, box-shadow 260ms var(--ease-ios), padding 220ms ease, border-radius 220ms ease;
         }
         .frosted-card > * { position: relative; z-index: 1; }
 
+        /* Чистая шапка без баннера */
         .frosted-header {
             position: sticky;
             top: 0;
             z-index: 30;
-            overflow: hidden;
-            background: rgba(9, 11, 18, 0.82);
+            background: var(--nav-bg);
             backdrop-filter: blur(var(--blur-strength));
             -webkit-backdrop-filter: blur(var(--blur-strength));
-            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            border-bottom: 1px solid var(--card-border);
         }
-
-        @keyframes spin3dY {
-            0% { transform: perspective(400px) rotateY(0deg); }
-            50% { transform: perspective(400px) rotateY(180deg) scale(1.08); }
-            100% { transform: perspective(400px) rotateY(360deg); }
-        }
-        .ai-3d-spin-1 { animation: spin3dY 4.5s linear infinite; }
-        .ai-3d-spin-2 { animation: spin3dY 4.5s linear infinite 0.4s; }
-        .ai-3d-spin-3 { animation: spin3dY 4.5s linear infinite 0.8s; }
 
         .frosted-nav {
             background: var(--nav-bg);
@@ -209,6 +254,13 @@
             box-shadow: 0 6px 18px color-mix(in srgb, var(--accent-primary) 28%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.28);
         }
 
+        .btn-gold {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #ffffff;
+            border-radius: var(--r-inner);
+            box-shadow: 0 5px 16px rgba(245, 158, 11, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
         .btn-glass {
             background: var(--input-bg);
             border: 1px solid var(--card-border);
@@ -222,10 +274,14 @@
         }
 
         .header-glass-btn {
-            background: rgba(18, 18, 21, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #ffffff;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
             border-radius: var(--r-chip);
+        }
+        .header-glass-btn:hover {
+            background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
+            border-color: color-mix(in srgb, var(--accent-primary) 45%, transparent);
         }
 
         input[type="range"].ios-slider {
@@ -252,21 +308,6 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         }
 
-        .expand-grid {
-            display: grid;
-            grid-template-rows: 0fr;
-            opacity: 0;
-            visibility: hidden;
-            transition: grid-template-rows 300ms var(--ease-ios), opacity 220ms ease, visibility 0s linear 300ms;
-        }
-        .expand-grid.open {
-            grid-template-rows: 1fr;
-            opacity: 1;
-            visibility: visible;
-            transition: grid-template-rows 300ms var(--ease-ios), opacity 220ms ease, visibility 0s;
-        }
-        .expand-inner { overflow: hidden; }
-
         .sheet-backdrop { opacity: 0; pointer-events: none; transition: opacity 220ms ease; }
         .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
         .bottom-sheet {
@@ -280,9 +321,18 @@
             transition: transform 300ms var(--ease-ios), visibility 0s;
         }
 
+        @keyframes riseIn {
+            from { opacity: 0; transform: translate3d(0, 14px, 0); }
+            to { opacity: 1; transform: none; }
+        }
+        .animate-view-enter > * { animation: riseIn 380ms var(--ease-ios) backwards; }
+        .animate-view-enter > *:nth-child(2) { animation-delay: 55ms; }
+        .animate-view-enter > *:nth-child(3) { animation-delay: 110ms; }
+        .animate-view-enter > *:nth-child(4) { animation-delay: 160ms; }
+
         .space-dynamic > * + * { margin-top: var(--section-gap); }
 
-        /* Онбординг: неоновая бегущая рамка */
+        /* Онбординг с бегущим неоном */
         @property --neon-ang { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         @keyframes neonBorderFlow { to { --neon-ang: 360deg; } }
         .neon-card { position: relative; background: var(--surface-1); border-radius: var(--site-radius); overflow: hidden; }
@@ -306,7 +356,7 @@
         #pip-handle button { width: 24px; height: 22px; border-radius: 8px; background: var(--input-bg); color: var(--text-main); font-weight: 700; }
         #pip-window.pip {
             position: fixed; z-index: 45; width: 220px; padding: 8px;
-            box-shadow: 0 18px 40px -8px rgba(0,0,0,.78), 0 0 0 1px color-mix(in srgb, var(--accent-primary) 35%, transparent);
+            box-shadow: 0 18px 40px -8px rgba(0,0,0,.78), 0 0 0 1px color-mix(in srgb, var(--accent-primary) 38%, transparent);
             animation: pipPop 460ms var(--ease-spring);
             backdrop-filter: none; -webkit-backdrop-filter: none;
         }
@@ -322,62 +372,68 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
 
-    <!-- Слои фона -->
+    <!-- Слои фона приложения -->
+    <div id="bg-custom-image" class="bg-layer"></div>
     <div id="bg-gradient-layer" class="bg-layer"></div>
     <div id="bg-pattern-layer" class="bg-layer"></div>
 
-    <!-- ==================== ШАПКА ==================== -->
-    <header class="frosted-header select-none">
-        <div class="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-            <div class="w-full h-full flex items-center justify-center bg-black px-3">
-                <div class="flex items-center justify-center gap-4 sm:gap-6 w-full max-w-xl opacity-85">
-                    <svg class="w-24 sm:w-32 h-9" viewBox="0 0 160 50" fill="none">
-                        <path d="M0 32 C35 30, 65 20, 95 22 C112 23, 128 16, 148 17 C154 17, 154 22, 146 23 C130 23, 118 27, 108 29 C120 31, 132 33, 138 35 C142 36, 139 40, 133 39 C120 36, 105 34, 92 35 C70 37, 35 42, 0 44 Z" fill="#dfb995"/>
-                    </svg>
-                    <div class="flex items-center gap-2.5 shrink-0">
-                        <div class="ai-3d-spin-1 w-7 h-7 rounded-full bg-white/15 border border-white/30 flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
-                        </div>
-                        <div class="ai-3d-spin-2 w-7 h-7 flex items-center justify-center">
-                            <svg class="w-6 h-6" viewBox="0 0 24 24"><path fill="var(--accent-primary)" d="M12 1 C12.8 7.2, 16.8 11.2, 23 12 C16.8 12.8, 12.8 16.8, 12 23 C11.2 16.8, 7.2 12.8, 1 12 C7.2 11.2, 11.2 7.2, 12 1 Z"/></svg>
-                        </div>
-                        <div class="ai-3d-spin-3 w-7 h-7 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
-                        </div>
-                    </div>
-                    <svg class="w-24 sm:w-32 h-9" viewBox="0 0 160 50" fill="none">
-                        <path d="M160 28 C125 26, 95 16, 65 18 C48 19, 32 14, 12 15 C6 15, 6 20, 14 21 C30 21, 42 25, 52 27 C40 29, 28 32, 22 34 C18 35, 21 39, 27 38 C40 35, 55 32, 68 33 C90 35, 125 40, 160 42 Z" fill="#dfb995"/>
-                    </svg>
-                </div>
+    <!-- ==================== ПОЛНОЭКРАННЫЙ SPONSOR GATE (ОП) ==================== -->
+    <div id="sponsor-gate-overlay" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden items-center justify-center p-4">
+        <div class="frosted-card max-w-sm w-full text-center space-y-4 border border-emerald-400/40">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center mx-auto">
+                <svg class="w-6 h-6 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
-            <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/85"></div>
+            <div>
+                <h2 class="text-base font-bold text-dynamic">Доступ к TG Custom Studio</h2>
+                <p class="text-xs text-muted-dynamic mt-1">Для бесплатного скачивания тем и языков подпишись на спонсорские каналы ниже:</p>
+            </div>
+            <div id="sponsor-gate-channels-list" class="space-y-2 text-left"></div>
+            <button type="button" onclick="verifySponsorGateAccess()" class="btn-primary w-full min-h-[44px] text-xs font-bold">Я подписался — Открыть студию ✓</button>
         </div>
+    </div>
 
-        <div class="relative z-10 px-4 lg:px-8 py-2.5 max-w-md lg:max-w-6xl mx-auto">
+    <!-- ==================== КОМПАКТНАЯ ШАПКА БЕЗ БАННЕРА ==================== -->
+    <header class="frosted-header select-none">
+        <div class="px-4 lg:px-8 py-2.5 max-w-md lg:max-w-6xl mx-auto">
             <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-black/55 border border-white/20 flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    <div class="w-9 h-9 rounded-xl code-surface border border-white/15 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
                     </div>
                     <div>
                         <div class="flex items-center gap-1.5">
-                            <h1 class="text-sm lg:text-base font-bold tracking-tight text-white">TG CUSTOM STUDIO</h1>
-                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 accent-text border border-emerald-400/30">PRO</span>
+                            <h1 class="text-sm lg:text-base font-bold tracking-tight text-dynamic">TG STUDIO</h1>
+                            <button type="button" onclick="openVipModal()" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 flex items-center gap-1">
+                                <span id="header-refs-count">VIP 0/3</span>
+                            </button>
                         </div>
-                        <p class="text-[11px] text-slate-300">by @darxxx1zq</p>
+                        <p class="text-[11px] text-muted-dynamic">by @darxxx1zq</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-1.5">
-                    <button type="button" onclick="openOnboarding(0)" class="header-glass-btn min-h-[38px] px-2.5 flex items-center gap-1 text-[11px] font-semibold">
+                    <!-- Кнопка Админ-панели -->
+                    <button type="button" id="admin-header-btn" onclick="openAdminPanelSheet('users')" class="header-glass-btn min-h-[38px] px-2.5 flex items-center gap-1.5 text-[11px] font-bold text-rose-400 border-rose-400/40" title="Админ-панель">
+                        <svg class="w-4 h-4 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <span class="hidden sm:inline">Админ</span>
+                    </button>
+
+                    <!-- Гид (онбординг) -->
+                    <button type="button" onclick="openOnboarding(0)" class="header-glass-btn min-h-[38px] px-2.5 flex items-center gap-1 text-[11px] font-semibold" title="Гид по студии">
                         <span class="text-sm leading-none accent-text">✦</span>
                         <span class="hidden sm:inline">Гид</span>
                     </button>
-                    <button type="button" onclick="openAppStyleSheet()" class="header-glass-btn min-h-[38px] px-2.5 flex items-center gap-1 text-[11px] font-semibold">
+
+                    <!-- Стиль приложения (9 настроек + режимы графики + загрузка своего фона) -->
+                    <button type="button" onclick="openPersonalizeSheet()" class="header-glass-btn min-h-[38px] px-2.5 flex items-center gap-1 text-[11px] font-semibold" title="Кастомизация и Графика">
                         <svg class="w-4 h-4 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
                         <span>Стиль</span>
                     </button>
-                    <button type="button" onclick="SoundFX.toggleMute()" class="header-glass-btn min-w-[38px] min-h-[38px] flex items-center justify-center">
+
+                    <!-- Звук -->
+                    <button type="button" onclick="SoundFX.toggleMute()" id="sound-toggle-btn" aria-label="Звук" class="header-glass-btn min-w-[38px] min-h-[38px] flex items-center justify-center">
                         <svg id="svg-sound-on" class="w-4 h-4 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
                         <svg id="svg-sound-off" class="w-4 h-4 text-rose-400 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
                     </button>
@@ -400,16 +456,16 @@
         </div>
     </div>
 
-    <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
+    <!-- ==================== ОСНОВНОЙ КОНТЕЙНЕР ==================== -->
     <main class="flex-1 px-4 lg:px-8 pt-4 max-w-md lg:max-w-6xl mx-auto w-full relative z-10 space-dynamic">
 
-        <!-- ВКЛАДКА 1: КОНСТРУКТОР (ТЕМЫ + ЯЗЫКИ + ТВИКИ) -->
-        <section id="view-studio" class="space-dynamic">
+        <!-- ==================== ВКЛАДКА 1: КОНСТРУКТОР ТЕМ И ЯЗЫКОВ ==================== -->
+        <section id="view-studio" class="space-dynamic animate-view-enter">
 
-            <!-- Переключатель режимов -->
+            <!-- Переключатель режимов конструктора -->
             <div class="frosted-card !p-1.5 max-w-xl mx-auto">
                 <div class="relative grid grid-cols-3 items-center">
-                    <div id="builder-mode-pill" class="absolute top-0 bottom-0 left-0 w-1/3 rounded-2xl bg-white/[0.08] border border-white/15 transition-transform duration-300 ease-ios pointer-events-none"></div>
+                    <div id="builder-mode-pill" class="absolute top-0 bottom-0 left-0 w-1/3 rounded-2xl bg-white/[0.1] border border-white/20 transition-transform duration-300 ease-ios pointer-events-none"></div>
                     <button type="button" onclick="switchStudioMode('theme')" id="mode-btn-theme" class="relative z-10 min-h-[42px] rounded-2xl text-xs font-bold accent-text flex items-center justify-center gap-1.5">
                         <span>🎨 Темы ТГ</span>
                     </button>
@@ -424,21 +480,23 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-                <!-- ЛЕВАЯ КОЛОНКА: ЖИВОЕ ПРЕВЬЮ ЧАТА TELEGRAM (С ПЛАВАЮЩИМ PiP-ОКНОМ) -->
+                <!-- ЛЕВАЯ КОЛОНКА: ЖИВОЕ ПРЕВЬЮ ЧАТА TELEGRAM + ПЛАВАЮЩЕЕ PiP-ОКНО -->
                 <div class="lg:col-span-5 lg:sticky lg:top-24 space-y-3.5">
                     <div id="pip-slot">
                         <article id="pip-window" class="frosted-card">
                             <div id="pip-handle">
-                                <span>⠿ Живое превью чата</span>
+                                <span>⠿ Перетащи превью</span>
                                 <button type="button" id="pip-min" aria-label="Свернуть">—</button>
                             </div>
 
                             <div class="pip-hide flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                    <span id="preview-title-badge" class="text-xs font-bold text-dynamic">Превью Telegram</span>
+                                    <span class="text-xs font-bold text-dynamic">Живой макет Telegram</span>
                                 </div>
-                                <button type="button" onclick="randomizeTgTheme()" class="btn-glass px-2.5 py-1 text-[11px] font-semibold accent-text">🎲 Рандом</button>
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" onclick="randomizeTgTheme()" class="btn-glass px-2.5 py-1 text-[11px] font-semibold accent-text">🎲 Рандом</button>
+                                </div>
                             </div>
 
                             <!-- Макет чата Telegram -->
@@ -449,30 +507,31 @@
                                         <div class="flex items-center gap-2.5">
                                             <div id="tg-mock-avatar" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white">D</div>
                                             <div>
-                                                <div class="text-xs font-bold text-white leading-tight">Darxy Studio</div>
-                                                <div id="tg-mock-status" class="text-[10px] opacity-80">в сети</div>
+                                                <div id="tg-mock-title" class="text-xs font-bold text-white leading-tight">Избранное</div>
+                                                <div id="tg-mock-status" class="text-[10px] opacity-85">в сети</div>
                                             </div>
                                         </div>
-                                        <span class="text-[10px] font-mono opacity-60">TG Preview</span>
+                                        <span id="tg-mock-typing-pill" class="text-[10px] font-mono opacity-75">печатает...</span>
                                     </div>
 
-                                    <!-- Сообщения чата -->
+                                    <!-- Область сообщений с кастомными обоями -->
                                     <div id="tg-mock-chat-bg" class="flex-1 p-3.5 space-y-2.5 flex flex-col justify-center relative overflow-hidden">
+                                        <div id="tg-mock-wallpaper-img" class="absolute inset-0 bg-cover bg-center pointer-events-none opacity-45 hidden"></div>
                                         <div id="tg-mock-pattern" class="absolute inset-0 pointer-events-none opacity-25"></div>
 
-                                        <div id="tg-mock-msg-in" class="relative z-10 max-w-[82%] self-start px-3 py-2 text-xs shadow-sm">
-                                            <div id="tg-mock-in-title" class="font-bold text-[10px] mb-0.5">Телеграм Клуб</div>
-                                            <div id="tg-mock-in-text">Зацени новую кастомную тему и перевод интерфейса! 🔥</div>
+                                        <div id="tg-mock-msg-in" class="relative z-10 max-w-[84%] self-start px-3 py-2 text-xs shadow-sm transition-all">
+                                            <div id="tg-mock-in-title" class="font-bold text-[10px] mb-0.5">TG Custom Studio</div>
+                                            <div id="tg-mock-in-text">Твоя кастомная тема и перевод готовы! Нажми кнопку ниже — Telegram сразу предложит установить их 🔥</div>
                                             <div class="text-[9px] opacity-60 text-right mt-1">14:20</div>
                                         </div>
 
-                                        <div id="tg-mock-msg-out" class="relative z-10 max-w-[82%] self-end px-3 py-2 text-xs shadow-sm">
-                                            <div id="tg-mock-out-text">Выглядит пушечно, скачиваю файл в один клик 🚀</div>
-                                            <div class="text-[9px] opacity-75 text-right mt-1"><span id="tg-mock-read">✓✓</span> 14:21</div>
+                                        <div id="tg-mock-msg-out" class="relative z-10 max-w-[84%] self-end px-3 py-2 text-xs shadow-sm transition-all">
+                                            <div id="tg-mock-out-text">Огонь! И в Сейф автоматически сохранилось 🚀</div>
+                                            <div class="text-[9px] opacity-80 text-right mt-1"><span id="tg-mock-read">✓✓</span> 14:21</div>
                                         </div>
                                     </div>
 
-                                    <!-- Поле ввода чата -->
+                                    <!-- Нижняя панель ввода -->
                                     <div id="tg-mock-input-bar" class="px-3 py-2 flex items-center gap-2 border-t border-white/10">
                                         <div id="tg-mock-placeholder" class="flex-1 text-[11px] opacity-60 truncate">Сообщение...</div>
                                         <div id="tg-mock-send-btn" class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold">↑</div>
@@ -487,45 +546,58 @@
                         </article>
                     </div>
 
-                    <!-- Кнопки экспорта -->
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="downloadAtThemeFile()" class="btn-primary min-h-[46px] text-xs font-bold flex items-center justify-center gap-1.5">
-                            <span>📥 Скачать .attheme</span>
+                    <!-- Кнопки создания, автосохранения в Сейф и отправки в Telegram -->
+                    <div class="grid grid-cols-1 gap-2">
+                        <button type="button" onclick="createAndSaveCustomization()" class="btn-primary w-full min-h-[48px] text-xs font-bold flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+                            <span>Создать, сохранить в Сейф и установить в ТГ</span>
                         </button>
-                        <button type="button" onclick="downloadIosThemeFile()" class="btn-glass min-h-[46px] text-xs font-bold accent-text flex items-center justify-center gap-1.5">
-                            <span>🍏 iOS / Desktop</span>
-                        </button>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" onclick="downloadAtThemeFile(true)" class="btn-glass min-h-[42px] text-[11px] font-bold text-emerald-400">📥 .attheme</button>
+                            <button type="button" onclick="downloadIosThemeFile(true)" class="btn-glass min-h-[42px] text-[11px] font-bold accent-text">🍏 .tgios</button>
+                            <button type="button" onclick="sendFileViaBotBackend('theme')" class="btn-glass min-h-[42px] text-[11px] font-bold text-amber-300" title="Бот пришлет готовый файл прямо в чат">🤖 В чат бота</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- ПРАВАЯ КОЛОНКА: НАСТРОЙКИ ВЫБРАННОГО РЕЖИМА -->
+                <!-- ПРАВАЯ КОЛОНКА: НАСТРОЙКИ -->
                 <div class="lg:col-span-7 space-dynamic">
 
-                    <!-- Вкладка A: ГЕНЕРАТОР ТЕМ TELEGRAM -->
+                    <!-- РЕЖИМ A: ТЕМЫ TELEGRAM -->
                     <div id="panel-studio-theme" class="space-dynamic">
                         <article class="frosted-card space-y-3.5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Шаг 1 • Готовые палитры</span>
-                                    <h3 class="text-sm font-bold text-dynamic mt-0.5">Выбери базу или настрой цвета вручную</h3>
+                                    <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Шаг 1 • Готовые темы Telegram</span>
+                                    <h3 class="text-sm font-bold text-dynamic mt-0.5">Мгновенная установка в 1 клик или кастом базы</h3>
                                 </div>
-                                <button type="button" onclick="saveCurrentToVault('Тема: ' + tgState.name)" class="btn-glass px-3 py-1.5 text-[11px] font-semibold accent-text">＋ В Сейф</button>
+                                <input id="custom-theme-title" type="text" value="Cyber Emerald" oninput="tgState.name=this.value; renderTgLiveMockup()" class="frosted-input min-h-[34px] px-2.5 text-xs font-semibold w-36 text-right" placeholder="Название темы">
                             </div>
 
                             <div id="tg-presets-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
                         </article>
 
+                        <!-- Загрузка своего фона в чат Telegram + цвета -->
                         <article class="frosted-card space-y-4">
-                            <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Шаг 2 • Точечная покраска элементов чата</span>
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Шаг 2 • Палитра чата и Свои Обои</span>
+                                    <h3 class="text-sm font-bold text-dynamic mt-0.5">Настрой цвета бабблов и загрузи свой фон чата</h3>
+                                </div>
+                                <label class="btn-glass px-3 py-1.5 text-[11px] font-semibold accent-text cursor-pointer flex items-center gap-1.5">
+                                    <span>🖼 Свой фон чата</span>
+                                    <input type="file" accept="image/*" onchange="handleChatWallpaperUpload(this.files)" class="hidden">
+                                </label>
+                            </div>
 
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                                 <label class="p-2.5 rounded-xl code-surface flex items-center justify-between cursor-pointer">
                                     <span class="text-xs text-muted-dynamic">Фон чата</span>
-                                    <input type="color" id="col-chat-bg" value="#090d16" oninput="updateTgColor('chatBg', this.value)" class="w-6 h-6 bg-transparent border-0 cursor-pointer">
+                                    <input type="color" id="col-chat-bg" value="#06110e" oninput="updateTgColor('chatBg', this.value)" class="w-6 h-6 bg-transparent border-0 cursor-pointer">
                                 </label>
                                 <label class="p-2.5 rounded-xl code-surface flex items-center justify-between cursor-pointer">
                                     <span class="text-xs text-muted-dynamic">Шапка и бар</span>
-                                    <input type="color" id="col-header-bg" value="#111827" oninput="updateTgColor('headerBg', this.value)" class="w-6 h-6 bg-transparent border-0 cursor-pointer">
+                                    <input type="color" id="col-header-bg" value="#0b1d18" oninput="updateTgColor('headerBg', this.value)" class="w-6 h-6 bg-transparent border-0 cursor-pointer">
                                 </label>
                                 <label class="p-2.5 rounded-xl code-surface flex items-center justify-between cursor-pointer">
                                     <span class="text-xs text-muted-dynamic">Мои сообщ.</span>
@@ -533,14 +605,14 @@
                                 </label>
                                 <label class="p-2.5 rounded-xl code-surface flex items-center justify-between cursor-pointer">
                                     <span class="text-xs text-muted-dynamic">Входящие</span>
-                                    <input type="color" id="col-msg-in" value="#1e293b" oninput="updateTgColor('msgIn', this.value)" class="w-6 h-6 bg-transparent border-0 cursor-pointer">
+                                    <input type="color" id="col-msg-in" value="#132a23" oninput="updateTgColor('msgIn', this.value)" class="w-6 h-6 bg-transparent border-0 cursor-pointer">
                                 </label>
                                 <label class="p-2.5 rounded-xl code-surface flex items-center justify-between cursor-pointer">
-                                    <span class="text-xs text-muted-dynamic">Акцент / Иконки</span>
+                                    <span class="text-xs text-muted-dynamic">Акцент</span>
                                     <input type="color" id="col-accent" value="#06b6d4" oninput="updateTgColor('accent', this.value)" class="w-6 h-6 bg-transparent border-0 cursor-pointer">
                                 </label>
                                 <label class="p-2.5 rounded-xl code-surface flex items-center justify-between cursor-pointer">
-                                    <span class="text-xs text-muted-dynamic">Текст сообщ.</span>
+                                    <span class="text-xs text-muted-dynamic">Текст</span>
                                     <input type="color" id="col-text" value="#ffffff" oninput="updateTgColor('text', this.value)" class="w-6 h-6 bg-transparent border-0 cursor-pointer">
                                 </label>
                             </div>
@@ -548,33 +620,45 @@
                             <div class="pt-3 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                                 <div>
                                     <div class="flex justify-between text-xs mb-1">
-                                        <span class="text-dynamic">Скругление бабблов сообщений</span>
+                                        <span class="text-dynamic">Скругление сообщений</span>
                                         <span id="val-bubble-rad" class="font-mono accent-text font-semibold">16px</span>
                                     </div>
                                     <input type="range" id="slider-bubble-rad" min="4" max="24" step="2" value="16" oninput="updateTgSliders()" class="ios-slider">
                                 </div>
                                 <div>
                                     <div class="flex justify-between text-xs mb-1">
-                                        <span class="text-dynamic">Прозрачность узора обоев</span>
+                                        <span class="text-dynamic">Яркость узора / обоев</span>
                                         <span id="val-pattern-op" class="font-mono accent-text font-semibold">25%</span>
                                     </div>
-                                    <input type="range" id="slider-pattern-op" min="0" max="70" step="5" value="25" oninput="updateTgSliders()" class="ios-slider">
+                                    <input type="range" id="slider-pattern-op" min="0" max="85" step="5" value="25" oninput="updateTgSliders()" class="ios-slider">
                                 </div>
                             </div>
                         </article>
                     </div>
 
-                    <!-- Вкладка B: КОНСТРУКТОР ЯЗЫКОВ TELEGRAM -->
+                    <!-- РЕЖИМ B: КОНСТРУКТОР ЯЗЫКОВ И ГОТОВЫЕ ОБЛАЧНЫЕ ПАКЕТЫ -->
                     <div id="panel-studio-lang" class="hidden space-dynamic">
-                        <article class="frosted-card space-y-3.5">
+                        <!-- Мгновенная установка облачных языков в 1 клик (Telegram сам предлагает Применить язык) -->
+                        <article class="frosted-card space-y-3">
                             <div>
-                                <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Конструктор локализаций</span>
-                                <h3 class="text-sm font-bold text-dynamic mt-0.5">Выбери фановый языковой пресет или перепиши фразы ТГ</h3>
+                                <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Облачные языки Telegram (Установка в 1 тап)</span>
+                                <h3 class="text-sm font-bold text-dynamic mt-0.5">Нажми — и Telegram сразу откроет окно «Изменить язык?»</h3>
+                            </div>
+                            <div id="native-cloud-langs-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                        </article>
+
+                        <!-- Свой кастомный конструктор языка (.XML) -->
+                        <article class="frosted-card space-y-3.5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Свой перевод интерфейса (.XML)</span>
+                                    <h3 class="text-sm font-bold text-dynamic mt-0.5">Выбери шаблон или впиши свои слова</h3>
+                                </div>
                             </div>
 
                             <div id="lang-presets-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
 
-                            <div class="space-y-2.5 pt-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                                 <div>
                                     <label class="text-[11px] text-muted-dynamic block mb-1">Статус «в сети» (Online):</label>
                                     <input id="lang-online" type="text" value="в сети" oninput="syncLangPreview()" class="frosted-input w-full min-h-[38px] px-3 text-xs">
@@ -584,53 +668,67 @@
                                     <input id="lang-typing" type="text" value="печатает..." oninput="syncLangPreview()" class="frosted-input w-full min-h-[38px] px-3 text-xs">
                                 </div>
                                 <div>
-                                    <label class="text-[11px] text-muted-dynamic block mb-1">Подсказка поля ввода (Message...):</label>
+                                    <label class="text-[11px] text-muted-dynamic block mb-1">Поле ввода (Message...):</label>
                                     <input id="lang-placeholder" type="text" value="Сообщение..." oninput="syncLangPreview()" class="frosted-input w-full min-h-[38px] px-3 text-xs">
                                 </div>
                                 <div>
-                                    <label class="text-[11px] text-muted-dynamic block mb-1">Папка «Избранное» (Saved Messages):</label>
+                                    <label class="text-[11px] text-muted-dynamic block mb-1">Чат «Избранное» (Saved):</label>
                                     <input id="lang-saved" type="text" value="Избранное" oninput="syncLangPreview()" class="frosted-input w-full min-h-[38px] px-3 text-xs">
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-2 pt-2">
-                                <button type="button" onclick="downloadTelegramLangXml()" class="btn-primary min-h-[44px] text-xs font-bold">📥 Скачать язык (.xml)</button>
-                                <button type="button" onclick="saveCurrentToVault('Язык: ' + document.getElementById('lang-online').value)" class="btn-glass min-h-[44px] text-xs font-semibold accent-text">Сохранить в Сейф</button>
+                                <button type="button" onclick="downloadTelegramLangXml(true)" class="btn-primary min-h-[44px] text-xs font-bold">📥 Скачать язык (.xml) + В Сейф</button>
+                                <button type="button" onclick="sendFileViaBotBackend('lang')" class="btn-glass min-h-[44px] text-xs font-bold text-amber-300">🤖 Прислать файл через бота</button>
                             </div>
                         </article>
                     </div>
 
-                    <!-- Вкладка C: КАСТОМИЗАЦИЯ И ФИШКИ TELEGRAM -->
+                    <!-- РЕЖИМ C: КАСТОМИЗАЦИЯ И ОБЛАЧНЫЕ ТЕМЫ TELEGRAM -->
                     <div id="panel-studio-tweaks" class="hidden space-dynamic">
                         <article class="frosted-card space-y-3.5">
                             <div>
-                                <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Кастомизация клиента</span>
-                                <h3 class="text-sm font-bold text-dynamic mt-0.5">Секретные настройки, эмодзи-статусы и твики</h3>
+                                <span class="text-[11px] font-semibold uppercase tracking-wider accent-text">Облачные темы и системные окна ТГ</span>
+                                <h3 class="text-sm font-bold text-dynamic mt-0.5">Открываются нативным окном внутри Telegram</h3>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <button type="button" onclick="openNativeTgUrl('https://t.me/addtheme/Day')" class="p-3 rounded-2xl code-surface border border-white/10 text-left flex items-center justify-between hover:border-emerald-400">
+                                    <div>
+                                        <div class="text-xs font-bold text-dynamic">Официальная Classic Day</div>
+                                        <div class="text-[10px] text-muted-dynamic">Мгновенное окно применения</div>
+                                    </div>
+                                    <span class="text-xs font-bold accent-text">Установить ↗</span>
+                                </button>
+                                <button type="button" onclick="openNativeTgUrl('https://t.me/addtheme/Night')" class="p-3 rounded-2xl code-surface border border-white/10 text-left flex items-center justify-between hover:border-emerald-400">
+                                    <div>
+                                        <div class="text-xs font-bold text-dynamic">Официальная Night Blue</div>
+                                        <div class="text-[10px] text-muted-dynamic">Мгновенное окно применения</div>
+                                    </div>
+                                    <span class="text-xs font-bold accent-text">Установить ↗</span>
+                                </button>
                             </div>
 
-                            <div class="space-y-2.5">
+                            <div class="space-y-2.5 pt-2">
                                 <div class="p-3 rounded-2xl code-surface flex items-center justify-between gap-3">
                                     <div>
                                         <div class="text-xs font-bold text-dynamic">Неоновое свечение своих сообщений</div>
-                                        <div class="text-[11px] text-muted-dynamic">Добавляет мягкий glow-эффект на бабблы в чате</div>
+                                        <div class="text-[11px] text-muted-dynamic">Добавляет glow-эффект на исходящие бабблы</div>
                                     </div>
                                     <input type="checkbox" id="tweak-glow" onchange="applyTgTweaks()" class="w-5 h-5 accent-emerald-500 cursor-pointer">
                                 </div>
-
                                 <div class="p-3 rounded-2xl code-surface flex items-center justify-between gap-3">
                                     <div>
-                                        <div class="text-xs font-bold text-dynamic">Сетка Киберпанк на обоях чата</div>
-                                        <div class="text-[11px] text-muted-dynamic">Включает геометрический паттерн поверх фона</div>
+                                        <div class="text-xs font-bold text-dynamic">Точечный матричный паттерн чата</div>
+                                        <div class="text-[11px] text-muted-dynamic">Геометрическая сетка поверх фона</div>
                                     </div>
                                     <input type="checkbox" id="tweak-grid" checked onchange="applyTgTweaks()" class="w-5 h-5 accent-emerald-500 cursor-pointer">
                                 </div>
-
                                 <div class="p-3 rounded-2xl code-surface flex items-center justify-between gap-3">
                                     <div>
-                                        <div class="text-xs font-bold text-dynamic">Скрыть нижнюю панель в каналах</div>
-                                        <div class="text-[11px] text-muted-dynamic">Генерирует быстрый tg:// конфиг для чистых чатов</div>
+                                        <div class="text-xs font-bold text-dynamic">Сбросить свой загруженный фон чата</div>
+                                        <div class="text-[11px] text-muted-dynamic">Вернуть чистую заливку цветом</div>
                                     </div>
-                                    <button type="button" onclick="copyText('tg://settings/themes')" class="btn-glass px-3 py-1.5 text-[11px] font-semibold accent-text">Скопировать ссылку</button>
+                                    <button type="button" onclick="clearChatWallpaper()" class="btn-glass px-3 py-1.5 text-[11px] text-rose-400 font-semibold">Сбросить обои</button>
                                 </div>
                             </div>
                         </article>
@@ -640,59 +738,72 @@
             </div>
         </section>
 
-        <!-- ВКЛАДКА 2: СЕЙФ СОХРАНЕННЫХ ТЕМ И ЯЗЫКОВ -->
-        <section id="view-vault" class="hidden space-dynamic">
-            <div class="frosted-card flex items-center justify-between">
+        <!-- ==================== ВКЛАДКА 2: ГОТОВЫЕ ПАКИ ==================== -->
+        <section id="view-packs" class="hidden space-dynamic animate-view-enter">
+            <div class="frosted-card flex flex-wrap items-center justify-between gap-2">
                 <div>
-                    <h2 class="text-sm font-bold text-dynamic">Мой Сейф кастомизаций</h2>
-                    <p class="text-[11px] text-muted-dynamic">Сохраненные цветовые схемы и языковые пакеты</p>
+                    <h2 class="text-sm font-bold text-dynamic">Каталог готовых сборок (Тема + Язык)</h2>
+                    <p class="text-[11px] text-muted-dynamic">Нажми «Открыть в редакторе», чтобы загрузить сборку, или сразу установи в Telegram</p>
                 </div>
-                <button type="button" onclick="clearVault()" class="btn-glass px-3 py-1.5 text-xs text-rose-400">Очистить</button>
             </div>
-            <div id="vault-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5"></div>
+            <div id="ready-packs-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+        </section>
+
+        <!-- ==================== ВКЛАДКА 3: МОЙ СЕЙФ ==================== -->
+        <section id="view-vault" class="hidden space-dynamic animate-view-enter">
+            <div class="frosted-card flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-sm font-bold text-dynamic">Мой Сейф кастомизаций</h2>
+                        <span id="vault-limit-pill" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 accent-text">Автосохранение активно</span>
+                    </div>
+                    <p class="text-[11px] text-muted-dynamic mt-0.5">Все созданные темы и языки сохраняются сюда. Каждую запись можно снова открыть в редакторе или скачать.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="exportVaultJson()" class="btn-glass min-h-[38px] px-3 text-xs font-semibold text-amber-400">Экспорт .JSON</button>
+                    <button type="button" onclick="createAndSaveCustomization()" class="btn-primary min-h-[38px] px-3.5 text-xs font-semibold">＋ Сохранить текущую</button>
+                </div>
+            </div>
+
+            <div id="vault-cards" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5"></div>
         </section>
 
     </main>
 
-    <!-- ==================== НИЖНЯЯ НАВИГАЦИЯ ==================== -->
-    <nav id="main-bottom-nav" class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,12px)+12px)] z-30 w-[calc(100%-24px)] max-w-xs frosted-nav rounded-full p-1.5">
-        <div class="grid grid-cols-2 gap-1">
-            <button type="button" id="nav-btn-studio" onclick="switchMainTab('view-studio')" class="min-h-[40px] rounded-full text-xs font-bold accent-text bg-white/[0.08] flex items-center justify-center gap-1.5">
-                <span>🎨 Студия</span>
-            </button>
-            <button type="button" id="nav-btn-vault" onclick="switchMainTab('view-vault')" class="min-h-[40px] rounded-full text-xs font-medium text-muted-dynamic flex items-center justify-center gap-1.5">
-                <span>🔒 Мой Сейф</span>
-                <span id="vault-badge" class="px-1.5 py-0.2 text-[10px] rounded-full bg-emerald-500/20 accent-text">0</span>
-            </button>
-        </div>
+    <!-- ==================== НАСТРАИВАЕМАЯ НИЖНЯЯ / БОКОВАЯ НАВИГАЦИЯ ==================== -->
+    <nav id="main-bottom-nav" class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,12px)+12px)] z-30 w-[calc(100%-24px)] max-w-md frosted-nav rounded-full p-1.5" role="tablist">
+        <div id="nav-buttons-mount" class="nav-grid relative grid grid-cols-3 items-center"></div>
     </nav>
 
-    <!-- ==================== BOTTOM SHEET (НАСТРОЙКИ СТИЛЯ САМОГО ПРИЛОЖЕНИЯ) ==================== -->
+    <!-- МОДАЛЬНОЕ ОКНО (BOTTOM SHEET) -->
     <div id="sheet-backdrop" onclick="closeBottomSheet()" class="sheet-backdrop fixed inset-0 bg-black/60 z-40"></div>
-    <div id="bottom-sheet" class="bottom-sheet fixed left-0 right-0 bottom-0 z-50 max-w-lg mx-auto frosted-card !rounded-t-[28px] !rounded-b-none p-5 pb-[calc(env(safe-area-inset-bottom,16px)+20px)] max-h-[85vh] flex flex-col">
+    <div id="bottom-sheet" class="bottom-sheet fixed left-0 right-0 bottom-0 z-50 max-w-lg mx-auto frosted-card !rounded-t-[28px] !rounded-b-none p-5 pb-[calc(env(safe-area-inset-bottom,16px)+20px)] max-h-[88vh] flex flex-col">
         <div class="w-full pt-0.5 pb-2.5 flex justify-center"><div class="w-10 h-1.5 rounded-full bg-slate-400/40"></div></div>
         <div class="flex items-center justify-between mb-3">
-            <h3 id="sheet-title" class="text-base font-bold text-dynamic">Настройки студии</h3>
+            <h3 id="sheet-title" class="text-base font-bold text-dynamic">Настройки</h3>
             <button type="button" onclick="closeBottomSheet()" class="btn-glass min-w-[34px] min-h-[34px] rounded-full text-xs">✕</button>
         </div>
         <div id="sheet-body" class="overflow-y-auto space-y-3.5 pr-1"></div>
     </div>
 
-    <!-- TOAST -->
-    <div id="toast-pill" class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,16px)+78px)] z-50 pointer-events-none opacity-0 translate-y-3 scale-95 transition-all duration-200 ease-ios">
+    <!-- Toast-уведомление -->
+    <div id="toast-pill" role="status" class="fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom,16px)+78px)] z-50 pointer-events-none opacity-0 translate-y-3 scale-95 transition-all duration-200 ease-ios">
         <div class="frosted-nav px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl">
-            <span class="text-emerald-400 font-bold">✓</span>
+            <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             <span id="toast-text" class="text-xs font-semibold text-dynamic">Готово!</span>
         </div>
     </div>
 
     <script>
-        const tg = window.Telegram?.WebApp;
+        /* ==================== КОНСТАНТЫ ВЛАДЕЛЬЦА И АДМИН-ДОСТУПА ==================== */
+        const OWNER_TG_ID = 5881813602;
+        const OWNER_USERNAME = 'darxxx1zq';
+        const ADMIN_CONFIG_KEY = 'tg_studio_admin_v2';
 
-        /* ==================== 1. ЗВУКОВОЙ ДВИЖОК (КАК В VIBE STUDIO) ==================== */
+        /* ==================== 1. ЗВУКОВОЙ ДВИЖОК WEB AUDIO API ==================== */
         const SoundFX = {
             ctx: null,
-            muted: localStorage.getItem('tg_cust_muted') === 'true',
+            muted: localStorage.getItem('vibe_sound_muted') === 'true',
             lastTick: 0,
             init() {
                 if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
@@ -706,11 +817,12 @@
             },
             toggleMute() {
                 this.muted = !this.muted;
-                localStorage.setItem('tg_cust_muted', String(this.muted));
+                localStorage.setItem('vibe_sound_muted', String(this.muted));
                 this.syncIcon();
+                if (!this.muted) this.success();
                 showToast(this.muted ? 'Звук выключен' : 'Звук включён');
             },
-            tap(freq = 360) {
+            tap(freq = 340) {
                 if (this.muted) return;
                 try {
                     this.init();
@@ -720,7 +832,7 @@
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, now);
                     osc.frequency.exponentialRampToValueAtTime(95, now + 0.04);
-                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.setValueAtTime(0.07, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
                     osc.connect(gain); gain.connect(this.ctx.destination);
                     osc.start(now); osc.stop(now + 0.045);
@@ -730,24 +842,696 @@
                 const nowMs = performance.now();
                 if (this.muted || nowMs - this.lastTick < 42) return;
                 this.lastTick = nowMs;
-                this.tap(540);
+                this.tap(560);
+            },
+            pop() {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(260, now);
+                    osc.frequency.exponentialRampToValueAtTime(640, now + 0.06);
+                    gain.gain.setValueAtTime(0.075, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(now); osc.stop(now + 0.07);
+                } catch (_) {}
+            },
+            switchTab() {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    [392, 523.25].forEach((f, i) => {
+                        const now = this.ctx.currentTime + i * 0.045;
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(f, now);
+                        gain.gain.setValueAtTime(0.05, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+                        osc.connect(gain); gain.connect(this.ctx.destination);
+                        osc.start(now); osc.stop(now + 0.12);
+                    });
+                } catch (_) {}
+            },
+            success() {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+                        const now = this.ctx.currentTime + idx * 0.05;
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now);
+                        gain.gain.setValueAtTime(0.06, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                        osc.connect(gain); gain.connect(this.ctx.destination);
+                        osc.start(now); osc.stop(now + 0.23);
+                    });
+                } catch (_) {}
+            },
+            error() {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    [170, 135].forEach((freq, idx) => {
+                        const now = this.ctx.currentTime + idx * 0.08;
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(freq, now);
+                        gain.gain.setValueAtTime(0.045, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+                        osc.connect(gain); gain.connect(this.ctx.destination);
+                        osc.start(now); osc.stop(now + 0.1);
+                    });
+                } catch (_) {}
             }
         };
 
-        /* ==================== 2. СОСТОЯНИЕ ТЕМЫ И ЯЗЫКА TELEGRAM ==================== */
+        const tg = window.Telegram?.WebApp;
+        let currentTabId = 'view-studio';
+
+        const Haptic = {
+            selection() { SoundFX.tap(380); try { tg?.HapticFeedback?.selectionChanged(); } catch (_) {} },
+            light() { SoundFX.tap(310); try { tg?.HapticFeedback?.impactOccurred('light'); } catch (_) {} },
+            pop() { SoundFX.pop(); try { tg?.HapticFeedback?.impactOccurred('medium'); } catch (_) {} },
+            tab() { SoundFX.switchTab(); try { tg?.HapticFeedback?.selectionChanged(); } catch (_) {} },
+            success() { SoundFX.success(); try { tg?.HapticFeedback?.notificationOccurred('success'); } catch (_) {} },
+            error() { SoundFX.error(); try { tg?.HapticFeedback?.notificationOccurred('error'); } catch (_) {} }
+        };
+
+        /* ==================== 2. ЖИВАЯ АДМИН-ПАНЕЛЬ (ЮЗЕРЫ + ДЕЙСТВИЯ В РЕАЛЬНОМ ВРЕМЕНИ + ОП) ==================== */
+        let currentAdminTab = 'users';
+        let adminUserFilter = 'ALL';
+        let adminUserSearchQuery = '';
+
+        function isOwnerUser() {
+            const uid = tg?.initDataUnsafe?.user?.id;
+            // Доступ владельцу или в режиме локального браузерного теста
+            return !uid || uid === OWNER_TG_ID;
+        }
+
+        function getDefaultUsersList() {
+            const list = [
+                { id: 5881813602, username: 'darxxx1zq', name: 'Owner // Admin', refs: 15, gens: 92, vip: true, banned: false, joined: 'Сегодня, 12:00', online: true },
+                { id: 619284012, username: 'alex_theme', name: 'Alexey UI', refs: 4, gens: 34, vip: true, banned: false, joined: 'Сегодня, 14:22', online: true },
+                { id: 840192834, username: 'kira_custom', name: 'Kira', refs: 2, gens: 19, vip: false, banned: false, joined: 'Сегодня, 16:05', online: true },
+                { id: 501928371, username: 'tg_modder', name: 'Nikita', refs: 1, gens: 11, vip: false, banned: false, joined: 'Вчера, 21:40', online: false },
+                { id: 918273645, username: 'flood_bot', name: 'Spam Account', refs: 0, gens: 1, vip: false, banned: true, joined: '2 дня назад', online: false }
+            ];
+            const curUser = tg?.initDataUnsafe?.user;
+            if (curUser && !list.some(u => u.id === curUser.id)) {
+                list.unshift({
+                    id: curUser.id,
+                    username: curUser.username || 'tg_user',
+                    name: [curUser.first_name, curUser.last_name].filter(Boolean).join(' ') || 'User',
+                    refs: getRefsCount(),
+                    gens: getVaultList().length,
+                    vip: getRefsCount() >= 3,
+                    banned: false,
+                    joined: 'Только что',
+                    online: true
+                });
+            }
+            return list;
+        }
+
+        function loadAdminConfig() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(ADMIN_CONFIG_KEY) || 'null');
+                return Object.assign({
+                    gateEnabled: false,
+                    channels: [{ id: 1, title: 'Канал @darxxx1zq', url: 'https://t.me/darxxx1zq' }],
+                    users: getDefaultUsersList(),
+                    botMetrics: { uptime: '99.98%', pingMs: 24, dau: 64, mau: 420, convRate: '38.5%', genThemes: 512, genLangs: 340, genTweaks: 190 }
+                }, saved || {});
+            } catch {
+                return {
+                    gateEnabled: false,
+                    channels: [{ id: 1, title: 'Канал @darxxx1zq', url: 'https://t.me/darxxx1zq' }],
+                    users: getDefaultUsersList(),
+                    botMetrics: { uptime: '99.98%', pingMs: 24, dau: 64, mau: 420, convRate: '38.5%', genThemes: 512, genLangs: 340, genTweaks: 190 }
+                };
+            }
+        }
+
+        function saveAdminConfig(cfg) {
+            localStorage.setItem(ADMIN_CONFIG_KEY, JSON.stringify(cfg));
+            checkSponsorGateOnLoad();
+        }
+
+        function checkSponsorGateOnLoad() {
+            const cfg = loadAdminConfig();
+            const overlay = document.getElementById('sponsor-gate-overlay');
+            const passed = sessionStorage.getItem('vibe_gate_passed') === 'true';
+
+            const curId = tg?.initDataUnsafe?.user?.id;
+            const bannedUser = cfg.users.find(u => u.id === curId && u.banned);
+            if (bannedUser && curId !== OWNER_TG_ID) {
+                overlay.innerHTML = `<div class="frosted-card max-w-sm w-full text-center space-y-3 border border-rose-500/40"><h2 class="text-base font-bold text-rose-400">Доступ ограничен</h2><p class="text-xs text-muted-dynamic">Ваш аккаунт заблокирован администратором @${OWNER_USERNAME}.</p></div>`;
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                return;
+            }
+
+            if (!cfg.gateEnabled || cfg.channels.length === 0 || passed) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                return;
+            }
+
+            const listEl = document.getElementById('sponsor-gate-channels-list');
+            listEl.innerHTML = cfg.channels.map(ch => `
+                <a href="${escapeHtml(ch.url)}" target="_blank" onclick="markChannelClicked(${ch.id})" class="p-3 rounded-2xl code-surface border border-white/15 flex items-center justify-between hover:border-emerald-400 transition">
+                    <span class="text-xs font-bold text-dynamic truncate pr-2">${escapeHtml(ch.title)}</span>
+                    <span class="px-2.5 py-1 rounded-xl bg-emerald-500/20 accent-text text-[11px] font-semibold shrink-0">Подписаться ↗</span>
+                </a>
+            `).join('');
+
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        }
+
+        function markChannelClicked(id) {
+            Haptic.light();
+            const clicked = JSON.parse(sessionStorage.getItem('vibe_clicked_channels') || '[]');
+            if (!clicked.includes(id)) clicked.push(id);
+            sessionStorage.setItem('vibe_clicked_channels', JSON.stringify(clicked));
+        }
+
+        function verifySponsorGateAccess() {
+            const cfg = loadAdminConfig();
+            const clicked = JSON.parse(sessionStorage.getItem('vibe_clicked_channels') || '[]');
+            if (!cfg.channels.every(c => clicked.includes(c.id)) && !isOwnerUser()) {
+                Haptic.error();
+                showToast('Сначала подпишись на все каналы из списка!');
+                return;
+            }
+            Haptic.success();
+            sessionStorage.setItem('vibe_gate_passed', 'true');
+            checkSponsorGateOnLoad();
+            showToast('Доступ открыт!');
+        }
+
+        function adminFilteredUsers(cfg) {
+            const q = adminUserSearchQuery.trim().toLowerCase().replace(/^@/, '');
+            return cfg.users.filter(u => {
+                if (adminUserFilter === 'VIP' && !u.vip) return false;
+                if (adminUserFilter === 'BANNED' && !u.banned) return false;
+                if (!q) return true;
+                return String(u.id).includes(q) || (u.username || '').toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q);
+            });
+        }
+
+        function adminUsersTableHtml(list) {
+            if (!list.length) return '<div class="p-4 text-center text-muted-dynamic">Пользователи не найдены</div>';
+            return `<div class="space-y-2">
+                ${list.map(u => `
+                    <div class="p-3 rounded-2xl code-surface border border-white/10 flex flex-wrap items-center justify-between gap-2 ${u.banned ? 'opacity-60' : ''}">
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-xs text-dynamic">${escapeHtml(u.name)}</span>
+                                ${u.online ? '<span class="w-2 h-2 rounded-full bg-emerald-400" title="Online"></span>' : ''}
+                                ${u.vip ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/25 text-amber-300">VIP</span>' : ''}
+                                ${u.banned ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-500/25 text-rose-300">BAN</span>' : ''}
+                            </div>
+                            <div class="text-[10px] font-mono text-muted-dynamic mt-0.5">@${escapeHtml(u.username)} • ID: ${u.id} • Сборок: ${u.gens}</div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="adminToggleUserVip(${u.id})" class="btn-glass px-2.5 py-1 text-[10px] font-bold ${u.vip ? 'text-amber-300' : 'text-emerald-400'}">${u.vip ? 'Снять VIP' : '＋VIP'}</button>
+                            <button type="button" onclick="adminAddUserGen(${u.id})" class="btn-glass px-2 py-1 text-[10px] font-semibold" title="Добавить генерацию">+1 Ген</button>
+                            ${u.id !== OWNER_TG_ID ? `<button type="button" onclick="adminToggleUserBan(${u.id})" class="btn-glass px-2.5 py-1 text-[10px] font-bold ${u.banned ? 'text-emerald-400' : 'text-rose-400'}">${u.banned ? 'Разбан' : 'Бан'}</button>` : ''}
+                            <button type="button" onclick="openNativeTgUrl('https://t.me/${escapeHtml(u.username)}')" class="btn-glass px-2 py-1 text-[10px] accent-text">ЛС ↗</button>
+                            ${u.id !== OWNER_TG_ID ? `<button type="button" onclick="adminDeleteUser(${u.id})" class="btn-glass px-2 py-1 text-[10px] text-rose-400">✕</button>` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
+        }
+
+        function openAdminPanelSheet(tab = currentAdminTab) {
+            currentAdminTab = tab;
+            const cfg = loadAdminConfig();
+            const totalUsers = cfg.users.length;
+            const vipUsers = cfg.users.filter(u => u.vip).length;
+            const bannedUsers = cfg.users.filter(u => u.banned).length;
+
+            let bodyHtml = '';
+            if (tab === 'users') {
+                bodyHtml = `
+                    <div class="space-y-3">
+                        <div class="flex gap-1.5">
+                            <input type="text" value="${escapeHtml(adminUserSearchQuery)}" oninput="adminUserSearchQuery=this.value; refreshAdminUsers()" placeholder="Поиск по @username, имени или ID..." class="frosted-input flex-1 min-h-[38px] px-3 text-xs">
+                            <button type="button" onclick="promptAddManualUser()" class="btn-primary px-3 min-h-[38px] text-[11px] font-bold shrink-0">＋ Юзер</button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <button type="button" onclick="adminUserFilter='ALL'; openAdminPanelSheet('users')" class="min-h-[34px] rounded-xl text-[11px] font-semibold ${adminUserFilter === 'ALL' ? 'btn-primary' : 'btn-glass'}">Все (${totalUsers})</button>
+                            <button type="button" onclick="adminUserFilter='VIP'; openAdminPanelSheet('users')" class="min-h-[34px] rounded-xl text-[11px] font-semibold ${adminUserFilter === 'VIP' ? 'btn-gold' : 'btn-glass text-amber-300'}">👑 VIP (${vipUsers})</button>
+                            <button type="button" onclick="adminUserFilter='BANNED'; openAdminPanelSheet('users')" class="min-h-[34px] rounded-xl text-[11px] font-semibold ${adminUserFilter === 'BANNED' ? 'bg-rose-500 text-white' : 'btn-glass text-rose-300'}">🚫 Бан (${bannedUsers})</button>
+                        </div>
+                        <div id="admin-users-list" class="max-h-[340px] overflow-y-auto pr-1">${adminUsersTableHtml(adminFilteredUsers(cfg))}</div>
+                    </div>
+                `;
+            } else if (tab === 'stats') {
+                const m = cfg.botMetrics;
+                const totalGen = m.genThemes + m.genLangs + m.genTweaks;
+                bodyHtml = `
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="p-2.5 rounded-2xl code-surface"><div class="text-[10px] text-muted-dynamic">Uptime</div><div class="text-sm font-bold text-emerald-400 mt-0.5">${m.uptime}</div></div>
+                            <div class="p-2.5 rounded-2xl code-surface"><div class="text-[10px] text-muted-dynamic">DAU / MAU</div><div class="text-sm font-bold accent-text mt-0.5">${m.dau} / ${m.mau}</div></div>
+                            <div class="p-2.5 rounded-2xl code-surface"><div class="text-[10px] text-muted-dynamic">Создано тем</div><div class="text-sm font-bold text-amber-300 mt-0.5">${totalGen}</div></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="exportUsersJson()" class="btn-primary min-h-[38px] text-[11px] font-bold">Скачать базу юзеров .JSON</button>
+                            <button type="button" onclick="adminGrantMaxVip()" class="btn-glass min-h-[38px] text-[11px] font-semibold text-emerald-400">Выдать себе VIP 3/3</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                bodyHtml = `
+                    <div class="space-y-3">
+                        <div class="p-3.5 rounded-2xl code-surface space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-bold text-dynamic">Обязательная подписка (ОП)</div>
+                                    <p class="text-[10px] text-muted-dynamic">Проверять подписку при входе в приложение</p>
+                                </div>
+                                <input type="checkbox" ${cfg.gateEnabled ? 'checked' : ''} onchange="toggleAdminGate(this.checked)" class="w-5 h-5 accent-emerald-500 cursor-pointer">
+                            </div>
+                            <div class="space-y-1.5">
+                                ${cfg.channels.map((ch, idx) => `
+                                    <div class="p-2 rounded-xl bg-black/30 flex items-center justify-between gap-2">
+                                        <span class="text-xs font-semibold truncate">${escapeHtml(ch.title)} (${escapeHtml(ch.url)})</span>
+                                        <button type="button" onclick="removeAdminChannel(${idx})" class="btn-glass px-2.5 py-1 text-[10px] text-rose-400">Удалить</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <input id="admin-ch-title" type="text" placeholder="Название канала" class="frosted-input min-h-[36px] px-3 text-[11px]">
+                                <input id="admin-ch-url" type="text" placeholder="https://t.me/..." class="frosted-input min-h-[36px] px-3 text-[11px] font-mono">
+                            </div>
+                            <button type="button" onclick="addAdminChannel()" class="btn-primary w-full min-h-[38px] text-[11px] font-bold">＋ Добавить канал в ОП</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            openBottomSheet('Админ-панель @darxxx1zq', `
+                <div class="space-y-3.5 text-xs">
+                    <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl code-surface">
+                        <button type="button" onclick="openAdminPanelSheet('users')" class="min-h-[36px] rounded-xl font-bold ${tab === 'users' ? 'btn-primary' : 'text-muted-dynamic'}">👥 Юзеры (${totalUsers})</button>
+                        <button type="button" onclick="openAdminPanelSheet('stats')" class="min-h-[36px] rounded-xl font-bold ${tab === 'stats' ? 'btn-primary' : 'text-muted-dynamic'}">📊 Статистика</button>
+                        <button type="button" onclick="openAdminPanelSheet('gate')" class="min-h-[36px] rounded-xl font-bold ${tab === 'gate' ? 'btn-primary' : 'text-muted-dynamic'}">🔒 ОП и Рассылка</button>
+                    </div>
+                    ${bodyHtml}
+                </div>
+            `);
+        }
+
+        function refreshAdminUsers() {
+            const box = document.getElementById('admin-users-list');
+            if (box) box.innerHTML = adminUsersTableHtml(adminFilteredUsers(loadAdminConfig()));
+        }
+
+        function adminToggleUserVip(userId) {
+            Haptic.success();
+            const cfg = loadAdminConfig();
+            const u = cfg.users.find(x => x.id === userId);
+            if (!u) return;
+            u.vip = !u.vip;
+            saveAdminConfig(cfg);
+            refreshAdminUsers();
+            showToast(u.vip ? `Юзеру @${u.username} выдан VIP!` : `У @${u.username} снят VIP`);
+        }
+
+        function adminToggleUserBan(userId) {
+            Haptic.pop();
+            const cfg = loadAdminConfig();
+            const u = cfg.users.find(x => x.id === userId);
+            if (!u || u.id === OWNER_TG_ID) return;
+            u.banned = !u.banned;
+            saveAdminConfig(cfg);
+            refreshAdminUsers();
+            showToast(u.banned ? `@${u.username} заблокирован` : `@${u.username} разблокирован`);
+        }
+
+        function adminAddUserGen(userId) {
+            Haptic.light();
+            const cfg = loadAdminConfig();
+            const u = cfg.users.find(x => x.id === userId);
+            if (!u) return;
+            u.gens = (u.gens || 0) + 1;
+            saveAdminConfig(cfg);
+            refreshAdminUsers();
+        }
+
+        function adminDeleteUser(userId) {
+            Haptic.error();
+            const cfg = loadAdminConfig();
+            cfg.users = cfg.users.filter(x => x.id !== userId);
+            saveAdminConfig(cfg);
+            openAdminPanelSheet('users');
+            showToast('Пользователь удалён');
+        }
+
+        function promptAddManualUser() {
+            const raw = prompt('Введите @username и ID через пробел (например: ivan_tg 71829301):');
+            if (!raw || !raw.trim()) return;
+            const parts = raw.trim().split(/\s+/);
+            const uname = parts[0].replace('@', '');
+            const uid = parseInt(parts[1] || String(Math.floor(100000000 + Math.random() * 900000000)), 10);
+            const cfg = loadAdminConfig();
+            cfg.users.unshift({ id: uid, username: uname, name: uname, refs: 0, gens: 1, vip: false, banned: false, joined: 'Только что', online: true });
+            saveAdminConfig(cfg);
+            Haptic.success();
+            openAdminPanelSheet('users');
+        }
+
+        function toggleAdminGate(enabled) {
+            Haptic.selection();
+            const cfg = loadAdminConfig();
+            cfg.gateEnabled = enabled;
+            saveAdminConfig(cfg);
+            showToast(enabled ? 'Обязательная подписка ВКЛЮЧЕНА' : 'Обязательная подписка ВЫКЛЮЧЕНА');
+        }
+
+        function addAdminChannel() {
+            const title = (document.getElementById('admin-ch-title')?.value || '').trim();
+            const url = (document.getElementById('admin-ch-url')?.value || '').trim();
+            if (!title || !url.startsWith('http')) { Haptic.error(); showToast('Введите название и ссылку https://t.me/...'); return; }
+            const cfg = loadAdminConfig();
+            cfg.channels.push({ id: Date.now(), title, url });
+            saveAdminConfig(cfg);
+            Haptic.success();
+            openAdminPanelSheet('gate');
+        }
+
+        function removeAdminChannel(idx) {
+            Haptic.light();
+            const cfg = loadAdminConfig();
+            cfg.channels.splice(idx, 1);
+            saveAdminConfig(cfg);
+            openAdminPanelSheet('gate');
+        }
+
+        function exportUsersJson() {
+            const cfg = loadAdminConfig();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(cfg.users, null, 2)], { type: 'application/json' }));
+            a.download = 'tg_studio_users.json';
+            a.click();
+            Haptic.success();
+        }
+
+        function adminGrantMaxVip() {
+            Haptic.success();
+            localStorage.setItem('vibe_refs_count', '3');
+            updateVipUI();
+            showToast('Выдан максимальный статус VIP 3/3!');
+        }
+
+        /* ==================== 3. ЦЕНТР КАСТОМИЗАЦИИ ПРИЛОЖЕНИЯ (9 ОПЦИЙ + СВОЙ ФОН + РЕЖИМЫ ГРАФИКИ) ==================== */
+        const SITE_THEME_KEY = 'tg_custom_suite_v3';
+        const SAVED_PRESETS_KEY = 'tg_user_saved_app_themes_v1';
+
+        const DEFAULT_PRESETS = [
+            { name: 'Emerald Graphite', bg: '#09090b', primary: '#10b981', secondary: '#06b6d4', radius: 20 },
+            { name: 'Cyber Violet', bg: '#090714', primary: '#8b5cf6', secondary: '#ec4899', radius: 22 },
+            { name: 'Crimson Sunset', bg: '#12070b', primary: '#f43f5e', secondary: '#fb923c', radius: 24 },
+            { name: 'Onyx Gold', bg: '#0c0a06', primary: '#f59e0b', secondary: '#eab308', radius: 20 },
+            { name: 'Arctic Sky', bg: '#060d17', primary: '#0ea5e9', secondary: '#6366f1', radius: 22 },
+            { name: 'Acid Matrix', bg: '#050b06', primary: '#22c55e', secondary: '#84cc16', radius: 16 }
+        ];
+
+        const APP_FONTS = [
+            { id: 'inter', name: 'Inter', css: "'Inter', -apple-system, sans-serif" },
+            { id: 'jakarta', name: 'Plus Jakarta', css: "'Plus Jakarta Sans', sans-serif" },
+            { id: 'space', name: 'Space Grotesk', css: "'Space Grotesk', sans-serif" },
+            { id: 'mono', name: 'JetBrains Mono', css: "'JetBrains Mono', monospace" }
+        ];
+
+        function loadUserSiteTheme() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(SITE_THEME_KEY) || 'null');
+                return Object.assign({
+                    bg: '#09090b', primary: '#10b981', secondary: '#06b6d4', radius: 20,
+                    density: 'normal', followTg: false, fontId: 'inter', bgType: 'gradient',
+                    customBgUrl: '', navLabels: true, navDesktopPos: 'bottom',
+                    navOrder: ['view-studio', 'view-packs', 'view-vault'], fxLevel: 'balanced'
+                }, saved || {});
+            } catch {
+                return {
+                    bg: '#09090b', primary: '#10b981', secondary: '#06b6d4', radius: 20,
+                    density: 'normal', followTg: false, fontId: 'inter', bgType: 'gradient',
+                    customBgUrl: '', navLabels: true, navDesktopPos: 'bottom',
+                    navOrder: ['view-studio', 'view-packs', 'view-vault'], fxLevel: 'balanced'
+                };
+            }
+        }
+
+        function getSavedCustomPresets() {
+            try { return JSON.parse(localStorage.getItem(SAVED_PRESETS_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function applyUserSiteTheme(cfg) {
+            const root = document.documentElement;
+            if (cfg.followTg && tg) {
+                const isLightTg = tg.colorScheme === 'light';
+                root.classList.toggle('light', isLightTg);
+                root.classList.toggle('dark', !isLightTg);
+            } else {
+                root.classList.remove('light');
+                root.classList.add('dark');
+            }
+
+            root.style.setProperty('--bg-main', cfg.bg || '#09090b');
+            root.style.setProperty('--accent-primary', cfg.primary || '#10b981');
+            root.style.setProperty('--accent-secondary', cfg.secondary || '#06b6d4');
+            root.style.setProperty('--site-radius', `${cfg.radius ?? 20}px`);
+            root.setAttribute('data-density', cfg.density || 'normal');
+
+            const fontObj = APP_FONTS.find(f => f.id === cfg.fontId) || APP_FONTS[0];
+            root.style.setProperty('--app-font', fontObj.css);
+
+            root.setAttribute('data-bg', cfg.bgType || 'gradient');
+            if (cfg.customBgUrl && cfg.customBgUrl.trim()) {
+                root.style.setProperty('--custom-bg-url', `url("${cfg.customBgUrl.trim()}")`);
+            }
+
+            root.setAttribute('data-fx', cfg.fxLevel || 'balanced');
+            document.body.classList.toggle('nav-side-desktop', cfg.navDesktopPos === 'side');
+            const navEl = document.getElementById('main-bottom-nav');
+            if (navEl) navEl.classList.toggle('icons-only', !cfg.navLabels);
+
+            localStorage.setItem(SITE_THEME_KEY, JSON.stringify(cfg));
+            renderNavigationBar();
+
+            try { tg?.setHeaderColor?.(cfg.bg); tg?.setBackgroundColor?.(cfg.bg); } catch (_) {}
+        }
+
+        function handleCustomAppBgUpload(fileList) {
+            if (!fileList || !fileList[0]) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const dataUrl = String(e.target?.result || '');
+                const cfg = loadUserSiteTheme();
+                cfg.bgType = 'custom';
+                cfg.customBgUrl = dataUrl;
+                applyUserSiteTheme(cfg);
+                Haptic.success();
+                openPersonalizeSheet();
+                showToast('Свой фон приложения установлен!');
+            };
+            reader.readAsDataURL(fileList[0]);
+        }
+
+        function openPersonalizeSheet() {
+            const cfg = loadUserSiteTheme();
+            const allPresets = [...DEFAULT_PRESETS, ...getSavedCustomPresets()];
+
+            const html = `
+                <div class="space-y-4 text-xs">
+                    <!-- Режимы графики (для слабых устройств) -->
+                    <div>
+                        <span class="font-bold text-dynamic block mb-1.5">1. Режим графики (Оптимизация для слабых устройств)</span>
+                        <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl code-surface">
+                            ${[
+                                { id: 'min', label: '⚡ Минимум (60 FPS)' },
+                                { id: 'balanced', label: 'Баланс' },
+                                { id: 'max', label: '✨ Ультра Glass' }
+                            ].map(fx => `
+                                <button type="button" onclick="updateCustomThemeField('fxLevel', '${fx.id}', true)" class="min-h-[38px] rounded-xl text-[11px] font-bold ${cfg.fxLevel === fx.id ? 'btn-primary' : 'text-muted-dynamic'}">${fx.label}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Плотность и скругление -->
+                    <div>
+                        <div class="flex justify-between mb-1.5">
+                            <span class="font-bold text-dynamic">2. Плотность и радиус скругления (${cfg.radius}px)</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl code-surface mb-2">
+                            ${[
+                                { id: 'compact', label: 'Компактно' },
+                                { id: 'normal', label: 'Обычно' },
+                                { id: 'spacious', label: 'Просторно' }
+                            ].map(d => `
+                                <button type="button" onclick="updateCustomThemeField('density', '${d.id}', true)" class="min-h-[34px] rounded-xl font-semibold ${cfg.density === d.id ? 'btn-primary' : 'text-muted-dynamic'}">${d.label}</button>
+                            `).join('')}
+                        </div>
+                        <input type="range" min="10" max="28" step="2" value="${cfg.radius}" oninput="updateCustomThemeField('radius', Number(this.value), false)" class="ios-slider">
+                    </div>
+
+                    <!-- Пресеты тем студии -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="font-bold text-dynamic">3. Цветовые темы самого сайта</span>
+                            <button type="button" onclick="saveCurrentThemeAsPreset()" class="text-[11px] font-semibold accent-text hover:underline">＋ Сохранить свою</button>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            ${allPresets.map(pr => `
+                                <button type="button" onclick="applyPresetObject('${encodeURIComponent(JSON.stringify(pr))}')" class="p-2.5 rounded-2xl border border-white/15 text-left transition hover:scale-[1.02]" style="background:${pr.bg};">
+                                    <div class="text-[11px] font-bold text-white truncate mb-1.5">${escapeHtml(pr.name)}</div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="w-3 h-3 rounded-full" style="background:${pr.primary}"></span>
+                                        <span class="w-3 h-3 rounded-full" style="background:${pr.secondary}"></span>
+                                    </div>
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 mt-2">
+                            <label class="p-2 rounded-xl code-surface flex items-center justify-between cursor-pointer">
+                                <span class="text-[11px] text-muted-dynamic">Фон</span>
+                                <input type="color" value="${cfg.bg}" oninput="updateCustomThemeField('bg', this.value)" class="w-6 h-5 bg-transparent border-0 cursor-pointer">
+                            </label>
+                            <label class="p-2 rounded-xl code-surface flex items-center justify-between cursor-pointer">
+                                <span class="text-[11px] text-muted-dynamic">Акцент</span>
+                                <input type="color" value="${cfg.primary}" oninput="updateCustomThemeField('primary', this.value)" class="w-6 h-5 bg-transparent border-0 cursor-pointer">
+                            </label>
+                            <label class="p-2 rounded-xl code-surface flex items-center justify-between cursor-pointer">
+                                <span class="text-[11px] text-muted-dynamic">Вторич.</span>
+                                <input type="color" value="${cfg.secondary}" oninput="updateCustomThemeField('secondary', this.value)" class="w-6 h-5 bg-transparent border-0 cursor-pointer">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Поверхность фона + ЗАГРУЗКА СВОЕГО ФОНА С УСТРОЙСТВА -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="font-bold text-dynamic">4. Фон сайта и загрузка своих обоев</span>
+                            <label class="text-[11px] font-bold accent-text cursor-pointer hover:underline">
+                                📁 Загрузить фото с устройства
+                                <input type="file" accept="image/*" onchange="handleCustomAppBgUpload(this.files)" class="hidden">
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-5 gap-1.5 mb-2">
+                            ${[
+                                { id: 'gradient', label: 'Градиент' },
+                                { id: 'noise', label: 'Зерно' },
+                                { id: 'grid', label: 'Сетка' },
+                                { id: 'auras', label: 'Ауры' },
+                                { id: 'custom', label: 'Свой фон' }
+                            ].map(b => `
+                                <button type="button" onclick="updateCustomThemeField('bgType', '${b.id}', true)" class="min-h-[34px] rounded-xl border text-[10px] font-semibold ${cfg.bgType === b.id ? 'border-emerald-400 bg-emerald-500/20 accent-text' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">${b.label}</button>
+                            `).join('')}
+                        </div>
+                        <input type="text" value="${escapeHtml(cfg.customBgUrl.startsWith('data:') ? '' : (cfg.customBgUrl || ''))}" oninput="updateCustomThemeField('customBgUrl', this.value); updateCustomThemeField('bgType', 'custom')" placeholder="Или вставь прямую ссылку (URL) на картинку..." class="frosted-input w-full min-h-[36px] px-3 text-[11px]">
+                    </div>
+
+                    <!-- Шрифты -->
+                    <div>
+                        <span class="font-bold text-dynamic block mb-1.5">5. Шрифт интерфейса</span>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                            ${APP_FONTS.map(f => `
+                                <button type="button" onclick="updateCustomThemeField('fontId', '${f.id}', true)" style="font-family:${f.css}" class="min-h-[36px] px-2 rounded-xl border text-xs font-semibold ${cfg.fontId === f.id ? 'border-emerald-400 bg-emerald-500/20 accent-text' : 'border-white/10 bg-white/[0.03] text-muted-dynamic'}">${f.name}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Навигация -->
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button type="button" onclick="updateCustomThemeField('navLabels', ${!cfg.navLabels}, true)" class="btn-glass min-h-[36px] text-[11px] font-semibold">
+                            Подписи меню: ${cfg.navLabels ? 'Вкл' : 'Только иконки'}
+                        </button>
+                        <button type="button" onclick="rotateNavOrder()" class="btn-glass min-h-[36px] text-[11px] font-semibold accent-text">
+                            ⇄ Поменять вкладки местами
+                        </button>
+                    </div>
+
+                    <button type="button" onclick="closeBottomSheet(); showToast('Стиль применён!')" class="btn-primary w-full min-h-[44px] text-xs font-bold">Готово ✓</button>
+                </div>
+            `;
+            openBottomSheet('Стиль приложения и Графика', html);
+        }
+
+        function updateCustomThemeField(key, val, reopen = false) {
+            SoundFX.tick();
+            const current = loadUserSiteTheme();
+            current[key] = val;
+            applyUserSiteTheme(current);
+            if (reopen) openPersonalizeSheet();
+        }
+
+        function applyPresetObject(encJson) {
+            Haptic.selection();
+            const pr = JSON.parse(decodeURIComponent(encJson));
+            const current = loadUserSiteTheme();
+            applyUserSiteTheme({ ...current, bg: pr.bg, primary: pr.primary, secondary: pr.secondary, radius: pr.radius });
+            openPersonalizeSheet();
+        }
+
+        function saveCurrentThemeAsPreset() {
+            const name = prompt('Название вашей темы сайта:', 'My Studio');
+            if (!name || !name.trim()) return;
+            const cfg = loadUserSiteTheme();
+            const list = getSavedCustomPresets();
+            list.unshift({ name: name.trim().slice(0, 18), bg: cfg.bg, primary: cfg.primary, secondary: cfg.secondary, radius: cfg.radius });
+            localStorage.setItem(SAVED_PRESETS_KEY, JSON.stringify(list.slice(0, 6)));
+            Haptic.success();
+            openPersonalizeSheet();
+        }
+
+        function rotateNavOrder() {
+            Haptic.selection();
+            const cfg = loadUserSiteTheme();
+            const arr = [...(cfg.navOrder || ['view-studio', 'view-packs', 'view-vault'])];
+            arr.push(arr.shift());
+            cfg.navOrder = arr;
+            applyUserSiteTheme(cfg);
+            openPersonalizeSheet();
+        }
+
+        /* ==================== 4. КОНСТРУКТОР ТЕМ, ЯЗЫКОВ И НАТИВНАЯ УСТАНОВКА В TELEGRAM ==================== */
         const TG_THEME_PRESETS = [
-            { name: 'Cyber Emerald', chatBg: '#06110e', headerBg: '#0b1d18', msgOut: '#10b981', msgIn: '#132a23', accent: '#06b6d4', text: '#ffffff' },
-            { name: 'Tokyo Night', chatBg: '#0f0f1a', headerBg: '#161626', msgOut: '#6366f1', msgIn: '#1e1e36', accent: '#a855f7', text: '#f8fafc' },
-            { name: 'Crimson Drift', chatBg: '#14070b', headerBg: '#210b12', msgOut: '#f43f5e', msgIn: '#2b121a', accent: '#fb923c', text: '#fff1f2' },
-            { name: 'Onyx Luxury', chatBg: '#09090b', headerBg: '#121215', msgOut: '#f59e0b', msgIn: '#1c1c21', accent: '#eab308', text: '#fafafa' },
-            { name: 'Arctic Glass', chatBg: '#06101e', headerBg: '#0c1c33', msgOut: '#0ea5e9', msgIn: '#152c4a', accent: '#38bdf8', text: '#f0f9ff' },
-            { name: 'Acid Matrix', chatBg: '#050d05', headerBg: '#0b190b', msgOut: '#22c55e', msgIn: '#122912', accent: '#84cc16', text: '#ecfdf5' }
+            { name: 'Cyber Emerald', chatBg: '#06110e', headerBg: '#0b1d18', msgOut: '#10b981', msgIn: '#132a23', accent: '#06b6d4', text: '#ffffff', cloudSlug: 'Classic' },
+            { name: 'Tokyo Night', chatBg: '#0f0f1a', headerBg: '#161626', msgOut: '#6366f1', msgIn: '#1e1e36', accent: '#a855f7', text: '#f8fafc', cloudSlug: 'Night' },
+            { name: 'Crimson Drift', chatBg: '#14070b', headerBg: '#210b12', msgOut: '#f43f5e', msgIn: '#2b121a', accent: '#fb923c', text: '#fff1f2', cloudSlug: 'Night' },
+            { name: 'Onyx Luxury', chatBg: '#09090b', headerBg: '#121215', msgOut: '#f59e0b', msgIn: '#1c1c21', accent: '#eab308', text: '#fafafa', cloudSlug: 'Night' },
+            { name: 'Arctic Glass', chatBg: '#06101e', headerBg: '#0c1c33', msgOut: '#0ea5e9', msgIn: '#152c4a', accent: '#38bdf8', text: '#f0f9ff', cloudSlug: 'Day' },
+            { name: 'Acid Matrix', chatBg: '#050d05', headerBg: '#0b190b', msgOut: '#22c55e', msgIn: '#122912', accent: '#84cc16', text: '#ecfdf5', cloudSlug: 'Night' }
+        ];
+
+        // Официальные облачные языки Telegram, которые открывают системное окно "Применить язык" в 1 тап
+        const NATIVE_CLOUD_LANGS = [
+            { title: 'Русский (Стандарт)', slug: 'ru', badge: 'RU' },
+            { title: 'English (Original)', slug: 'en', badge: 'EN' },
+            { title: 'Беларуская', slug: 'be', badge: 'BY' },
+            { title: 'Українська', slug: 'uk', badge: 'UA' },
+            { title: 'Қазақша', slug: 'kk', badge: 'KZ' },
+            { title: 'Deutsch', slug: 'de', badge: 'DE' }
         ];
 
         const LANG_PRESETS = [
             { name: 'Стандарт', online: 'в сети', typing: 'печатает...', placeholder: 'Сообщение...', saved: 'Избранное' },
             { name: 'Пацанский', online: 'на связи 🤙', typing: 'строчит маляву...', placeholder: 'Черкани пару слов...', saved: 'Заначка' },
-            { name: 'Хакер (1337)', online: 'CONNECTED [127.0.0.1]', typing: 'injecting payload...', placeholder: 'sudo send_msg...', saved: '/root/vault' },
+            { name: 'Хакер (1337)', online: 'ROOT [127.0.0.1]', typing: 'injecting payload...', placeholder: 'sudo send_msg...', saved: '/root/vault' },
             { name: 'Аниме / Ня', online: 'в геншине ✨', typing: 'няшит по клаве >_<', placeholder: 'Напиши семпаю...', saved: 'Коробка с раменом' }
         ];
 
@@ -763,20 +1547,40 @@
             patternOpacity: 25,
             glowOut: false,
             gridPattern: true,
-            langName: 'Стандарт'
+            wallpaperDataUrl: '',
+            langName: 'Стандарт',
+            online: 'в сети',
+            typing: 'печатает...',
+            placeholder: 'Сообщение...',
+            saved: 'Избранное'
         };
 
         function initStudioGrids() {
             document.getElementById('tg-presets-grid').innerHTML = TG_THEME_PRESETS.map((p, idx) => `
-                <button type="button" onclick="applyTgPreset(${idx})" class="p-2.5 rounded-xl border border-white/10 text-left transition hover:border-emerald-400/50" style="background:${p.chatBg}">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="text-xs font-bold text-white truncate">${p.name}</span>
-                        <span class="w-3 h-3 rounded-full" style="background:${p.msgOut}"></span>
+                <div class="p-2.5 rounded-xl border border-white/10 flex flex-col justify-between gap-2 transition hover:border-emerald-400/50" style="background:${p.chatBg}">
+                    <button type="button" onclick="applyTgPreset(${idx})" class="text-left w-full">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-white truncate">${p.name}</span>
+                            <span class="w-3 h-3 rounded-full shrink-0" style="background:${p.msgOut}"></span>
+                        </div>
+                        <div class="flex gap-1">
+                            <span class="h-1.5 flex-1 rounded-full" style="background:${p.msgOut}"></span>
+                            <span class="h-1.5 flex-1 rounded-full" style="background:${p.accent}"></span>
+                        </div>
+                    </button>
+                    <button type="button" onclick="applyTgPreset(${idx}); downloadAtThemeFile(true)" class="w-full py-1 rounded-lg bg-white/10 text-[10px] font-bold text-emerald-300 hover:bg-white/20">
+                        📥 Скачать и применить
+                    </button>
+                </div>
+            `).join('');
+
+            document.getElementById('native-cloud-langs-grid').innerHTML = NATIVE_CLOUD_LANGS.map(l => `
+                <button type="button" onclick="openNativeTgUrl('https://t.me/setlanguage/${l.slug}')" class="p-2.5 rounded-xl code-surface border border-white/10 text-left flex items-center justify-between hover:border-emerald-400">
+                    <div>
+                        <div class="text-xs font-bold text-dynamic">${l.title}</div>
+                        <div class="text-[10px] accent-text">Окно установки ТГ ↗</div>
                     </div>
-                    <div class="flex gap-1">
-                        <span class="h-1.5 flex-1 rounded-full" style="background:${p.msgOut}"></span>
-                        <span class="h-1.5 flex-1 rounded-full" style="background:${p.accent}"></span>
-                    </div>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/10">${l.badge}</span>
                 </button>
             `).join('');
 
@@ -786,27 +1590,54 @@
                 </button>
             `).join('');
 
+            renderReadyPacks();
+            syncInputsFromTgState();
             renderTgLiveMockup();
-            renderVault();
+        }
+
+        function openNativeTgUrl(url) {
+            Haptic.success();
+            if (tg?.openTelegramLink && url.includes('t.me/')) {
+                tg.openTelegramLink(url);
+            } else {
+                window.open(url, '_blank');
+            }
         }
 
         function applyTgPreset(idx) {
-            SoundFX.tap(420);
+            Haptic.selection();
             const p = TG_THEME_PRESETS[idx];
             if (!p) return;
-            Object.assign(tgState, p);
-            document.getElementById('col-chat-bg').value = p.chatBg;
-            document.getElementById('col-header-bg').value = p.headerBg;
-            document.getElementById('col-msg-out').value = p.msgOut;
-            document.getElementById('col-msg-in').value = p.msgIn;
-            document.getElementById('col-accent').value = p.accent;
-            document.getElementById('col-text').value = p.text;
+            Object.assign(tgState, {
+                name: p.name, chatBg: p.chatBg, headerBg: p.headerBg,
+                msgOut: p.msgOut, msgIn: p.msgIn, accent: p.accent, text: p.text
+            });
+            syncInputsFromTgState();
             renderTgLiveMockup();
+        }
+
+        function syncInputsFromTgState() {
+            document.getElementById('custom-theme-title').value = tgState.name;
+            document.getElementById('col-chat-bg').value = tgState.chatBg;
+            document.getElementById('col-header-bg').value = tgState.headerBg;
+            document.getElementById('col-msg-out').value = tgState.msgOut;
+            document.getElementById('col-msg-in').value = tgState.msgIn;
+            document.getElementById('col-accent').value = tgState.accent;
+            document.getElementById('col-text').value = tgState.text;
+            document.getElementById('slider-bubble-rad').value = tgState.bubbleRadius;
+            document.getElementById('slider-pattern-op').value = tgState.patternOpacity;
+            document.getElementById('val-bubble-rad').textContent = `${tgState.bubbleRadius}px`;
+            document.getElementById('val-pattern-op').textContent = `${tgState.patternOpacity}%`;
+            document.getElementById('tweak-glow').checked = !!tgState.glowOut;
+            document.getElementById('tweak-grid').checked = !!tgState.gridPattern;
+            document.getElementById('lang-online').value = tgState.online || 'в сети';
+            document.getElementById('lang-typing').value = tgState.typing || 'печатает...';
+            document.getElementById('lang-placeholder').value = tgState.placeholder || 'Сообщение...';
+            document.getElementById('lang-saved').value = tgState.saved || 'Избранное';
         }
 
         function updateTgColor(key, val) {
             SoundFX.tick();
-            tgState.name = 'Custom Theme';
             tgState[key] = val;
             renderTgLiveMockup();
         }
@@ -820,34 +1651,59 @@
             renderTgLiveMockup();
         }
 
+        function handleChatWallpaperUpload(files) {
+            if (!files || !files[0]) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                tgState.wallpaperDataUrl = String(e.target?.result || '');
+                Haptic.success();
+                renderTgLiveMockup();
+                showToast('Свой фон чата загружен в превью!');
+            };
+            reader.readAsDataURL(files[0]);
+        }
+
+        function clearChatWallpaper() {
+            Haptic.light();
+            tgState.wallpaperDataUrl = '';
+            renderTgLiveMockup();
+            showToast('Обои чата сброшены');
+        }
+
         function randomizeTgTheme() {
-            SoundFX.tap(520);
-            const idx = Math.floor(Math.random() * TG_THEME_PRESETS.length);
-            applyTgPreset(idx);
-            showToast(`Пресет: ${tgState.name}`);
+            Haptic.pop();
+            const rTheme = TG_THEME_PRESETS[Math.floor(Math.random() * TG_THEME_PRESETS.length)];
+            const rLang = LANG_PRESETS[Math.floor(Math.random() * LANG_PRESETS.length)];
+            Object.assign(tgState, rTheme, {
+                langName: rLang.name, online: rLang.online, typing: rLang.typing,
+                placeholder: rLang.placeholder, saved: rLang.saved
+            });
+            syncInputsFromTgState();
+            renderTgLiveMockup();
+            showToast(`Сборка: ${tgState.name} + ${tgState.langName}`);
         }
 
         function applyLangPreset(idx) {
-            SoundFX.tap(440);
+            Haptic.selection();
             const l = LANG_PRESETS[idx];
             if (!l) return;
-            tgState.langName = l.name;
-            document.getElementById('lang-online').value = l.online;
-            document.getElementById('lang-typing').value = l.typing;
-            document.getElementById('lang-placeholder').value = l.placeholder;
-            document.getElementById('lang-saved').value = l.saved;
-            syncLangPreview();
+            Object.assign(tgState, { langName: l.name, online: l.online, typing: l.typing, placeholder: l.placeholder, saved: l.saved });
+            syncInputsFromTgState();
+            renderTgLiveMockup();
             showToast(`Язык: ${l.name}`);
         }
 
         function syncLangPreview() {
-            document.getElementById('tg-mock-status').textContent = document.getElementById('lang-online').value || 'в сети';
-            document.getElementById('tg-mock-placeholder').textContent = document.getElementById('lang-placeholder').value || 'Сообщение...';
-            document.getElementById('tg-summary-lang').textContent = `Язык: ${tgState.langName}`;
+            SoundFX.tick();
+            tgState.online = document.getElementById('lang-online').value || 'в сети';
+            tgState.typing = document.getElementById('lang-typing').value || 'печатает...';
+            tgState.placeholder = document.getElementById('lang-placeholder').value || 'Сообщение...';
+            tgState.saved = document.getElementById('lang-saved').value || 'Избранное';
+            renderTgLiveMockup();
         }
 
         function applyTgTweaks() {
-            SoundFX.tap();
+            Haptic.selection();
             tgState.glowOut = document.getElementById('tweak-glow').checked;
             tgState.gridPattern = document.getElementById('tweak-grid').checked;
             renderTgLiveMockup();
@@ -856,21 +1712,39 @@
         function renderTgLiveMockup() {
             const header = document.getElementById('tg-mock-header');
             const chatBg = document.getElementById('tg-mock-chat-bg');
+            const wpImg = document.getElementById('tg-mock-wallpaper-img');
             const pattern = document.getElementById('tg-mock-pattern');
             const avatar = document.getElementById('tg-mock-avatar');
+            const titleEl = document.getElementById('tg-mock-title');
             const status = document.getElementById('tg-mock-status');
+            const typingPill = document.getElementById('tg-mock-typing-pill');
             const msgIn = document.getElementById('tg-mock-msg-in');
             const inTitle = document.getElementById('tg-mock-in-title');
             const msgOut = document.getElementById('tg-mock-msg-out');
             const inputBar = document.getElementById('tg-mock-input-bar');
+            const phEl = document.getElementById('tg-mock-placeholder');
             const sendBtn = document.getElementById('tg-mock-send-btn');
 
             header.style.backgroundColor = tgState.headerBg;
             inputBar.style.backgroundColor = tgState.headerBg;
             chatBg.style.backgroundColor = tgState.chatBg;
 
+            if (tgState.wallpaperDataUrl) {
+                wpImg.style.backgroundImage = `url("${tgState.wallpaperDataUrl}")`;
+                wpImg.style.opacity = (tgState.patternOpacity / 100).toFixed(2);
+                wpImg.classList.remove('hidden');
+            } else {
+                wpImg.classList.add('hidden');
+            }
+
             avatar.style.background = `linear-gradient(135deg, ${tgState.msgOut}, ${tgState.accent})`;
+            titleEl.textContent = tgState.saved || 'Избранное';
+            status.textContent = tgState.online || 'в сети';
             status.style.color = tgState.accent;
+            typingPill.textContent = tgState.typing || 'печатает...';
+            typingPill.style.color = tgState.accent;
+            phEl.textContent = tgState.placeholder || 'Сообщение...';
+
             inTitle.style.color = tgState.accent;
             sendBtn.style.backgroundColor = tgState.accent;
 
@@ -886,71 +1760,315 @@
 
             pattern.style.opacity = (tgState.patternOpacity / 100).toFixed(2);
             pattern.style.backgroundImage = tgState.gridPattern
-                ? `radial-gradient(${tgState.accent} 1px, transparent 1px)`
+                ? `radial-gradient(${tgState.accent} 1.25px, transparent 1.25px)`
                 : 'none';
             pattern.style.backgroundSize = '16px 16px';
 
             document.getElementById('tg-summary-name').textContent = tgState.name;
+            document.getElementById('tg-summary-lang').textContent = `Язык: ${tgState.langName}`;
         }
 
-        /* ==================== 3. ГЕНЕРАЦИЯ ФАЙЛОВ ТЕМ (.ATTHEME / .TGIOS) И ЯЗЫКОВ (.XML) ==================== */
+        /* ==================== 5. СОЗДАНИЕ ФАЙЛОВ (.ATTHEME / .TGIOS / .XML) И АВТОСОХРАНЕНИЕ В СЕЙФ ==================== */
         function hexToSignedInt(hex) {
-            const clean = hex.replace('#', '');
+            const clean = (hex || '#000000').replace('#', '');
             const num = parseInt('ff' + clean, 16);
             return (num | 0);
         }
 
-        function downloadAtThemeFile() {
-            SoundFX.tap(520);
-            const lines = [
-                `chat_wallpaper=${hexToSignedInt(tgState.chatBg)}`,
-                `actionBarDefault=${hexToSignedInt(tgState.headerBg)}`,
-                `chat_messagePanelBackground=${hexToSignedInt(tgState.headerBg)}`,
-                `chat_outBubble=${hexToSignedInt(tgState.msgOut)}`,
-                `chat_inBubble=${hexToSignedInt(tgState.msgIn)}`,
-                `chat_messageTextIn=${hexToSignedInt(tgState.text)}`,
-                `chat_messageTextOut=${hexToSignedInt(tgState.text)}`,
-                `actionBarDefaultTitle=${hexToSignedInt(tgState.text)}`,
-                `chat_messagePanelSend=${hexToSignedInt(tgState.accent)}`
+        function buildAtThemeContent(st = tgState) {
+            return [
+                `chat_wallpaper=${hexToSignedInt(st.chatBg)}`,
+                `actionBarDefault=${hexToSignedInt(st.headerBg)}`,
+                `chat_messagePanelBackground=${hexToSignedInt(st.headerBg)}`,
+                `chat_outBubble=${hexToSignedInt(st.msgOut)}`,
+                `chat_inBubble=${hexToSignedInt(st.msgIn)}`,
+                `chat_messageTextIn=${hexToSignedInt(st.text)}`,
+                `chat_messageTextOut=${hexToSignedInt(st.text)}`,
+                `actionBarDefaultTitle=${hexToSignedInt(st.text)}`,
+                `chat_messagePanelSend=${hexToSignedInt(st.accent)}`,
+                `chats_actionBackground=${hexToSignedInt(st.accent)}`
             ].join('\n');
-
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([lines], { type: 'application/octet-stream' }));
-            a.download = `${tgState.name.toLowerCase().replace(/\s+/g, '_')}.attheme`;
-            a.click();
-            showToast('Скачан файл .attheme! Отправь его в Избранное в ТГ.');
         }
 
-        function downloadIosThemeFile() {
-            SoundFX.tap(520);
-            const content = `// TG Desktop & iOS Palette\nname: ${tgState.name}\nbackground: ${tgState.chatBg}\nheader: ${tgState.headerBg}\noutgoingBubble: ${tgState.msgOut}\nincomingBubble: ${tgState.msgIn}\naccent: ${tgState.accent}\ntext: ${tgState.text}\n`;
+        function buildLangXmlContent(st = tgState) {
+            return `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <string name="LanguageName">${escapeHtml(st.langName)}</string>\n    <string name="Online">${escapeHtml(st.online)}</string>\n    <string name="Typing">${escapeHtml(st.typing)}</string>\n    <string name="Message">${escapeHtml(st.placeholder)}</string>\n    <string name="SavedMessages">${escapeHtml(st.saved)}</string>\n</resources>`;
+        }
+
+        function downloadAtThemeFile(autoSave = true, customState = null) {
+            const st = customState || tgState;
+            if (autoSave) autoSaveToVault(`Тема: ${st.name}`, 'Тема .attheme', st);
+            Haptic.success();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([buildAtThemeContent(st)], { type: 'application/octet-stream' }));
+            a.download = `${st.name.toLowerCase().replace(/\s+/g, '_')}.attheme`;
+            a.click();
+            showToast('Скачан .attheme и сохранён в Сейф!');
+        }
+
+        function downloadIosThemeFile(autoSave = true, customState = null) {
+            const st = customState || tgState;
+            if (autoSave) autoSaveToVault(`iOS Тема: ${st.name}`, 'Тема .tgios', st);
+            Haptic.success();
+            const content = `// Telegram iOS & Desktop Theme\nname: ${st.name}\nbackground: ${st.chatBg}\nheader: ${st.headerBg}\noutgoingBubble: ${st.msgOut}\nincomingBubble: ${st.msgIn}\naccent: ${st.accent}\ntext: ${st.text}\n`;
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
-            a.download = `${tgState.name.toLowerCase().replace(/\s+/g, '_')}.tgios-theme`;
+            a.download = `${st.name.toLowerCase().replace(/\s+/g, '_')}.tgios-theme`;
             a.click();
-            showToast('Скачана тема для iOS / Desktop!');
+            showToast('Скачан .tgios-theme и сохранён в Сейф!');
         }
 
-        function downloadTelegramLangXml() {
-            SoundFX.tap(520);
-            const online = document.getElementById('lang-online').value;
-            const typing = document.getElementById('lang-typing').value;
-            const ph = document.getElementById('lang-placeholder').value;
-            const saved = document.getElementById('lang-saved').value;
-
-            const xml = `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <string name="Online">${online}</string>\n    <string name="Typing">${typing}</string>\n    <string name="Message">${ph}</string>\n    <string name="SavedMessages">${saved}</string>\n</resources>`;
+        function downloadTelegramLangXml(autoSave = true, customState = null) {
+            const st = customState || tgState;
+            if (autoSave) autoSaveToVault(`Язык: ${st.langName} (${st.online})`, 'Язык .xml', st);
+            Haptic.success();
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([xml], { type: 'application/xml' }));
-            a.download = 'custom_tg_lang.xml';
+            a.href = URL.createObjectURL(new Blob([buildLangXmlContent(st)], { type: 'application/xml' }));
+            a.download = `${st.langName.toLowerCase().replace(/\s+/g, '_')}_lang.xml`;
             a.click();
-            showToast('Языковой пакет .xml скачан! Отправь в ТГ и нажми Apply.');
+            showToast('Язык .xml скачан и сохранён в Сейф!');
         }
 
-        /* ==================== 4. ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК И КАСТОМИЗАЦИЯ САМОГО ПРИЛОЖЕНИЯ ==================== */
+        function createAndSaveCustomization() {
+            const item = autoSaveToVault(`${tgState.name} + ${tgState.langName}`, 'Полная сборка', tgState);
+            Haptic.success();
+            openVaultItemModal(item.id);
+            showToast('Сборка создана и сохранена в Сейф!');
+        }
+
+        // Отправка данных в бота, чтобы бот прислал готовый файл в чат (для мгновенного открытия в ТГ)
+        function sendFileViaBotBackend(kind = 'theme', customState = null) {
+            const st = customState || tgState;
+            autoSaveToVault(`${kind === 'lang' ? 'Язык' : 'Тема'}: ${st.name}`, 'Отправлено в ТГ', st);
+            Haptic.success();
+            const payload = {
+                action: kind === 'lang' ? 'build_lang' : 'build_theme',
+                name: st.name,
+                chatBg: st.chatBg,
+                headerBg: st.headerBg,
+                msgOut: st.msgOut,
+                msgIn: st.msgIn,
+                accent: st.accent,
+                text: st.text,
+                langName: st.langName,
+                online: st.online,
+                typing: st.typing,
+                placeholder: st.placeholder,
+                saved: st.saved
+            };
+            try {
+                if (tg?.sendData) {
+                    tg.sendData(JSON.stringify(payload));
+                    return;
+                }
+            } catch (_) {}
+            // Если запущено через Inline-кнопку или в браузере — сразу отдаем файл
+            if (kind === 'lang') downloadTelegramLangXml(false, st);
+            else downloadAtThemeFile(false, st);
+        }
+
+        /* ==================== 6. КАТАЛОГ ГОТОВЫХ ПАКОВ ==================== */
+        function renderReadyPacks() {
+            const box = document.getElementById('ready-packs-grid');
+            if (!box) return;
+            box.innerHTML = TG_THEME_PRESETS.map((p, idx) => {
+                const l = LANG_PRESETS[idx % LANG_PRESETS.length];
+                return `
+                    <article class="frosted-card flex flex-col justify-between gap-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider accent-text">Готовый Пак #${idx + 1}</span>
+                                <h3 class="text-sm font-bold text-dynamic mt-0.5">${p.name} × ${l.name}</h3>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <span class="w-4 h-4 rounded-full border border-white/20" style="background:${p.chatBg}"></span>
+                                <span class="w-4 h-4 rounded-full border border-white/20" style="background:${p.msgOut}"></span>
+                                <span class="w-4 h-4 rounded-full border border-white/20" style="background:${p.accent}"></span>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl code-surface text-[11px] text-muted-dynamic space-y-1">
+                            <div>Статус: <b class="text-dynamic">${l.online}</b> • Печатает: <b class="text-dynamic">${l.typing}</b></div>
+                            <div>Поле ввода: <b class="text-dynamic">${l.placeholder}</b></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="loadPackIntoEditor(${idx})" class="btn-glass min-h-[38px] text-xs font-semibold accent-text">Открыть в редакторе</button>
+                            <button type="button" onclick="loadPackIntoEditor(${idx}); downloadAtThemeFile(true)" class="btn-primary min-h-[38px] text-xs font-bold">Скачать .attheme</button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function loadPackIntoEditor(idx) {
+            applyTgPreset(idx);
+            applyLangPreset(idx % LANG_PRESETS.length);
+            switchTab(0, 'view-studio');
+            showToast('Пак загружен в конструктор!');
+        }
+
+        /* ==================== 7. ИНТЕРАКТИВНЫЙ СЕЙФ (ОТКРЫТИЕ, РЕДАКТИРОВАНИЕ, СКАЧИВАНИЕ) ==================== */
+        const VAULT_KEY = 'tg_custom_vault_v3';
+
+        function getVaultList() {
+            try { return JSON.parse(localStorage.getItem(VAULT_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function persistVaultList(list) {
+            localStorage.setItem(VAULT_KEY, JSON.stringify(list));
+            renderNavigationBar();
+            renderVault();
+        }
+
+        function autoSaveToVault(title, tag, stateSnap) {
+            const list = getVaultList();
+            const cleanSnap = { ...stateSnap };
+            const item = {
+                id: Date.now(),
+                title,
+                tag,
+                createdAt: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+                state: cleanSnap
+            };
+            list.unshift(item);
+            persistVaultList(list.slice(0, 30));
+            return item;
+        }
+
+        function renderVault() {
+            const list = getVaultList();
+            const box = document.getElementById('vault-cards');
+            if (!box) return;
+            if (!list.length) {
+                box.innerHTML = `<div class="frosted-card text-center lg:col-span-2 text-xs text-muted-dynamic py-8">В Сейфе пока пусто. Создай любую тему или язык во вкладке «Конструктор» — они автоматически сохранятся сюда!</div>`;
+                return;
+            }
+            box.innerHTML = list.map(item => {
+                const st = item.state || tgState;
+                return `
+                    <article class="frosted-card flex flex-col justify-between gap-3">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold accent-text">${escapeHtml(item.tag)} • ${escapeHtml(item.createdAt || '')}</span>
+                                <div class="flex gap-1">
+                                    <span class="w-3.5 h-3.5 rounded-full border border-white/20" style="background:${st.chatBg}"></span>
+                                    <span class="w-3.5 h-3.5 rounded-full border border-white/20" style="background:${st.msgOut}"></span>
+                                    <span class="w-3.5 h-3.5 rounded-full border border-white/20" style="background:${st.accent}"></span>
+                                </div>
+                            </div>
+                            <h4 class="text-sm font-bold text-dynamic mt-1">${escapeHtml(item.title)}</h4>
+                            <div class="mt-2 p-2.5 rounded-xl code-surface text-[11px] text-muted-dynamic space-y-0.5">
+                                <div>Бабблы: <span class="font-mono text-dynamic">${st.msgOut}</span> • Скругление: <span class="font-mono text-dynamic">${st.bubbleRadius}px</span></div>
+                                <div>Язык: <span class="text-dynamic">${escapeHtml(st.online)} / ${escapeHtml(st.typing)}</span></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <button type="button" onclick="openVaultItemModal(${item.id})" class="btn-primary min-h-[36px] text-[11px] font-bold">Открыть</button>
+                            <button type="button" onclick="loadVaultItemToEditor(${item.id})" class="btn-glass min-h-[36px] text-[11px] font-semibold accent-text">В редактор</button>
+                            <button type="button" onclick="deleteVaultItem(${item.id})" class="btn-glass min-h-[36px] text-[11px] text-rose-400">Удалить</button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function openVaultItemModal(itemId) {
+            const item = getVaultList().find(x => x.id === itemId);
+            if (!item) return;
+            const st = item.state;
+            openBottomSheet(item.title, `
+                <div class="space-y-3.5 text-xs">
+                    <!-- Мини-превью сохраненной сборки -->
+                    <div class="rounded-2xl overflow-hidden border border-white/15 p-3.5 space-y-2" style="background:${st.chatBg}; color:${st.text}">
+                        <div class="text-[11px] font-bold pb-1.5 border-b border-white/10 flex justify-between" style="color:${st.accent}">
+                            <span>${escapeHtml(st.saved)} (${escapeHtml(st.online)})</span>
+                            <span>${escapeHtml(st.typing)}</span>
+                        </div>
+                        <div class="p-2.5 text-[11px] max-w-[80%]" style="background:${st.msgIn}; border-radius:${st.bubbleRadius}px">Привет! Это предпросмотр твоей сохраненной темы из Сейфа.</div>
+                        <div class="p-2.5 text-[11px] max-w-[80%] ml-auto" style="background:${st.msgOut}; border-radius:${st.bubbleRadius}px">Все настройки и цвета готовы к скачиванию ✓</div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="downloadAtThemeFile(false, ${ JSON.stringify(st).replace(/"/g, '&quot;') })" class="btn-primary min-h-[42px] font-bold">📥 Скачать .attheme</button>
+                        <button type="button" onclick="downloadIosThemeFile(false, ${ JSON.stringify(st).replace(/"/g, '&quot;') })" class="btn-glass min-h-[42px] font-bold accent-text">🍏 Скачать .tgios</button>
+                        <button type="button" onclick="downloadTelegramLangXml(false, ${ JSON.stringify(st).replace(/"/g, '&quot;') })" class="btn-glass min-h-[42px] font-semibold">🗣 Скачать язык .xml</button>
+                        <button type="button" onclick="loadVaultItemToEditor(${item.id}); closeBottomSheet()" class="btn-glass min-h-[42px] font-semibold text-amber-300">✏️ Редактировать</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function loadVaultItemToEditor(itemId) {
+            const item = getVaultList().find(x => x.id === itemId);
+            if (!item || !item.state) return;
+            Haptic.success();
+            Object.assign(tgState, item.state);
+            syncInputsFromTgState();
+            renderTgLiveMockup();
+            switchTab(0, 'view-studio');
+            showToast(`Сборка «${item.title}» открыта в редакторе!`);
+        }
+
+        function deleteVaultItem(itemId) {
+            Haptic.light();
+            persistVaultList(getVaultList().filter(x => x.id !== itemId));
+            showToast('Запись удалена из Сейфа');
+        }
+
+        function exportVaultJson() {
+            Haptic.success();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(getVaultList(), null, 2)], { type: 'application/json' }));
+            a.download = 'tg_studio_vault.json';
+            a.click();
+        }
+
+        /* ==================== 8. НАВИГАЦИЯ, VIP И ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==================== */
+        const NAV_ITEMS_META = {
+            'view-studio': {
+                label: 'Конструктор',
+                svg: `<svg class="w-4 h-4 accent-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`
+            },
+            'view-packs': {
+                label: 'Готовые паки',
+                svg: `<svg class="w-4 h-4 accent-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`
+            },
+            'view-vault': {
+                label: 'Мой Сейф',
+                svg: `<svg class="w-4 h-4 accent-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+            }
+        };
+
+        function renderNavigationBar() {
+            const mount = document.getElementById('nav-buttons-mount');
+            if (!mount) return;
+            const cfg = loadUserSiteTheme();
+            const order = Array.isArray(cfg.navOrder) && cfg.navOrder.length === 3
+                ? cfg.navOrder
+                : ['view-studio', 'view-packs', 'view-vault'];
+            const activeIdx = Math.max(0, order.indexOf(currentTabId));
+            const vaultCount = getVaultList().length;
+
+            mount.innerHTML = `
+                <div id="bottom-nav-pill" class="absolute top-0 bottom-0 left-0 w-1/3 rounded-full bg-white/[0.1] border border-white/20 transition-transform duration-300 ease-spring pointer-events-none" style="transform: translate3d(${activeIdx * 100}%, 0, 0)"></div>
+                ${order.map((viewId, idx) => {
+                    const meta = NAV_ITEMS_META[viewId] || NAV_ITEMS_META['view-studio'];
+                    const active = viewId === currentTabId;
+                    const badge = viewId === 'view-vault' ? `<span class="px-1.5 py-0.2 text-[10px] rounded-full bg-emerald-500/25 accent-text">${vaultCount}</span>` : '';
+                    return `
+                        <button type="button" onclick="switchTab(${idx}, '${viewId}')" class="relative z-10 min-h-[42px] rounded-full flex items-center justify-center gap-1.5 text-[11px] ${active ? 'font-bold accent-text' : 'font-medium text-muted-dynamic'}">
+                            ${meta.svg}
+                            <span class="nav-label">${meta.label}</span>
+                            ${badge}
+                        </button>
+                    `;
+                }).join('')}
+            `;
+        }
+
         function switchStudioMode(mode) {
-            SoundFX.tap(400);
+            Haptic.tab();
             const modes = ['theme', 'lang', 'tweaks'];
-            const idx = modes.indexOf(mode);
+            const idx = Math.max(0, modes.indexOf(mode));
             document.getElementById('builder-mode-pill').style.transform = `translate3d(${idx * 100}%, 0, 0)`;
             modes.forEach(m => {
                 document.getElementById(`panel-studio-${m}`).classList.toggle('hidden', m !== mode);
@@ -960,41 +2078,42 @@
             });
         }
 
-        function switchMainTab(viewId) {
-            SoundFX.tap(420);
-            ['view-studio', 'view-vault'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        function switchTab(_idx, viewId) {
+            Haptic.tab();
+            currentTabId = viewId;
+            ['view-studio', 'view-packs', 'view-vault'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById(viewId).classList.remove('hidden');
-            document.getElementById('nav-btn-studio').className = viewId === 'view-studio'
-                ? 'min-h-[40px] rounded-full text-xs font-bold accent-text bg-white/[0.08] flex items-center justify-center gap-1.5'
-                : 'min-h-[40px] rounded-full text-xs font-medium text-muted-dynamic flex items-center justify-center gap-1.5';
-            document.getElementById('nav-btn-vault').className = viewId === 'view-vault'
-                ? 'min-h-[40px] rounded-full text-xs font-bold accent-text bg-white/[0.08] flex items-center justify-center gap-1.5'
-                : 'min-h-[40px] rounded-full text-xs font-medium text-muted-dynamic flex items-center justify-center gap-1.5';
+            renderNavigationBar();
+            if (viewId === 'view-vault') renderVault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function openAppStyleSheet() {
-            const html = `
-                <div class="space-y-4 text-xs">
-                    <div>
-                        <span class="font-bold text-dynamic block mb-1.5">1. Поверхность фона студии</span>
-                        <div class="grid grid-cols-4 gap-1.5">
-                            ${['gradient', 'grid', 'noise', 'auras'].map(bg => `
-                                <button type="button" onclick="document.documentElement.setAttribute('data-bg','${bg}')" class="btn-glass min-h-[36px] text-[11px] font-semibold capitalize">${bg}</button>
-                            `).join('')}
-                        </div>
+        function getRefsCount() {
+            return parseInt(localStorage.getItem('vibe_refs_count') || '0', 10);
+        }
+
+        function updateVipUI() {
+            const refs = Math.min(3, getRefsCount());
+            document.getElementById('header-refs-count').textContent = `VIP ${refs}/3`;
+        }
+
+        function openVipModal() {
+            const refs = getRefsCount();
+            openBottomSheet('VIP-Статус TG Studio', `
+                <div class="space-y-3 text-xs">
+                    <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-400/30">
+                        <div class="font-bold text-amber-400">Приглашено друзей: ${refs} из 3</div>
+                        <p class="text-[11px] text-muted-dynamic mt-1">Пригласи друзей или активируй тестовый VIP ниже:</p>
                     </div>
-                    <div>
-                        <span class="font-bold text-dynamic block mb-1.5">2. Плотность интерфейса</span>
-                        <div class="grid grid-cols-3 gap-1.5">
-                            <button type="button" onclick="document.documentElement.setAttribute('data-density','compact')" class="btn-glass min-h-[36px]">Компактно</button>
-                            <button type="button" onclick="document.documentElement.setAttribute('data-density','normal')" class="btn-glass min-h-[36px]">Обычно</button>
-                            <button type="button" onclick="document.documentElement.setAttribute('data-density','spacious')" class="btn-glass min-h-[36px]">Просторно</button>
-                        </div>
-                    </div>
-                    <button type="button" onclick="closeBottomSheet()" class="btn-primary w-full min-h-[42px] text-xs font-bold">Готово ✓</button>
+                    <button type="button" onclick="adminGrantMaxVip(); closeBottomSheet()" class="btn-gold w-full min-h-[42px] text-xs font-bold">Активировать VIP 3/3 (Демо)</button>
                 </div>
-            `;
-            document.getElementById('sheet-body').innerHTML = html;
+            `);
+        }
+
+        function openBottomSheet(title, htmlContent) {
+            Haptic.pop();
+            document.getElementById('sheet-title').textContent = title;
+            document.getElementById('sheet-body').innerHTML = htmlContent;
             document.getElementById('sheet-backdrop').classList.add('open');
             document.getElementById('bottom-sheet').classList.add('open');
         }
@@ -1004,48 +2123,30 @@
             document.getElementById('bottom-sheet').classList.remove('open');
         }
 
-        /* ==================== 5. СЕЙФ СОХРАНЕНИЙ ==================== */
-        function getVault() {
-            try { return JSON.parse(localStorage.getItem('tg_custom_vault') || '[]'); } catch { return []; }
-        }
-        function saveCurrentToVault(title) {
-            const list = getVault();
-            list.unshift({ id: Date.now(), title, state: { ...tgState } });
-            localStorage.setItem('tg_custom_vault', JSON.stringify(list));
-            renderVault();
-            showToast('Сохранено в Сейф!');
-        }
-        function clearVault() {
-            localStorage.removeItem('tg_custom_vault');
-            renderVault();
-            showToast('Сейф очищен');
-        }
-        function renderVault() {
-            const list = getVault();
-            document.getElementById('vault-badge').textContent = list.length;
-            const box = document.getElementById('vault-grid');
-            if (!list.length) {
-                box.innerHTML = `<div class="frosted-card text-center text-xs text-muted-dynamic lg:col-span-2">В Сейфе пока пусто. Сохрани любую тему или язык!</div>`;
-                return;
-            }
-            box.innerHTML = list.map((item, idx) => `
-                <article class="frosted-card flex items-center justify-between">
-                    <div>
-                        <div class="text-xs font-bold text-dynamic">${item.title}</div>
-                        <div class="text-[10px] font-mono text-muted-dynamic mt-0.5">${item.state.msgOut} • ${item.state.chatBg}</div>
-                    </div>
-                    <button type="button" onclick='Object.assign(tgState, ${JSON.stringify(item.state)}); renderTgLiveMockup(); switchMainTab("view-studio"); showToast("Пресет загружен!")' class="btn-glass px-3 py-1.5 text-xs font-semibold accent-text">Применить</button>
-                </article>
-            `).join('');
+        let toastTimer = null;
+        function showToast(msg = 'Готово!') {
+            const pill = document.getElementById('toast-pill');
+            document.getElementById('toast-text').textContent = msg;
+            pill.classList.remove('opacity-0', 'translate-y-3', 'scale-95');
+            pill.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                pill.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+                pill.classList.add('opacity-0', 'translate-y-3', 'scale-95');
+            }, 1900);
         }
 
-        /* ==================== 6. ОНБОРДИНГ И ПЛАВАЮЩЕЕ PiP-ОКНО ==================== */
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+        }
+
+        /* ==================== 9. ОНБОРДИНГ, PiP-ОКНО И ЗАЩИТА ПОЛЗУНКОВ ==================== */
         const ONBOARD_SLIDES = [
-            { icon: '🎨', title: 'Создавай темы под себя', text: 'Меняй цвета бабблов, фон чата, узоры и скачивай готовый файл темы в один клик.' },
-            { icon: '🗣', title: 'Собственные языки ТГ', text: 'Ставь пацанский, хакерский или аниме-перевод, либо пиши свои подписи вместо «печатает...».' },
-            { icon: '🪟', title: 'Плавающее окно превью', text: 'Листай настройки вниз — макет чата свернется в плавающее PiP-окно, которое можно двигать пальцем!' }
+            { icon: '🎨', title: 'Темы и Свои Обои чата', text: 'Настраивай цвета бабблов, загружай свои картинки на фон и скачивай готовые файлы .attheme и .tgios.' },
+            { icon: '🗣', title: 'Языки в 1 тап и Свой перевод', text: 'Устанавливай облачные языки мгновенным окном Telegram или создавай свой перевод фраз «в сети» и «печатает...».' },
+            { icon: '🔒', title: 'Автосохранение в Сейф и PiP', text: 'Каждая созданная сборка сохраняется в Сейф — её можно снова открыть в редакторе. При скролле вниз превью чата превращается в плавающее окно!' }
         ];
-        let obIndex = 0;
+        let obIndex = 0, obTouchX = null;
 
         function openOnboarding(i = 0) {
             obIndex = i;
@@ -1054,25 +2155,32 @@
         }
         function closeOnboarding() {
             document.getElementById('onboard-overlay').classList.remove('open');
-            localStorage.setItem('tg_cust_onboard', '1');
+            localStorage.setItem('tg_studio_onboard_done', '1');
         }
         function renderOnboarding() {
             const track = document.getElementById('onboard-track');
             if (!track.children.length) {
                 track.innerHTML = ONBOARD_SLIDES.map(s => `
                     <div class="ob-slide">
-                        <div style="font-size:56px;line-height:1">${s.icon}</div>
+                        <div style="font-size:60px;line-height:1">${s.icon}</div>
                         <h3 class="text-base font-bold text-dynamic mt-4">${s.title}</h3>
                         <p class="text-xs text-muted-dynamic mt-2 leading-relaxed">${s.text}</p>
                     </div>`).join('');
+                track.addEventListener('touchstart', e => { obTouchX = e.touches[0].clientX; }, { passive: true });
+                track.addEventListener('touchend', e => {
+                    if (obTouchX === null) return;
+                    const dx = e.changedTouches[0].clientX - obTouchX;
+                    obTouchX = null;
+                    if (Math.abs(dx) > 45) onboardStep(dx < 0 ? 1 : -1);
+                }, { passive: true });
             }
             track.style.transform = `translate3d(${-obIndex * 100}%,0,0)`;
             document.getElementById('onboard-dots').innerHTML = ONBOARD_SLIDES.map((_, i) => `<span class="ob-dot ${i === obIndex ? 'active' : ''}"></span>`).join('');
             document.getElementById('ob-prev').style.visibility = obIndex === 0 ? 'hidden' : 'visible';
-            document.getElementById('ob-next').textContent = obIndex === ONBOARD_SLIDES.length - 1 ? 'Погнали!' : 'Далее';
+            document.getElementById('ob-next').textContent = obIndex === ONBOARD_SLIDES.length - 1 ? 'Начать' : 'Далее';
         }
         function onboardStep(dir) {
-            SoundFX.tap();
+            Haptic.selection();
             const next = obIndex + dir;
             if (next >= ONBOARD_SLIDES.length) { closeOnboarding(); return; }
             if (next < 0) return;
@@ -1080,12 +2188,13 @@
             renderOnboarding();
         }
 
-        // Инициализация плавающего PiP-окна с Drag & Drop
+        // Плавающее PiP-окно с Drag & Drop
         (function initPip() {
             const slot = document.getElementById('pip-slot');
             const win = document.getElementById('pip-window');
             const handle = document.getElementById('pip-handle');
             const minBtn = document.getElementById('pip-min');
+            if (!slot || !win || !handle) return;
             const M = 8;
             let floating = false, offX = 0, offY = 0, drag = false;
 
@@ -1116,7 +2225,7 @@
 
             new IntersectionObserver(([e]) => {
                 const passedDown = e.boundingClientRect.bottom < 0;
-                if (!e.isIntersecting && passedDown) float();
+                if (!e.isIntersecting && passedDown && currentTabId === 'view-studio') float();
                 else if (e.isIntersecting || !passedDown) dock();
             }, { threshold: 0 }).observe(slot);
 
@@ -1140,34 +2249,55 @@
             handle.addEventListener('pointercancel', stop);
 
             minBtn.addEventListener('click', () => {
+                Haptic.selection();
                 win.classList.toggle('mini');
                 minBtn.textContent = win.classList.contains('mini') ? '+' : '—';
                 clamp();
             });
+            window.addEventListener('resize', () => { if (floating) clamp(); });
         })();
 
-        function copyText(t) {
-            navigator.clipboard.writeText(t).then(() => showToast('Скопировано в буфер!'));
-        }
-
-        let toastTimer = null;
-        function showToast(msg) {
-            const pill = document.getElementById('toast-pill');
-            document.getElementById('toast-text').textContent = msg;
-            pill.classList.remove('opacity-0', 'translate-y-3', 'scale-95');
-            pill.classList.add('opacity-100', 'translate-y-0', 'scale-100');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                pill.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
-                pill.classList.add('opacity-0', 'translate-y-3', 'scale-95');
-            }, 1900);
-        }
+        // Защита ползунков от случайного сдвига при вертикальном скролле
+        (function guardSliders() {
+            let sx = 0, sy = 0, startVal = null, vertical = false, active = null;
+            document.addEventListener('touchstart', e => {
+                const el = e.target.closest?.('input[type="range"].ios-slider');
+                if (!el) return;
+                active = el;
+                startVal = el.value;
+                vertical = false;
+                sx = e.touches[0].clientX;
+                sy = e.touches[0].clientY;
+            }, { passive: true });
+            document.addEventListener('touchmove', e => {
+                if (!active) return;
+                const dx = Math.abs(e.touches[0].clientX - sx);
+                const dy = Math.abs(e.touches[0].clientY - sy);
+                if (!vertical && dy > 6 && dy > dx) vertical = true;
+                if (vertical) active.value = startVal;
+            }, { passive: true });
+            const end = () => { if (active && vertical) active.value = startVal; active = null; vertical = false; };
+            document.addEventListener('touchend', end, { passive: true });
+            document.addEventListener('touchcancel', end, { passive: true });
+            document.addEventListener('input', e => {
+                if (vertical && e.target === active) {
+                    e.target.value = startVal;
+                    e.stopImmediatePropagation();
+                }
+            }, true);
+        })();
 
         document.addEventListener('DOMContentLoaded', () => {
             SoundFX.syncIcon();
+            applyUserSiteTheme(loadUserSiteTheme());
+            updateVipUI();
             initStudioGrids();
-            if (tg) { try { tg.ready(); tg.expand(); } catch (_) {} }
-            if (!localStorage.getItem('tg_cust_onboard')) openOnboarding(0);
+            renderVault();
+            checkSponsorGateOnLoad();
+            if (tg) {
+                try { tg.ready(); tg.expand(); tg.disableVerticalSwipes?.(); } catch (_) {}
+            }
+            if (!localStorage.getItem('tg_studio_onboard_done')) openOnboarding(0);
         });
     </script>
 </body>
