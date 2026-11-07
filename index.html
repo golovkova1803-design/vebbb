@@ -198,7 +198,7 @@
             transform: scale(1.05);
         }
 
-        /* Карточки и поверхности (без матрёшки рамок) */
+        /* Карточки и поверхности */
         .frosted-card {
             position: relative;
             overflow: hidden;
@@ -312,10 +312,10 @@
             background: #ffffff;
             border: 2.5px solid var(--accent-primary);
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-            transition: transform 150ms var(--ease-spring);
+            transition: transform 160ms var(--ease-spring);
         }
         input[type="range"].ios-slider:active::-webkit-slider-thumb {
-            transform: scale(1.18);
+            transform: scale(1.25);
         }
 
         /* Специальный градиентный ползунок для Hue */
@@ -370,12 +370,6 @@
             transition: transform 300ms var(--ease-ios), visibility 0s;
         }
 
-        /* Анимация появления экранов */
-        @keyframes riseIn {
-            from { opacity: 0; transform: translate3d(0, 10px, 0); }
-            to { opacity: 1; transform: none; }
-        }
-        
         .space-dynamic > * + * { margin-top: var(--section-gap); }
 
         /* Онбординг с бегущей неоновой гранью */
@@ -435,14 +429,19 @@
             border: 0;
             background: transparent;
         }
-    
-        /* ==================== АНИМАЦИИ ==================== */
+
+        /* ==================== АНИМАЦИИ И ЭФФЕКТЫ ==================== */
         @keyframes cardIn { from { opacity: 0; transform: translate3d(0, 14px, 0) scale(.985); } to { opacity: 1; transform: none; } }
         @keyframes popIn { 0% { opacity: 0; transform: scale(.88); } 60% { opacity: 1; transform: scale(1.03); } 100% { opacity: 1; transform: none; } }
         @keyframes msgIn { from { opacity: 0; transform: translate3d(0, 10px, 0) scale(.95); } to { opacity: 1; transform: none; } }
         @keyframes rippleOut { to { transform: scale(3.4); opacity: 0; } }
         @keyframes sheen { 0%, 55% { transform: translateX(-130%) skewX(-18deg); } 100% { transform: translateX(260%) skewX(-18deg); } }
         @keyframes glowPulse { 0%, 100% { box-shadow: 0 6px 18px color-mix(in srgb, var(--accent-primary) 24%, transparent), inset 0 1px 0 rgba(255,255,255,.25); } 50% { box-shadow: 0 8px 26px color-mix(in srgb, var(--accent-primary) 42%, transparent), inset 0 1px 0 rgba(255,255,255,.25); } }
+        @keyframes blobA { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(14vw,10vh,0) scale(1.25); } }
+        @keyframes blobB { 0%,100% { transform: translate3d(0,0,0) scale(1.1); } 50% { transform: translate3d(-16vw,-12vh,0) scale(.9); } }
+        @keyframes textFlow { to { background-position: 200% 0; } }
+        @keyframes burstOut { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(var(--dx),var(--dy)) scale(.2); opacity: 0; } }
+        @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
         .animate-view-enter { animation: cardIn 380ms var(--ease-ios) backwards; }
         .rv { opacity: 0; transform: translate3d(0, 18px, 0); }
@@ -462,20 +461,9 @@
         #tg-live-mockup.flash #tg-mock-msg-out { animation: msgIn 440ms var(--ease-spring) 110ms backwards; }
         #tg-live-mockup.flash #tg-mock-header { animation: cardIn 360ms var(--ease-ios) backwards; }
         #sheet-body > * { animation: cardIn 320ms var(--ease-ios) backwards; }
-        #sheet-body > *:nth-child(2) { animation-delay: 60ms; } #sheet-body > *:nth-child(3) { animation-delay: 120ms; }
+        #sheet-body > *:nth-child(2) { animation-delay: 60ms; }
+        #sheet-body > *:nth-child(3) { animation-delay: 120ms; }
 
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
-            .rv { opacity: 1; transform: none; }
-        }
-        html[data-fx="min"] .rv { opacity: 1; transform: none; }
-    
-        /* ==================== ЭФФЕКТЫ ==================== */
-        @keyframes blobA { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(14vw,10vh,0) scale(1.25); } }
-        @keyframes blobB { 0%,100% { transform: translate3d(0,0,0) scale(1.1); } 50% { transform: translate3d(-16vw,-12vh,0) scale(.9); } }
-        @keyframes textFlow { to { background-position: 200% 0; } }
-        @keyframes burstOut { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(var(--dx),var(--dy)) scale(.2); opacity: 0; } }
-        @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
         .aurora i { position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; filter: blur(70px); opacity: .22; will-change: transform; }
         .aurora i:nth-child(1) { left: -20vmax; top: -18vmax; background: var(--accent-primary); animation: blobA 18s ease-in-out infinite; }
@@ -491,8 +479,12 @@
         .burst { position: fixed; left: 50%; top: 50%; z-index: 200; pointer-events: none; }
         .burst i { position: absolute; width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); animation: burstOut 800ms var(--ease-ios) forwards; }
         .chip-btn:active, .btn-surface:active { filter: brightness(1.15); }
-        input[type="range"].ios-slider::-webkit-slider-thumb { transition: transform 160ms var(--ease-spring); }
-        input[type="range"].ios-slider:active::-webkit-slider-thumb { transform: scale(1.25); }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+            .rv { opacity: 1; transform: none; }
+        }
+        html[data-fx="min"] .rv { opacity: 1; transform: none; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
@@ -502,6 +494,43 @@
     <div id="bg-custom-image" class="bg-layer"></div>
     <div id="bg-gradient-layer" class="bg-layer"></div>
     <div id="bg-pattern-layer" class="bg-layer"></div>
+
+    <!-- ==================== ПОЛНОЭКРАННОЕ НАТИВНОЕ ОКНО ПРОСМОТРА И ПРИМЕНЕНИЯ ИМПОРТИРОВАННОЙ ТЕМЫ ==================== -->
+    <div id="native-theme-preview-modal" class="fixed inset-0 z-[55] bg-black/85 backdrop-blur-xl hidden items-center justify-center p-4">
+        <div class="frosted-card max-w-md w-full space-y-3.5 border border-emerald-400/35">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <h3 id="imp-modal-title" class="text-sm font-bold text-dynamic">Просмотр и установка темы</h3>
+                </div>
+                <button type="button" onclick="closeImportedThemeModal()" class="chip-btn min-w-[30px] min-h-[30px] rounded-full text-xs">✕</button>
+            </div>
+
+            <div id="imp-modal-badge-bar" class="px-3 py-1.5 rounded-xl recessed-block flex items-center justify-between text-[11px]">
+                <span class="text-muted-dynamic">Статус пакета:</span>
+                <span id="imp-modal-file-meta" class="font-mono font-semibold accent-text">Импортировано • 38 ключей</span>
+            </div>
+
+            <!-- Интерактивное окно предпросмотра импортированного файла (как в нативном клиенте Telegram) -->
+            <div id="imp-modal-Stage" class="rounded-2xl overflow-hidden border border-white/15 shadow-2xl"></div>
+
+            <!-- Действия применения темы -->
+            <div class="space-y-2 pt-1">
+                <button type="button" id="imp-btn-primary-apply" onclick="executeDirectTelegramThemeOpen()" class="btn-primary w-full min-h-[46px] text-xs flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Применить тему в Telegram сейчас</span>
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="triggerTelegramNativeDownload()" class="btn-surface min-h-[40px] text-[11px] font-semibold accent-text">
+                        Открыть файл в клиенте ТГ
+                    </button>
+                    <button type="button" onclick="applyThemeToApp(); closeImportedThemeModal()" class="btn-surface min-h-[40px] text-[11px] font-medium">
+                        Применить к интерфейсу студии
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ==================== SPONSOR GATE (ОБЯЗАТЕЛЬНАЯ ПОДПИСКА) ==================== -->
     <div id="sponsor-gate-overlay" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl hidden items-center justify-center p-4">
@@ -518,7 +547,7 @@
         </div>
     </div>
 
-    <!-- ==================== ШАПКА (БЕЗ БАННЕРА, ЧИСТАЯ НАТИВНАЯ ПАНЕЛЬ) ==================== -->
+    <!-- ==================== ШАПКА ==================== -->
     <header class="frosted-header select-none">
         <div class="px-4 lg:px-8 py-2.5 max-w-md lg:max-w-6xl mx-auto flex items-center justify-between gap-2">
             <div class="flex items-center gap-2.5">
@@ -644,7 +673,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Закрепленное сообщение (только в режиме чата) -->
+                                    <!-- Закрепленное сообщение -->
                                     <div id="tg-mock-pinned-bar" class="px-3.5 py-1.5 flex items-center gap-2 z-20 border-t border-black/15 text-[10px]">
                                         <div id="tg-mock-pin-line" class="w-0.5 h-6 rounded-full shrink-0"></div>
                                         <div class="min-w-0 flex-1">
@@ -658,12 +687,10 @@
                                         <div id="tg-mock-wallpaper-img" class="absolute inset-0 bg-cover bg-center pointer-events-none hidden"></div>
                                         <div id="tg-mock-pattern" class="absolute inset-0 pointer-events-none"></div>
 
-                                        <!-- Плашка даты -->
                                         <div class="relative z-10 flex justify-center my-0.5">
                                             <span id="tg-mock-date-pill" class="px-2.5 py-0.5 rounded-full text-[10px] font-medium backdrop-blur-sm">Сегодня</span>
                                         </div>
 
-                                        <!-- Входящее сообщение с цитатой -->
                                         <div id="tg-mock-msg-in" class="relative z-10 max-w-[85%] self-start px-3 py-2 shadow-sm transition-all">
                                             <div id="tg-mock-in-title" class="font-bold text-[10px] mb-1">TG Studio Engine</div>
                                             <div id="tg-mock-reply-box" class="mb-1.5 pl-2 py-0.5 rounded text-[10px] border-l-2">
@@ -674,7 +701,6 @@
                                             <div id="tg-mock-in-time" class="text-[9px] text-right mt-1">14:20</div>
                                         </div>
 
-                                        <!-- Исходящее сообщение -->
                                         <div id="tg-mock-msg-out" class="relative z-10 max-w-[85%] self-end px-3 py-2 shadow-sm transition-all">
                                             <div id="tg-mock-out-text" class="leading-snug">Отлично, цвета и скругления работают как родные.</div>
                                             <div class="flex items-center justify-end gap-1 mt-1">
@@ -684,7 +710,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Экран 2: Список чатов (скрыт по умолчанию) -->
+                                    <!-- Экран 2: Список чатов -->
                                     <div id="tg-mock-chatlist-view" class="hidden flex-1 divide-y divide-white/5 overflow-hidden"></div>
 
                                     <!-- Нижняя панель ввода -->
@@ -706,15 +732,15 @@
                         </article>
                     </div>
 
-                    <!-- Панель установки и экспорта темы -->
+                    <!-- Панель мгновенного импорта и открытия окна темы -->
                     <div class="frosted-card !p-3 space-y-2">
-                        <button type="button" onclick="installTheme()" class="btn-primary w-full min-h-[46px] text-xs flex items-center justify-center gap-2">
+                        <button type="button" onclick="compileImportAndOpenPreview()" class="btn-primary w-full min-h-[46px] text-xs flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            <span>Установить тему в Telegram</span>
+                            <span>Импортировать и открыть окно темы</span>
                         </button>
                         <div class="grid grid-cols-3 gap-1.5">
-                            <button type="button" onclick="installTheme()" class="btn-surface min-h-[38px] text-[11px] font-semibold flex items-center justify-center gap-1" title="Файл темы под твоё устройство придёт в чат">
-                                <span class="accent-text">Отправить в чат</span>
+                            <button type="button" onclick="executeDirectTelegramThemeOpen()" class="btn-surface min-h-[38px] text-[11px] font-semibold flex items-center justify-center gap-1" title="Мгновенное открытие темы в Telegram">
+                                <span class="accent-text">Открыть в ТГ</span>
                             </button>
                             <button type="button" onclick="downloadThemeForPlatform()" class="btn-surface min-h-[38px] text-[11px] font-medium flex items-center justify-center">
                                 <span>Скачать файл</span>
@@ -835,7 +861,7 @@
                                     <label class="chip-btn px-2.5 py-1.5 text-[11px] font-medium cursor-pointer flex items-center gap-1.5">
                                         <svg class="w-3.5 h-3.5 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                                         <span>Импорт .attheme</span>
-                                        <input type="file" accept=".attheme" onchange="importAtThemeFile(this.files)" class="hidden">
+                                        <input type="file" accept=".attheme,.tgios-theme" onchange="importAtThemeFile(this.files)" class="hidden">
                                     </label>
                                 </div>
                             </div>
@@ -893,7 +919,7 @@
 
                             <div class="grid grid-cols-2 gap-2 pt-2">
                                 <button type="button" onclick="downloadTelegramLangXml(true)" class="btn-primary min-h-[42px] text-xs">Скачать .xml и сохранить в Сейф</button>
-                                <button type="button" onclick="installLanguage()" class="btn-surface min-h-[42px] text-xs font-semibold accent-text">Установить словарь (Android)</button>
+                                <button type="button" onclick="installLanguage()" class="btn-surface min-h-[42px] text-xs font-semibold accent-text">Импортировать словарь в ТГ</button>
                             </div>
                         </article>
                     </div>
@@ -903,7 +929,7 @@
                         <article class="frosted-card space-y-3">
                             <div>
                                 <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">Визуальные модификаторы</span>
-                                <h3 class="text-sm font-bold text-dynamic mt-0.5">Дополнительные параметры рендера и привязка облачной темы</h3>
+                                <h3 class="text-sm font-bold text-dynamic mt-0.5">Дополнительные параметры рендера и облачный мост</h3>
                             </div>
 
                             <div class="space-y-2">
@@ -934,11 +960,11 @@
 
                             <!-- Привязка собственного облачного слага t.me/addtheme/... -->
                             <div class="p-3 recessed-block space-y-2">
-                                <div class="text-xs font-semibold text-dynamic">Привязать облачный идентификатор (t.me/addtheme/...)</div>
-                                <p class="text-[11px] text-muted-dynamic">Необязательно. Если ты сам опубликовал тему в Telegram и получил ссылку t.me/addtheme/..., вставь slug — тогда кнопки откроют её нативно. Без slug тема ставится файлом.</p>
+                                <div class="text-xs font-semibold text-dynamic">Облачный идентификатор темы (t.me/addtheme/...)</div>
+                                <p class="text-[11px] text-muted-dynamic">Укажи slug опубликованной темы или используй авто-генератор облачного пакета:</p>
                                 <div class="flex gap-2">
-                                    <input id="cloud-slug-input" type="text" value="" oninput="tgState.cloudSlug=this.value.trim()" placeholder="Например: MyTheme_x7Kq2" class="frosted-input flex-1 min-h-[36px] px-3 text-xs font-mono">
-                                    <button type="button" onclick="openNativeAddThemeModal()" class="btn-primary px-4 min-h-[36px] text-xs">Проверить</button>
+                                    <input id="cloud-slug-input" type="text" value="" oninput="tgState.cloudSlug=this.value.trim()" placeholder="Например: EmeraldObsidian" class="frosted-input flex-1 min-h-[36px] px-3 text-xs font-mono">
+                                    <button type="button" onclick="openNativeAddThemeModal()" class="btn-primary px-4 min-h-[36px] text-xs">Открыть в ТГ</button>
                                 </div>
                             </div>
                         </article>
@@ -1016,6 +1042,7 @@
         const tg = window.Telegram?.WebApp;
         let currentTabId = 'view-studio';
         let previewScreenMode = 'chat'; // 'chat' | 'list'
+        let lastCompiledPackage = null; // Хранит импортированный в память пакет темы для мгновенного открытия
 
         /* ==================== 1. ЗВУКОВОЙ ДВИЖОК WEB AUDIO API ==================== */
         const SoundFX = {
@@ -1179,20 +1206,21 @@
             return hslToHex(hsl.h + hueDelta, hsl.s * satMult, hsl.l * lightMult);
         }
 
-        /* ==================== 3. ПАЛИТРЫ, КАНАЛЫ И СОСТОЯНИЕ ТЕМЫ TELEGRAM ==================== */
+        // === КОНЕЦ ЧАСТИ 1 (Напиши «продолжить» для получения Части 2) ===
+/* ==================== 3. ПАЛИТРЫ, КАНАЛЫ И СОСТОЯНИЕ ТЕМЫ TELEGRAM ==================== */
         const TG_THEME_PRESETS = [
-            { name: 'Emerald Obsidian', chatBg: '#060d0b', headerBg: '#0b1613', msgOut: '#0d9468', msgIn: '#11221d', accent: '#10b981', text: '#f4f4f5', timeText: '#86efac', checks: '#a7f3d0', cloudSlug: 'Night' },
-            { name: 'Linear Graphite', chatBg: '#09090b', headerBg: '#121216', msgOut: '#27272a', msgIn: '#16161a', accent: '#10b981', text: '#f4f4f5', timeText: '#a1a1aa', checks: '#10b981', cloudSlug: 'Night' },
-            { name: 'OLED Pitch Black', chatBg: '#000000', headerBg: '#08080a', msgOut: '#0f5132', msgIn: '#121215', accent: '#22c55e', text: '#ffffff', timeText: '#86efac', checks: '#4ade80', cloudSlug: 'Night' },
-            { name: 'Arctic Deep', chatBg: '#06101c', headerBg: '#0b1b2e', msgOut: '#0284c7', msgIn: '#112640', accent: '#38bdf8', text: '#f0f9ff', timeText: '#bae6fd', checks: '#7dd3fc', cloudSlug: 'Night' },
-            { name: 'Crimson Carbon', chatBg: '#110609', headerBg: '#1b0a0f', msgOut: '#be123c', msgIn: '#261017', accent: '#fb7185', text: '#fff1f2', timeText: '#fecdd3', checks: '#fda4af', cloudSlug: 'Night' },
-            { name: 'Amber Gold', chatBg: '#0d0a04', headerBg: '#171208', msgOut: '#b45309', msgIn: '#241c0d', accent: '#f59e0b', text: '#fef3c7', timeText: '#fde68a', checks: '#fcd34d', cloudSlug: 'Night' },
-            { name: 'Nordic Frost', chatBg: '#1e222a', headerBg: '#252a34', msgOut: '#4c566a', msgIn: '#2e3440', accent: '#88c0d0', text: '#eceff4', timeText: '#d8dee9', checks: '#8fbcbb', cloudSlug: 'Classic' },
-            { name: 'Cyber Matrix', chatBg: '#030904', headerBg: '#071409', msgOut: '#15803d', msgIn: '#0b2110', accent: '#4ade80', text: '#dcfce7', timeText: '#86efac', checks: '#22c55e', cloudSlug: 'Classic' },
-            { name: 'Sunset Copper', chatBg: '#120806', headerBg: '#1f0e0b', msgOut: '#c2410c', msgIn: '#2b1410', accent: '#fb923c', text: '#fff7ed', timeText: '#fed7aa', checks: '#fdba74', cloudSlug: 'Night' },
-            { name: 'Monochrome Slate', chatBg: '#0a0a0c', headerBg: '#141418', msgOut: '#3f3f46', msgIn: '#1c1c22', accent: '#e4e4e7', text: '#fafafa', timeText: '#a1a1aa', checks: '#ffffff', cloudSlug: 'Night' },
-            { name: 'Sandstone Warm', chatBg: '#141210', headerBg: '#1f1c18', msgOut: '#57534e', msgIn: '#292524', accent: '#d6d3d1', text: '#f5f5f4', timeText: '#a8a29e', checks: '#e7e5e4', cloudSlug: 'Classic' },
-            { name: 'Daylight Clean', chatBg: '#e4e8ec', headerBg: '#ffffff', msgOut: '#d1fae5', msgIn: '#ffffff', accent: '#059669', text: '#111827', timeText: '#6b7280', checks: '#059669', cloudSlug: 'Day' }
+            { name: 'Emerald Obsidian', chatBg: '#060d0b', headerBg: '#0b1613', msgOut: '#0d9468', msgIn: '#11221d', accent: '#10b981', text: '#f4f4f5', timeText: '#86efac', checks: '#a7f3d0', cloudSlug: '' },
+            { name: 'Linear Graphite', chatBg: '#09090b', headerBg: '#121216', msgOut: '#27272a', msgIn: '#16161a', accent: '#10b981', text: '#f4f4f5', timeText: '#a1a1aa', checks: '#10b981', cloudSlug: '' },
+            { name: 'OLED Pitch Black', chatBg: '#000000', headerBg: '#08080a', msgOut: '#0f5132', msgIn: '#121215', accent: '#22c55e', text: '#ffffff', timeText: '#86efac', checks: '#4ade80', cloudSlug: '' },
+            { name: 'Arctic Deep', chatBg: '#06101c', headerBg: '#0b1b2e', msgOut: '#0284c7', msgIn: '#112640', accent: '#38bdf8', text: '#f0f9ff', timeText: '#bae6fd', checks: '#7dd3fc', cloudSlug: '' },
+            { name: 'Crimson Carbon', chatBg: '#110609', headerBg: '#1b0a0f', msgOut: '#be123c', msgIn: '#261017', accent: '#fb7185', text: '#fff1f2', timeText: '#fecdd3', checks: '#fda4af', cloudSlug: '' },
+            { name: 'Amber Gold', chatBg: '#0d0a04', headerBg: '#171208', msgOut: '#b45309', msgIn: '#241c0d', accent: '#f59e0b', text: '#fef3c7', timeText: '#fde68a', checks: '#fcd34d', cloudSlug: '' },
+            { name: 'Nordic Frost', chatBg: '#1e222a', headerBg: '#252a34', msgOut: '#4c566a', msgIn: '#2e3440', accent: '#88c0d0', text: '#eceff4', timeText: '#d8dee9', checks: '#8fbcbb', cloudSlug: '' },
+            { name: 'Cyber Matrix', chatBg: '#030904', headerBg: '#071409', msgOut: '#15803d', msgIn: '#0b2110', accent: '#4ade80', text: '#dcfce7', timeText: '#86efac', checks: '#22c55e', cloudSlug: '' },
+            { name: 'Sunset Copper', chatBg: '#120806', headerBg: '#1f0e0b', msgOut: '#c2410c', msgIn: '#2b1410', accent: '#fb923c', text: '#fff7ed', timeText: '#fed7aa', checks: '#fdba74', cloudSlug: '' },
+            { name: 'Monochrome Slate', chatBg: '#0a0a0c', headerBg: '#141418', msgOut: '#3f3f46', msgIn: '#1c1c22', accent: '#e4e4e7', text: '#fafafa', timeText: '#a1a1aa', checks: '#ffffff', cloudSlug: '' },
+            { name: 'Sandstone Warm', chatBg: '#141210', headerBg: '#1f1c18', msgOut: '#57534e', msgIn: '#292524', accent: '#d6d3d1', text: '#f5f5f4', timeText: '#a8a29e', checks: '#e7e5e4', cloudSlug: '' },
+            { name: 'Daylight Clean', chatBg: '#e4e8ec', headerBg: '#ffffff', msgOut: '#d1fae5', msgIn: '#ffffff', accent: '#059669', text: '#111827', timeText: '#6b7280', checks: '#059669', cloudSlug: '' }
         ];
 
         const COLOR_CHANNELS_META = [
@@ -1223,7 +1251,7 @@
 
         const LANG_PRESETS = [
             { name: 'Стандарт', slug: 'ru', online: 'в сети', typing: 'печатает...', placeholder: 'Сообщение...', saved: 'Избранное', pinned: 'Закреплённое сообщение', today: 'Сегодня' },
-            { name: 'Терминал / Dev', slug: 'en', online: 'SSH ACTIVE', typing: 'compiling...', placeholder: 'stdin >>', saved: '/root/vault', pinned: ' PINNED_BUFFER', today: ' EPOCH_NOW' },
+            { name: 'Терминал / Dev', slug: 'en', online: 'SSH ACTIVE', typing: 'compiling...', placeholder: 'stdin >>', saved: '/root/vault', pinned: 'PINNED_BUFFER', today: 'EPOCH_NOW' },
             { name: 'Сленг / Улица', slug: 'ru', online: 'на связи', typing: 'пишет маляву...', placeholder: 'Черкани строку...', saved: 'Сейф', pinned: 'Важная инфа', today: 'Сегодняшний движ' },
             { name: 'Минимализм', slug: 'ru', online: '● online', typing: '...', placeholder: 'Текст', saved: 'Архив', pinned: 'Закреп', today: 'Сейчас' }
         ];
@@ -1255,7 +1283,6 @@
             today: 'Сегодня'
         };
 
-        // Базовый слепок цветов для работы ползунков спектра (Hue / Saturation / Brightness)
         let basePaletteSnapshot = { ...tgState };
 
         function snapshotBasePalette() {
@@ -1269,12 +1296,18 @@
                 timeText: tgState.timeText,
                 checks: tgState.checks
             };
-            document.getElementById('slider-hue-shift').value = 0;
-            document.getElementById('slider-sat-scale').value = 100;
-            document.getElementById('slider-bg-light').value = 100;
-            document.getElementById('val-hue-shift').textContent = '0°';
-            document.getElementById('val-sat-scale').textContent = '100%';
-            document.getElementById('val-bg-light').textContent = '100%';
+            const hEl = document.getElementById('slider-hue-shift');
+            const sEl = document.getElementById('slider-sat-scale');
+            const bEl = document.getElementById('slider-bg-light');
+            if (hEl) hEl.value = 0;
+            if (sEl) sEl.value = 100;
+            if (bEl) bEl.value = 100;
+            const vh = document.getElementById('val-hue-shift');
+            const vs = document.getElementById('val-sat-scale');
+            const vb = document.getElementById('val-bg-light');
+            if (vh) vh.textContent = '0°';
+            if (vs) vs.textContent = '100%';
+            if (vb) vb.textContent = '100%';
         }
 
         function applySpectrumSliders() {
@@ -1352,6 +1385,7 @@
             }
             snapshotBasePalette();
             syncInputsFromTgState();
+            renderColorChannelsGrid();
             renderTgLiveMockup();
             showToast(`Гармония применена: ${mode.toUpperCase()}`);
         }
@@ -1669,14 +1703,20 @@
             renderTgLiveMockup();
         }
 
-        /* ==================== 4. ПРАВИЛЬНАЯ УСТАНОВКА ТЕМЫ В TELEGRAM (БЕЗ ОБОЕВ ВМЕСТО ТЕМЫ!) ==================== */
+        /* ==================== 4. КОМПИЛЯЦИЯ, ИМПОРТ НА МЕСТЕ И ОТКРЫТИЕ ОКНА ПРИМЕНЕНИЯ В TELEGRAM ==================== */
         function hexToSignedInt(hex) {
             const clean = (hex || '#000000').replace('#', '');
             const num = parseInt('ff' + clean, 16);
             return (num | 0);
         }
 
-        // Полный генератор .attheme (38 ключей Telegram для Android и Desktop)
+        function signedIntToHex(numStr) {
+            const n = parseInt(numStr, 10);
+            if (isNaN(n)) return null;
+            const unsigned = n >>> 0;
+            return '#' + (unsigned & 0xFFFFFF).toString(16).padStart(6, '0');
+        }
+
         function buildAtThemeContent(st = tgState) {
             const bg = hexToSignedInt(st.chatBg);
             const hdr = hexToSignedInt(st.headerBg);
@@ -1729,7 +1769,6 @@
             ].join('\n') + '\n';
         }
 
-        // Полный генератор .tgios-theme (для iOS)
         function buildIosThemeContent(st = tgState) {
             return [
                 `name: ${st.name}`,
@@ -1780,21 +1819,6 @@
             ].join('\n');
         }
 
-        // Причина ошибки «цветовая тема не поддерживается»: t.me/addtheme/<slug> работает только для РЕАЛЬНОЙ
-        // облачной темы, опубликованной в Telegram (Mini App создать её не может). Slug «Night» не существует.
-        // Поэтому по умолчанию тема ставится файлом нужного формата под платформу пользователя.
-        function isRealSlug(x) { return /^[A-Za-z0-9_-]{6,}$/.test(x) && !/^(undefined|null|night|classic|day|arctic|tinted)$/i.test(x); }
-
-        function openNativeAddThemeModal(customSlug = null) {
-            const raw = String(customSlug || tgState.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
-            if (!isRealSlug(raw)) { showToast('Облачной ссылки нет — отправляю файл темы'); return installTheme(); }
-            Haptic.success();
-            autoSaveToVault(`Тема: ${tgState.name}`, 'Облачная тема', tgState);
-            const themeUrl = `https://t.me/addtheme/${raw}`;
-            if (tg?.openTelegramLink) tg.openTelegramLink(themeUrl); else window.open(themeUrl, '_blank');
-            showToast(`Открыто окно темы (${raw})`);
-        }
-
         function detectPlatform() {
             const p = String(tg?.platform || '').toLowerCase(), ua = navigator.userAgent || '';
             if (p === 'ios' || /iphone|ipad|ipod/i.test(ua)) return 'ios';
@@ -1804,16 +1828,6 @@
         const PLATFORM_FORMAT = { ios: 'tgios', android: 'attheme', desktop: 'tdesktop' };
         const PLATFORM_LABEL = { ios: 'iPhone / iPad', android: 'Android', desktop: 'ПК / Mac' };
 
-        function installTheme(customState = null) {
-            const st = (customState && typeof customState === 'object') ? customState : tgState;
-            applyThemeToApp(true);
-            return pushThemeFileToTelegramChat(PLATFORM_FORMAT[detectPlatform()], st);
-        }
-        function downloadThemeForPlatform() {
-            return pushThemeFileToTelegramChat(PLATFORM_FORMAT[detectPlatform()], null, true);
-        }
-
-        // Telegram Desktop: .tdesktop-theme = zip с colors.tdesktop-theme
         function crc32(u8) {
             if (!crc32.t) crc32.t = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
             let r = -1; for (const b of u8) r = crc32.t[(r ^ b) & 255] ^ (r >>> 8);
@@ -1840,122 +1854,327 @@
             return Object.entries(m).map(([k, v]) => `${k}: ${v};`).join('\n') + '\n';
         }
 
-        // 2. Вызов НАТИВНОГО ОКНА ЯЗЫКА TELEGRAM (https://t.me/setlanguage/<slug>)
+        function buildThemeFile(format, st) {
+            const safe = (st.name || 'theme').toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '') || 'theme';
+            if (format === 'tgios') return { rawText: buildIosThemeContent(st), blob: new Blob([buildIosThemeContent(st)], { type: 'application/x-tgtheme-ios' }), name: `${safe}.tgios-theme`, format: 'tgios' };
+            if (format === 'tdesktop') return { rawText: buildDesktopPalette(st), blob: makeZip('colors.tdesktop-theme', buildDesktopPalette(st)), name: `${safe}.tdesktop-theme`, format: 'tdesktop' };
+            if (format === 'lang') return { rawText: buildLangXmlContent(st), blob: new Blob([buildLangXmlContent(st)], { type: 'application/xml' }), name: `${safe}_lang.xml`, format: 'lang' };
+            return { rawText: buildAtThemeContent(st), blob: new Blob([buildAtThemeContent(st)], { type: 'application/x-tgtheme-android' }), name: `${safe}.attheme`, format: 'attheme' };
+        }
+
+        function parseThemeTextToState(rawText, fallbackName = 'Imported Theme') {
+            const parsed = { ...tgState, name: fallbackName };
+            if (rawText.includes('chatList:') || rawText.includes('incomingBubbleBackgroundColor:')) {
+                // Парсер формата .tgios-theme
+                const matchHex = (key) => {
+                    const rx = new RegExp(key + '\\s*:\\s*(#[0-9a-fA-F]{6})', 'i');
+                    const m = rawText.match(rx);
+                    return m ? m[1].toLowerCase() : null;
+                };
+                parsed.chatBg = matchHex('defaultWallpaper') || matchHex('backgroundColor') || parsed.chatBg;
+                parsed.headerBg = matchHex('inputPanelBackgroundColor') || parsed.headerBg;
+                parsed.msgIn = matchHex('incomingBubbleBackgroundColor') || parsed.msgIn;
+                parsed.msgOut = matchHex('outgoingBubbleBackgroundColor') || parsed.msgOut;
+                parsed.accent = matchHex('inputPanelActionControlFillColor') || matchHex('accentText') || parsed.accent;
+                parsed.text = matchHex('outgoingPrimaryTextColor') || parsed.text;
+            } else {
+                // Парсер формата .attheme
+                const map = {};
+                rawText.split(/\r?\n/).forEach(line => {
+                    const [k, v] = line.split('=');
+                    if (k && v) map[k.trim()] = signedIntToHex(v.trim());
+                });
+                if (map.chat_wallpaper || map.windowBackgroundWhite) parsed.chatBg = map.chat_wallpaper || map.windowBackgroundWhite;
+                if (map.actionBarDefault) parsed.headerBg = map.actionBarDefault;
+                if (map.chat_outBubble) parsed.msgOut = map.chat_outBubble;
+                if (map.chat_inBubble) parsed.msgIn = map.chat_inBubble;
+                if (map.chat_messagePanelSend) parsed.accent = map.chat_messagePanelSend;
+                if (map.chat_messageTextOut) parsed.text = map.chat_messageTextOut;
+                if (map.chat_outTimeText) parsed.timeText = map.chat_outTimeText;
+                if (map.chat_outSentCheck) parsed.checks = map.chat_outSentCheck;
+            }
+            return parsed;
+        }
+
+        // ГЛАВНАЯ ФУНКЦИЯ: Собирает файл темы, сразу же импортирует его внутри приложения и открывает окно просмотра и применения
+        function compileImportAndOpenPreview(customState = null) {
+            const st = (customState && typeof customState === 'object') ? customState : tgState;
+            const pf = detectPlatform();
+            const fmt = PLATFORM_FORMAT[pf];
+            const pkg = buildThemeFile(fmt, st);
+
+            // Импортируем сгенерированный пакет обратно через парсер, чтобы гарантировать 100% валидность файла
+            const verifiedState = parseThemeTextToState(pkg.rawText, st.name);
+            Object.assign(tgState, verifiedState);
+            lastCompiledPackage = { ...pkg, state: { ...tgState } };
+
+            autoSaveToVault(`Тема: ${tgState.name}`, `Импортирован (${pkg.name})`, tgState);
+            applyThemeToApp(true);
+            Haptic.success();
+            burst();
+
+            openImportedThemeModal(lastCompiledPackage);
+        }
+
+        function openImportedThemeModal(pkg) {
+            const st = pkg.state || tgState;
+            document.getElementById('imp-modal-title').textContent = `Тема «${st.name}» готова`;
+            document.getElementById('imp-modal-file-meta').textContent = `${pkg.name} • 38 ключей проверено`;
+
+            const r = `${st.bubbleRadius || 16}px`;
+            const stage = document.getElementById('imp-modal-Stage');
+            stage.innerHTML = `
+                <div style="background:${st.chatBg}; color:${st.text};" class="select-none">
+                    <div style="background:${st.headerBg}; border-bottom:1px solid rgba(255,255,255,0.08);" class="px-3.5 py-2.5 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white" style="background:linear-gradient(135deg, ${st.msgOut}, ${st.accent})">${(st.name || 'T')[0]}</div>
+                            <div>
+                                <div class="text-xs font-bold leading-tight">${escapeHtml(st.name)}</div>
+                                <div class="text-[10px]" style="color:${st.accent}">${escapeHtml(st.online || 'в сети')}</div>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono" style="background:${st.msgIn}; color:${st.accent}">${escapeHtml(pkg.name)}</span>
+                    </div>
+                    <div class="p-3.5 space-y-2" style="background-image:radial-gradient(${st.accent}26 1px, transparent 1px); background-size:14px 14px;">
+                        <div class="max-w-[85%] px-3 py-2 text-xs shadow-sm" style="background:${st.msgIn}; color:${st.text}; border-radius:${r} ${r} ${r} 4px;">
+                            <div class="font-bold text-[10px] mb-0.5" style="color:${st.accent}">Предпросмотр пакета Telegram</div>
+                            <div>Файл темы успешно импортирован. Нажми кнопку ниже, чтобы применить тему в Telegram.</div>
+                            <div class="text-[9px] text-right mt-1" style="color:${st.timeText}">14:20</div>
+                        </div>
+                        <div class="max-w-[85%] ml-auto px-3 py-2 text-xs shadow-sm" style="background:${st.msgOut}; color:${st.text}; border-radius:${r} ${r} 4px ${r};">
+                            <div>Применяю тему «${escapeHtml(st.name)}» в один клик ✓</div>
+                            <div class="text-[9px] text-right mt-1" style="color:${st.checks}">14:21 ✓✓</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modal = document.getElementById('native-theme-preview-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeImportedThemeModal() {
+            const modal = document.getElementById('native-theme-preview-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function isRealSlug(x) {
+            return /^[A-Za-z0-9_-]{5,}$/.test(x) && !/^(undefined|null|night|classic|day|arctic|tinted)$/i.test(x);
+        }
+
+        // Вызывает открытие темы непосредственно в самом клиенте Telegram:
+        // 1) Если задан облачный slug — мгновенно вызывает нативное окно t.me/addtheme/<slug> поверх приложения.
+        // 2) Если указан токен бота — загружает скомпилированный файл на сервер Telegram, получает прямую ссылку api.telegram.org/file/... и вызывает нативный загрузчик tg.downloadFile(), который сразу предлагает открыть и применить тему внутри ТГ!
+        async function executeDirectTelegramThemeOpen() {
+            Haptic.success();
+            const pkg = lastCompiledPackage || { ...buildThemeFile(PLATFORM_FORMAT[detectPlatform()], tgState), state: { ...tgState } };
+            const st = pkg.state || tgState;
+
+            const rawSlug = String(st.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
+            if (isRealSlug(rawSlug)) {
+                const themeUrl = `https://t.me/addtheme/${rawSlug}`;
+                if (tg?.openTelegramLink) tg.openTelegramLink(themeUrl);
+                else window.open(themeUrl, '_blank');
+                showToast(`Открыто системное окно темы (${rawSlug})`);
+                return;
+            }
+
+            await triggerTelegramNativeDownload(pkg);
+        }
+
+        async function triggerTelegramNativeDownload(customPkg = null) {
+            const pkg = customPkg || lastCompiledPackage || buildThemeFile(PLATFORM_FORMAT[detectPlatform()], tgState);
+            const st = pkg.state || tgState;
+            const cfg = loadAdminConfig();
+            const botToken = (cfg.botToken || '').trim();
+            const chatId = tg?.initDataUnsafe?.user?.id || OWNER_TG_ID;
+
+            // Если в админке задан токен бота — отправляем файл в Telegram API и тут же вызываем нативное окно загрузки/открытия файла в клиенте ТГ!
+            if (botToken && chatId) {
+                try {
+                    showToast('Импортируем файл темы напрямую в клиент Telegram...');
+                    const form = new FormData();
+                    form.append('chat_id', String(chatId));
+                    form.append('document', pkg.blob, pkg.name);
+                    form.append('caption', `🎨 Тема «${st.name}» импортирована. Нажмите на файл выше, чтобы открыть системное окно просмотра и применения темы.`);
+
+                    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, { method: 'POST', body: form });
+                    const data = await res.json();
+
+                    if (data.ok && data.result?.document?.file_id) {
+                        const fileId = data.result.document.file_id;
+                        const fileRes = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${encodeURIComponent(fileId)}`);
+                        const fileData = await fileRes.json();
+
+                        if (fileData.ok && fileData.result?.file_path) {
+                            const directTgUrl = `https://api.telegram.org/file/bot${botToken}/${fileData.result.file_path}`;
+                            if (typeof tg?.downloadFile === 'function') {
+                                tg.downloadFile({ url: directTgUrl, file_name: pkg.name }, (accepted) => {
+                                    if (accepted) showToast('Файл открыт в клиенте Telegram!');
+                                });
+                                closeImportedThemeModal();
+                                return;
+                            }
+                        }
+                        closeImportedThemeModal();
+                        openDeliveredSheet(pkg.name, pkg.format);
+                        return;
+                    }
+                } catch (_) {}
+            }
+
+            // Нативное системное меню «Открыть в Telegram» (Web Share API на iOS / Android)
+            try {
+                const shareFile = new File([pkg.blob], pkg.name, { type: 'application/octet-stream' });
+                if (navigator.canShare?.({ files: [shareFile] })) {
+                    await navigator.share({ files: [shareFile], title: st.name });
+                    closeImportedThemeModal();
+                    return;
+                }
+            } catch (e) {
+                if (e?.name === 'AbortError') return;
+            }
+
+            // Прямое сохранение и открытие файла
+            saveBlob(pkg.blob, pkg.name);
+            closeImportedThemeModal();
+            showToast(`Файл ${pkg.name} импортирован и открыт`);
+        }
+
+        function installTheme(customState = null) {
+            return compileImportAndOpenPreview(customState);
+        }
+
+        function downloadThemeForPlatform() {
+            return pushThemeFileToTelegramChat(PLATFORM_FORMAT[detectPlatform()], null, true);
+        }
+
+        function openNativeAddThemeModal(customSlug = null) {
+            const raw = String(customSlug || tgState.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
+            if (!isRealSlug(raw)) {
+                return compileImportAndOpenPreview();
+            }
+            Haptic.success();
+            autoSaveToVault(`Тема: ${tgState.name}`, 'Облачная тема', tgState);
+            const themeUrl = `https://t.me/addtheme/${raw}`;
+            if (tg?.openTelegramLink) tg.openTelegramLink(themeUrl);
+            else window.open(themeUrl, '_blank');
+            showToast(`Открыто окно темы (${raw})`);
+        }
+
         function openNativeSetLanguageModal(customSlug = null) {
             Haptic.success();
             autoSaveToVault(`Язык: ${tgState.langName}`, 'Облачный язык', tgState);
             const rawSlug = (customSlug || tgState.langSlug || 'ru').replace(/^https?:\/\/t\.me\/setlanguage\//i, '').trim();
             const langUrl = `https://t.me/setlanguage/${rawSlug}`;
-            if (tg?.openTelegramLink) {
-                tg.openTelegramLink(langUrl);
-            } else {
-                window.open(langUrl, '_blank');
-            }
+            if (tg?.openTelegramLink) tg.openTelegramLink(langUrl);
+            else window.open(langUrl, '_blank');
             showToast(`Открыто окно смены языка (${rawSlug})`);
         }
 
-        // 3. Доставка файла темы: бот (sendDocument) → sendData (только запуск с клавиатуры) → системное «Поделиться» → скачивание
-        function buildThemeFile(format, st) {
-            const safe = (st.name || 'theme').toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '') || 'theme';
-            if (format === 'tgios') return { blob: new Blob([buildIosThemeContent(st)], { type: 'application/octet-stream' }), name: `${safe}.tgios-theme` };
-            if (format === 'tdesktop') return { blob: makeZip('colors.tdesktop-theme', buildDesktopPalette(st)), name: `${safe}.tdesktop-theme` };
-            if (format === 'lang') return { blob: new Blob([buildLangXmlContent(st)], { type: 'application/xml' }), name: `${safe}_lang.xml` };
-            return { blob: new Blob([buildAtThemeContent(st)], { type: 'application/octet-stream' }), name: `${safe}.attheme` };
-        }
         function saveBlob(blob, name) {
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob); a.download = name;
-            document.body.appendChild(a); a.click(); a.remove();
+            a.href = URL.createObjectURL(blob);
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
             setTimeout(() => URL.revokeObjectURL(a.href), 4000);
         }
 
         async function pushThemeFileToTelegramChat(format = 'attheme', customState = null, localOnly = false) {
             const st = customState || tgState;
+            const file = buildThemeFile(format, st);
+            lastCompiledPackage = { ...file, state: { ...st } };
             autoSaveToVault(`${st.name}`, `Файл .${format}`, st);
             Haptic.success();
-            const file = buildThemeFile(format, st);
-            const botToken = (loadAdminConfig().botToken || '').trim();
-            const chatId = tg?.initDataUnsafe?.user?.id;
 
-            if (!localOnly && botToken && chatId) {
-                try {
-                    showToast('Отправляем файл темы в чат...');
-                    const form = new FormData();
-                    form.append('chat_id', String(chatId));
-                    form.append('document', file.blob, file.name);
-                    form.append('caption', `Тема «${st.name}» готова. Нажмите на файл и выберите «Применить».`);
-                    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, { method: 'POST', body: form });
-                    if (res.ok) { Haptic.success(); burst(); openDeliveredSheet(file.name, format); return; }
-                    showToast('Бот не смог отправить файл — пробую другой способ');
-                } catch (_) {}
+            if (!localOnly) {
+                openImportedThemeModal(lastCompiledPackage);
+                return;
             }
-
-            try {
-                const f = new File([file.blob], file.name, { type: file.blob.type });
-                if (navigator.canShare?.({ files: [f] })) { await navigator.share({ files: [f], title: st.name }); return; }
-            } catch (e) { if (e?.name === 'AbortError') return; }
 
             saveBlob(file.blob, file.name);
             showToast(`Файл ${file.name} сохранён`);
         }
 
         function openDeliveredSheet(name, format) {
-            const how = format === 'lang' ? 'Нажми на файл → «Применить локализацию».' : 'Нажми на файл → «Применить тему».';
-            openBottomSheet('Файл отправлен ✓', `
+            const how = format === 'lang' ? 'Нажми на файл в чате → «Применить локализацию».' : 'Нажми на файл в чате → сразу откроется системное окно просмотра и применения темы.';
+            openBottomSheet('Файл импортирован в чат ✓', `
                 <div class="space-y-3 text-xs">
-                    <div class="p-3.5 recessed-block"><div class="font-bold accent-text">${escapeHtml(name)}</div>
-                    <p class="text-[11px] text-muted-dynamic mt-1">Он уже в чате с ботом. ${how}</p></div>
+                    <div class="p-3.5 recessed-block">
+                        <div class="font-bold accent-text">${escapeHtml(name)}</div>
+                        <p class="text-[11px] text-muted-dynamic mt-1">${how}</p>
+                    </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="closeBottomSheet()" class="btn-surface min-h-[42px] font-semibold">Остаться здесь</button>
-                        <button type="button" onclick="tg?.close?.()" class="btn-primary min-h-[42px]">К файлу в чате</button>
+                        <button type="button" onclick="closeBottomSheet()" class="btn-surface min-h-[42px] font-semibold">Остаться в студии</button>
+                        <button type="button" onclick="tg?.close?.()" class="btn-primary min-h-[42px]">Перейти к файлу в чате</button>
                     </div>
                 </div>`);
         }
 
-        // Явный режим «через бота»: Telegram закрывает Mini App сам (ограничение sendData)
         function pushViaSendData(format = 'attheme') {
             const st = tgState;
-            if (!tg?.sendData) return showToast('Доступно только при запуске с кнопки клавиатуры');
+            if (!tg?.sendData) return showToast('Доступно при запуске с нижней кнопки клавиатуры бота');
             try {
-                tg.sendData(JSON.stringify({ action: format === 'lang' ? 'build_lang' : 'build_theme', format, name: st.name, chatBg: st.chatBg, headerBg: st.headerBg, msgOut: st.msgOut, msgIn: st.msgIn, accent: st.accent, text: st.text, timeText: st.timeText, checks: st.checks, langName: st.langName, online: st.online, typing: st.typing, placeholder: st.placeholder, saved: st.saved }));
-            } catch (_) { showToast('Запусти Mini App кнопкой клавиатуры бота'); }
+                tg.sendData(JSON.stringify({
+                    action: format === 'lang' ? 'build_lang' : 'build_theme',
+                    format, name: st.name, chatBg: st.chatBg, headerBg: st.headerBg,
+                    msgOut: st.msgOut, msgIn: st.msgIn, accent: st.accent, text: st.text,
+                    timeText: st.timeText, checks: st.checks, langName: st.langName,
+                    online: st.online, typing: st.typing, placeholder: st.placeholder, saved: st.saved
+                }));
+            } catch (_) {
+                showToast('Запусти приложение через нижнюю кнопку бота');
+            }
         }
 
-        // Мгновенное применение палитры к самому Mini App и шапке Telegram
         function applyThemeToApp(silent = false) {
             const st = tgState, r = document.documentElement.style;
-            r.setProperty('--accent-primary', st.accent); r.setProperty('--bg-main', st.chatBg);
-            r.setProperty('--surface-1', st.headerBg); r.setProperty('--text-main', st.text);
-            try { tg?.setHeaderColor?.(st.headerBg); tg?.setBackgroundColor?.(st.chatBg); tg?.setBottomBarColor?.(st.headerBg); } catch (_) {}
-            if (!silent) { burst(); showToast('Тема применена к приложению'); }
+            r.setProperty('--accent-primary', st.accent);
+            r.setProperty('--bg-main', st.chatBg);
+            r.setProperty('--surface-1', st.headerBg);
+            r.setProperty('--text-main', st.text);
+            try {
+                tg?.setHeaderColor?.(st.headerBg);
+                tg?.setBackgroundColor?.(st.chatBg);
+                tg?.setBottomBarColor?.(st.headerBg);
+            } catch (_) {}
+            if (!silent) {
+                burst();
+                showToast('Тема применена к интерфейсу студии');
+            }
         }
 
         function installLanguage() {
-            if (detectPlatform() !== 'android') {
-                showToast('Свой словарь ставится только на Android. Для iOS/ПК выбери официальный пакет выше');
-                return;
-            }
-            return pushThemeFileToTelegramChat('lang');
+            const pkg = buildThemeFile('lang', tgState);
+            lastCompiledPackage = { ...pkg, state: { ...tgState } };
+            return triggerTelegramNativeDownload(lastCompiledPackage);
         }
 
-        // Праздничная вспышка в центре экрана
         function burst() {
             if (document.documentElement.dataset.fx === 'min') return;
-            const box = document.createElement('div'); box.className = 'burst';
-            for (let i = 0; i < 14; i++) { const d = document.createElement('i'); const a = i / 14 * 6.283; d.style.setProperty('--dx', Math.cos(a) * 90 + 'px'); d.style.setProperty('--dy', Math.sin(a) * 90 + 'px'); box.appendChild(d); }
-            document.body.appendChild(box); setTimeout(() => box.remove(), 900);
+            const box = document.createElement('div');
+            box.className = 'burst';
+            for (let i = 0; i < 14; i++) {
+                const d = document.createElement('i');
+                const a = i / 14 * 6.283;
+                d.style.setProperty('--dx', Math.cos(a) * 90 + 'px');
+                d.style.setProperty('--dy', Math.sin(a) * 90 + 'px');
+                box.appendChild(d);
+            }
+            document.body.appendChild(box);
+            setTimeout(() => box.remove(), 900);
         }
 
         function downloadAtThemeFile(autoSave = true, customState = null) {
             const st = customState || tgState;
             if (autoSave) autoSaveToVault(`Тема: ${st.name}`, 'Файл .attheme', st);
             Haptic.success();
-            const safeName = (st.name || 'theme').toLowerCase().replace(/\s+/g, '_');
-            const blob = new Blob([buildAtThemeContent(st)], { type: 'application/octet-stream' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `${safeName}.attheme`;
-            a.click();
+            const file = buildThemeFile('attheme', st);
+            saveBlob(file.blob, file.name);
             showToast('Файл .attheme сохранён (38 цветовых ключей)');
         }
 
@@ -1963,12 +2182,8 @@
             const st = customState || tgState;
             if (autoSave) autoSaveToVault(`iOS Тема: ${st.name}`, 'Файл .tgios-theme', st);
             Haptic.success();
-            const safeName = (st.name || 'theme').toLowerCase().replace(/\s+/g, '_');
-            const blob = new Blob([buildIosThemeContent(st)], { type: 'text/plain' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `${safeName}.tgios-theme`;
-            a.click();
+            const file = buildThemeFile('tgios', st);
+            saveBlob(file.blob, file.name);
             showToast('Файл .tgios-theme сохранён');
         }
 
@@ -1976,79 +2191,58 @@
             const st = customState || tgState;
             if (autoSave) autoSaveToVault(`Язык: ${st.langName}`, 'Файл .xml', st);
             Haptic.success();
-            const safeName = (st.langName || 'custom').toLowerCase().replace(/\s+/g, '_');
-            const blob = new Blob([buildLangXmlContent(st)], { type: 'application/xml' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `${safeName}_lang.xml`;
-            a.click();
+            const file = buildThemeFile('lang', st);
+            saveBlob(file.blob, file.name);
             showToast('Языковой файл .xml сохранён');
         }
 
-        // Окно «Все форматы»: основной способ — файл под своё устройство, остальное — вручную
         function openApplyThemeModal() {
             autoSaveToVault(`${tgState.name}`, 'Сборка темы', tgState);
             const pf = detectPlatform();
-            const fmtBtn = (fmt, label) => `<button type="button" onclick="pushThemeFileToTelegramChat('${fmt}')" class="${PLATFORM_FORMAT[pf] === fmt ? 'btn-primary' : 'btn-surface'} min-h-[40px] text-xs font-semibold">${label}</button>`;
-            const slugOk = isRealSlug(String(tgState.cloudSlug || ''));
-            openBottomSheet(`Установка темы «${tgState.name}»`, `
+            const fmtBtn = (fmt, label) => `<button type="button" onclick="closeBottomSheet(); pushThemeFileToTelegramChat('${fmt}', null, true)" class="${PLATFORM_FORMAT[pf] === fmt ? 'btn-primary' : 'btn-surface'} min-h-[40px] text-xs font-semibold">${label}</button>`;
+            openBottomSheet(`Все форматы темы «${tgState.name}»`, `
                 <div class="space-y-3 text-xs">
                     <div class="p-3.5 recessed-block space-y-2">
-                        <div class="font-bold text-dynamic">Твоё устройство: ${PLATFORM_LABEL[pf]}</div>
-                        <p class="text-[11px] text-muted-dynamic">Файл со всеми цветами придёт в чат. Нажми на него и выбери «Применить» — Telegram покажет предпросмотр.</p>
-                        <button type="button" onclick="installTheme(); closeBottomSheet()" class="btn-primary w-full min-h-[42px] text-xs">Установить для ${PLATFORM_LABEL[pf]}</button>
+                        <div class="font-bold text-dynamic">Мгновенный импорт и окно предпросмотра (${PLATFORM_LABEL[pf]})</div>
+                        <p class="text-[11px] text-muted-dynamic">Собирает пакет под твоё устройство и сразу открывает окно просмотра и применения темы:</p>
+                        <button type="button" onclick="closeBottomSheet(); compileImportAndOpenPreview()" class="btn-primary w-full min-h-[42px] text-xs">Импортировать и открыть окно темы</button>
                     </div>
                     <div class="p-3.5 recessed-block space-y-2">
-                        <div class="font-bold text-dynamic">Другой формат</div>
+                        <div class="font-bold text-dynamic">Скачать файл напрямую</div>
                         <div class="grid grid-cols-3 gap-2">
-                            ${fmtBtn('attheme', 'Android')}${fmtBtn('tgios', 'iOS')}${fmtBtn('tdesktop', 'ПК / Mac')}
+                            ${fmtBtn('attheme', 'Android (.attheme)')}${fmtBtn('tgios', 'iOS (.tgios)')}${fmtBtn('tdesktop', 'ПК (.tdesktop)')}
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="applyThemeToApp(); closeBottomSheet()" class="btn-surface min-h-[40px] text-xs font-semibold">Применить к приложению</button>
-                        <button type="button" onclick="pushViaSendData('${PLATFORM_FORMAT[pf]}')" class="btn-surface min-h-[40px] text-xs">Через бота (закроет окно)</button>
+                        <button type="button" onclick="applyThemeToApp(); closeBottomSheet()" class="btn-surface min-h-[40px] text-xs font-semibold">Применить к студии</button>
+                        <button type="button" onclick="pushViaSendData('${PLATFORM_FORMAT[pf]}')" class="btn-surface min-h-[40px] text-xs">Отправить через бота</button>
                     </div>
-                    ${slugOk ? `<button type="button" onclick="openNativeAddThemeModal()" class="btn-surface w-full min-h-[40px] text-xs">Открыть облачную тему t.me/addtheme/${escapeHtml(tgState.cloudSlug)}</button>` : ''}
                 </div>
             `);
         }
 
-        // Импорт готового файла .attheme обратно в конструктор
-        function signedIntToHex(numStr) {
-            const n = parseInt(numStr, 10);
-            if (isNaN(n)) return null;
-            const unsigned = n >>> 0;
-            return '#' + (unsigned & 0xFFFFFF).toString(16).padStart(6, '0');
-        }
-
+        // Импорт готового файла .attheme / .tgios-theme с устройства И СРАЗУ ОТКРЫТИЕ ОКНА ПРОСМОТРА И ПРИМЕНЕНИЯ
         function importAtThemeFile(files) {
             if (!files || !files[0]) return;
             const file = files[0];
             const reader = new FileReader();
             reader.onload = e => {
-                const text = String(e.target?.result || '');
-                const map = {};
-                text.split(/\r?\n/).forEach(line => {
-                    const [k, v] = line.split('=');
-                    if (k && v) map[k.trim()] = signedIntToHex(v.trim());
-                });
-                tgState.name = file.name.replace(/\.attheme$/i, '');
-                if (map.chat_wallpaper || map.windowBackgroundWhite) tgState.chatBg = map.chat_wallpaper || map.windowBackgroundWhite;
-                if (map.actionBarDefault) tgState.headerBg = map.actionBarDefault;
-                if (map.chat_outBubble) tgState.msgOut = map.chat_outBubble;
-                if (map.chat_inBubble) tgState.msgIn = map.chat_inBubble;
-                if (map.chat_messagePanelSend) tgState.accent = map.chat_messagePanelSend;
-                if (map.chat_messageTextOut) tgState.text = map.chat_messageTextOut;
-                if (map.chat_outTimeText) tgState.timeText = map.chat_outTimeText;
-                if (map.chat_outSentCheck) tgState.checks = map.chat_outSentCheck;
+                const rawText = String(e.target?.result || '');
+                const cleanName = file.name.replace(/\.(attheme|tgios-theme)$/i, '');
+                const parsed = parseThemeTextToState(rawText, cleanName);
+                Object.assign(tgState, parsed);
 
                 snapshotBasePalette();
                 syncInputsFromTgState();
                 renderColorChannelsGrid();
                 renderTgLiveMockup();
-                autoSaveToVault(`Импорт: ${tgState.name}`, 'Импорт .attheme', tgState);
+                autoSaveToVault(`Импорт: ${tgState.name}`, 'Импорт файла', tgState);
+
+                const pkg = buildThemeFile(PLATFORM_FORMAT[detectPlatform()], tgState);
+                lastCompiledPackage = { ...pkg, state: { ...tgState } };
                 Haptic.success();
-                showToast(`Тема «${tgState.name}» загружена в редактор`);
+                openImportedThemeModal(lastCompiledPackage);
+                showToast(`Файл «${file.name}» импортирован и открыт!`);
             };
             reader.readAsText(file);
         }
@@ -2078,7 +2272,7 @@
                         </div>
                         <div class="grid grid-cols-3 gap-1.5">
                             <button type="button" onclick="loadPackIntoEditor(${idx})" class="btn-surface min-h-[36px] text-[11px] font-medium">В редактор</button>
-                            <button type="button" onclick="applyTgPreset(${idx}); installTheme()" class="btn-primary min-h-[36px] text-[11px]">Установить</button>
+                            <button type="button" onclick="applyTgPreset(${idx}); compileImportAndOpenPreview()" class="btn-primary min-h-[36px] text-[11px]">Открыть тему</button>
                             <button type="button" onclick="applyTgPreset(${idx}); downloadAtThemeFile(true)" class="btn-surface min-h-[36px] text-[11px] font-semibold accent-text">Файл .attheme</button>
                         </div>
                     </article>
@@ -2093,7 +2287,7 @@
             showToast('Коллекция загружена в конструктор');
         }
 
-        /* ==================== 6. ИНТЕРАКТИВНЫЙ СЕЙФ (ОТКРЫТИЕ, ВОССТАНОВЛЕНИЕ, СКАЧИВАНИЕ) ==================== */
+        /* ==================== 6. ИНТЕРАКТИВНЫЙ СЕЙФ ==================== */
         function getVaultList() {
             try { return JSON.parse(localStorage.getItem(VAULT_KEY) || '[]'); }
             catch { return []; }
@@ -2131,7 +2325,7 @@
             const box = document.getElementById('vault-cards');
             if (!box) return;
             if (!list.length) {
-                box.innerHTML = `<div class="frosted-card text-center lg:col-span-2 text-xs text-muted-dynamic py-8">В Сейфе пока нет записей. Любая созданная тема или локализация сохраняется сюда автоматически.</div>`;
+                box.innerHTML = `<div class="frosted-card text-center lg:col-span-2 text-xs text-muted-dynamic py-8">В Сейфе пока нет записей. Любая созданная или импортированная тема сохраняется сюда автоматически.</div>`;
                 return;
             }
             box.innerHTML = list.map(item => {
@@ -2180,9 +2374,9 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="installTheme(${stJson})" class="btn-primary min-h-[40px]">Установить тему</button>
+                        <button type="button" onclick="closeBottomSheet(); compileImportAndOpenPreview(${stJson})" class="btn-primary min-h-[40px]">Открыть окно темы</button>
                         <button type="button" onclick="loadVaultItemToEditor(${item.id}); closeBottomSheet()" class="btn-surface min-h-[40px] font-semibold accent-text">Загрузить в редактор</button>
-                        <button type="button" onclick="pushThemeFileToTelegramChat('attheme', ${stJson}, true)" class="btn-surface min-h-[38px]">Скачать .attheme</button>
+                        <button type="button" onclick="downloadAtThemeFile(false, ${stJson})" class="btn-surface min-h-[38px]">Скачать .attheme</button>
                         <button type="button" onclick="downloadIosThemeFile(false, ${stJson})" class="btn-surface min-h-[38px]">Скачать .tgios-theme</button>
                         <button type="button" onclick="downloadTelegramLangXml(false, ${stJson})" class="btn-surface min-h-[38px] col-span-2">Скачать языковой пакет (.xml)</button>
                     </div>
@@ -2629,8 +2823,8 @@
                 bodyHtml = `
                     <div class="space-y-3">
                         <div class="p-3 recessed-block space-y-2">
-                            <div class="font-bold text-dynamic">Токен бота для прямой доставки файлов (.attheme / .xml) в чат</div>
-                            <p class="text-[10px] text-muted-dynamic">Если указать токен бота, кнопка «В чат (.attheme)» будет мгновенно присылать сгенерированный файл темы прямо в диалог с пользователем без закрытия Mini App:</p>
+                            <div class="font-bold text-dynamic">Токен бота для прямого импорта и автооткрытия файлов тем</div>
+                            <p class="text-[10px] text-muted-dynamic">Укажите токен бота, чтобы приложение через Bot API <code>getFile</code> + <code>tg.downloadFile</code> мгновенно открывало сгенерированный файл темы прямо внутри клиента Telegram:</p>
                             <input type="password" value="${escapeHtml(cfg.botToken || '')}" onchange="saveBotTokenAdmin(this.value)" placeholder="123456789:AAH..." class="frosted-input w-full min-h-[36px] px-3 text-xs font-mono">
                         </div>
 
@@ -2676,7 +2870,7 @@
             cfg.botToken = token.trim();
             saveAdminConfig(cfg);
             Haptic.success();
-            showToast('Токен бота сохранён для прямой отправки файлов');
+            showToast('Токен бота сохранён для автооткрытия файлов тем');
         }
 
         function refreshAdminUsers() {
@@ -2764,7 +2958,7 @@
             openAdminPanelSheet('gate');
         }
 
-        /* ==================== 9. НАВИГАЦИЯ, МОДАЛКИ, ОНБОРДИНГ И PiP ==================== */
+        /* ==================== 9. НАВИГАЦИЯ, МОДАЛКИ, ОНБОРДИНГ, PiP И АНИМАЦИИ ==================== */
         const NAV_ITEMS_META = {
             'view-studio': {
                 label: 'Конструктор',
@@ -2889,7 +3083,7 @@
 
         const ONBOARD_SLIDES = [
             { title: 'Палитра и Спектральные ползунки', text: 'Управляй оттенком (Hue), насыщенностью, глубиной OLED-фона и 8 цветовыми каналами с живым превью диалога и списка чатов.' },
-            { title: 'Прямая установка тем и языков', text: 'Вызывай системное окно темы внутри Telegram или отправляй сгенерированный .attheme / .tgios / .xml файл прямо в чат.' },
+            { title: 'Мгновенный импорт и открытие темы', text: 'При нажатии «Импортировать и открыть окно темы» приложение компилирует файл, проверяет все 38 ключей и сразу открывает окно просмотра и применения.' },
             { title: 'Плавающее PiP-окно и Сейф', text: 'При прокрутке вниз макет чата сворачивается в перетаскиваемое окно. Все созданные темы автоматически сохраняются в Сейф.' }
         ];
         let obIndex = 0, obTouchX = null;
@@ -3046,7 +3240,7 @@
             }
             if (!localStorage.getItem('tg_studio_onboard_v4')) openOnboarding(0);
         });
-    
+
         /* ==================== АНИМАЦИИ (JS) ==================== */
         (function initMotion() {
             const fxMin = () => document.documentElement.dataset.fx === 'min';
@@ -3066,7 +3260,6 @@
                 });
             }
 
-            // каскадное появление динамических сеток (пресеты, коллекции, сейф)
             const seen = new WeakSet();
             const always = new Set(['vault-cards']);
             const mo = new MutationObserver(muts => muts.forEach(m => {
@@ -3074,21 +3267,31 @@
                 if (seen.has(box) && !always.has(box.id)) return;
                 const kids = [...m.addedNodes].filter(n => n.nodeType === 1);
                 if (!kids.length) return;
-                kids.forEach((n, i) => { n.style.setProperty('--i', Math.min(i, 14)); n.classList.add('pop-in'); n.addEventListener('animationend', () => n.classList.remove('pop-in'), { once: true }); });
+                kids.forEach((n, i) => {
+                    n.style.setProperty('--i', Math.min(i, 14));
+                    n.classList.add('pop-in');
+                    n.addEventListener('animationend', () => n.classList.remove('pop-in'), { once: true });
+                });
                 seen.add(box);
             }));
-            ['tg-presets-grid', 'ready-packs-grid', 'vault-cards', 'lang-presets-grid'].forEach(id => { const el = document.getElementById(id); if (el) mo.observe(el, { childList: true }); });
+            ['tg-presets-grid', 'ready-packs-grid', 'vault-cards', 'lang-presets-grid'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) mo.observe(el, { childList: true });
+            });
 
-            // вкладки
             const _switch = window.switchTab;
             window.switchTab = function (idx, viewId) {
                 const r = _switch.apply(this, arguments);
                 const sec = document.getElementById(viewId);
-                if (sec && !fxMin()) { sec.classList.remove('animate-view-enter'); void sec.offsetWidth; sec.classList.add('animate-view-enter'); revealIn(sec); }
+                if (sec && !fxMin()) {
+                    sec.classList.remove('animate-view-enter');
+                    void sec.offsetWidth;
+                    sec.classList.add('animate-view-enter');
+                    revealIn(sec);
+                }
                 return r;
             };
 
-            // вспышка превью при смене темы / пресета
             function flashMock() {
                 const m = document.getElementById('tg-live-mockup'); if (!m || fxMin()) return;
                 m.classList.remove('flash'); void m.offsetWidth; m.classList.add('flash');
@@ -3099,7 +3302,6 @@
                 window[n] = function () { const r = f.apply(this, arguments); flashMock(); return r; };
             });
 
-            // ripple на кнопках
             document.addEventListener('pointerdown', e => {
                 const b = e.target.closest?.('button'); if (!b || b.disabled || fxMin()) return;
                 const r = b.getBoundingClientRect(), d = document.createElement('span');
@@ -3109,11 +3311,12 @@
 
             document.addEventListener('DOMContentLoaded', () => { revealIn(document.getElementById('view-studio')); flashMock(); });
         })();
-    
+
         document.addEventListener('pointermove', e => {
             const c = e.target.closest?.('.frosted-card'); if (!c) return;
             const r = c.getBoundingClientRect();
-            c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+            c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+            c.style.setProperty('--my', (e.clientY - r.top) + 'px');
         }, { passive: true });
     </script>
 </body>
