@@ -483,6 +483,13 @@
             .rv { opacity: 1; transform: none; }
         }
         html[data-fx="min"] .rv { opacity: 1; transform: none; }
+    
+        /* ==== Приветствие: welcome.jpg ==== */
+        @keyframes kenburns { from { transform: scale(1) translate3d(0,0,0); } to { transform: scale(1.12) translate3d(-2%,-2%,0); } }
+        .ob-hero { position: relative; height: 180px; overflow: hidden; border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+        .ob-hero img { width: 100%; height: 100%; object-fit: cover; display: block; animation: kenburns 14s ease-in-out infinite alternate; }
+        .ob-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 45%, var(--bg-main, #09090b) 100%); pointer-events: none; }
+        .ob-hero + div #onboard-track > .ob-slide { padding-top: 1rem; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -592,6 +599,7 @@
     <!-- ==================== ОНБОРДИНГ ==================== -->
     <div id="onboard-overlay" class="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4" onclick="if(event.target===this)closeOnboarding()">
         <div class="neon-card w-full max-w-sm">
+            <div class="ob-hero"><img src="welcome.jpg" alt="" decoding="async" onerror="this.parentElement.remove()"></div>
             <div class="overflow-hidden">
                 <div id="onboard-track"></div>
             </div>
@@ -888,7 +896,7 @@
                                     <label class="chip-btn px-2.5 py-1.5 text-[11px] font-medium cursor-pointer flex items-center gap-1.5">
                                         <svg class="w-3.5 h-3.5 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                                         <span>Импорт темы</span>
-                                        <input type="file" accept=".attheme,.tgios-theme,.tdesktop-theme" onchange="importAtThemeFile(this.files)" class="hidden">
+                                        <input type="file" onchange="importAtThemeFile(this.files); this.value=''" class="hidden">
                                     </label>
                                 </div>
                             </div>
@@ -915,7 +923,7 @@
                                 </div>
                                 <label class="chip-btn px-2.5 py-1.5 text-[11px] font-semibold accent-text cursor-pointer flex items-center gap-1.5">
                                     <span>📂 Импорт .xml</span>
-                                    <input type="file" accept=".xml" onchange="importLangXmlFile(this.files)" class="hidden">
+                                    <input type="file" onchange="importLangXmlFile(this.files); this.value=''" class="hidden">
                                 </label>
                             </div>
 
@@ -2332,6 +2340,49 @@
                 `checkboxCheck=${avTxt}`
             ];
 
+            const dlgFg = hexToSignedInt(getReadableFg(dlgHex));
+            const accSoft = hexWithAlphaToSignedInt(st.accent, '22');
+            const extra = {
+                // галочки и часики (список чатов, пузыри, медиа)
+                chats_sentClock: chk, chat_outSentClock: chk, chat_outSentClockSelected: chk, chat_mediaSentCheck: chk, chat_mediaSentClock: chk,
+                // закрытые (секретные) чаты, «зелёные» остатки
+                chat_secretChatStatusText: acc, chats_onlineCircle: acc, windowBackgroundWhiteGreenText: acc, windowBackgroundWhiteGreenText2: acc,
+                calls_callReceivedGreenIcon: acc, chat_inPollCorrectAnswer: medIn, chat_outPollCorrectAnswer: medOut,
+                chats_archiveBackground: acc, chats_archiveIcon: avTxt, chats_archiveText: avTxt, chats_unreadCounterMuted: tm,
+                chats_pinnedIcon: tm, chats_muteIcon: tm, chats_menuTopBackground: hdr, chats_menuName: hdrTxt, chats_menuPhone: tm,
+                // песни, аудио, дорожки голосовых (точные имена ключей Telegram Android)
+                chat_inAudioPerfomerText: tm, chat_outAudioPerfomerText: tm, chat_inAudioPerfomerSelectedText: tm, chat_outAudioPerfomerSelectedText: tm,
+                chat_inAudioDurationSelectedText: tm, chat_outAudioDurationSelectedText: tm,
+                chat_inAudioCacheSeekbar: medInTrack, chat_outAudioCacheSeekbar: medOutTrack,
+                chat_inFileBackground: medIn, chat_inFileBackgroundSelected: medIn, chat_outFileBackground: medOut, chat_outFileBackgroundSelected: medOut,
+                chat_inFileProgress: medInTrack, chat_inFileProgressSelected: medInTrack, chat_outFileProgress: medOutTrack, chat_outFileProgressSelected: medOutTrack,
+                chat_inFileSelectedIcon: medInIconFg, chat_outFileSelectedIcon: medOutIconFg,
+                chat_inFileNameText: txt, chat_outFileNameText: outTxt, chat_inFileInfoText: tm, chat_outFileInfoText: tm,
+                chat_inFileInfoSelectedText: tm, chat_outFileInfoSelectedText: tm,
+                chat_recordedVoiceProgress: acc, chat_recordedVoiceProgressInner: avTxt, chat_recordedVoiceBackground: acc, chat_recordedVoicePlayPause: avTxt,
+                chat_messagePanelVoiceBackground: acc, chat_recordTime: tm,
+                // диалоги «Принять / Отмена», ссылки, переключатели, галочки в диалогах
+                dialogTextLink: dlg, dialogCheckboxSquareBackground: dlg, dialogCheckboxSquareCheck: dlgFg, dialogRadioBackgroundChecked: dlg,
+                dialogProgressCircle: dlg, dialogInputFieldActivated: dlg, dialogRoundCheckBox: dlg, dialogRoundCheckBoxCheck: dlgFg,
+                dialogScrollGlow: dlg, dialogBadgeBackground: dlg, dialogBadgeText: dlgFg, dialogFloatingButton: dlg, dialogFloatingIcon: dlgFg,
+                windowBackgroundWhiteBlueText5: dlg, windowBackgroundWhiteBlueText6: dlg, windowBackgroundWhiteBlueText7: dlg,
+                windowBackgroundWhiteLinkText: dlg, windowBackgroundWhiteLinkSelection: dlgSel, windowBackgroundWhiteInputFieldActivated: dlg,
+                switchTrackBlueChecked: dlg, switchTrackBlueSelectorChecked: dlg, progressCircle: dlg, fastScrollActive: dlg, listSelector: accSoft,
+                featuredStickers_addButton: dlg, featuredStickers_buttonText: dlgFg, featuredStickers_addedIcon: dlg,
+                profile_actionBackground: dlg, profile_actionIcon: dlgFg, profile_verifiedBackground: dlg, profile_verifiedCheck: dlgFg,
+                chats_verifiedBackground: dlg, chats_verifiedCheck: dlgFg, picker_badge: dlg,
+                // ответы, ссылки, контакты, геолокация, кнопки в пузырях
+                chat_goDownButtonCounterBackground: acc, chat_goDownButtonCounter: avTxt, chat_unreadMessagesStartText: acc, chat_unreadMessagesStartArrowIcon: acc,
+                chat_inReplyLine: acc, chat_outReplyLine: outTxt, chat_inReplyNameText: acc, chat_outReplyNameText: outTxt,
+                chat_inViaBotNameText: acc, chat_outViaBotNameText: outTxt, chat_inSiteNameText: acc, chat_outSiteNameText: outTxt,
+                chat_inPreviewLine: acc, chat_outPreviewLine: outTxt, chat_inInstant: acc, chat_outInstant: outTxt,
+                chat_inContactNameText: acc, chat_outContactNameText: outTxt, chat_inContactBackground: medIn, chat_outContactBackground: medOut,
+                chat_inContactIcon: medInIconFg, chat_outContactIcon: medOutIconFg,
+                chat_inLocationBackground: medIn, chat_outLocationBackground: medOut, chat_inLocationIcon: medInIconFg, chat_outLocationIcon: medOutIconFg,
+                chat_inMenu: tm, chat_outMenu: tm, chat_inTimeSelectedText: tm, chat_outTimeSelectedText: tm, chat_topPanelLine: acc
+            };
+            Object.entries(extra).forEach(([k, v]) => lines.push(`${k}=${v}`));
+
             if (!hasEmbeddedWallpaper) {
                 lines.push(`chat_wallpaper=${bg}`);
             }
@@ -2622,7 +2673,7 @@
                 if (map.chat_outBubble) parsed.msgOut = map.chat_outBubble;
                 if (map.chat_inBubble) parsed.msgIn = map.chat_inBubble;
                 if (map.chat_messagePanelSend) parsed.accent = map.chat_messagePanelSend;
-                if (map.chat_outVoiceSeekbarSelected || map.chat_outFileBg) parsed.mediaColor = map.chat_outVoiceSeekbarSelected || map.chat_outFileBg;
+                const mc = map.chat_outAudioProgress || map.chat_outVoiceSeekbarFill || map.chat_outVoiceSeekbarSelected || map.chat_outFileBackground || map.chat_outFileBg; if (mc) parsed.mediaColor = mc;
                 if (map.dialogButton || map.dialogTextBlue) parsed.dialogColor = map.dialogButton || map.dialogTextBlue;
                 if (map.avatar_backgroundSaved || map.avatar_backgroundBlue) parsed.avatarBg = map.avatar_backgroundSaved || map.avatar_backgroundBlue;
                 if (map.chat_messageTextOut) parsed.text = map.chat_messageTextOut;
@@ -2949,24 +3000,76 @@
             `);
         }
 
-        function importAtThemeFile(files) {
+        async function inflateRaw(raw) {
+            const ds = new DecompressionStream('deflate-raw');
+            const w = ds.writable.getWriter(); w.write(raw); w.close();
+            return new Uint8Array(await new Response(ds.readable).arrayBuffer());
+        }
+        async function readZipEntries(buf) {
+            const dv = new DataView(buf), u8 = new Uint8Array(buf), dec = new TextDecoder();
+            let e = u8.length - 22;
+            while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+            if (e < 0) throw new Error('Это не архив темы');
+            const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true); const out = {};
+            for (let i = 0; i < n; i++) {
+                const method = dv.getUint16(p + 10, true), cs = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lo = dv.getUint32(p + 42, true);
+                const name = dec.decode(u8.subarray(p + 46, p + 46 + nl));
+                const start = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true);
+                const raw = u8.subarray(start, start + cs);
+                out[name] = method === 0 ? raw : await inflateRaw(raw);
+                p += 46 + nl + el + cl;
+            }
+            return out;
+        }
+        function findSeq(u8, str, from = 0) {
+            const q = Array.from(str).map(c => c.charCodeAt(0));
+            outer: for (let i = from; i <= u8.length - q.length; i++) { for (let j = 0; j < q.length; j++) if (u8[i + j] !== q[j]) continue outer; return i; }
+            return -1;
+        }
+        function bytesToDataUrl(u8, mime) {
+            let bin = ''; for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+            return `data:${mime};base64,${btoa(bin)}`;
+        }
+        function parseDesktopPalette(text, name) {
+            const map = {};
+            text.split(/\r?\n/).forEach(l => { const m = l.match(/^\s*([A-Za-z0-9_]+)\s*:\s*([^;]+);/); if (m) map[m[1]] = m[2].trim(); });
+            const col = k => { let v = map[k], d = 0; while (v && !/^#/.test(v) && d++ < 5) v = map[v]; return v && /^#[0-9a-f]{6}/i.test(v) ? v.slice(0, 7).toLowerCase() : null; };
+            const p = { ...tgState, name };
+            p.chatBg = col('windowBg') || p.chatBg; p.headerBg = col('titleBg') || col('historyComposeAreaBg') || p.headerBg;
+            p.msgIn = col('msgInBg') || p.msgIn; p.msgOut = col('msgOutBg') || p.msgOut;
+            p.accent = col('windowActiveTextFg') || col('activeButtonBg') || p.accent;
+            p.text = col('historyTextOutFg') || col('windowFg') || p.text; p.timeText = col('msgInDateFg') || col('windowSubTextFg') || p.timeText;
+            p.checks = col('historyOutIconFg') || p.checks;
+            return p;
+        }
+        async function importAtThemeFile(files) {
             if (!files || !files[0]) return;
             const file = files[0];
-            const reader = new FileReader();
-            reader.onload = async e => {
-                const rawText = String(e.target?.result || '');
-                const cleanName = file.name.replace(/\.(attheme|tgios-theme|tdesktop-theme)$/i, '');
-                const parsed = parseThemeTextToState(rawText, cleanName);
+            try {
+                const buf = await file.arrayBuffer(), u8 = new Uint8Array(buf), dec = new TextDecoder('utf-8');
+                let text = '', wp = null;
+                if (u8[0] === 0x50 && u8[1] === 0x4B) {
+                    const z = await readZipEntries(buf), names = Object.keys(z);
+                    const nm = names.find(k => /colors\.tdesktop-theme$|\.tdesktop-palette$/i.test(k)) || names.find(k => /\.tdesktop-theme$/i.test(k));
+                    if (!nm) throw new Error('в архиве нет палитры');
+                    text = dec.decode(z[nm]);
+                    const bg = names.find(k => /(^|\/)background\.(jpe?g|png)$/i.test(k));
+                    if (bg) wp = bytesToDataUrl(z[bg], /png$/i.test(bg) ? 'image/png' : 'image/jpeg');
+                } else {
+                    let end = u8.length; const mark = findSeq(u8, 'WPS\n');
+                    if (mark >= 0) { end = mark; const e2 = findSeq(u8, '\nWPE\n', mark); wp = bytesToDataUrl(u8.subarray(mark + 4, e2 >= 0 ? e2 : u8.length), 'image/jpeg'); }
+                    text = dec.decode(u8.subarray(0, end));
+                }
+                const cleanName = file.name.replace(/\.(attheme|tgios-theme|tdesktop-theme|tdesktop-palette)$/i, '');
+                const parsed = /(^|\n)\s*windowBg\s*:/.test(text) ? parseDesktopPalette(text, cleanName) : parseThemeTextToState(text, cleanName);
+                if (wp) parsed.wallpaperDataUrl = wp;
                 Object.assign(tgState, parsed);
-
-                snapshotBasePalette();
-                syncInputsFromTgState();
-                renderColorChannelsGrid();
-                renderTgLiveMockup();
+                snapshotBasePalette(); syncInputsFromTgState(); renderColorChannelsGrid(); renderTgLiveMockup();
                 await compileImportAndOpenPreview('theme', tgState);
                 showToast(`Файл «${file.name}» импортирован и открыт!`);
-            };
-            reader.readAsText(file);
+            } catch (err) {
+                showToast('Не удалось прочитать файл: ' + (err.message || err));
+            }
         }
 
         /* ==================== 5. КАТАЛОГ ГОТОВЫХ КОЛЛЕКЦИЙ ==================== */
