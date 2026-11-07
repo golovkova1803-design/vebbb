@@ -469,9 +469,34 @@
             .rv { opacity: 1; transform: none; }
         }
         html[data-fx="min"] .rv { opacity: 1; transform: none; }
+    
+        /* ==================== ЭФФЕКТЫ ==================== */
+        @keyframes blobA { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(14vw,10vh,0) scale(1.25); } }
+        @keyframes blobB { 0%,100% { transform: translate3d(0,0,0) scale(1.1); } 50% { transform: translate3d(-16vw,-12vh,0) scale(.9); } }
+        @keyframes textFlow { to { background-position: 200% 0; } }
+        @keyframes burstOut { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(var(--dx),var(--dy)) scale(.2); opacity: 0; } }
+        @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .aurora i { position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; filter: blur(70px); opacity: .22; will-change: transform; }
+        .aurora i:nth-child(1) { left: -20vmax; top: -18vmax; background: var(--accent-primary); animation: blobA 18s ease-in-out infinite; }
+        .aurora i:nth-child(2) { right: -24vmax; bottom: -20vmax; background: var(--accent-secondary); animation: blobB 22s ease-in-out infinite; }
+        html.light .aurora i { opacity: .14; }
+        html[data-fx="min"] .aurora, html[data-fx="balanced"] .aurora i:nth-child(2) { display: none; }
+        main, header, section, nav { position: relative; z-index: 1; }
+        h1, .brand-title { background: linear-gradient(90deg, var(--text-main), var(--accent-primary), var(--accent-secondary), var(--text-main)); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: textFlow 7s linear infinite; }
+        .frosted-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 300ms ease; background: radial-gradient(240px circle at var(--mx,50%) var(--my,50%), color-mix(in srgb, var(--accent-primary) 16%, transparent), transparent 65%); }
+        .frosted-card:hover::after { opacity: 1; }
+        #tg-live-mockup { animation: floaty 6s ease-in-out infinite; }
+        #pip-window.pip #tg-live-mockup { animation: none; }
+        .burst { position: fixed; left: 50%; top: 50%; z-index: 200; pointer-events: none; }
+        .burst i { position: absolute; width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); animation: burstOut 800ms var(--ease-ios) forwards; }
+        .chip-btn:active, .btn-surface:active { filter: brightness(1.15); }
+        input[type="range"].ios-slider::-webkit-slider-thumb { transition: transform 160ms var(--ease-spring); }
+        input[type="range"].ios-slider:active::-webkit-slider-thumb { transform: scale(1.25); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300">
+    <div class="aurora" aria-hidden="true"><i></i><i></i></div>
 
     <!-- Слои фона приложения -->
     <div id="bg-custom-image" class="bg-layer"></div>
@@ -868,7 +893,7 @@
 
                             <div class="grid grid-cols-2 gap-2 pt-2">
                                 <button type="button" onclick="downloadTelegramLangXml(true)" class="btn-primary min-h-[42px] text-xs">Скачать .xml и сохранить в Сейф</button>
-                                <button type="button" onclick="pushThemeFileToTelegramChat('lang')" class="btn-surface min-h-[42px] text-xs font-semibold accent-text">Отправить .xml в чат бота</button>
+                                <button type="button" onclick="installLanguage()" class="btn-surface min-h-[42px] text-xs font-semibold accent-text">Установить словарь (Android)</button>
                             </div>
                         </article>
                     </div>
@@ -1187,7 +1212,13 @@
             { title: 'Беларуская', slug: 'be', badge: 'BY', desc: 'Официальный пакет' },
             { title: 'Українська', slug: 'uk', badge: 'UA', desc: 'Официальный пакет' },
             { title: 'Қазақша', slug: 'kk', badge: 'KZ', desc: 'Официальный пакет' },
-            { title: 'Deutsch', slug: 'de', badge: 'DE', desc: 'Официальный пакет' }
+            { title: 'Deutsch', slug: 'de', badge: 'DE', desc: 'Официальный пакет' },
+            { title: 'Español', slug: 'es', badge: 'ES', desc: 'Официальный пакет' },
+            { title: 'Français', slug: 'fr', badge: 'FR', desc: 'Официальный пакет' },
+            { title: 'Italiano', slug: 'it', badge: 'IT', desc: 'Официальный пакет' },
+            { title: 'Português (BR)', slug: 'pt-br', badge: 'BR', desc: 'Официальный пакет' },
+            { title: 'Türkçe', slug: 'tr', badge: 'TR', desc: 'Официальный пакет' },
+            { title: 'O‘zbek', slug: 'uz', badge: 'UZ', desc: 'Официальный пакет' }
         ];
 
         const LANG_PRESETS = [
@@ -1738,12 +1769,13 @@
                 `<?xml version="1.0" encoding="utf-8"?>`,
                 `<resources>`,
                 `    <string name="LanguageName">${escapeHtml(st.langName)}</string>`,
+                `    <string name="LanguageNameInEnglish">${escapeHtml(st.langName)}</string>`,
+                `    <string name="LanguageCode">${escapeHtml(st.langSlug || 'ru')}</string>`,
                 `    <string name="Online">${escapeHtml(st.online)}</string>`,
                 `    <string name="Typing">${escapeHtml(st.typing)}</string>`,
-                `    <string name="Message">${escapeHtml(st.placeholder)}</string>`,
+                `    <string name="TypeMessage">${escapeHtml(st.placeholder)}</string>`,
                 `    <string name="SavedMessages">${escapeHtml(st.saved)}</string>`,
                 `    <string name="PinnedMessage">${escapeHtml(st.pinned)}</string>`,
-                `    <string name="TodayAt">${escapeHtml(st.today)}</string>`,
                 `</resources>`
             ].join('\n');
         }
@@ -1774,6 +1806,7 @@
 
         function installTheme(customState = null) {
             const st = (customState && typeof customState === 'object') ? customState : tgState;
+            applyThemeToApp(true);
             return pushThemeFileToTelegramChat(PLATFORM_FORMAT[detectPlatform()], st);
         }
         function downloadThemeForPlatform() {
@@ -1852,21 +1885,8 @@
                     form.append('document', file.blob, file.name);
                     form.append('caption', `Тема «${st.name}» готова. Нажмите на файл и выберите «Применить».`);
                     const res = await fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, { method: 'POST', body: form });
-                    if (res.ok) { Haptic.success(); showToast('Файл в чате с ботом — откройте и нажмите «Применить»'); return; }
+                    if (res.ok) { Haptic.success(); burst(); openDeliveredSheet(file.name, format); return; }
                     showToast('Бот не смог отправить файл — пробую другой способ');
-                } catch (_) {}
-            }
-
-            // sendData работает только если Mini App открыт кнопкой клавиатуры (нет query_id) и закрывает приложение
-            if (!localOnly && !botToken && tg?.sendData && !tg.initDataUnsafe?.query_id) {
-                try {
-                    tg.sendData(JSON.stringify({
-                        action: format === 'lang' ? 'build_lang' : 'build_theme', format,
-                        name: st.name, chatBg: st.chatBg, headerBg: st.headerBg, msgOut: st.msgOut, msgIn: st.msgIn,
-                        accent: st.accent, text: st.text, timeText: st.timeText, checks: st.checks,
-                        langName: st.langName, online: st.online, typing: st.typing, placeholder: st.placeholder, saved: st.saved
-                    }));
-                    return;
                 } catch (_) {}
             }
 
@@ -1877,6 +1897,53 @@
 
             saveBlob(file.blob, file.name);
             showToast(`Файл ${file.name} сохранён`);
+        }
+
+        function openDeliveredSheet(name, format) {
+            const how = format === 'lang' ? 'Нажми на файл → «Применить локализацию».' : 'Нажми на файл → «Применить тему».';
+            openBottomSheet('Файл отправлен ✓', `
+                <div class="space-y-3 text-xs">
+                    <div class="p-3.5 recessed-block"><div class="font-bold accent-text">${escapeHtml(name)}</div>
+                    <p class="text-[11px] text-muted-dynamic mt-1">Он уже в чате с ботом. ${how}</p></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="closeBottomSheet()" class="btn-surface min-h-[42px] font-semibold">Остаться здесь</button>
+                        <button type="button" onclick="tg?.close?.()" class="btn-primary min-h-[42px]">К файлу в чате</button>
+                    </div>
+                </div>`);
+        }
+
+        // Явный режим «через бота»: Telegram закрывает Mini App сам (ограничение sendData)
+        function pushViaSendData(format = 'attheme') {
+            const st = tgState;
+            if (!tg?.sendData) return showToast('Доступно только при запуске с кнопки клавиатуры');
+            try {
+                tg.sendData(JSON.stringify({ action: format === 'lang' ? 'build_lang' : 'build_theme', format, name: st.name, chatBg: st.chatBg, headerBg: st.headerBg, msgOut: st.msgOut, msgIn: st.msgIn, accent: st.accent, text: st.text, timeText: st.timeText, checks: st.checks, langName: st.langName, online: st.online, typing: st.typing, placeholder: st.placeholder, saved: st.saved }));
+            } catch (_) { showToast('Запусти Mini App кнопкой клавиатуры бота'); }
+        }
+
+        // Мгновенное применение палитры к самому Mini App и шапке Telegram
+        function applyThemeToApp(silent = false) {
+            const st = tgState, r = document.documentElement.style;
+            r.setProperty('--accent-primary', st.accent); r.setProperty('--bg-main', st.chatBg);
+            r.setProperty('--surface-1', st.headerBg); r.setProperty('--text-main', st.text);
+            try { tg?.setHeaderColor?.(st.headerBg); tg?.setBackgroundColor?.(st.chatBg); tg?.setBottomBarColor?.(st.headerBg); } catch (_) {}
+            if (!silent) { burst(); showToast('Тема применена к приложению'); }
+        }
+
+        function installLanguage() {
+            if (detectPlatform() !== 'android') {
+                showToast('Свой словарь ставится только на Android. Для iOS/ПК выбери официальный пакет выше');
+                return;
+            }
+            return pushThemeFileToTelegramChat('lang');
+        }
+
+        // Праздничная вспышка в центре экрана
+        function burst() {
+            if (document.documentElement.dataset.fx === 'min') return;
+            const box = document.createElement('div'); box.className = 'burst';
+            for (let i = 0; i < 14; i++) { const d = document.createElement('i'); const a = i / 14 * 6.283; d.style.setProperty('--dx', Math.cos(a) * 90 + 'px'); d.style.setProperty('--dy', Math.sin(a) * 90 + 'px'); box.appendChild(d); }
+            document.body.appendChild(box); setTimeout(() => box.remove(), 900);
         }
 
         function downloadAtThemeFile(autoSave = true, customState = null) {
@@ -1936,6 +2003,10 @@
                         <div class="grid grid-cols-3 gap-2">
                             ${fmtBtn('attheme', 'Android')}${fmtBtn('tgios', 'iOS')}${fmtBtn('tdesktop', 'ПК / Mac')}
                         </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="applyThemeToApp(); closeBottomSheet()" class="btn-surface min-h-[40px] text-xs font-semibold">Применить к приложению</button>
+                        <button type="button" onclick="pushViaSendData('${PLATFORM_FORMAT[pf]}')" class="btn-surface min-h-[40px] text-xs">Через бота (закроет окно)</button>
                     </div>
                     ${slugOk ? `<button type="button" onclick="openNativeAddThemeModal()" class="btn-surface w-full min-h-[40px] text-xs">Открыть облачную тему t.me/addtheme/${escapeHtml(tgState.cloudSlug)}</button>` : ''}
                 </div>
@@ -3038,6 +3109,12 @@
 
             document.addEventListener('DOMContentLoaded', () => { revealIn(document.getElementById('view-studio')); flashMock(); });
         })();
+    
+        document.addEventListener('pointermove', e => {
+            const c = e.target.closest?.('.frosted-card'); if (!c) return;
+            const r = c.getBoundingClientRect();
+            c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        }, { passive: true });
     </script>
 </body>
 </html>
