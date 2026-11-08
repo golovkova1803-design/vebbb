@@ -483,15 +483,13 @@
             .rv { opacity: 1; transform: none; }
         }
         html[data-fx="min"] .rv { opacity: 1; transform: none; }
-    
-        /* ==== Приветствие: welcome.jpg ==== */
+
         @keyframes kenburns { from { transform: scale(1) translate3d(0,0,0); } to { transform: scale(1.12) translate3d(-2%,-2%,0); } }
         .ob-hero { position: relative; height: 180px; overflow: hidden; border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
         .ob-hero img { width: 100%; height: 100%; object-fit: cover; display: block; animation: kenburns 14s ease-in-out infinite alternate; }
         .ob-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 45%, var(--bg-main, #09090b) 100%); pointer-events: none; }
         .ob-hero + div #onboard-track > .ob-slide { padding-top: 1rem; }
-    
-        /* ==== окно просмотра ==== */
+
         @keyframes sheetUp { from { opacity: 0; transform: translate3d(0, 34px, 0) scale(.97); } to { opacity: 1; transform: none; } }
         .imp-sheet { animation: sheetUp 420ms var(--ease-spring); max-height: 92vh; overflow-y: auto; }
         #native-theme-preview-modal #imp-modal-Stage > div { animation: cardIn 520ms var(--ease-ios) 120ms backwards; }
@@ -514,8 +512,8 @@
             </div>
             <div id="imp-modal-Stage" class="rounded-2xl overflow-hidden border border-white/15 shadow-2xl"></div>
             <div id="imp-compat" class="hidden grid-cols-2 gap-1 p-1 rounded-xl recessed-block">
-                <button type="button" id="compat-full" onclick="setCompat('full')">Полная</button>
-                <button type="button" id="compat-basic" onclick="setCompat('basic')">Базовая</button>
+                <button type="button" id="compat-full" onclick="setCompat('full')">Полная (Все экраны и профиль)</button>
+                <button type="button" id="compat-basic" onclick="setCompat('basic')">Базовая (С защитой профиля)</button>
             </div>
             <div class="grid grid-cols-[1fr_auto] gap-2">
                 <button type="button" id="imp-btn-primary-apply" onclick="applyPackageInTelegram()" class="btn-primary min-h-[46px] text-xs flex items-center justify-center gap-2">
@@ -625,7 +623,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-                <!-- ЛЕВАЯ КОЛОНКА: ИНТЕРАКТИВНЫЙ МАКЕТ TELEGRAM (ГОЛОСОВЫЕ, ПЕСНИ, СЕКРЕТНЫЕ ЧАТЫ, КНОПКИ ДИАЛОГОВ) + PiP -->
+                <!-- ЛЕВАЯ КОЛОНКА: ИНТЕРАКТИВНЫЙ МАКЕТ TELEGRAM (ДИАЛОГ | СПИСОК | ПРОФИЛЬ) + PiP -->
                 <div class="lg:col-span-5 lg:sticky lg:top-20 space-y-3">
                     <div id="pip-slot">
                         <article id="pip-window" class="frosted-card">
@@ -634,26 +632,27 @@
                                 <button type="button" id="pip-min" aria-label="Свернуть">—</button>
                             </div>
 
-                            <!-- Панель управления превью -->
-                            <div class="pip-hide flex items-center justify-between mb-3">
-                                <div class="flex items-center gap-1 p-0.5 rounded-lg recessed-block">
-                                    <button type="button" id="prev-tab-chat" onclick="setPreviewScreen('chat')" class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/10 text-dynamic">Диалог</button>
-                                    <button type="button" id="prev-tab-list" onclick="setPreviewScreen('list')" class="px-2.5 py-1 rounded-md text-[11px] font-medium text-muted-dynamic">Список + Секрет</button>
+                            <!-- Панель управления превью (теперь с вкладкой Профиль!) -->
+                            <div class="pip-hide flex items-center justify-between mb-3 gap-1">
+                                <div class="flex items-center gap-0.5 p-0.5 rounded-lg recessed-block">
+                                    <button type="button" id="prev-tab-chat" onclick="setPreviewScreen('chat')" class="px-2 py-1 rounded-md text-[11px] font-semibold bg-white/10 text-dynamic">Диалог</button>
+                                    <button type="button" id="prev-tab-list" onclick="setPreviewScreen('list')" class="px-2 py-1 rounded-md text-[11px] font-medium text-muted-dynamic">Чаты</button>
+                                    <button type="button" id="prev-tab-profile" onclick="setPreviewScreen('profile')" class="px-2 py-1 rounded-md text-[11px] font-medium text-muted-dynamic">Профиль</button>
                                 </div>
                                 <div class="flex items-center gap-1">
                                     <button type="button" id="btn-drag-wp-toggle" onclick="toggleWallpaperDragMode()" class="chip-btn px-2 py-1 text-[11px] font-medium hidden" title="Двигать фон пальцем/мышью">
-                                        <span>✥ Двигать фон</span>
+                                        <span>✥ Фон</span>
                                     </button>
                                     <button type="button" onclick="randomizeTgTheme()" class="chip-btn px-2.5 py-1 text-[11px] font-medium flex items-center gap-1">
                                         <svg class="w-3 h-3 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
-                                        <span>Случайно</span>
+                                        <span>Рандом</span>
                                     </button>
                                 </div>
                             </div>
 
                             <!-- Сам экран Telegram -->
                             <div class="pip-body">
-                                <div id="tg-live-mockup" class="rounded-[var(--r-inner)] overflow-hidden transition-all duration-200 select-none flex flex-col justify-between relative border border-white/10" style="min-height: 390px;">
+                                <div id="tg-live-mockup" class="rounded-[var(--r-inner)] overflow-hidden transition-all duration-200 select-none flex flex-col justify-between relative border border-white/10" style="min-height: 395px;">
 
                                     <!-- Шапка Telegram -->
                                     <div id="tg-mock-header" class="px-3.5 py-2 flex items-center justify-between z-20 transition-colors">
@@ -675,12 +674,12 @@
                                     </div>
 
                                     <!-- Мини-плеер / Закрепленное сообщение -->
-                                    <div id="tg-mock-pinned-bar" class="px-3.5 py-1.5 flex items-center justify-between gap-2 z-20 border-t border-black/15 text-[10px]">
+                                    <div id="tg-mock-pinned-bar" class="px-3.5 py-1.5 flex items-center justify-between gap-2 z-20 text-[10px]">
                                         <div class="flex items-center gap-2 min-w-0">
                                             <div id="tg-mock-pin-line" class="w-0.5 h-6 rounded-full shrink-0"></div>
                                             <div class="min-w-0">
                                                 <div id="tg-mock-pin-label" class="font-bold truncate">Закреплённое сообщение</div>
-                                                <div id="tg-mock-pin-sub" class="opacity-75 truncate">Новая тема</div>
+                                                <div id="tg-mock-pin-sub" class="opacity-80 truncate">Все зависимости проверены</div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-1.5 shrink-0">
@@ -689,7 +688,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Экран 1: Внутри диалога (Музыка + Голосовое с дорожкой + Галочки) -->
+                                    <!-- Экран 1: Внутри диалога -->
                                     <div id="tg-mock-chat-bg" class="flex-1 p-3 space-y-2 flex flex-col justify-end relative overflow-hidden">
                                         <div id="tg-mock-wallpaper-img" class="absolute inset-0 pointer-events-none hidden" style="background-repeat: no-repeat;"></div>
                                         <div id="tg-mock-wallpaper-dim" class="absolute inset-0 pointer-events-none hidden" style="background:#000; opacity:0;"></div>
@@ -698,7 +697,7 @@
                                             <span id="tg-mock-date-pill" class="px-2.5 py-0.5 rounded-full text-[10px] font-medium backdrop-blur-sm">Сегодня</span>
                                         </div>
 
-                                        <!-- Входящее сообщение: ПЕСНЯ (Кнопка песни + Название песни + Исполнитель) -->
+                                        <!-- Входящее сообщение: ПЕСНЯ -->
                                         <div id="tg-mock-msg-in" class="relative z-10 max-w-[88%] self-start px-3 py-2 shadow-sm transition-all">
                                             <div id="tg-mock-in-title" class="font-bold text-[10px] mb-1">TG Studio Audio</div>
                                             <div class="flex items-center gap-2.5 my-1">
@@ -707,26 +706,25 @@
                                                 </div>
                                                 <div class="min-w-0 flex-1">
                                                     <div id="tg-mock-song-title" class="text-[11px] font-bold truncate">Nightcall (Synthwave Mix)</div>
-                                                    <div id="tg-mock-song-artist" class="text-[10px] opacity-80 truncate">Darxy Studio • 03:42</div>
+                                                    <div id="tg-mock-song-artist" class="text-[10px] truncate">Darxy Studio • 03:42</div>
                                                 </div>
                                             </div>
-                                            <div id="tg-mock-in-text" class="leading-snug text-[11px] mt-1">Смотри, какая тема получилась</div>
+                                            <div id="tg-mock-in-text" class="leading-snug text-[11px] mt-1">Ник и описание в профиле теперь всегда контрастные</div>
                                             <div id="tg-mock-in-time" class="text-[9px] text-right mt-0.5">14:20</div>
                                         </div>
 
-                                        <!-- Исходящее сообщение: ГОЛОСОВОЕ (Кнопка + Дорожка голосового + Галочки) -->
+                                        <!-- Исходящее сообщение: ГОЛОСОВОЕ -->
                                         <div id="tg-mock-msg-out" class="relative z-10 max-w-[88%] self-end px-3 py-2 shadow-sm transition-all">
                                             <div class="flex items-center gap-2.5 my-0.5">
                                                 <div id="tg-mock-voice-btn" class="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
                                                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
                                                 </div>
                                                 <div class="flex-1 min-w-[115px]">
-                                                    <!-- Дорожка голосового сообщения (активная + неактивная часть) -->
                                                     <div id="tg-mock-voice-wave" class="flex items-center gap-[2px] h-4"></div>
                                                     <div id="tg-mock-voice-dur" class="text-[9px] mt-0.5">0:18 • Голосовое</div>
                                                 </div>
                                             </div>
-                                            <div id="tg-mock-out-text" class="leading-snug text-[11px] mt-1">Выглядит отлично</div>
+                                            <div id="tg-mock-out-text" class="leading-snug text-[11px] mt-1">Кнопки и галочки нигде не сливаются</div>
                                             <div class="flex items-center justify-end gap-1 mt-0.5">
                                                 <span id="tg-mock-out-time" class="text-[9px]">14:21</span>
                                                 <svg id="tg-mock-checks" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
@@ -734,13 +732,16 @@
                                         </div>
                                     </div>
 
-                                    <!-- Экран 2: Список чатов (включая Секретный закрытый чат и галочки) -->
-                                    <div id="tg-mock-chatlist-view" class="hidden flex-1 divide-y divide-white/5 overflow-hidden"></div>
+                                    <!-- Экран 2: Список чатов -->
+                                    <div id="tg-mock-chatlist-view" class="hidden flex-1 overflow-hidden"></div>
+
+                                    <!-- Экран 3: Профиль пользователя (Никнейм, Статус, Кнопки, Описание О себе, Юзернейм, Вкладки) -->
+                                    <div id="tg-mock-profile-view" class="hidden flex-1 overflow-hidden flex-col justify-between"></div>
 
                                     <!-- Нижняя панель ввода -->
                                     <div id="tg-mock-input-bar" class="px-3 py-2 flex items-center gap-2.5 z-20">
                                         <svg id="tg-mock-attach" class="w-4 h-4 shrink-0 opacity-65" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                                        <div id="tg-mock-placeholder" class="flex-1 text-xs opacity-65 truncate">Сообщение...</div>
+                                        <div id="tg-mock-placeholder" class="flex-1 text-xs truncate">Сообщение...</div>
                                         <div id="tg-mock-send-btn" class="w-7 h-7 rounded-full flex items-center justify-center shrink-0">
                                             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                                         </div>
@@ -751,6 +752,7 @@
                             <!-- Строка статуса под превью -->
                             <div class="pip-hide flex items-center justify-between mt-3 pt-2.5 border-t border-white/5 text-[11px] text-muted-dynamic">
                                 <span id="tg-summary-name" class="font-semibold text-dynamic">Emerald Obsidian</span>
+                                <span id="tg-summary-contrast-badge" class="font-mono text-[10px] accent-text">Контраст: 100% ОК</span>
                             </div>
                         </article>
                     </div>
@@ -855,14 +857,14 @@
 
                                 <div class="flex items-center justify-between p-2.5 recessed-block">
                                     <div>
-                                        <div class="text-xs font-semibold text-dynamic">Автоконтраст элементов</div>
+                                        <div class="text-xs font-semibold text-dynamic">Защита от сливания (Профиль + Чат)</div>
                                     </div>
                                     <div id="sw-autocontrast" onclick="toggleTweakSwitch('autoContrast')" class="tg-switch checked"></div>
                                 </div>
                             </div>
                         </article>
 
-                        <!-- Блок 3: Поэлементная палитра (10 каналов: включая Голосовые/Песни, Кнопки диалогов, Галочки/Секретные чаты и Аватарки) -->
+                        <!-- Блок 3: Поэлементная палитра (10 каналов) -->
                         <article class="frosted-card space-y-3.5">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <div>
@@ -886,7 +888,7 @@
                         </article>
                     </div>
 
-                    <!-- ==================== ПАНЕЛЬ B: ЯЗЫКОВОЙ ПАКЕТ (ОТКРЫВАЕТСЯ ТАК ЖЕ КАК ТЕМЫ!) ==================== -->
+                    <!-- ==================== ПАНЕЛЬ B: ЯЗЫКОВОЙ ПАКЕТ ==================== -->
                     <div id="panel-studio-lang" class="hidden space-dynamic">
                         <article class="frosted-card space-y-3">
                             <div>
@@ -953,7 +955,7 @@
                         </article>
                     </div>
 
-                    <!-- ==================== ПАНЕЛЬ C: РЕДАКТОР ФОНА (ЗУМ, ПОЗИЦИЯ X/Y, РАЗМЫТИЕ) И АВАТАРОК ==================== -->
+                    <!-- ==================== ПАНЕЛЬ C: РЕДАКТОР ФОНА И АВАТАРОК ==================== -->
                     <div id="panel-studio-tweaks" class="hidden space-dynamic">
                         <article class="frosted-card space-y-4">
                             <div class="flex flex-wrap items-center justify-between gap-2">
@@ -1024,8 +1026,7 @@
                                     <input type="range" id="slider-pattern-op" min="10" max="100" step="5" value="90" oninput="updateGeometrySliders()" class="ios-slider">
                                 </div>
                             </div>
-
-</article>
+                        </article>
 
                         <!-- Блок кастомизации аватарок и свечения -->
                         <article class="frosted-card space-y-3">
@@ -1121,7 +1122,7 @@
         /* ==================== КОНСТАНТЫ ==================== */
         const OWNER_TG_ID = 5881813602;
         const OWNER_USERNAME = 'darxxx1zq';
-                const ADMIN_CONFIG_KEY = 'tg_studio_admin_v6';
+        const ADMIN_CONFIG_KEY = 'tg_studio_admin_v6';
         const VAULT_KEY = 'tg_studio_vault_v6';
         const SITE_THEME_KEY = 'tg_studio_app_style_v6';
         const SAVED_PRESETS_KEY = 'tg_studio_saved_styles_v6';
@@ -1129,7 +1130,7 @@
 
         const tg = window.Telegram?.WebApp;
         let currentTabId = 'view-studio';
-        let previewScreenMode = 'chat';
+        let previewScreenMode = 'chat'; // 'chat' | 'list' | 'profile'
         let lastCompiledPackage = null;
         let wpDragActive = false;
 
@@ -1255,7 +1256,7 @@
             error() { SoundFX.error(); try { tg?.HapticFeedback?.notificationOccurred('error'); } catch (_) {} }
         };
 
-        /* ==================== 2. МАТЕМАТИКА ЦВЕТА И УМНЫЙ ДВИЖОК АВТОКОНТРАСТА (WCAG) ==================== */
+        /* ==================== 2. СТРОГИЙ ДВИЖОК КОНТРАСТА И МАТРИЦА ЗАВИСИМОСТЕЙ ТЕМЫ ==================== */
         function hexToRgb(hex) {
             let c = String(hex || '#10b981').replace('#', '').trim();
             if (c.length === 3) c = c.split('').map(x => x + x).join('');
@@ -1276,18 +1277,6 @@
             const l1 = getLuminance(hex1);
             const l2 = getLuminance(hex2);
             return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
-        }
-
-        function getReadableFg(bgHex) {
-            return getLuminance(bgHex) > 0.42 ? '#09090b' : '#ffffff';
-        }
-
-        function ensureReadableColor(bgHex, fgHex, minRatio = 3.5) {
-            if (getContrastRatio(bgHex, fgHex) >= minRatio) return fgHex;
-            const bgLum = getLuminance(bgHex);
-            const hsl = hexToHsl(fgHex);
-            const targetL = bgLum > 0.45 ? Math.min(22, hsl.l) : Math.max(82, hsl.l);
-            return hslToHex(hsl.h, Math.max(30, hsl.s), targetL);
         }
 
         function hexToHsl(hex) {
@@ -1321,13 +1310,114 @@
             return `#${f(0)}${f(8)}${f(4)}`;
         }
 
+        function mixHex(a, b, t) {
+            const A = hexToRgb(a), B = hexToRgb(b), m = (x, y) => Math.round(x + (y - x) * t);
+            return '#' + [m(A.r, B.r), m(A.g, B.g), m(A.b, B.b)].map(v => v.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Точный выбор читаемого текста (по реальному контрасту с белым и тёмным, порог L = 0.179)
+        function getReadableFg(bgHex) {
+            const cWhite = getContrastRatio(bgHex, '#ffffff');
+            const cDark = getContrastRatio(bgHex, '#09090b');
+            return cWhite >= cDark ? '#ffffff' : '#09090b';
+        }
+
+        // Итеративно сдвигает светлоту (L) цвета fgHex с сохранением его оттенка (Hue), пока контраст с bgHex не достигнет minRatio
+        function ensureReadableColor(bgHex, fgHex, minRatio = 4.5) {
+            if (getContrastRatio(bgHex, fgHex) >= minRatio) return fgHex;
+            const hsl = hexToHsl(fgHex);
+            const preferLight = getContrastRatio(bgHex, '#ffffff') >= getContrastRatio(bgHex, '#09090b');
+            let l = hsl.l;
+            const sat = Math.max(25, hsl.s);
+            for (let step = 0; step < 25; step++) {
+                l = preferLight ? Math.min(98, l + 4) : Math.max(4, l - 4);
+                const candidate = hslToHex(hsl.h, sat, l);
+                if (getContrastRatio(bgHex, candidate) >= minRatio) return candidate;
+            }
+            return preferLight ? '#ffffff' : '#09090b';
+        }
+
+        // Разводит две соседние поверхности (например, баббл и фон чата, или карточку профиля и подложку), чтобы они никогда не сливались
+        function ensureSurfaceSeparation(baseBg, surfaceHex, minDeltaRatio = 1.22) {
+            if (getContrastRatio(baseBg, surfaceHex) >= minDeltaRatio) return surfaceHex;
+            const hsl = hexToHsl(surfaceHex);
+            const baseLum = getLuminance(baseBg);
+            // Если база темная — делаем поверхность заметно светлее; если светлая — темнее
+            const shiftL = baseLum < 0.25 ? Math.min(92, hsl.l + 11) : Math.max(8, hsl.l - 11);
+            return hslToHex(hsl.h, hsl.s, shiftL);
+        }
+
         function shiftHexColor(hex, hueDelta, satMult, lightMult = 1) {
             const hsl = hexToHsl(hex);
             return hslToHex(hsl.h + hueDelta, hsl.s * satMult, hsl.l * lightMult);
         }
 
-        // === КОНЕЦ ЧАСТИ 1 (Напиши «продолжить» для получения Части 2 и кода бота с картинкой приветствия) ===
-        /* ==================== 3. ПАЛИТРЫ, 10 КАНАЛОВ (ГОЛОСОВЫЕ, ПЕСНИ, ДИАЛОГИ, ГАЛОЧКИ, СЕКРЕТНЫЕ ЧАТЫ, АВАТАРКИ) ==================== */
+        /* ГЛАВНАЯ МАТРИЦА ЗАВИСИМОСТЕЙ ВСЕХ ПАРАМЕТРОВ ТЕМЫ */
+        function resolveThemeDependencies(st = tgState) {
+            const enforce = st.autoContrast !== false;
+            const chatBg = st.chatBg || '#060d0b';
+            const isDarkBg = getLuminance(chatBg) < 0.35;
+
+            // 1. Поверхности: шапка, карточки профиля (windowBackgroundWhite), подложка профиля (windowBackgroundGray) и бабблы
+            const headerBg = enforce ? ensureSurfaceSeparation(chatBg, st.headerBg || '#0b1613', 1.12) : (st.headerBg || '#0b1613');
+            const graySectionBg = mixHex(chatBg, isDarkBg ? '#ffffff' : '#000000', isDarkBg ? 0.065 : 0.06);
+            const dividerColor = mixHex(chatBg, isDarkBg ? '#ffffff' : '#000000', isDarkBg ? 0.16 : 0.14);
+            const headerDivider = mixHex(headerBg, getLuminance(headerBg) < 0.35 ? '#ffffff' : '#000000', 0.15);
+
+            const msgIn = enforce ? ensureSurfaceSeparation(chatBg, st.msgIn || '#11221d', 1.20) : (st.msgIn || '#11221d');
+            const msgOut = enforce ? ensureSurfaceSeparation(chatBg, st.msgOut || '#0d9468', 1.25) : (st.msgOut || '#0d9468');
+
+            // 2. Текст в Профиле, Настройках и Списке чатов (на фоне chatBg и headerBg)
+            const primaryTextOnBg = enforce ? ensureReadableColor(chatBg, st.text || '#f4f4f5', 6.5) : st.text;
+            const secondaryTextOnBg = enforce ? ensureReadableColor(chatBg, st.timeText || st.text, 4.2) : (st.timeText || st.text);
+            const hintTextOnBg = enforce ? ensureReadableColor(chatBg, mixHex(primaryTextOnBg, chatBg, 0.38), 3.3) : st.timeText;
+
+            const primaryTextOnHdr = enforce ? ensureReadableColor(headerBg, st.text || '#f4f4f5', 6.5) : st.text;
+            const secondaryTextOnHdr = enforce ? ensureReadableColor(headerBg, st.timeText || st.text, 4.2) : (st.timeText || st.text);
+            const hintTextOnHdr = enforce ? ensureReadableColor(headerBg, mixHex(primaryTextOnHdr, headerBg, 0.38), 3.3) : st.timeText;
+
+            // 3. Акценты, Ссылки, Кнопки диалогов и Вкладки Профиля (никогда не сливаются ни с chatBg, ни с headerBg)
+            const accentOnBg = enforce ? ensureReadableColor(chatBg, st.accent || '#10b981', 4.5) : st.accent;
+            const accentOnHdr = enforce ? ensureReadableColor(headerBg, st.accent || '#10b981', 4.5) : st.accent;
+            const dialogBtnOnHdr = enforce ? ensureReadableColor(headerBg, st.dialogColor || st.accent, 4.5) : (st.dialogColor || st.accent);
+            const dialogBtnOnBg = enforce ? ensureReadableColor(chatBg, st.dialogColor || st.accent, 4.5) : (st.dialogColor || st.accent);
+
+            // 4. Аватарки и кнопки действий в Профиле
+            const avatarBg = enforce ? ensureSurfaceSeparation(headerBg, st.avatarBg || st.accent, 1.35) : (st.avatarBg || st.accent);
+            const avatarFg = getReadableFg(avatarBg);
+            const actionBtnBg = st.accent || '#10b981';
+            const actionBtnFg = getReadableFg(actionBtnBg);
+
+            // 5. Элементы внутри ВХОДЯЩЕГО баббла (msgIn)
+            const inText = enforce ? ensureReadableColor(msgIn, st.text || '#f4f4f5', 5.2) : st.text;
+            const inTime = enforce ? ensureReadableColor(msgIn, st.timeText || st.text, 3.6) : st.timeText;
+            const inAccent = enforce ? ensureReadableColor(msgIn, st.accent || '#10b981', 4.2) : st.accent;
+            const inMedia = enforce ? ensureReadableColor(msgIn, st.mediaColor || st.accent, 3.8) : (st.mediaColor || st.accent);
+            const inMediaFg = getReadableFg(inMedia);
+
+            // 6. Элементы внутри ИСХОДЯЩЕГО баббла (msgOut)
+            const outText = enforce ? ensureReadableColor(msgOut, st.text || '#f4f4f5', 5.2) : st.text;
+            const outTime = enforce ? ensureReadableColor(msgOut, st.timeText || st.text, 3.6) : st.timeText;
+            const outAccent = enforce ? ensureReadableColor(msgOut, st.accent || outText, 4.2) : st.accent;
+            const outMedia = enforce ? ensureReadableColor(msgOut, st.mediaColor || st.accent, 3.6) : (st.mediaColor || st.accent);
+            const outMediaFg = getReadableFg(outMedia);
+            const outChecks = enforce ? ensureReadableColor(msgOut, st.checks || st.accent, 3.8) : (st.checks || st.accent);
+            const listChecks = enforce ? ensureReadableColor(chatBg, st.checks || st.accent, 4.0) : (st.checks || st.accent);
+
+            return {
+                chatBg, headerBg, graySectionBg, dividerColor, headerDivider, msgIn, msgOut,
+                primaryTextOnBg, secondaryTextOnBg, hintTextOnBg,
+                primaryTextOnHdr, secondaryTextOnHdr, hintTextOnHdr,
+                accentOnBg, accentOnHdr, dialogBtnOnHdr, dialogBtnOnBg,
+                avatarBg, avatarFg, actionBtnBg, actionBtnFg,
+                inText, inTime, inAccent, inMedia, inMediaFg,
+                outText, outTime, outAccent, outMedia, outMediaFg,
+                outChecks, listChecks
+            };
+        }
+
+        // === КОНЕЦ ЧАСТИ 1 (Напиши «продолжить» для получения Части 2) ===
+        /* ==================== 3. ПАЛИТРЫ, 10 КАНАЛОВ И СОСТОЯНИЕ ТЕМЫ ==================== */
         const TG_THEME_PRESETS = [
             { name: 'Emerald Obsidian', chatBg: '#060d0b', headerBg: '#0b1613', msgOut: '#0d9468', msgIn: '#11221d', accent: '#10b981', mediaColor: '#34d399', dialogColor: '#10b981', avatarBg: '#059669', text: '#f4f4f5', timeText: '#86efac', checks: '#a7f3d0', cloudSlug: '' },
             { name: 'Linear Graphite', chatBg: '#09090b', headerBg: '#121216', msgOut: '#27272a', msgIn: '#16161a', accent: '#10b981', mediaColor: '#10b981', dialogColor: '#34d399', avatarBg: '#3f3f46', text: '#f4f4f5', timeText: '#a1a1aa', checks: '#10b981', cloudSlug: '' },
@@ -1344,16 +1434,16 @@
         ];
 
         const COLOR_CHANNELS_META = [
-            { key: 'chatBg', label: 'Фон чата' },
-            { key: 'headerBg', label: 'Шапка и панель' },
+            { key: 'chatBg', label: 'Фон и Профиль' },
+            { key: 'headerBg', label: 'Шапка и Карточки' },
             { key: 'msgOut', label: 'Мои сообщения' },
             { key: 'msgIn', label: 'Входящие' },
-            { key: 'accent', label: 'Главный акцент' },
+            { key: 'accent', label: 'Акцент и Ссылки' },
             { key: 'mediaColor', label: 'Голосовые и Песни' },
-            { key: 'dialogColor', label: 'Принять / Отмена' },
+            { key: 'dialogColor', label: 'Кнопки и Вкладки' },
             { key: 'checks', label: 'Галочки и Секрет' },
             { key: 'avatarBg', label: 'Фон аватарок' },
-            { key: 'text', label: 'Текст и Названия' }
+            { key: 'text', label: 'Ник и Описание' }
         ];
 
         const NATIVE_CLOUD_LANGS = [
@@ -1486,55 +1576,58 @@
             const { h, s } = hexToHsl(tgState.accent);
             if (mode === 'oled') {
                 tgState.chatBg = '#000000';
-                tgState.headerBg = '#070709';
-                tgState.msgIn = '#121216';
+                tgState.headerBg = '#0b0b0e';
+                tgState.msgIn = '#141419';
                 tgState.msgOut = hslToHex(h, Math.min(85, s), 26);
-                tgState.mediaColor = hslToHex(h, 90, 62);
-                tgState.dialogColor = hslToHex(h, 85, 56);
-                tgState.avatarBg = hslToHex(h, Math.min(90, s), 34);
+                tgState.mediaColor = hslToHex(h, 90, 64);
+                tgState.dialogColor = hslToHex(h, 85, 58);
+                tgState.avatarBg = hslToHex(h, Math.min(90, s), 36);
                 tgState.text = '#ffffff';
-                tgState.timeText = hslToHex(h, 60, 75);
-                tgState.checks = hslToHex(h, 85, 68);
+                tgState.timeText = hslToHex(h, 60, 76);
+                tgState.checks = hslToHex(h, 85, 70);
             } else if (mode === 'mono') {
-                tgState.chatBg = hslToHex(h, 8, 5);
-                tgState.headerBg = hslToHex(h, 10, 9);
-                tgState.msgIn = hslToHex(h, 12, 14);
-                tgState.msgOut = hslToHex(h, 18, 26);
+                tgState.chatBg = hslToHex(h, 8, 6);
+                tgState.headerBg = hslToHex(h, 10, 11);
+                tgState.msgIn = hslToHex(h, 12, 16);
+                tgState.msgOut = hslToHex(h, 18, 28);
                 tgState.accent = hslToHex(h, 25, 78);
-                tgState.mediaColor = hslToHex(h, 25, 82);
+                tgState.mediaColor = hslToHex(h, 25, 84);
                 tgState.dialogColor = hslToHex(h, 25, 78);
-                tgState.avatarBg = hslToHex(h, 22, 32);
+                tgState.avatarBg = hslToHex(h, 22, 34);
                 tgState.text = '#f4f4f5';
-                tgState.timeText = hslToHex(h, 12, 68);
+                tgState.timeText = hslToHex(h, 12, 70);
                 tgState.checks = '#ffffff';
             } else if (mode === 'contrast') {
                 tgState.chatBg = '#050507';
-                tgState.headerBg = '#0d0d12';
-                tgState.msgIn = '#171720';
-                tgState.msgOut = hslToHex(h, 90, 36);
-                tgState.accent = hslToHex((h + 160) % 360, 90, 58);
-                tgState.mediaColor = hslToHex((h + 160) % 360, 95, 65);
-                tgState.dialogColor = hslToHex((h + 160) % 360, 90, 58);
+                tgState.headerBg = '#0e0e14';
+                tgState.msgIn = '#181822';
+                tgState.msgOut = hslToHex(h, 88, 34);
+                tgState.accent = hslToHex((h + 160) % 360, 90, 60);
+                tgState.mediaColor = hslToHex((h + 160) % 360, 95, 68);
+                tgState.dialogColor = hslToHex((h + 160) % 360, 90, 60);
                 tgState.avatarBg = hslToHex((h + 160) % 360, 80, 42);
                 tgState.text = '#ffffff';
+                tgState.timeText = '#cbd5e1';
+                tgState.checks = '#ffffff';
             } else if (mode === 'neon') {
                 tgState.chatBg = hslToHex(h, 45, 5);
-                tgState.headerBg = hslToHex(h, 50, 8);
-                tgState.msgIn = hslToHex(h, 45, 13);
-                tgState.msgOut = hslToHex(h, 92, 38);
-                tgState.accent = hslToHex((h + 35) % 360, 98, 58);
-                tgState.mediaColor = hslToHex((h + 35) % 360, 100, 66);
-                tgState.dialogColor = hslToHex((h + 35) % 360, 98, 58);
+                tgState.headerBg = hslToHex(h, 50, 10);
+                tgState.msgIn = hslToHex(h, 45, 15);
+                tgState.msgOut = hslToHex(h, 90, 34);
+                tgState.accent = hslToHex((h + 35) % 360, 98, 60);
+                tgState.mediaColor = hslToHex((h + 35) % 360, 100, 70);
+                tgState.dialogColor = hslToHex((h + 35) % 360, 98, 60);
                 tgState.avatarBg = hslToHex((h + 20) % 360, 92, 46);
+                tgState.text = '#ffffff';
                 tgState.glowOut = true;
             } else if (mode === 'soft') {
-                tgState.chatBg = hslToHex(h, 22, 11);
+                tgState.chatBg = hslToHex(h, 22, 10);
                 tgState.headerBg = hslToHex(h, 24, 15);
-                tgState.msgIn = hslToHex(h, 22, 20);
+                tgState.msgIn = hslToHex(h, 22, 21);
                 tgState.msgOut = hslToHex(h, 42, 34);
-                tgState.accent = hslToHex(h, 62, 68);
-                tgState.mediaColor = hslToHex(h, 68, 72);
-                tgState.dialogColor = hslToHex(h, 62, 68);
+                tgState.accent = hslToHex(h, 65, 70);
+                tgState.mediaColor = hslToHex(h, 70, 76);
+                tgState.dialogColor = hslToHex(h, 65, 70);
                 tgState.avatarBg = hslToHex(h, 50, 44);
                 tgState.text = '#f8fafc';
             }
@@ -1575,7 +1668,7 @@
 
         function initStudioGrids() {
             document.getElementById('tg-presets-grid').innerHTML = TG_THEME_PRESETS.map((p, idx) => {
-                const safeTitleColor = ensureReadableColor(p.chatBg, p.text, 4.0);
+                const safeTitleColor = ensureReadableColor(p.chatBg, p.text, 4.5);
                 return `
                 <button type="button" onclick="applyTgPreset(${idx})" class="p-2.5 rounded-[var(--r-inner)] border border-white/10 text-left transition hover:border-emerald-400/50 flex flex-col justify-between gap-2" style="background:${p.chatBg}">
                     <div class="flex items-center justify-between w-full">
@@ -1738,18 +1831,22 @@
         function setPreviewScreen(mode) {
             Haptic.selection();
             previewScreenMode = mode;
-            document.getElementById('prev-tab-chat').className = mode === 'chat'
-                ? 'px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/10 text-dynamic'
-                : 'px-2.5 py-1 rounded-md text-[11px] font-medium text-muted-dynamic';
-            document.getElementById('prev-tab-list').className = mode === 'list'
-                ? 'px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/10 text-dynamic'
-                : 'px-2.5 py-1 rounded-md text-[11px] font-medium text-muted-dynamic';
+            ['chat', 'list', 'profile'].forEach(m => {
+                const btn = document.getElementById('prev-tab-' + m);
+                if (btn) {
+                    btn.className = (m === mode)
+                        ? 'px-2 py-1 rounded-md text-[11px] font-semibold bg-white/10 text-dynamic'
+                        : 'px-2 py-1 rounded-md text-[11px] font-medium text-muted-dynamic';
+                }
+            });
             renderTgLiveMockup();
         }
 
         const VOICE_WAVE_HEIGHTS = [35, 65, 95, 50, 80, 100, 60, 40, 85, 95, 70, 45, 90, 65, 50, 75, 95, 60, 40, 55, 80, 45];
 
         function renderTgLiveMockup() {
+            const C = resolveThemeDependencies(tgState);
+
             const header = document.getElementById('tg-mock-header');
             const lockIcon = document.getElementById('tg-mock-lock-icon');
             const pinnedBar = document.getElementById('tg-mock-pinned-bar');
@@ -1759,6 +1856,7 @@
             const dlgAccept = document.getElementById('tg-mock-dlg-accept');
             const chatBg = document.getElementById('tg-mock-chat-bg');
             const listView = document.getElementById('tg-mock-chatlist-view');
+            const profileView = document.getElementById('tg-mock-profile-view');
             const wpImg = document.getElementById('tg-mock-wallpaper-img');
             const wpDim = document.getElementById('tg-mock-wallpaper-dim');
             const avatar = document.getElementById('tg-mock-avatar');
@@ -1782,97 +1880,144 @@
             const phEl = document.getElementById('tg-mock-placeholder');
             const sendBtn = document.getElementById('tg-mock-send-btn');
 
-            const ac = tgState.autoContrast !== false;
-            const mediaHex = tgState.mediaColor || tgState.accent;
-            const dlgHex = tgState.dialogColor || tgState.accent;
-            const chkHex = tgState.checks || tgState.accent;
+            header.style.backgroundColor = C.headerBg;
+            header.style.color = C.primaryTextOnHdr;
+            header.style.borderBottom = `1px solid ${C.headerDivider}`;
+            lockIcon.style.color = C.listChecks;
 
-            const hdrText = ac ? ensureReadableColor(tgState.headerBg, tgState.text, 4.2) : tgState.text;
-            const hdrAccent = ac ? ensureReadableColor(tgState.headerBg, tgState.accent, 3.2) : tgState.accent;
-            const inTextCol = ac ? ensureReadableColor(tgState.msgIn, tgState.text, 4.2) : tgState.text;
-            const inMediaCol = ac ? ensureReadableColor(tgState.msgIn, mediaHex, 3.0) : mediaHex;
-            const inTimeCol = ac ? ensureReadableColor(tgState.msgIn, tgState.timeText, 2.8) : tgState.timeText;
-            const outTextCol = ac ? ensureReadableColor(tgState.msgOut, tgState.text, 4.2) : tgState.text;
-            const outMediaCol = ac ? ensureReadableColor(tgState.msgOut, mediaHex, 3.0) : mediaHex;
-            const outTimeCol = ac ? ensureReadableColor(tgState.msgOut, tgState.timeText, 2.8) : tgState.timeText;
-            const outChecksCol = ac ? ensureReadableColor(tgState.msgOut, chkHex, 3.0) : chkHex;
-            const avFgCol = getReadableFg(tgState.avatarBg || tgState.accent);
-            const sendBtnFg = getReadableFg(tgState.accent);
-
-            header.style.backgroundColor = tgState.headerBg;
-            header.style.color = hdrText;
-            lockIcon.style.color = chkHex;
-
-            pinnedBar.style.backgroundColor = tgState.headerBg;
-            pinnedBar.style.color = hdrText;
-            pinLine.style.backgroundColor = hdrAccent;
-            pinLabel.style.color = hdrAccent;
+            pinnedBar.style.backgroundColor = C.headerBg;
+            pinnedBar.style.color = C.primaryTextOnHdr;
+            pinnedBar.style.borderBottom = `1px solid ${C.headerDivider}`;
+            pinLine.style.backgroundColor = C.accentOnHdr;
+            pinLabel.style.color = C.accentOnHdr;
             pinLabel.textContent = tgState.pinned || 'Закреплённое сообщение';
 
-            // Кнопки диалогов (Отмена / Принять)
-            const safeDlgCol = ac ? ensureReadableColor(tgState.headerBg, dlgHex, 3.2) : dlgHex;
             dlgCancel.textContent = tgState.cancel || 'Отмена';
-            dlgCancel.style.color = safeDlgCol;
-            dlgCancel.style.backgroundColor = `${safeDlgCol}1a`;
+            dlgCancel.style.color = C.dialogBtnOnHdr;
+            dlgCancel.style.backgroundColor = `${C.dialogBtnOnHdr}1f`;
+            dlgCancel.style.border = `1px solid ${C.dialogBtnOnHdr}55`;
             dlgAccept.textContent = tgState.ok || 'Принять';
-            dlgAccept.style.backgroundColor = safeDlgCol;
-            dlgAccept.style.color = getReadableFg(safeDlgCol);
+            dlgAccept.style.backgroundColor = C.dialogBtnOnHdr;
+            dlgAccept.style.color = getReadableFg(C.dialogBtnOnHdr);
 
-            inputBar.style.backgroundColor = tgState.headerBg;
-            inputBar.style.color = hdrText;
-            chatBg.style.backgroundColor = tgState.chatBg;
-            listView.style.backgroundColor = tgState.chatBg;
+            inputBar.style.backgroundColor = C.headerBg;
+            inputBar.style.color = C.primaryTextOnHdr;
+            inputBar.style.borderTop = `1px solid ${C.headerDivider}`;
+            chatBg.style.backgroundColor = C.chatBg;
+            listView.style.backgroundColor = C.chatBg;
+            profileView.style.backgroundColor = C.graySectionBg;
 
+            const isChat = previewScreenMode === 'chat';
             const isList = previewScreenMode === 'list';
-            chatBg.classList.toggle('hidden', isList);
-            pinnedBar.classList.toggle('hidden', isList);
-            inputBar.classList.toggle('hidden', isList);
-            listView.classList.toggle('hidden', !isList);
+            const isProfile = previewScreenMode === 'profile';
 
-            const avBg = tgState.avatarBg || tgState.accent;
+            header.classList.toggle('hidden', isProfile);
+            chatBg.classList.toggle('hidden', !isChat);
+            pinnedBar.classList.toggle('hidden', !isChat);
+            inputBar.classList.toggle('hidden', !isChat);
+            listView.classList.toggle('hidden', !isList);
+            profileView.classList.toggle('hidden', !isProfile);
+            if (isProfile) profileView.classList.add('flex');
+            else profileView.classList.remove('flex');
+
             if (tgState.avatarDataUrl) {
                 avatar.style.backgroundImage = `url("${tgState.avatarDataUrl}")`;
                 avatar.textContent = '';
             } else {
                 avatar.style.backgroundImage = 'none';
-                avatar.style.backgroundColor = avBg;
-                avatar.style.color = avFgCol;
+                avatar.style.backgroundColor = C.avatarBg;
+                avatar.style.color = C.avatarFg;
                 avatar.textContent = (tgState.saved || 'D')[0].toUpperCase();
             }
 
             if (isList) {
-                const listTextCol = ac ? ensureReadableColor(tgState.chatBg, tgState.text, 4.2) : tgState.text;
-                const listSubCol = ac ? ensureReadableColor(tgState.chatBg, tgState.timeText, 3.0) : tgState.timeText;
-                const listAccCol = ac ? ensureReadableColor(tgState.chatBg, tgState.accent, 3.2) : tgState.accent;
-                const listSecretCol = ac ? ensureReadableColor(tgState.chatBg, chkHex, 3.2) : chkHex;
-
                 const sampleChats = [
-                    { name: 'Секретный чат (Encrypted)', msg: 'Замок и заголовок без зелёного!', time: '14:25', unread: 0, secret: true, sentCheck: true },
+                    { name: 'Секретный чат (Encrypted)', msg: 'Замок и заголовок контрастные', time: '14:25', unread: 0, secret: true, sentCheck: true },
                     { name: tgState.saved || 'Избранное', msg: 'Nightcall (Synthwave Mix).mp3', time: '14:22', unread: 2, secret: false, sentCheck: false },
                     { name: 'Darxy // Studio', msg: tgState.typing || 'печатает...', time: '12:10', unread: 0, typing: true, secret: false, sentCheck: false },
                     { name: 'Telegram Audio', msg: 'Голосовое сообщение (0:18)', time: 'Вчера', unread: 0, secret: false, sentCheck: true }
                 ];
                 listView.innerHTML = sampleChats.map(c => `
-                    <div class="px-3.5 py-2.5 flex items-center gap-3" style="color:${listTextCol}">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0 bg-cover bg-center" style="${tgState.avatarDataUrl ? `background-image:url('${tgState.avatarDataUrl}')` : `background-color:${avBg}; color:${avFgCol}`}">${tgState.avatarDataUrl ? '' : c.name[0]}</div>
+                    <div class="px-3.5 py-2.5 flex items-center gap-3" style="color:${C.primaryTextOnBg}; border-bottom:1px solid ${C.dividerColor}">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0 bg-cover bg-center" style="${tgState.avatarDataUrl ? `background-image:url('${tgState.avatarDataUrl}')` : `background-color:${C.avatarBg}; color:${C.avatarFg}`}">${tgState.avatarDataUrl ? '' : c.name[0]}</div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-center">
-                                <span class="text-xs font-bold truncate flex items-center gap-1" style="color:${c.secret ? listSecretCol : listTextCol}">
+                                <span class="text-xs font-bold truncate flex items-center gap-1" style="color:${c.secret ? C.listChecks : C.primaryTextOnBg}">
                                     ${c.secret ? `<svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` : ''}
                                     ${escapeHtml(c.name)}
                                 </span>
-                                <span class="text-[10px] flex items-center gap-1" style="color:${listSubCol}">
-                                    ${c.sentCheck ? `<svg class="w-3.5 h-3.5" style="color:${listSecretCol}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>` : ''}
+                                <span class="text-[10px] flex items-center gap-1" style="color:${C.secondaryTextOnBg}">
+                                    ${c.sentCheck ? `<svg class="w-3.5 h-3.5" style="color:${C.listChecks}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>` : ''}
                                     ${c.time}
                                 </span>
                             </div>
                             <div class="flex justify-between items-center mt-0.5">
-                                <span class="text-[11px] truncate" style="color:${c.typing ? listAccCol : listSubCol}">${escapeHtml(c.msg)}</span>
-                                ${c.unread ? `<span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" style="background:${tgState.accent}; color:${sendBtnFg}">${c.unread}</span>` : ''}
+                                <span class="text-[11px] truncate" style="color:${c.typing ? C.accentOnBg : C.secondaryTextOnBg}">${escapeHtml(c.msg)}</span>
+                                ${c.unread ? `<span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" style="background:${C.actionBtnBg}; color:${C.actionBtnFg}">${c.unread}</span>` : ''}
                             </div>
                         </div>
                     </div>
                 `).join('');
+            }
+
+            // Рендер экрана ПРОФИЛЯ (Никнейм, Статус, Кнопки, Блок «О себе», Юзернейм и Вкладки Медиа)
+            if (isProfile) {
+                const avStyle = tgState.avatarDataUrl
+                    ? `background-image:url('${tgState.avatarDataUrl}'); background-size:cover;`
+                    : `background:${C.avatarBg}; color:${C.avatarFg};`;
+                profileView.innerHTML = `
+                    <div>
+                        <!-- Шапка профиля -->
+                        <div class="px-4 pt-3 pb-3 flex flex-col items-center text-center relative" style="background:${C.headerBg}; border-bottom:1px solid ${C.headerDivider}">
+                            <div class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-base shadow-md mb-2" style="${avStyle}; border:2px solid ${C.accentOnHdr}">${tgState.avatarDataUrl ? '' : 'D'}</div>
+                            <div class="text-sm font-bold leading-tight flex items-center gap-1" style="color:${C.primaryTextOnHdr}">
+                                <span>Darxy // TG Studio</span>
+                                <span class="w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[9px]" style="background:${C.dialogBtnOnHdr}; color:${getReadableFg(C.dialogBtnOnHdr)}">✓</span>
+                            </div>
+                            <div class="text-[11px] mt-0.5 font-medium" style="color:${C.secondaryTextOnHdr}">${escapeHtml(tgState.online || 'в сети')}</div>
+
+                            <!-- Кнопки действий в профиле -->
+                            <div class="grid grid-cols-3 gap-2 w-full mt-3">
+                                ${['Чат', 'Звонок', 'Звук'].map(act => `
+                                    <div class="py-1.5 px-2 rounded-xl flex flex-col items-center justify-center gap-0.5" style="background:${C.chatBg}; border:1px solid ${C.dividerColor}; color:${C.accentOnBg}">
+                                        <span class="text-[10px] font-bold">${act}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Карточка Информации («О себе» и Юзернейм) -->
+                        <div class="mx-3 my-2.5 rounded-xl overflow-hidden" style="background:${C.chatBg}; border:1px solid ${C.dividerColor}">
+                            <div class="px-3.5 py-2" style="border-bottom:1px solid ${C.dividerColor}">
+                                <div class="text-[10px] font-bold uppercase tracking-wider" style="color:${C.accentOnBg}">Информация</div>
+                                <div class="text-xs font-medium mt-1 leading-snug" style="color:${C.primaryTextOnBg}">Создатель кастомных тем и локализаций Telegram. Текст описания никогда не сливается с фоном!</div>
+                                <div class="text-[10px] mt-0.5" style="color:${C.secondaryTextOnBg}">О себе (Bio)</div>
+                            </div>
+                            <div class="px-3.5 py-2 flex items-center justify-between">
+                                <div>
+                                    <div class="text-xs font-bold" style="color:${C.dialogBtnOnBg}">@darxxx1zq</div>
+                                    <div class="text-[10px]" style="color:${C.secondaryTextOnBg}">Имя пользователя</div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold" style="background:${C.dialogBtnOnBg}22; color:${C.dialogBtnOnBg}">QR</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Вкладки профиля (Медиа / Файлы / Голосовые) -->
+                    <div class="px-3 pt-2 pb-2.5" style="background:${C.chatBg}; border-top:1px solid ${C.dividerColor}">
+                        <div class="flex items-center justify-around text-[11px] font-bold pb-1.5" style="border-bottom:1px solid ${C.dividerColor}">
+                            <span class="pb-1" style="color:${C.dialogBtnOnBg}; border-bottom:2px solid ${C.dialogBtnOnBg}">Медиа</span>
+                            <span style="color:${C.secondaryTextOnBg}">Файлы</span>
+                            <span style="color:${C.secondaryTextOnBg}">Голосовые</span>
+                            <span style="color:${C.secondaryTextOnBg}">Ссылки</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1.5 pt-2">
+                            <div class="h-11 rounded-lg flex items-center justify-center text-[10px] font-mono" style="background:${C.msgIn}; color:${C.inText}; border:1px solid ${C.dividerColor}">IMG_01</div>
+                            <div class="h-11 rounded-lg flex items-center justify-center text-[10px] font-mono" style="background:${C.msgOut}; color:${C.outText}; border:1px solid ${C.dividerColor}">IMG_02</div>
+                            <div class="h-11 rounded-lg flex items-center justify-center text-[10px] font-mono" style="background:${C.headerBg}; color:${C.primaryTextOnHdr}; border:1px solid ${C.dividerColor}">IMG_03</div>
+                        </div>
+                    </div>
+                `;
             }
 
             if (tgState.wallpaperDataUrl) {
@@ -1895,53 +2040,54 @@
 
             titleEl.textContent = isList ? 'Telegram' : (tgState.saved || 'Избранное');
             status.textContent = tgState.online || 'в сети';
-            status.style.color = hdrAccent;
+            status.style.color = C.accentOnHdr;
             typingPill.textContent = tgState.typing || 'печатает...';
-            typingPill.style.color = hdrAccent;
+            typingPill.style.color = C.accentOnHdr;
             phEl.textContent = tgState.placeholder || 'Сообщение...';
+            phEl.style.color = C.secondaryTextOnHdr;
 
             datePill.textContent = tgState.today || 'Сегодня';
-            datePill.style.backgroundColor = `${tgState.headerBg}d9`;
-            datePill.style.color = hdrText;
+            datePill.style.backgroundColor = `${C.headerBg}e6`;
+            datePill.style.color = C.primaryTextOnHdr;
+            datePill.style.border = `1px solid ${C.headerDivider}`;
 
-            // Входящая песня (Кнопка песни + Название песни + Исполнитель)
-            inTitle.style.color = inMediaCol;
-            songBtn.style.backgroundColor = inMediaCol;
-            songBtn.style.color = getReadableFg(inMediaCol);
-            songTitle.style.color = inTextCol;
-            songArtist.style.color = inTimeCol;
+            inTitle.style.color = C.inAccent;
+            songBtn.style.backgroundColor = C.inMedia;
+            songBtn.style.color = C.inMediaFg;
+            songTitle.style.color = C.inText;
+            songArtist.style.color = C.inTime;
 
-            // Исходящее голосовое (Кнопка + Дорожка голосового + Время)
-            voiceBtn.style.backgroundColor = outMediaCol;
-            voiceBtn.style.color = getReadableFg(outMediaCol);
-            voiceDur.style.color = outTimeCol;
+            voiceBtn.style.backgroundColor = C.outMedia;
+            voiceBtn.style.color = C.outMediaFg;
+            voiceDur.style.color = C.outTime;
             voiceWave.innerHTML = VOICE_WAVE_HEIGHTS.map((h, i) => {
                 const played = i < 13;
-                const barCol = played ? outMediaCol : `${outTimeCol}55`;
+                const barCol = played ? C.outMedia : `${C.outTime}66`;
                 return `<span style="height:${h}%; width:2.5px; border-radius:99px; background:${barCol}; display:inline-block;"></span>`;
             }).join('');
 
-            sendBtn.style.backgroundColor = tgState.accent;
-            sendBtn.style.color = sendBtnFg;
+            sendBtn.style.backgroundColor = C.actionBtnBg;
+            sendBtn.style.color = C.actionBtnFg;
 
             const r = `${tgState.bubbleRadius}px`;
             const fSize = `${tgState.fontSize}px`;
-            msgIn.style.backgroundColor = tgState.msgIn;
-            msgIn.style.color = inTextCol;
+            msgIn.style.backgroundColor = C.msgIn;
+            msgIn.style.color = C.inText;
             msgIn.style.fontSize = fSize;
             msgIn.style.borderRadius = `${r} ${r} ${r} 4px`;
-            inTime.style.color = inTimeCol;
+            msgIn.style.border = `1px solid ${C.dividerColor}`;
+            inTime.style.color = C.inTime;
 
-            msgOut.style.backgroundColor = tgState.msgOut;
-            msgOut.style.color = outTextCol;
+            msgOut.style.backgroundColor = C.msgOut;
+            msgOut.style.color = C.outText;
             msgOut.style.fontSize = fSize;
             msgOut.style.borderRadius = `${r} ${r} 4px ${r}`;
-            msgOut.style.boxShadow = tgState.glowOut ? `0 4px 20px ${tgState.msgOut}88` : 'none';
-            outTime.style.color = outTimeCol;
-            checks.style.color = outChecksCol;
+            msgOut.style.border = `1px solid ${mixHex(C.msgOut, C.outText, 0.14)}`;
+            msgOut.style.boxShadow = tgState.glowOut ? `0 4px 20px ${C.msgOut}88` : 'none';
+            outTime.style.color = C.outTime;
+            checks.style.color = C.outChecks;
 
             document.getElementById('tg-summary-name').textContent = tgState.name;
-            const _sm = document.getElementById('tg-summary-metrics'); if (_sm) _sm.textContent = `${tgState.langName}${tgState.wallpaperDataUrl ? ` • Фон ${tgState.wpScale}%` : ''}`;
         }
 
         function handleChatWallpaperUpload(files) {
@@ -2053,7 +2199,7 @@
             renderTgLiveMockup();
         }
 
-        /* ==================== 4. КОМПИЛЯТОР 178 КЛЮЧЕЙ ТЕМЫ (БЕЗ ЗЕЛЁНЫХ/СИНИХ ДЫР) И ЕДИНЫЙ API СЕРВЕРА ==================== */
+        /* ==================== 4. КОМПИЛЯТОР ТЕМ С ЗАЩИТОЙ ПРОФИЛЯ, ОПИСАНИЯ, НИКА И КНОПОК ОТ СЛИВАНИЯ ==================== */
         function hexToSignedInt(hex) {
             const clean = (hex || '#000000').replace('#', '').slice(0, 6);
             const num = parseInt('ff' + clean.padStart(6, '0'), 16);
@@ -2131,66 +2277,121 @@
             });
         }
 
-        // Полный генератор .attheme (178 ключей: перекрашивает дорожки голосовых, названия/кнопки песен, синие диалоги Принять/Отмена, зелёные галочки, секретные чаты и аватарки!)
+        // Базовый генератор строк .attheme, использующий матрицу зависимостей resolveThemeDependencies(st)
         function buildAtThemeTextLines(st = tgState, hasEmbeddedWallpaper = false) {
-            const ac = st.autoContrast !== false;
-            const mediaHex = st.mediaColor || st.accent;
-            const dlgHex = st.dialogColor || st.accent;
-            const chkHex = st.checks || st.accent;
-            const avHex = st.avatarBg || st.accent;
+            const C = resolveThemeDependencies(st);
 
-            const inTxtHex = ac ? ensureReadableColor(st.msgIn, st.text, 4.2) : st.text;
-            const outTxtHex = ac ? ensureReadableColor(st.msgOut, st.text, 4.2) : st.text;
-            const hdrTxtHex = ac ? ensureReadableColor(st.headerBg, st.text, 4.2) : st.text;
-            const inMediaHex = ac ? ensureReadableColor(st.msgIn, mediaHex, 3.0) : mediaHex;
-            const outMediaHex = ac ? ensureReadableColor(st.msgOut, mediaHex, 3.0) : mediaHex;
+            const bg = hexToSignedInt(C.chatBg);
+            const grayBg = hexToSignedInt(C.graySectionBg);
+            const divCol = hexToSignedInt(C.dividerColor);
+            const hdr = hexToSignedInt(C.headerBg);
+            const outB = hexToSignedInt(C.msgOut);
+            const inB = hexToSignedInt(C.msgIn);
 
-            const bg = hexToSignedInt(st.chatBg);
-            const hdr = hexToSignedInt(st.headerBg);
-            const outB = hexToSignedInt(st.msgOut);
-            const inB = hexToSignedInt(st.msgIn);
-            const txt = hexToSignedInt(inTxtHex);
-            const outTxt = hexToSignedInt(outTxtHex);
-            const hdrTxt = hexToSignedInt(hdrTxtHex);
-            const acc = hexToSignedInt(st.accent);
-            const medIn = hexToSignedInt(inMediaHex);
-            const medOut = hexToSignedInt(outMediaHex);
-            const medInTrack = hexWithAlphaToSignedInt(inMediaHex, '55');
-            const medOutTrack = hexWithAlphaToSignedInt(outMediaHex, '55');
-            const medInIconFg = hexToSignedInt(getReadableFg(inMediaHex));
-            const medOutIconFg = hexToSignedInt(getReadableFg(outMediaHex));
-            const dlg = hexToSignedInt(dlgHex);
-            const dlgSel = hexWithAlphaToSignedInt(dlgHex, '33');
-            const avBg = hexToSignedInt(avHex);
-            const avTxt = hexToSignedInt(getReadableFg(avHex));
-            const tm = hexToSignedInt(st.timeText || st.accent);
-            const chk = hexToSignedInt(chkHex);
+            const txtOnBg = hexToSignedInt(C.primaryTextOnBg);
+            const subOnBg = hexToSignedInt(C.secondaryTextOnBg);
+            const hintOnBg = hexToSignedInt(C.hintTextOnBg);
+
+            const txtOnHdr = hexToSignedInt(C.primaryTextOnHdr);
+            const subOnHdr = hexToSignedInt(C.secondaryTextOnHdr);
+
+            const inTxt = hexToSignedInt(C.inText);
+            const outTxt = hexToSignedInt(C.outText);
+            const inTm = hexToSignedInt(C.inTime);
+            const outTm = hexToSignedInt(C.outTime);
+
+            const accBg = hexToSignedInt(C.accentOnBg);
+            const accHdr = hexToSignedInt(C.accentOnHdr);
+            const inAcc = hexToSignedInt(C.inAccent);
+            const outAcc = hexToSignedInt(C.outAccent);
+
+            const medIn = hexToSignedInt(C.inMedia);
+            const medOut = hexToSignedInt(C.outMedia);
+            const medInTrack = hexWithAlphaToSignedInt(C.inMedia, '55');
+            const medOutTrack = hexWithAlphaToSignedInt(C.outMedia, '55');
+            const medInIconFg = hexToSignedInt(C.inMediaFg);
+            const medOutIconFg = hexToSignedInt(C.outMediaFg);
+
+            const dlgHdr = hexToSignedInt(C.dialogBtnOnHdr);
+            const dlgBg = hexToSignedInt(C.dialogBtnOnBg);
+            const dlgSel = hexWithAlphaToSignedInt(C.dialogBtnOnHdr, '33');
+
+            const avBg = hexToSignedInt(C.avatarBg);
+            const avTxt = hexToSignedInt(C.avatarFg);
+            const actBg = hexToSignedInt(C.actionBtnBg);
+            const actFg = hexToSignedInt(C.actionBtnFg);
+
+            const chkOut = hexToSignedInt(C.outChecks);
+            const chkList = hexToSignedInt(C.listChecks);
 
             const lines = [
+                // Глобальные поверхности, карточки Профиля и Настроек (Ник, Описание О себе, Юзернейм)
                 `windowBackgroundWhite=${bg}`,
-                `windowBackgroundGray=${bg}`,
+                `windowBackgroundGray=${grayBg}`,
+                `graySection=${grayBg}`,
+                `key_graySectionText=${subOnBg}`,
+                `graySectionText=${subOnBg}`,
+                `divider=${divCol}`,
+                `windowBackgroundWhiteBlackText=${txtOnBg}`,
+                `windowBackgroundWhiteValueText=${accBg}`,
+                `windowBackgroundWhiteLinkText=${dlgBg}`,
+                `windowBackgroundWhiteGrayText=${subOnBg}`,
+                `windowBackgroundWhiteGrayText2=${subOnBg}`,
+                `windowBackgroundWhiteGrayText3=${hintOnBg}`,
+                `windowBackgroundWhiteGrayText4=${subOnBg}`,
+                `windowBackgroundWhiteGrayText5=${subOnBg}`,
+                `windowBackgroundWhiteGrayText6=${subOnBg}`,
+                `windowBackgroundWhiteGrayText7=${hintOnBg}`,
+                `windowBackgroundWhiteGrayText8=${hintOnBg}`,
+                `windowBackgroundWhiteHintText=${hintOnBg}`,
+                `windowBackgroundWhiteGrayIcon=${subOnBg}`,
+                `windowBackgroundWhiteBlueHeader=${accBg}`,
+                `windowBackgroundWhiteBlueText=${dlgBg}`,
+                `windowBackgroundWhiteBlueText2=${dlgBg}`,
+                `windowBackgroundWhiteBlueText3=${dlgBg}`,
+                `windowBackgroundWhiteBlueText4=${dlgBg}`,
+                `windowBackgroundWhiteBlueText5=${dlgBg}`,
+                `windowBackgroundWhiteBlueText6=${dlgBg}`,
+                `windowBackgroundWhiteBlueText7=${dlgBg}`,
+                `windowBackgroundWhiteBlueButton=${dlgBg}`,
+                `windowBackgroundWhiteBlueIcon=${dlgBg}`,
+                // Шапка и Профиль (Никнейм, Статус в профиле, Вкладки Медиа/Файлы/Голосовые)
                 `actionBarDefault=${hdr}`,
-                `actionBarDefaultIcon=${hdrTxt}`,
-                `actionBarDefaultTitle=${hdrTxt}`,
-                `actionBarDefaultSubtitle=${acc}`,
+                `actionBarDefaultIcon=${txtOnHdr}`,
+                `actionBarDefaultTitle=${txtOnHdr}`,
+                `actionBarDefaultSubtitle=${subOnHdr}`,
+                `actionBarTabActiveText=${accHdr}`,
+                `actionBarTabUnactiveText=${subOnHdr}`,
+                `actionBarTabLine=${accHdr}`,
                 `drawerBackground=${hdr}`,
-                // Список чатов, галочки в списке и закрытые (секретные) чаты
+                `profile_title=${txtOnHdr}`,
+                `profile_status=${subOnHdr}`,
+                `profile_actionBackground=${actBg}`,
+                `profile_actionIcon=${actFg}`,
+                `profile_actionPressedBackground=${avBg}`,
+                `profile_verifiedBackground=${dlgHdr}`,
+                `profile_verifiedCheck=${hexToSignedInt(getReadableFg(C.dialogBtnOnHdr))}`,
+                `profile_tabText=${subOnBg}`,
+                `profile_tabSelectedText=${dlgBg}`,
+                `profile_tabSelectedLine=${dlgBg}`,
+                `profile_tabSelector=${dlgSel}`,
+                // Список чатов
                 `chats_background=${bg}`,
-                `chats_name=${txt}`,
-                `chats_nameArchived=${txt}`,
-                `chats_secretName=${chk}`,
-                `chats_secretIcon=${chk}`,
-                `chat_lockIcon=${chk}`,
-                `chats_message=${tm}`,
-                `chats_date=${tm}`,
-                `chats_sentCheck=${chk}`,
-                `chats_sentReadCheck=${chk}`,
-                `chats_unreadCounter=${acc}`,
-                `chats_unreadCounterText=${avTxt}`,
-                `chats_UnreadCounterMuted=${inB}`,
-                `chats_actionBackground=${acc}`,
-                `chats_actionIcon=${avTxt}`,
-                // Все ключи аватарок
+                `chats_name=${txtOnBg}`,
+                `chats_nameArchived=${txtOnBg}`,
+                `chats_secretName=${chkList}`,
+                `chats_secretIcon=${chkList}`,
+                `chat_lockIcon=${chkList}`,
+                `chats_message=${subOnBg}`,
+                `chats_date=${subOnBg}`,
+                `chats_sentCheck=${chkList}`,
+                `chats_sentReadCheck=${chkList}`,
+                `chats_unreadCounter=${actBg}`,
+                `chats_unreadCounterText=${actFg}`,
+                `chats_unreadCounterMuted=${inB}`,
+                `chats_actionBackground=${actBg}`,
+                `chats_actionIcon=${actFg}`,
+                // Аватарки и шапка профиля
                 `avatar_text=${avTxt}`,
                 `avatar_backgroundSaved=${avBg}`,
                 `avatar_backgroundArchived=${avBg}`,
@@ -2201,30 +2402,32 @@
                 `avatar_backgroundCyan=${avBg}`,
                 `avatar_backgroundBlue=${avBg}`,
                 `avatar_backgroundPink=${avBg}`,
-                `avatar_backgroundInProfileBlue=${avBg}`,
-                `avatar_nameInMessageRed=${acc}`,
-                `avatar_nameInMessageOrange=${acc}`,
-                `avatar_nameInMessageViolet=${acc}`,
-                `avatar_nameInMessageGreen=${acc}`,
-                `avatar_nameInMessageCyan=${acc}`,
-                `avatar_nameInMessageBlue=${acc}`,
-                `avatar_nameInMessagePink=${acc}`,
+                `avatar_backgroundInProfileBlue=${hdr}`,
+                `avatar_subtitleInProfileBlue=${subOnHdr}`,
+                `avatar_actionBarIconBlue=${txtOnHdr}`,
+                `avatar_nameInMessageRed=${inAcc}`,
+                `avatar_nameInMessageOrange=${inAcc}`,
+                `avatar_nameInMessageViolet=${inAcc}`,
+                `avatar_nameInMessageGreen=${inAcc}`,
+                `avatar_nameInMessageCyan=${inAcc}`,
+                `avatar_nameInMessageBlue=${inAcc}`,
+                `avatar_nameInMessagePink=${inAcc}`,
                 // Сообщения и галочки прочтения
                 `chat_inBubble=${inB}`,
                 `chat_inBubbleSelected=${hdr}`,
                 `chat_outBubble=${outB}`,
                 `chat_outBubbleSelected=${hdr}`,
-                `chat_messageTextIn=${txt}`,
+                `chat_messageTextIn=${inTxt}`,
                 `chat_messageTextOut=${outTxt}`,
-                `chat_messageLinkIn=${acc}`,
-                `chat_messageLinkOut=${outMediaHex === outTxtHex ? acc : medOut}`,
-                `chat_inTimeText=${tm}`,
-                `chat_outTimeText=${tm}`,
-                `chat_outSentCheck=${chk}`,
-                `chat_outSentCheckSelected=${chk}`,
-                `chat_outSentCheckRead=${chk}`,
-                `chat_outSentCheckReadSelected=${chk}`,
-                // Дорожка голосовых (Voice Seekbar), ползунки и кнопки песен/аудио
+                `chat_messageLinkIn=${inAcc}`,
+                `chat_messageLinkOut=${outAcc}`,
+                `chat_inTimeText=${inTm}`,
+                `chat_outTimeText=${outTm}`,
+                `chat_outSentCheck=${chkOut}`,
+                `chat_outSentCheckSelected=${chkOut}`,
+                `chat_outSentCheckRead=${chkOut}`,
+                `chat_outSentCheckReadSelected=${chkOut}`,
+                // Голосовые и Аудио
                 `chat_inVoiceSeekbar=${medInTrack}`,
                 `chat_inVoiceSeekbarSelected=${medIn}`,
                 `chat_inVoiceSeekbarFill=${medIn}`,
@@ -2237,12 +2440,12 @@
                 `chat_outAudioSeekbar=${medOutTrack}`,
                 `chat_outAudioSeekbarSelected=${medOut}`,
                 `chat_outAudioSeekbarFill=${medOut}`,
-                `chat_inAudioTitleText=${txt}`,
+                `chat_inAudioTitleText=${inTxt}`,
                 `chat_outAudioTitleText=${outTxt}`,
-                `chat_inAudioPerformerText=${tm}`,
-                `chat_outAudioPerformerText=${tm}`,
-                `chat_inAudioDurationText=${tm}`,
-                `chat_outAudioDurationText=${tm}`,
+                `chat_inAudioPerfomerText=${inTm}`,
+                `chat_outAudioPerfomerText=${outTm}`,
+                `chat_inAudioDurationText=${inTm}`,
+                `chat_outAudioDurationText=${outTm}`,
                 `chat_inAudioProgress=${inB}`,
                 `chat_outAudioProgress=${outB}`,
                 `chat_inAudioSelectedProgress=${hdr}`,
@@ -2251,113 +2454,65 @@
                 `chat_outLoader=${medOut}`,
                 `chat_inLoaderSelected=${medIn}`,
                 `chat_outLoaderSelected=${medOut}`,
-                `chat_inFileBg=${medIn}`,
-                `chat_outFileBg=${medOut}`,
-                `chat_inFileSelectedBg=${medIn}`,
-                `chat_outFileSelectedBg=${medOut}`,
+                `chat_inFileBackground=${medIn}`,
+                `chat_outFileBackground=${medOut}`,
+                `chat_inFileBackgroundSelected=${medIn}`,
+                `chat_outFileBackgroundSelected=${medOut}`,
                 `chat_inFileIcon=${medInIconFg}`,
                 `chat_outFileIcon=${medOutIconFg}`,
                 `chat_inMediaIcon=${medInIconFg}`,
                 `chat_outMediaIcon=${medOutIconFg}`,
                 `chat_inMediaIconSelected=${medInIconFg}`,
                 `chat_outMediaIconSelected=${medOutIconFg}`,
-                // Верхний мини-плеер и полноэкранный плеер песен
+                // Плеер и Диалоги
                 `inappPlayerBackground=${hdr}`,
-                `inappPlayerTitle=${hdrTxt}`,
-                `inappPlayerPerformer=${medIn}`,
-                `inappPlayerPlayPause=${medIn}`,
-                `inappPlayerClose=${tm}`,
+                `inappPlayerTitle=${txtOnHdr}`,
+                `inappPlayerPerformer=${subOnHdr}`,
+                `inappPlayerPlayPause=${accHdr}`,
+                `inappPlayerClose=${subOnHdr}`,
                 `player_background=${bg}`,
                 `player_actionBar=${hdr}`,
-                `player_actionBarTitle=${hdrTxt}`,
-                `player_actionBarSubtitle=${tm}`,
+                `player_actionBarTitle=${txtOnHdr}`,
+                `player_actionBarSubtitle=${subOnHdr}`,
                 `player_seekBarBackground=${medInTrack}`,
-                `player_seekBarProgress=${medIn}`,
-                `player_button=${hdrTxt}`,
-                `player_buttonActive=${medIn}`,
-                // Диалоговые окна и бывшие «синие» кнопки Отмена / Принять
+                `player_seekBarProgress=${accBg}`,
+                `player_button=${txtOnBg}`,
+                `player_buttonActive=${accBg}`,
                 `dialogBackground=${hdr}`,
-                `dialogTextBlack=${hdrTxt}`,
-                `dialogTextGray2=${tm}`,
-                `dialogButton=${dlg}`,
+                `dialogTextBlack=${txtOnHdr}`,
+                `dialogTextGray2=${subOnHdr}`,
+                `dialogButton=${dlgHdr}`,
                 `dialogButtonSelector=${dlgSel}`,
-                `dialogTextBlue=${dlg}`,
-                `dialogTextBlue2=${dlg}`,
-                `dialogTextBlue3=${dlg}`,
-                `dialogTextBlue4=${dlg}`,
+                `dialogTextBlue=${dlgHdr}`,
+                `dialogTextBlue2=${dlgHdr}`,
+                `dialogTextBlue3=${dlgHdr}`,
+                `dialogTextBlue4=${dlgHdr}`,
                 `dialogLinkSelection=${dlgSel}`,
-                `windowBackgroundWhiteBlueText=${dlg}`,
-                `windowBackgroundWhiteBlueText2=${dlg}`,
-                `windowBackgroundWhiteBlueText3=${dlg}`,
-                `windowBackgroundWhiteBlueText4=${dlg}`,
-                `windowBackgroundWhiteBlueButton=${dlg}`,
-                `windowBackgroundWhiteBlueIcon=${dlg}`,
-                `picker_enabledButton=${dlg}`,
-                `chat_fieldOverlayText=${dlg}`,
-                // Панель ввода и цитаты
+                `picker_enabledButton=${dlgHdr}`,
+                `chat_fieldOverlayText=${dlgHdr}`,
+                // Панель ввода и ответы
                 `chat_messagePanelBackground=${hdr}`,
-                `chat_messagePanelText=${hdrTxt}`,
-                `chat_messagePanelHint=${tm}`,
-                `chat_messagePanelSend=${acc}`,
-                `chat_messagePanelIcons=${tm}`,
-                `chat_replyPanelName=${acc}`,
-                `chat_replyPanelMessage=${txt}`,
-                `chat_replyPanelLine=${acc}`,
+                `chat_messagePanelText=${txtOnHdr}`,
+                `chat_messagePanelHint=${subOnHdr}`,
+                `chat_messagePanelSend=${accHdr}`,
+                `chat_messagePanelIcons=${subOnHdr}`,
+                `chat_replyPanelName=${accHdr}`,
+                `chat_replyPanelMessage=${txtOnHdr}`,
+                `chat_replyPanelLine=${accHdr}`,
+                `chat_inReplyNameText=${inAcc}`,
+                `chat_inReplyMessageText=${inTxt}`,
+                `chat_inReplyLine=${inAcc}`,
+                `chat_outReplyNameText=${outAcc}`,
+                `chat_outReplyMessageText=${outTxt}`,
+                `chat_outReplyLine=${outAcc}`,
                 `chat_topPanelBackground=${hdr}`,
-                `chat_topPanelTitle=${acc}`,
-                `chat_topPanelMessage=${hdrTxt}`,
-                ` chat_topPanelLine=${acc}`,
-                `switchTrackChecked=${acc}`,
-                `checkbox=${acc}`,
-                `checkboxCheck=${avTxt}`
+                `chat_topPanelTitle=${accHdr}`,
+                `chat_topPanelMessage=${txtOnHdr}`,
+                `chat_topPanelLine=${accHdr}`,
+                `switchTrackChecked=${accBg}`,
+                `checkbox=${actBg}`,
+                `checkboxCheck=${actFg}`
             ];
-
-            const dlgFg = hexToSignedInt(getReadableFg(dlgHex));
-            const accSoft = hexWithAlphaToSignedInt(st.accent, '22');
-            const extra = {
-                // галочки и часики (список чатов, пузыри, медиа)
-                chats_sentClock: chk, chat_outSentClock: chk, chat_outSentClockSelected: chk, chat_mediaSentCheck: chk, chat_mediaSentClock: chk,
-                // закрытые (секретные) чаты, «зелёные» остатки
-                chat_secretChatStatusText: acc, chats_onlineCircle: acc, windowBackgroundWhiteGreenText: acc, windowBackgroundWhiteGreenText2: acc,
-                calls_callReceivedGreenIcon: acc, chat_inPollCorrectAnswer: medIn, chat_outPollCorrectAnswer: medOut,
-                chats_archiveBackground: acc, chats_archiveIcon: avTxt, chats_archiveText: avTxt, chats_unreadCounterMuted: tm,
-                chats_pinnedIcon: tm, chats_muteIcon: tm, chats_menuTopBackground: hdr, chats_menuName: hdrTxt, chats_menuPhone: tm,
-                // песни, аудио, дорожки голосовых (точные имена ключей Telegram Android)
-                chat_inAudioPerfomerText: tm, chat_outAudioPerfomerText: tm, chat_inAudioPerfomerSelectedText: tm, chat_outAudioPerfomerSelectedText: tm,
-                chat_inAudioDurationSelectedText: tm, chat_outAudioDurationSelectedText: tm,
-                chat_inAudioCacheSeekbar: medInTrack, chat_outAudioCacheSeekbar: medOutTrack,
-                chat_inFileBackground: medIn, chat_inFileBackgroundSelected: medIn, chat_outFileBackground: medOut, chat_outFileBackgroundSelected: medOut,
-                chat_inFileProgress: medInTrack, chat_inFileProgressSelected: medInTrack, chat_outFileProgress: medOutTrack, chat_outFileProgressSelected: medOutTrack,
-                chat_inFileSelectedIcon: medInIconFg, chat_outFileSelectedIcon: medOutIconFg,
-                chat_inFileNameText: txt, chat_outFileNameText: outTxt, chat_inFileInfoText: tm, chat_outFileInfoText: tm,
-                chat_inFileInfoSelectedText: tm, chat_outFileInfoSelectedText: tm,
-                chat_recordedVoiceProgress: acc, chat_recordedVoiceProgressInner: avTxt, chat_recordedVoiceBackground: acc, chat_recordedVoicePlayPause: avTxt,
-                chat_messagePanelVoiceBackground: acc, chat_recordTime: tm,
-                // диалоги «Принять / Отмена», ссылки, переключатели, галочки в диалогах
-                dialogTextLink: dlg, dialogCheckboxSquareBackground: dlg, dialogCheckboxSquareCheck: dlgFg, dialogRadioBackgroundChecked: dlg,
-                dialogProgressCircle: dlg, dialogInputFieldActivated: dlg, dialogRoundCheckBox: dlg, dialogRoundCheckBoxCheck: dlgFg,
-                dialogScrollGlow: dlg, dialogBadgeBackground: dlg, dialogBadgeText: dlgFg, dialogFloatingButton: dlg, dialogFloatingIcon: dlgFg,
-                windowBackgroundWhiteBlueText5: dlg, windowBackgroundWhiteBlueText6: dlg, windowBackgroundWhiteBlueText7: dlg,
-                windowBackgroundWhiteLinkText: dlg, windowBackgroundWhiteLinkSelection: dlgSel, windowBackgroundWhiteInputFieldActivated: dlg,
-                switchTrackBlueChecked: dlg, switchTrackBlueSelectorChecked: dlg, progressCircle: dlg, fastScrollActive: dlg, listSelector: accSoft,
-                featuredStickers_addButton: dlg, featuredStickers_buttonText: dlgFg, featuredStickers_addedIcon: dlg,
-                profile_actionBackground: dlg, profile_actionIcon: dlgFg, profile_verifiedBackground: dlg, profile_verifiedCheck: dlgFg,
-                chats_verifiedBackground: dlg, chats_verifiedCheck: dlgFg, picker_badge: dlg,
-                // ответы, ссылки, контакты, геолокация, кнопки в пузырях
-                chat_goDownButtonCounterBackground: acc, chat_goDownButtonCounter: avTxt, chat_unreadMessagesStartText: acc, chat_unreadMessagesStartArrowIcon: acc,
-                chat_inReplyLine: acc, chat_outReplyLine: outTxt, chat_inReplyNameText: acc, chat_outReplyNameText: outTxt,
-                chat_inViaBotNameText: acc, chat_outViaBotNameText: outTxt, chat_inSiteNameText: acc, chat_outSiteNameText: outTxt,
-                chat_inPreviewLine: acc, chat_outPreviewLine: outTxt, chat_inInstant: acc, chat_outInstant: outTxt,
-                chat_inContactNameText: acc, chat_outContactNameText: outTxt, chat_inContactBackground: medIn, chat_outContactBackground: medOut,
-                chat_inContactIcon: medInIconFg, chat_outContactIcon: medOutIconFg,
-                chat_inLocationBackground: medIn, chat_outLocationBackground: medOut, chat_inLocationIcon: medInIconFg, chat_outLocationIcon: medOutIconFg,
-                chat_inMenu: tm, chat_outMenu: tm, chat_inTimeSelectedText: tm, chat_outTimeSelectedText: tm, chat_topPanelLine: acc,
-                chats_attachMessage: acc, chats_actionMessage: acc, chats_nameMessage: acc, chats_nameMessage_threeLines: acc, chats_message_threeLines: tm,
-                chat_inReplyMediaMessageText: acc, chat_outReplyMediaMessageText: outTxt, chat_inReplyMediaMessageSelectedText: acc, chat_outReplyMediaMessageSelectedText: outTxt,
-                chat_inReplyMessageText: txt, chat_outReplyMessageText: outTxt, chat_stickerReplyNameText: acc, chat_stickerReplyLine: acc,
-                chat_stickerReplyMessageText: tm, chat_stickerViaBotNameText: acc
-            };
-            Object.entries(extra).forEach(([k, v]) => lines.push(`${k}=${v}`));
 
             if (!hasEmbeddedWallpaper) {
                 lines.push(`chat_wallpaper=${bg}`);
@@ -2365,9 +2520,148 @@
             return lines.join('\n') + '\n';
         }
 
+        // Расширенный список базовых ключей (включает все ключи Профиля, Описания и Настроек, чтобы ничего не сливалось даже в Базовом режиме)
+        const AT_BASIC_KEYS = new Set(
+            'windowBackgroundWhite windowBackgroundGray graySection key_graySectionText graySectionText divider windowBackgroundWhiteBlackText windowBackgroundWhiteValueText windowBackgroundWhiteLinkText windowBackgroundWhiteGrayText windowBackgroundWhiteGrayText2 windowBackgroundWhiteGrayText3 windowBackgroundWhiteGrayText4 windowBackgroundWhiteHintText windowBackgroundWhiteGrayIcon windowBackgroundWhiteBlueHeader windowBackgroundWhiteBlueText windowBackgroundWhiteBlueButton windowBackgroundWhiteBlueIcon actionBarDefault actionBarDefaultIcon actionBarDefaultTitle actionBarDefaultSubtitle actionBarTabActiveText actionBarTabUnactiveText actionBarTabLine drawerBackground profile_title profile_status profile_actionBackground profile_actionIcon profile_tabText profile_tabSelectedText profile_tabSelectedLine chats_background chats_name chats_secretName chats_secretIcon chats_message chats_date chats_sentCheck chats_sentReadCheck chats_unreadCounter chats_unreadCounterText chats_actionBackground chats_actionIcon avatar_text avatar_backgroundSaved avatar_backgroundRed avatar_backgroundOrange avatar_backgroundViolet avatar_backgroundGreen avatar_backgroundCyan avatar_backgroundBlue avatar_backgroundPink avatar_backgroundInProfileBlue avatar_subtitleInProfileBlue avatar_actionBarIconBlue avatar_nameInMessageRed avatar_nameInMessageOrange avatar_nameInMessageViolet avatar_nameInMessageGreen avatar_nameInMessageCyan avatar_nameInMessageBlue avatar_nameInMessagePink chat_inBubble chat_outBubble chat_messageTextIn chat_messageTextOut chat_messageLinkIn chat_messageLinkOut chat_inTimeText chat_outTimeText chat_outSentCheck chat_outSentCheckSelected chat_outSentCheckRead chat_inVoiceSeekbar chat_inVoiceSeekbarSelected chat_inVoiceSeekbarFill chat_outVoiceSeekbar chat_outVoiceSeekbarSelected chat_outVoiceSeekbarFill chat_inAudioSeekbar chat_inAudioSeekbarSelected chat_inAudioSeekbarFill chat_outAudioSeekbar chat_outAudioSeekbarSelected chat_outAudioSeekbarFill chat_inAudioTitleText chat_outAudioTitleText chat_inAudioPerfomerText chat_outAudioPerfomerText chat_inFileBackground chat_outFileBackground chat_inFileIcon chat_outFileIcon chat_inMediaIcon chat_outMediaIcon dialogBackground dialogTextBlack dialogTextGray2 dialogButton dialogTextBlue chat_messagePanelBackground chat_messagePanelText chat_messagePanelHint chat_messagePanelSend chat_messagePanelIcons chat_replyPanelName chat_replyPanelMessage chat_replyPanelLine chat_inReplyNameText chat_inReplyMessageText chat_inReplyLine chat_outReplyNameText chat_outReplyMessageText chat_outReplyLine chat_topPanelBackground chat_topPanelTitle chat_topPanelMessage chat_topPanelLine switchTrackChecked checkbox checkboxCheck chat_wallpaper'.split(' ')
+        );
+        const AT_INVALID_KEYS = new Set(['chat_inFileBg', 'chat_outFileBg', 'chat_inFileSelectedBg', 'chat_outFileSelectedBg', 'chat_inAudioPerformerText', 'chat_outAudioPerformerText', 'chats_UnreadCounterMuted']);
+
+        function getCompatMode() {
+            return localStorage.getItem('tg_studio_compat') === 'basic' ? 'basic' : 'full';
+        }
+
+        function sanitizeAtTheme(text) {
+            const basic = getCompatMode() === 'basic', map = new Map();
+            String(text).split(/\r?\n/).forEach(raw => {
+                const m = raw.trim().match(/^([A-Za-z0-9_]+)=(-?\d+)$/);
+                if (!m || AT_INVALID_KEYS.has(m[1]) || (basic && !AT_BASIC_KEYS.has(m[1]))) return;
+                map.set(m[1], m[2]);
+            });
+            return [...map].map(([k, v]) => `${k}=${v}`).join('\n') + '\n';
+        }
+
+        function updateCompatUI() {
+            const m = getCompatMode();
+            ['full', 'basic'].forEach(x => {
+                const b = document.getElementById('compat-' + x);
+                if (b) b.className = 'min-h-[32px] rounded-lg text-[11px] font-semibold ' + (m === x ? 'btn-primary' : 'text-muted-dynamic');
+            });
+        }
+
+        async function setCompat(mode) {
+            localStorage.setItem('tg_studio_compat', mode === 'basic' ? 'basic' : 'full');
+            Haptic.selection();
+            const old = lastCompiledPackage;
+            if (old) {
+                const st = old.state || tgState;
+                lastCompiledPackage = { ...(await buildThemeFileAsync(old.format, st)), state: st };
+            }
+            updateCompatUI();
+            showToast(mode === 'basic' ? 'Базовый набор (с защитой профиля)' : 'Полный набор (все экраны)');
+        }
+
+        // Дополнительный слой глубоких ключей Android (Боковое меню, Настройки, Профиль, Эмодзи, Звонки, Поиск)
+        function buildContrastLines(st) {
+            const C = resolveThemeDependencies(st);
+            const I = hexToSignedInt, A = hexWithAlphaToSignedInt;
+            const redOnBg = ensureReadableColor(C.chatBg, '#f43f5e', 4.5);
+            const redOnHdr = ensureReadableColor(C.headerBg, '#f43f5e', 4.5);
+            const trackOff = mixHex(C.chatBg, C.primaryTextOnBg, 0.28);
+            const dlgHFg = getReadableFg(C.dialogBtnOnHdr);
+
+            const k = {};
+            const S = (keys, hex) => keys.split(' ').forEach(n => { k[n] = I(hex); });
+            const SA = (keys, hex, a) => keys.split(' ').forEach(n => { k[n] = A(hex, a); });
+
+            S('windowBackgroundWhite chats_background', C.chatBg);
+            S('windowBackgroundGray graySection', C.graySectionBg);
+            S('windowBackgroundWhiteBlackText chats_name chats_nameArchived', C.primaryTextOnBg);
+            S('windowBackgroundWhiteGrayText windowBackgroundWhiteGrayText2 windowBackgroundWhiteGrayText4 windowBackgroundWhiteGrayText5 windowBackgroundWhiteGrayText6 windowBackgroundWhiteGrayIcon key_graySectionText graySectionText chats_message chats_date chats_sentClock chats_message_threeLines', C.secondaryTextOnBg);
+            S('windowBackgroundWhiteGrayText3 windowBackgroundWhiteGrayText7 windowBackgroundWhiteGrayText8 windowBackgroundWhiteHintText emptyListPlaceholder chats_muteIcon chats_pinnedIcon', C.hintTextOnBg);
+            S('windowBackgroundWhiteValueText windowBackgroundWhiteGreenText windowBackgroundWhiteGreenText2 calls_callReceivedGreenIcon chats_onlineCircle chats_attachMessage chats_actionMessage chats_nameMessage chats_nameMessage_threeLines', C.accentOnBg);
+            S('windowBackgroundWhiteBlueHeader windowBackgroundWhiteBlueText windowBackgroundWhiteBlueText2 windowBackgroundWhiteBlueText3 windowBackgroundWhiteBlueText4 windowBackgroundWhiteBlueText5 windowBackgroundWhiteBlueText6 windowBackgroundWhiteBlueText7 windowBackgroundWhiteBlueButton windowBackgroundWhiteBlueIcon windowBackgroundWhiteLinkText windowBackgroundWhiteInputFieldActivated progressCircle fastScrollActive picker_enabledButton', C.dialogBtnOnBg);
+            SA('windowBackgroundWhiteLinkSelection', C.dialogBtnOnBg, '33');
+            S('windowBackgroundWhiteRedText windowBackgroundWhiteRedText2 windowBackgroundWhiteRedText3 windowBackgroundWhiteRedText4 windowBackgroundWhiteRedText5 windowBackgroundWhiteRedText6 calls_callReceivedRedIcon featuredStickers_delButton', redOnBg);
+            S('divider windowBackgroundWhiteGrayLine windowBackgroundWhiteInputField fastScrollInactive checkboxDisabled picker_disabledButton', C.dividerColor);
+            SA('listSelector', C.primaryTextOnBg, '18');
+            S('chats_secretName chats_secretIcon chat_lockIcon chats_sentCheck chats_sentReadCheck', C.listChecks);
+            S('chats_unreadCounter chats_actionBackground chats_archiveBackground', C.actionBtnBg);
+            S('chats_unreadCounterText chats_actionIcon chats_archiveIcon chats_archiveText', C.actionBtnFg);
+            S('chats_unreadCounterMuted', mixHex(C.actionBtnBg, C.chatBg, 0.45));
+            S('chats_archivePinBackground', C.hintTextOnBg);
+            S('switchTrack switchTrackBlue', trackOff);
+            S('switchTrackChecked switchTrackBlueChecked', C.dialogBtnOnBg);
+            S('checkbox featuredStickers_addButton picker_badge chats_verifiedBackground profile_verifiedBackground', C.actionBtnBg);
+            S('checkboxCheck featuredStickers_buttonText picker_badgeText chats_verifiedCheck profile_verifiedCheck', C.actionBtnFg);
+
+            // Шапка, боковое меню и Профиль пользователя
+            S('actionBarDefault drawerBackground chats_menuBackground chats_menuTopBackground actionBarDefaultSubmenuBackground actionBarActionModeDefault actionBarActionModeDefaultTop', C.headerBg);
+            S('actionBarDefaultIcon actionBarDefaultTitle actionBarDefaultSearch actionBarDefaultSubmenuItem actionBarActionModeDefaultIcon chats_menuItemText chats_menuName chats_menuCloud', C.primaryTextOnHdr);
+            S('actionBarDefaultSubtitle actionBarTabActiveText actionBarTabLine', C.accentOnHdr);
+            S('actionBarDefaultSearchPlaceholder actionBarDefaultSubmenuItemIcon actionBarTabUnactiveText chats_menuItemIcon chats_menuPhone chats_menuPhoneCats', C.secondaryTextOnHdr);
+            S('actionBarDefaultSubmenuSeparator', C.headerDivider);
+            SA('actionBarDefaultSelector actionBarActionModeDefaultSelector', C.primaryTextOnHdr, '22');
+            SA('actionBarTabSelector', C.accentOnHdr, '33');
+
+            S('profile_title', C.primaryTextOnHdr);
+            S('profile_status', C.secondaryTextOnHdr);
+            S('profile_actionBackground', C.actionBtnBg);
+            S('profile_actionIcon', C.actionBtnFg);
+            S('profile_actionPressedBackground', C.avatarBg);
+            S('profile_tabText', C.secondaryTextOnBg);
+            S('profile_tabSelectedText profile_tabSelectedLine', C.dialogBtnOnBg);
+            SA('profile_tabSelector', C.dialogBtnOnBg, '22');
+
+            ['Blue', 'Red', 'Orange', 'Violet', 'Green', 'Cyan', 'Pink'].forEach(c => {
+                S(`avatar_backgroundActionBar${c} avatar_backgroundInProfile${c}`, C.headerBg);
+                S(`avatar_actionBarIcon${c}`, C.primaryTextOnHdr);
+                S(`avatar_subtitleInProfile${c}`, C.secondaryTextOnHdr);
+                SA(`avatar_actionBarSelector${c}`, C.primaryTextOnHdr, '22');
+            });
+
+            // Диалоговые окна и попапы
+            S('dialogBackground dialogBackgroundGray', C.headerBg);
+            S('dialogTextBlack', C.primaryTextOnHdr);
+            S('dialogTextGray dialogTextGray2 dialogIcon dialogRadioBackground dialogCheckboxSquareUnchecked', C.secondaryTextOnHdr);
+            S('dialogTextGray3 dialogTextGray4 dialogTextHint', C.hintTextOnHdr);
+            S('dialogTextBlue dialogTextBlue2 dialogTextBlue3 dialogTextBlue4 dialogTextLink dialogButton dialogInputFieldActivated dialogCheckboxSquareBackground dialogRadioBackgroundChecked dialogProgressCircle dialogScrollGlow dialogBadgeBackground dialogRoundCheckBox', C.dialogBtnOnHdr);
+            S('dialogCheckboxSquareCheck dialogBadgeText dialogRoundCheckBoxCheck', dlgHFg);
+            S('dialogFloatingButton', C.actionBtnBg);
+            S('dialogFloatingIcon', C.actionBtnFg);
+            S('dialogGrayLine dialogInputField dialogCheckboxSquareDisabled', C.headerDivider);
+            S('dialogTextRed', redOnHdr);
+            SA('dialogButtonSelector dialogLinkSelection', C.dialogBtnOnHdr, '26');
+
+            // Панель ввода, эмодзи, закреп, ответ
+            S('chat_messagePanelBackground chat_emojiPanelBackground chat_topPanelBackground player_background inappPlayerBackground', C.headerBg);
+            S('chat_messagePanelText chat_topPanelMessage chat_replyPanelMessage chat_emojiPanelTrendingTitle player_actionBarTitle inappPlayerTitle player_button', C.primaryTextOnHdr);
+            S('chat_messagePanelHint', C.hintTextOnHdr);
+            S('chat_messagePanelIcons chat_emojiPanelIcon chat_emojiPanelBackspace chat_emojiPanelEmptyText chat_emojiPanelStickerSetName chat_emojiPanelTrendingDescription chat_emojiBottomPanelIcon chat_emojiSearchIcon chat_replyPanelIcons chat_replyPanelClose chat_topPanelClose player_actionBarSubtitle inappPlayerPerformer inappPlayerClose', C.secondaryTextOnHdr);
+            S('chat_messagePanelSend chat_messagePanelCursor chat_emojiPanelIconSelected chat_replyPanelName chat_replyPanelLine chat_topPanelTitle chat_topPanelLine chat_fieldOverlayText chat_attachActiveTab chat_serviceLink player_buttonActive inappPlayerPlayPause', C.accentOnHdr);
+            S('chat_attachUnactiveTab', C.secondaryTextOnHdr);
+            S('chat_emojiSearchBackground', mixHex(C.headerBg, C.primaryTextOnHdr, 0.1));
+            S('chat_emojiPanelShadowLine', C.headerDivider);
+            SA('chat_serviceBackground', C.headerBg, 'D9');
+            S('chat_serviceBackgroundSelected', C.headerBg);
+            S('chat_serviceText chat_serviceIcon', C.primaryTextOnHdr);
+
+            // Внутри пузырей сообщений (входящие и исходящие отдельно)
+            S('chat_messageTextIn chat_inFileNameText chat_inAudioTitleText chat_inReplyMessageText', C.inText);
+            S('chat_messageTextOut chat_outFileNameText chat_outAudioTitleText chat_outReplyMessageText', C.outText);
+            S('chat_inTimeText chat_inTimeSelectedText chat_inFileInfoText chat_inFileInfoSelectedText chat_inAudioPerfomerText chat_inAudioPerfomerSelectedText chat_inAudioDurationText chat_inAudioDurationSelectedText chat_inContactPhoneText chat_inVenueInfoText chat_inMenu chat_stickerReplyMessageText', C.inTime);
+            S('chat_outTimeText chat_outTimeSelectedText chat_outFileInfoText chat_outFileInfoSelectedText chat_outAudioPerfomerText chat_outAudioPerfomerSelectedText chat_outAudioDurationText chat_outAudioDurationSelectedText chat_outContactPhoneText chat_outVenueInfoText chat_outMenu', C.outTime);
+            S('chat_messageLinkIn chat_inReplyNameText chat_inViaBotNameText chat_inForwardedNameText chat_inSiteNameText chat_inContactNameText chat_inInstant chat_inReplyLine chat_inPreviewLine chat_inReplyMediaMessageText chat_inReplyMediaMessageSelectedText chat_stickerReplyNameText chat_stickerReplyLine chat_stickerViaBotNameText', C.inAccent);
+            S('chat_messageLinkOut chat_outReplyNameText chat_outViaBotNameText chat_outForwardedNameText chat_outSiteNameText chat_outContactNameText chat_outInstant chat_outReplyLine chat_outPreviewLine chat_outReplyMediaMessageText chat_outReplyMediaMessageSelectedText', C.outAccent);
+            S('chat_outSentCheck chat_outSentCheckSelected chat_outSentCheckRead chat_outSentCheckReadSelected chat_outSentClock chat_outSentClockSelected', C.outChecks);
+            SA('chat_inTextSelectionHighlight', C.inAccent, '55');
+            SA('chat_outTextSelectionHighlight', C.outText, '55');
+
+            return Object.entries(k).map(([n, v]) => `${n}=${v}`).join('\n') + '\n';
+        }
+
         async function buildAtThemeBinaryBlob(st = tgState) {
             const wpBytes = await bakeWallpaperToJpegBytes(st);
-            const headerText = sanitizeAtTheme(buildAtThemeTextLines(st, !!wpBytes));
+            const headerText = sanitizeAtTheme(buildAtThemeTextLines(st, !!wpBytes) + '\n' + buildContrastLines(st));
             const enc = new TextEncoder();
 
             if (!wpBytes) {
@@ -2384,46 +2678,155 @@
             return { blob: new Blob([combined], { type: 'application/octet-stream' }), rawText: headerText };
         }
 
+        // Полный генератор .tgios-theme с секциями rootController и list (защищает Профиль и Настройки на iPhone от сливания!)
         function buildIosThemeContent(st = tgState) {
-            const ac = st.autoContrast !== false;
-            const inTxt = ac ? ensureReadableColor(st.msgIn, st.text, 4.2) : st.text;
-            const outTxt = ac ? ensureReadableColor(st.msgOut, st.text, 4.2) : st.text;
-            const medHex = st.mediaColor || st.accent;
+            const C = resolveThemeDependencies(st);
             return [
                 `name: ${st.name}`,
                 `basedOn: dark`,
                 `dark: true`,
                 `intro:`,
                 `  statusBar: white`,
-                `  primaryText: ${st.text}`,
-                `  accentText: ${st.accent}`,
+                `  primaryText: ${C.primaryTextOnBg}`,
+                `  accentText: ${C.accentOnBg}`,
+                `rootController:`,
+                `  tabBar:`,
+                `    backgroundColor: ${C.headerBg}`,
+                `    separatorColor: ${C.headerDivider}`,
+                `    iconColor: ${C.secondaryTextOnHdr}`,
+                `    selectedIconColor: ${C.accentOnHdr}`,
+                `    textColor: ${C.secondaryTextOnHdr}`,
+                `    selectedTextColor: ${C.accentOnHdr}`,
+                `    badgeBackgroundColor: ${C.actionBtnBg}`,
+                `    badgeTextColor: ${C.actionBtnFg}`,
+                `  navigationBar:`,
+                `    buttonColor: ${C.accentOnHdr}`,
+                `    primaryTextColor: ${C.primaryTextOnHdr}`,
+                `    secondaryTextColor: ${C.secondaryTextOnHdr}`,
+                `    controlColor: ${C.secondaryTextOnHdr}`,
+                `    accentTextColor: ${C.accentOnHdr}`,
+                `    backgroundColor: ${C.headerBg}`,
+                `    separatorColor: ${C.headerDivider}`,
+                `    badgeBackgroundColor: ${C.actionBtnBg}`,
+                `    badgeTextColor: ${C.actionBtnFg}`,
+                `list:`,
+                `  blocksBackgroundColor: ${C.graySectionBg}`,
+                `  plainBackgroundColor: ${C.chatBg}`,
+                `  itemPrimaryTextColor: ${C.primaryTextOnBg}`,
+                `  itemSecondaryTextColor: ${C.secondaryTextOnBg}`,
+                `  itemDisabledTextColor: ${C.hintTextOnBg}`,
+                `  itemAccentColor: ${C.dialogBtnOnBg}`,
+                `  itemHighlightedColor: ${C.accentOnBg}`,
+                `  itemDestructiveColor: #f43f5e`,
+                `  itemPlaceholderTextColor: ${C.hintTextOnBg}`,
+                `  itemBlocksBackgroundColor: ${C.chatBg}`,
+                `  itemHighlightedBackgroundColor: ${C.headerBg}`,
+                `  itemBlocksSeparatorColor: ${C.dividerColor}`,
+                `  itemPlainSeparatorColor: ${C.dividerColor}`,
+                `  disclosureArrowColor: ${C.secondaryTextOnBg}`,
+                `  sectionHeaderTextColor: ${C.secondaryTextOnBg}`,
+                `  freeTextColor: ${C.secondaryTextOnBg}`,
                 `chatList:`,
-                `  backgroundColor: ${st.chatBg}`,
-                `  itemSeparatorColor: ${st.headerBg}`,
-                `  itemBackgroundColor: ${st.chatBg}`,
-                `  titleColor: ${st.text}`,
-                `  secretTitleColor: ${st.checks || st.accent}`,
-                `  messageTextColor: ${st.timeText}`,
-                `  dateTextColor: ${st.timeText}`,
-                `  checkmarkColor: ${st.checks || st.accent}`,
-                `  unreadBadgeFillColor: ${st.accent}`,
-                `  unreadBadgeTextColor: ${getReadableFg(st.accent)}`,
+                `  backgroundColor: ${C.chatBg}`,
+                `  itemSeparatorColor: ${C.dividerColor}`,
+                `  itemBackgroundColor: ${C.chatBg}`,
+                `  pinnedItemBackgroundColor: ${C.headerBg}`,
+                `  titleColor: ${C.primaryTextOnBg}`,
+                `  secretTitleColor: ${C.listChecks}`,
+                `  messageTextColor: ${C.secondaryTextOnBg}`,
+                `  dateTextColor: ${C.secondaryTextOnBg}`,
+                `  checkmarkColor: ${C.listChecks}`,
+                `  unreadBadgeFillColor: ${C.actionBtnBg}`,
+                `  unreadBadgeTextColor: ${C.actionBtnFg}`,
                 `chat:`,
-                `  defaultWallpaper: ${st.chatBg}`,
-                `  incomingBubbleBackgroundColor: ${st.msgIn}`,
-                `  incomingPrimaryTextColor: ${inTxt}`,
-                `  incomingSecondaryTextColor: ${st.timeText}`,
-                `  incomingLinkTextColor: ${st.accent}`,
-                `  incomingAudioWaveformForegroundColor: ${medHex}`,
-                `  outgoingBubbleBackgroundColor: ${st.msgOut}`,
-                `  outgoingPrimaryTextColor: ${outTxt}`,
-                `  outgoingSecondaryTextColor: ${st.timeText}`,
-                `  outgoingCheckColor: ${st.checks}`,
-                `  outgoingAudioWaveformForegroundColor: ${medHex}`,
-                `  inputPanelBackgroundColor: ${st.headerBg}`,
-                `  inputPanelPrimaryTextColor: ${st.text}`,
-                `  inputPanelActionControlFillColor: ${st.accent}`
+                `  defaultWallpaper: ${C.chatBg}`,
+                `  incomingBubbleBackgroundColor: ${C.msgIn}`,
+                `  incomingPrimaryTextColor: ${C.inText}`,
+                `  incomingSecondaryTextColor: ${C.inTime}`,
+                `  incomingLinkTextColor: ${C.inAccent}`,
+                `  incomingAudioWaveformForegroundColor: ${C.inMedia}`,
+                `  outgoingBubbleBackgroundColor: ${C.msgOut}`,
+                `  outgoingPrimaryTextColor: ${C.outText}`,
+                `  outgoingSecondaryTextColor: ${C.outTime}`,
+                `  outgoingCheckColor: ${C.outChecks}`,
+                `  outgoingAudioWaveformForegroundColor: ${C.outMedia}`,
+                `  inputPanelBackgroundColor: ${C.headerBg}`,
+                `  inputPanelPrimaryTextColor: ${C.primaryTextOnHdr}`,
+                `  inputPanelSecondaryTextColor: ${C.secondaryTextOnHdr}`,
+                `  inputPanelActionControlFillColor: ${C.actionBtnBg}`,
+                `  inputPanelActionControlForegroundColor: ${C.actionBtnFg}`
             ].join('\n') + '\n';
+        }
+
+        function buildDesktopPalette(st = tgState) {
+            const C = resolveThemeDependencies(st);
+            const m = {
+                windowBg: C.chatBg,
+                windowFg: C.primaryTextOnBg,
+                windowBgOver: C.graySectionBg,
+                windowFgOver: C.primaryTextOnBg,
+                windowSubTextFg: C.secondaryTextOnBg,
+                windowSubTextFgOver: C.secondaryTextOnBg,
+                windowBoldFg: C.primaryTextOnBg,
+                windowBoldFgOver: C.primaryTextOnBg,
+                windowBgActive: C.actionBtnBg,
+                windowFgActive: C.actionBtnFg,
+                windowActiveTextFg: C.dialogBtnOnBg,
+                activeButtonBg: C.actionBtnBg,
+                activeButtonBgOver: C.actionBtnBg,
+                activeButtonFg: C.actionBtnFg,
+                lightButtonBg: C.headerBg,
+                lightButtonFg: C.dialogBtnOnHdr,
+                titleBg: C.headerBg,
+                titleFg: C.primaryTextOnHdr,
+                titleBgActive: C.headerBg,
+                titleFgActive: C.primaryTextOnHdr,
+                dialogsBg: C.chatBg,
+                dialogsNameFg: C.primaryTextOnBg,
+                dialogsSecretNameFg: C.listChecks,
+                dialogsTextFg: C.secondaryTextOnBg,
+                dialogsDateFg: C.secondaryTextOnBg,
+                dialogsSentIconFg: C.listChecks,
+                dialogsUnreadBg: C.actionBtnBg,
+                dialogsTextFgService: C.accentOnBg,
+                dialogsTextFgServiceActive: C.outText,
+                dialogsUnreadFg: C.actionBtnFg,
+                dialogsBgActive: C.msgOut,
+                dialogsNameFgActive: C.outText,
+                dialogsTextFgActive: C.outText,
+                dialogsDateFgActive: C.outTime,
+                historyComposeAreaBg: C.headerBg,
+                historyComposeAreaFg: C.primaryTextOnHdr,
+                historyTextInFg: C.inText,
+                historyTextOutFg: C.outText,
+                msgInBg: C.msgIn,
+                msgOutBg: C.msgOut,
+                msgInDateFg: C.inTime,
+                msgOutDateFg: C.outTime,
+                historyOutIconFg: C.outChecks,
+                historyLinkInFg: C.inAccent,
+                historyLinkOutFg: C.outAccent,
+                msgWaveformInActive: C.inMedia,
+                msgWaveformInInactive: C.inTime,
+                msgWaveformOutActive: C.outMedia,
+                msgWaveformOutInactive: C.outTime,
+                msgFileInBg: C.inMedia,
+                msgFileOutBg: C.outMedia,
+                mediaPlayerBg: C.headerBg,
+                mediaPlayerActiveFg: C.accentOnHdr,
+                profileVerifiedCheckBg: C.dialogBtnOnHdr,
+                profileVerifiedCheckFg: getReadableFg(C.dialogBtnOnHdr),
+                historyPeer1UserpicBg: C.avatarBg,
+                historyPeer2UserpicBg: C.avatarBg,
+                historyPeer3UserpicBg: C.avatarBg,
+                historyPeer4UserpicBg: C.avatarBg,
+                historyPeer5UserpicBg: C.avatarBg,
+                historyPeer6UserpicBg: C.avatarBg,
+                historyPeer7UserpicBg: C.avatarBg,
+                historyPeer8UserpicBg: C.avatarBg,
+                historyPeerUserpicFg: C.avatarFg
+            };
+            return Object.entries(m).map(([k, v]) => `${k}: ${v};`).join('\n') + '\n';
         }
 
         function buildLangXmlContent(st = tgState) {
@@ -2576,51 +2979,6 @@
             return new Blob([...localParts, ...centralParts, new Uint8Array(eo.buffer)], { type: 'application/zip' });
         }
 
-        function buildDesktopPalette(st = tgState) {
-            const chk = st.checks || st.accent, tm = st.timeText || st.accent, av = st.avatarBg || st.accent, med = st.mediaColor || st.accent, dlg = st.dialogColor || st.accent;
-            const m = {
-                windowBg: st.chatBg, windowFg: st.text, windowSubTextFg: tm, windowActiveTextFg: dlg, activeButtonBg: dlg, activeButtonFg: getReadableFg(dlg),
-                titleBg: st.headerBg, titleFg: st.text, titleBgActive: st.headerBg, titleFgActive: st.text,
-                dialogsBg: st.chatBg, dialogsNameFg: st.text, dialogsSecretNameFg: chk, dialogsTextFg: tm, dialogsDateFg: tm, dialogsSentIconFg: chk, dialogsUnreadBg: st.accent, dialogsTextFgService: st.accent, dialogsTextFgServiceActive: st.text, dialogsUnreadFg: getReadableFg(st.accent),
-                dialogsBgActive: st.msgOut, dialogsNameFgActive: st.text, dialogsTextFgActive: st.text, dialogsDateFgActive: st.text,
-                historyComposeAreaBg: st.headerBg, historyComposeAreaFg: st.text,
-                historyTextInFg: st.text, historyTextOutFg: st.text, msgInBg: st.msgIn, msgOutBg: st.msgOut,
-                msgInDateFg: tm, msgOutDateFg: tm, historyOutIconFg: chk, historyLinkInFg: st.accent, historyLinkOutFg: st.accent,
-                msgWaveformInActive: med, msgWaveformInInactive: tm, msgWaveformOutActive: med, msgWaveformOutInactive: tm,
-                msgFileInBg: med, msgFileOutBg: med, mediaPlayerBg: st.headerBg, mediaPlayerActiveFg: med,
-                historyPeer1UserpicBg: av, historyPeer2UserpicBg: av, historyPeer3UserpicBg: av, historyPeer4UserpicBg: av,
-                historyPeer5UserpicBg: av, historyPeer6UserpicBg: av, historyPeer7UserpicBg: av, historyPeer8UserpicBg: av,
-                historyPeerUserpicFg: getReadableFg(av)
-            };
-            return Object.entries(m).map(([k, v]) => `${k}: ${v};`).join('\n') + '\n';
-        }
-
-        // Только строки «ключ=число», без пробелов и дублей, без несуществующих ключей; «Базовая» = минимальный набор, который точно открывается во всех клиентах
-        const AT_BASIC_KEYS = new Set('windowBackgroundWhite windowBackgroundGray actionBarDefault actionBarDefaultIcon actionBarDefaultTitle actionBarDefaultSubtitle drawerBackground chats_background chats_name chats_message chats_date chats_unreadCounter chats_unreadCounterText chats_actionBackground chats_actionIcon avatar_text avatar_backgroundSaved avatar_backgroundRed avatar_backgroundOrange avatar_backgroundViolet avatar_backgroundGreen avatar_backgroundCyan avatar_backgroundBlue avatar_backgroundPink avatar_nameInMessageRed avatar_nameInMessageOrange avatar_nameInMessageViolet avatar_nameInMessageGreen avatar_nameInMessageCyan avatar_nameInMessageBlue avatar_nameInMessagePink chat_inBubble chat_outBubble chat_messageTextIn chat_messageTextOut chat_messageLinkIn chat_messageLinkOut chat_inTimeText chat_outTimeText chat_outSentCheck chat_outSentCheckSelected chat_messagePanelBackground chat_messagePanelText chat_messagePanelHint chat_messagePanelSend chat_messagePanelIcons chat_replyPanelName chat_replyPanelMessage chat_replyPanelLine chat_topPanelBackground chat_topPanelTitle chat_topPanelMessage switchTrackChecked chat_wallpaper'.split(' '));
-        const AT_INVALID_KEYS = new Set(['chat_inFileBg', 'chat_outFileBg', 'chat_inFileSelectedBg', 'chat_outFileSelectedBg', 'chat_inAudioPerformerText', 'chat_outAudioPerformerText', 'chats_UnreadCounterMuted']);
-        function getCompatMode() { return localStorage.getItem('tg_studio_compat') === 'basic' ? 'basic' : 'full'; }
-        function sanitizeAtTheme(text) {
-            const basic = getCompatMode() === 'basic', map = new Map();
-            String(text).split(/\r?\n/).forEach(raw => {
-                const m = raw.trim().match(/^([A-Za-z0-9_]+)=(-?\d+)$/);
-                if (!m || AT_INVALID_KEYS.has(m[1]) || (basic && !AT_BASIC_KEYS.has(m[1]))) return;
-                map.set(m[1], m[2]);
-            });
-            return [...map].map(([k, v]) => `${k}=${v}`).join('\n') + '\n';
-        }
-        function updateCompatUI() {
-            const m = getCompatMode();
-            ['full', 'basic'].forEach(x => { const b = document.getElementById('compat-' + x); if (b) b.className = 'min-h-[32px] rounded-lg text-[11px] font-semibold ' + (m === x ? 'btn-primary' : 'text-muted-dynamic'); });
-        }
-        async function setCompat(mode) {
-            localStorage.setItem('tg_studio_compat', mode === 'basic' ? 'basic' : 'full');
-            Haptic.selection();
-            const old = lastCompiledPackage;
-            if (old) { const st = old.state || tgState; lastCompiledPackage = { ...(await buildThemeFileAsync(old.format, st)), state: st }; }
-            updateCompatUI();
-            showToast(mode === 'basic' ? 'Базовый набор цветов' : 'Полный набор цветов');
-        }
-
         async function buildThemeFileAsync(format, st = tgState) {
             const safe = (st.name || 'theme').toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '') || 'theme';
             if (format === 'tgios') {
@@ -2675,17 +3033,17 @@
                 if (map.chat_outBubble) parsed.msgOut = map.chat_outBubble;
                 if (map.chat_inBubble) parsed.msgIn = map.chat_inBubble;
                 if (map.chat_messagePanelSend) parsed.accent = map.chat_messagePanelSend;
-                const mc = map.chat_outAudioProgress || map.chat_outVoiceSeekbarFill || map.chat_outVoiceSeekbarSelected || map.chat_outFileBackground || map.chat_outFileBg; if (mc) parsed.mediaColor = mc;
+                const mc = map.chat_outVoiceSeekbarFill || map.chat_outVoiceSeekbarSelected || map.chat_outFileBackground;
+                if (mc) parsed.mediaColor = mc;
                 if (map.dialogButton || map.dialogTextBlue) parsed.dialogColor = map.dialogButton || map.dialogTextBlue;
                 if (map.avatar_backgroundSaved || map.avatar_backgroundBlue) parsed.avatarBg = map.avatar_backgroundSaved || map.avatar_backgroundBlue;
-                if (map.chat_messageTextOut) parsed.text = map.chat_messageTextOut;
+                if (map.windowBackgroundWhiteBlackText || map.chat_messageTextOut) parsed.text = map.windowBackgroundWhiteBlackText || map.chat_messageTextOut;
                 if (map.chat_outTimeText) parsed.timeText = map.chat_outTimeText;
                 if (map.chat_outSentCheck) parsed.checks = map.chat_outSentCheck;
             }
             return parsed;
         }
 
-        // Компилирует Тему ИЛИ Язык, сохраняет в Сейф и открывает единое окно предпросмотра и установки
         async function compileImportAndOpenPreview(mode = 'theme', customState = null) {
             const st = (customState && typeof customState === 'object') ? customState : tgState;
             const isLang = mode === 'lang';
@@ -2703,52 +3061,44 @@
 
         function openImportedThemeModal(pkg) {
             const st = pkg.state || tgState;
+            const C = resolveThemeDependencies(st);
             const isLang = pkg.kind === 'lang' || pkg.format === 'lang';
             document.getElementById('imp-modal-title').textContent = isLang ? st.langName : st.name;
             document.getElementById('imp-btn-primary-label').textContent = isLang ? 'Установить язык' : 'Применить в Telegram';
 
             const r = `${st.bubbleRadius || 16}px`, fs = `${st.fontSize || 13}px`;
-            const avBg = st.avatarBg || st.accent, med = st.mediaColor || st.accent, dlg = st.dialogColor || st.accent;
-            const chk = st.checks || st.accent, tm = st.timeText || st.accent;
-            const inTxt = ensureReadableColor(st.msgIn, st.text, 4.0), outTxt = ensureReadableColor(st.msgOut, st.text, 4.0);
-            const inMed = ensureReadableColor(st.msgIn, med, 3.0), outMed = ensureReadableColor(st.msgOut, med, 3.0);
             const wave = (c) => VOICE_WAVE_HEIGHTS.map((h, i) => `<i style="display:block;width:2px;height:${Math.max(20, h)}%;border-radius:2px;background:${c};opacity:${i < 11 ? 1 : .4}"></i>`).join('');
-            const play = (bg) => `<span style="width:30px;height:30px;border-radius:50%;background:${bg};color:${getReadableFg(bg)};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20"/></svg></span>`;
+            const play = (bg, fg) => `<span style="width:30px;height:30px;border-radius:50%;background:${bg};color:${fg};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20"/></svg></span>`;
             const wp = st.wallpaperDataUrl ? `background-image:url("${st.wallpaperDataUrl}");background-size:${st.wpScale || 100}%;background-position:${st.wpPosX ?? 50}% ${st.wpPosY ?? 50}%;` : '';
-            const avatar = st.avatarDataUrl ? `background-image:url('${st.avatarDataUrl}');background-size:cover` : `background:linear-gradient(135deg,${st.msgOut},${avBg})`;
-            const lock = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="display:inline-block;margin-right:3px"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
+            const avatar = st.avatarDataUrl ? `background-image:url('${st.avatarDataUrl}');background-size:cover` : `background:${C.avatarBg};color:${C.avatarFg}`;
 
             document.getElementById('imp-modal-Stage').innerHTML = `
-                <div style="background:${st.chatBg};color:${st.text};font-size:${fs}" class="select-none">
-                    <div style="background:${st.headerBg}" class="px-3.5 py-2.5 flex items-center gap-2.5">
-                        <div style="${avatar};width:32px;height:32px;border-radius:50%;flex-shrink:0"></div>
-                        <div class="min-w-0 flex-1">
-                            <div class="text-xs font-bold leading-tight truncate">${escapeHtml(isLang ? (st.saved || st.name) : st.name)}</div>
-                            <div class="text-[10px]" style="color:${st.accent}">${escapeHtml(st.online || 'в сети')}</div>
+                <div style="background:${C.chatBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none">
+                    <!-- Мини-профиль сверху (показывает контраст Ника и Описания) -->
+                    <div style="background:${C.headerBg};border-bottom:1px solid ${C.headerDivider}" class="px-3.5 py-2.5 flex items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div style="${avatar};width:34px;height:34px;border-radius:50%;flex-shrink:0" class="flex items-center justify-center font-bold text-xs">${st.avatarDataUrl ? '' : escapeHtml((st.name || 'D')[0])}</div>
+                            <div class="min-w-0">
+                                <div class="text-xs font-bold leading-tight truncate" style="color:${C.primaryTextOnHdr}">${escapeHtml(isLang ? (st.saved || st.name) : st.name)}</div>
+                                <div class="text-[10px] truncate" style="color:${C.secondaryTextOnHdr}">Ник и описание защищены от сливания • <span style="color:${C.accentOnHdr}">${escapeHtml(st.online || 'в сети')}</span></div>
+                            </div>
                         </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" style="background:${C.actionBtnBg};color:${C.actionBtnFg}">ОК</span>
                     </div>
-                    <div style="background:${st.headerBg};border-top:1px solid rgba(255,255,255,.06)" class="px-3.5 py-2 flex items-center gap-2.5">
-                        <div style="background:${avBg};color:${getReadableFg(avBg)};width:28px;height:28px;border-radius:50%;flex-shrink:0" class="flex items-center justify-center text-[11px] font-bold">${escapeHtml((st.name || 'T')[0])}</div>
-                        <div class="min-w-0 flex-1"><div class="text-[11px] font-bold truncate" style="color:${chk}">${lock}${escapeHtml(st.saved || 'Секретный чат')}</div><div class="text-[10px] truncate" style="color:${tm}">${escapeHtml(st.typing || 'печатает...')}</div></div>
-                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="background:${st.accent};color:${getReadableFg(st.accent)}">2</span>
-                    </div>
+                    <!-- Секция чата -->
                     <div class="p-3.5 space-y-2" style="${wp}">
-                        <div class="text-center"><span class="px-2 py-0.5 rounded-full text-[10px]" style="background:${st.headerBg}cc;color:${st.text}">${escapeHtml(st.today || 'Сегодня')}</span></div>
-                        <div class="max-w-[82%] px-3 py-2" style="background:${st.msgIn};color:${inTxt};border-radius:${r} ${r} ${r} 4px">
-                            <div class="flex items-center gap-2">${play(inMed)}<div class="min-w-0"><div class="text-[11px] font-bold truncate">Nightcall</div><div class="text-[10px] opacity-80" style="color:${tm}">Darxy Studio • 03:42</div></div></div>
+                        <div class="text-center"><span class="px-2 py-0.5 rounded-full text-[10px]" style="background:${C.headerBg}e6;color:${C.primaryTextOnHdr};border:1px solid ${C.headerDivider}">${escapeHtml(st.today || 'Сегодня')}</span></div>
+                        <div class="max-w-[82%] px-3 py-2" style="background:${C.msgIn};color:${C.inText};border-radius:${r} ${r} ${r} 4px;border:1px solid ${C.dividerColor}">
+                            <div class="flex items-center gap-2">${play(C.inMedia, C.inMediaFg)}<div class="min-w-0"><div class="text-[11px] font-bold truncate" style="color:${C.inText}">Nightcall</div><div class="text-[10px]" style="color:${C.inTime}">Darxy Studio • 03:42</div></div></div>
                         </div>
-                        <div class="max-w-[82%] ml-auto px-3 py-2" style="background:${st.msgOut};color:${outTxt};border-radius:${r} ${r} 4px ${r}">
-                            <div class="flex items-center gap-2">${play(outMed)}<div class="flex items-center gap-[2px] h-4 flex-1">${wave(outMed)}</div></div>
-                            <div class="text-[9px] text-right mt-1" style="color:${tm}">0:18 • 14:21 <span style="color:${chk}">✓✓</span></div>
+                        <div class="max-w-[82%] ml-auto px-3 py-2" style="background:${C.msgOut};color:${C.outText};border-radius:${r} ${r} 4px ${r}">
+                            <div class="flex items-center gap-2">${play(C.outMedia, C.outMediaFg)}<div class="flex items-center gap-[2px] h-4 flex-1">${wave(C.outMedia)}</div></div>
+                            <div class="text-[9px] text-right mt-1" style="color:${C.outTime}">0:18 • 14:21 <span style="color:${C.outChecks}">✓✓</span></div>
                         </div>
-                        <div class="rounded-xl px-3 py-2.5 mx-auto max-w-[78%]" style="background:${st.headerBg};color:${st.text}">
-                            <div class="text-[11px] mb-2 text-center">${escapeHtml(isLang ? `${st.placeholder} • ${st.pinned}` : st.name)}</div>
-                            <div class="flex justify-end gap-4 text-[11px] font-bold"><span style="color:${dlg}">${escapeHtml(st.cancel || 'Отмена')}</span><span style="color:${dlg}">${escapeHtml(st.ok || 'Принять')}</span></div>
+                        <div class="rounded-xl px-3 py-2 mx-auto max-w-[82%]" style="background:${C.headerBg};color:${C.primaryTextOnHdr};border:1px solid ${C.headerDivider}">
+                            <div class="text-[11px] mb-1.5 text-center">${escapeHtml(isLang ? `${st.placeholder} • ${st.pinned}` : st.name)}</div>
+                            <div class="flex justify-end gap-4 text-[11px] font-bold"><span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.cancel || 'Отмена')}</span><span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.ok || 'Принять')}</span></div>
                         </div>
-                    </div>
-                    <div style="background:${st.headerBg}" class="px-3.5 py-2.5 flex items-center gap-2.5">
-                        <span class="flex-1 text-[11px]" style="color:${tm}">${escapeHtml(st.placeholder || 'Сообщение...')}</span>
-                        <span style="width:28px;height:28px;border-radius:50%;background:${st.accent};color:${getReadableFg(st.accent)}" class="flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></span>
                     </div>
                 </div>`;
 
@@ -2780,7 +3130,6 @@
             return true;
         }
 
-        // Установка: облачная тема (если задан slug) → файл в чат бота из админки + tg.downloadFile → «Поделиться» / сохранение
         async function installDirect(customState = null) {
             const st = (customState && typeof customState === 'object') ? customState : tgState;
             Haptic.success();
@@ -3162,16 +3511,17 @@
             const item = getVaultList().find(x => x.id === itemId);
             if (!item) return;
             const st = item.state;
+            const C = resolveThemeDependencies(st);
             const stJson = JSON.stringify(st).replace(/"/g, '&quot;');
             openBottomSheet(item.title, `
                 <div class="space-y-3.5 text-xs">
-                    <div class="rounded-[var(--r-inner)] overflow-hidden border border-white/10 p-3.5 space-y-2" style="background:${st.chatBg}; color:${st.text}">
-                        <div class="text-[11px] font-bold pb-1.5 border-b border-white/10 flex justify-between" style="color:${st.accent}">
+                    <div class="rounded-[var(--r-inner)] overflow-hidden border border-white/10 p-3.5 space-y-2" style="background:${C.chatBg}; color:${C.primaryTextOnBg}">
+                        <div class="text-[11px] font-bold pb-1.5 flex justify-between" style="color:${C.accentOnBg}; border-bottom:1px solid ${C.dividerColor}">
                             <span>${escapeHtml(st.saved)} (${escapeHtml(st.online)})</span>
                             <span>${escapeHtml(st.typing)}</span>
                         </div>
-                        <div class="p-2.5 text-[11px] max-w-[82%]" style="background:${st.msgIn}; color:${ensureReadableColor(st.msgIn, st.text, 4.0)}; border-radius:${st.bubbleRadius}px">Предпросмотр сохранённой сборки из вашего Сейфа.</div>
-                        <div class="p-2.5 text-[11px] max-w-[82%] ml-auto" style="background:${st.msgOut}; color:${ensureReadableColor(st.msgOut, st.text, 4.0)}; border-radius:${st.bubbleRadius}px">Тема готова к установке.</div>
+                        <div class="p-2.5 text-[11px] max-w-[82%]" style="background:${C.msgIn}; color:${C.inText}; border-radius:${st.bubbleRadius}px">Предпросмотр сохранённой сборки из вашего Сейфа.</div>
+                        <div class="p-2.5 text-[11px] max-w-[82%] ml-auto" style="background:${C.msgOut}; color:${C.outText}; border-radius:${st.bubbleRadius}px">Все параметры профиля и чатов защищены от сливания.</div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
@@ -3264,7 +3614,7 @@
             root.classList.toggle('dark', !isLightBg);
 
             const btnFg = getReadableFg(primHex);
-            const activeChipFg = ensureReadableColor(bgHex, primHex, 3.2);
+            const activeChipFg = ensureReadableColor(bgHex, primHex, 3.8);
 
             root.style.setProperty('--bg-main', bgHex);
             root.style.setProperty('--accent-primary', primHex);
@@ -3351,7 +3701,7 @@
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             ${allPresets.map(pr => `
                                 <button type="button" onclick="applyPresetObject('${encodeURIComponent(JSON.stringify(pr))}')" class="p-2.5 rounded-xl border border-white/10 text-left transition" style="background:${pr.bg};">
-                                    <div class="text-[11px] font-bold text-white truncate mb-1.5">${escapeHtml(pr.name)}</div>
+                                    <div class="text-[11px] font-bold truncate mb-1.5" style="color:${ensureReadableColor(pr.bg, '#ffffff', 4.5)}">${escapeHtml(pr.name)}</div>
                                     <div class="flex items-center gap-1.5">
                                         <span class="w-3 h-3 rounded-full" style="background:${pr.primary}"></span>
                                         <span class="w-3 h-3 rounded-full" style="background:${pr.secondary}"></span>
@@ -3437,7 +3787,7 @@
             openPersonalizeSheet();
         }
 
-        /* ==================== 8. АДМИН-ПАНЕЛЬ (СИНХРОНИЗАЦИЯ С СЕРВЕРОМ /api/admin) ==================== */
+        /* ==================== 8. АДМИН-ПАНЕЛЬ ==================== */
         function loadAdminConfig() {
             try {
                 const saved = JSON.parse(localStorage.getItem(ADMIN_CONFIG_KEY) || 'null');
@@ -3547,7 +3897,7 @@
             const cfg = loadAdminConfig();
             cfg.gateEnabled = enabled;
             saveAdminConfig(cfg);
-            openAdminPanelSheet('gate');
+            openAdminPanelSheet();
         }
 
         function addAdminChannel() {
@@ -3558,7 +3908,7 @@
             cfg.channels = [{ id: Date.now(), title, url }];
             saveAdminConfig(cfg);
             Haptic.success();
-            openAdminPanelSheet('gate');
+            openAdminPanelSheet();
             showToast('Канал сохранён');
         }
 
@@ -3664,9 +4014,9 @@
         }
 
         const ONBOARD_SLIDES = [
-            { title: 'Палитра и пресеты', text: 'Настрой цвета, скругления и обои — результат сразу в превью.' },
-            { title: 'Установка в один тап', text: 'Нажми «Установить» — файл откроется в Telegram, останется применить.' },
-            { title: 'Сейф', text: 'Все темы и языки сохраняются автоматически.' }
+            { title: 'Палитра и Защита от сливания', text: 'Матрица зависимостей автоматически проверяет контраст ника, описания в профиле, кнопок и галочек.' },
+            { title: 'Превью Диалога, Чатов и Профиля', text: 'Переключай вкладку «Профиль» прямо над превью, чтобы видеть, как выглядят карточки «О себе» и вкладки медиа.' },
+            { title: 'Установка и Сейф', text: 'Все созданные темы и языки сохраняются автоматически и готовы к установке в Telegram.' }
         ];
         let obIndex = 0, obTouchX = null;
 
