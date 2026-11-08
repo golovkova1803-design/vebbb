@@ -761,7 +761,7 @@
                             <span>Установить тему</span>
                         </button>
                         <div class="grid grid-cols-3 gap-1.5">
-                            <button type="button" onclick="sendPackageViaBotDeepLink('theme')" class="btn-surface min-h-[38px] text-[11px] font-semibold flex items-center justify-center gap-1">
+                            <button type="button" onclick="installTheme()" class="btn-surface min-h-[38px] text-[11px] font-semibold flex items-center justify-center gap-1">
                                 <span class="accent-text">В Telegram</span>
                             </button>
                             <button type="button" onclick="downloadThemeForPlatform()" class="btn-surface min-h-[38px] text-[11px] font-medium flex items-center justify-center">
@@ -947,7 +947,7 @@
 
                             <div class="grid grid-cols-2 gap-2 pt-2">
                                 <button type="button" onclick="compileImportAndOpenPreview('lang')" class="btn-primary min-h-[44px] text-xs">Импортировать и открыть окно языка</button>
-                                <button type="button" onclick="sendPackageViaBotDeepLink('lang')" class="btn-surface min-h-[44px] text-xs font-semibold accent-text">Установить язык</button>
+                                <button type="button" onclick="installLanguage()" class="btn-surface min-h-[44px] text-xs font-semibold accent-text">Установить язык</button>
                             </div>
                         </article>
                     </div>
@@ -1941,7 +1941,7 @@
             checks.style.color = outChecksCol;
 
             document.getElementById('tg-summary-name').textContent = tgState.name;
-            document.getElementById('tg-summary-metrics').textContent = `${tgState.langName}${tgState.wallpaperDataUrl ? ` • Фон ${tgState.wpScale}%` : ''}`;
+            const _sm = document.getElementById('tg-summary-metrics'); if (_sm) _sm.textContent = `${tgState.langName}${tgState.wallpaperDataUrl ? ` • Фон ${tgState.wpScale}%` : ''}`;
         }
 
         function handleChatWallpaperUpload(files) {
