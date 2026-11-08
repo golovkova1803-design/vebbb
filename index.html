@@ -490,6 +490,11 @@
         .ob-hero img { width: 100%; height: 100%; object-fit: cover; display: block; animation: kenburns 14s ease-in-out infinite alternate; }
         .ob-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 45%, var(--bg-main, #09090b) 100%); pointer-events: none; }
         .ob-hero + div #onboard-track > .ob-slide { padding-top: 1rem; }
+    
+        /* ==== окно просмотра ==== */
+        @keyframes sheetUp { from { opacity: 0; transform: translate3d(0, 34px, 0) scale(.97); } to { opacity: 1; transform: none; } }
+        .imp-sheet { animation: sheetUp 420ms var(--ease-spring); max-height: 92vh; overflow-y: auto; }
+        #native-theme-preview-modal #imp-modal-Stage > div { animation: cardIn 520ms var(--ease-ios) 120ms backwards; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -500,39 +505,20 @@
     <div id="bg-gradient-layer" class="bg-layer"></div>
     <div id="bg-pattern-layer" class="bg-layer"></div>
 
-    <!-- ==================== ПОЛНОЭКРАННОЕ ОКНО ПРОСМОТРА И УСТАНОВКИ (ТЕМЫ И ЯЗЫКИ) ==================== -->
-    <div id="native-theme-preview-modal" class="fixed inset-0 z-[55] bg-black/85 backdrop-blur-xl hidden items-center justify-center p-4">
-        <div class="frosted-card max-w-md w-full space-y-3.5 border border-emerald-400/35">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <h3 id="imp-modal-title" class="text-sm font-bold text-dynamic">Просмотр и установка пакета</h3>
-                </div>
+    <!-- ==================== ОКНО ПРОСМОТРА И УСТАНОВКИ ==================== -->
+    <div id="native-theme-preview-modal" class="fixed inset-0 z-[55] bg-black/80 backdrop-blur-xl hidden items-end sm:items-center justify-center p-3" onclick="if(event.target===this)closeImportedThemeModal()">
+        <div class="imp-sheet frosted-card max-w-md w-full space-y-3">
+            <div class="flex items-center justify-between gap-2">
+                <h3 id="imp-modal-title" class="text-sm font-bold text-dynamic truncate"></h3>
                 <button type="button" onclick="closeImportedThemeModal()" class="chip-btn min-w-[30px] min-h-[30px] rounded-full text-xs">✕</button>
             </div>
-
-            <div id="imp-modal-badge-bar" class="px-3 py-1.5 rounded-xl recessed-block flex items-center justify-between text-[11px]">
-                <span class="text-muted-dynamic">Статус компиляции:</span>
-                <span id="imp-modal-file-meta" class="font-mono font-semibold accent-text">178 ключей • Без зелёных/синих дыр</span>
-            </div>
-
-            <!-- Чистый предпросмотр без точек -->
             <div id="imp-modal-Stage" class="rounded-2xl overflow-hidden border border-white/15 shadow-2xl"></div>
-
-            <!-- Действия применения ТОЛЬКО в Telegram -->
-            <div class="space-y-2 pt-1">
-                <button type="button" id="imp-btn-primary-apply" onclick="executeDirectTelegramThemeOpen()" class="btn-primary w-full min-h-[46px] text-xs flex items-center justify-center gap-2">
+            <div class="grid grid-cols-[1fr_auto] gap-2">
+                <button type="button" id="imp-btn-primary-apply" onclick="applyPackageInTelegram()" class="btn-primary min-h-[46px] text-xs flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span id="imp-btn-primary-label">Открыть и применить в Telegram</span>
+                    <span id="imp-btn-primary-label">Применить в Telegram</span>
                 </button>
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" onclick="downloadCompiledPackageDirect()" class="btn-surface min-h-[40px] text-[11px] font-semibold accent-text">
-                        Скачать файл напрямую
-                    </button>
-                    <button type="button" onclick="closeImportedThemeModal()" class="btn-surface min-h-[40px] text-[11px] font-medium">
-                        Вернуться в редактор
-                    </button>
-                </div>
+                <button type="button" onclick="downloadCompiledPackageDirect()" class="btn-surface min-h-[46px] px-4 text-xs font-semibold accent-text">Файл</button>
             </div>
         </div>
     </div>
@@ -545,7 +531,7 @@
             </div>
             <div>
                 <h2 class="text-base font-bold text-dynamic">Добро пожаловать в TG Studio</h2>
-                <p class="text-xs text-muted-dynamic mt-1">Подпишитесь на канал разработчика один раз при первом входе, чтобы открыть полный доступ навсегда:</p>
+                <p class="text-xs text-muted-dynamic mt-1">Подпишитесь на канал, чтобы продолжить:</p>
             </div>
             <div id="sponsor-gate-channels-list" class="space-y-2 text-left"></div>
             <button type="button" onclick="verifySponsorGateAccess()" class="btn-primary w-full min-h-[44px] text-xs">Я подписался — Войти навсегда</button>
@@ -693,7 +679,7 @@
                                             <div id="tg-mock-pin-line" class="w-0.5 h-6 rounded-full shrink-0"></div>
                                             <div class="min-w-0">
                                                 <div id="tg-mock-pin-label" class="font-bold truncate">Закреплённое сообщение</div>
-                                                <div id="tg-mock-pin-sub" class="opacity-75 truncate">Плеер, голосовые и диалоги синхронизированы</div>
+                                                <div id="tg-mock-pin-sub" class="opacity-75 truncate">Новая тема</div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-1.5 shrink-0">
@@ -723,7 +709,7 @@
                                                     <div id="tg-mock-song-artist" class="text-[10px] opacity-80 truncate">Darxy Studio • 03:42</div>
                                                 </div>
                                             </div>
-                                            <div id="tg-mock-in-text" class="leading-snug text-[11px] mt-1">Названия песен и кнопки плеера перекрашены.</div>
+                                            <div id="tg-mock-in-text" class="leading-snug text-[11px] mt-1">Смотри, какая тема получилась</div>
                                             <div id="tg-mock-in-time" class="text-[9px] text-right mt-0.5">14:20</div>
                                         </div>
 
@@ -739,7 +725,7 @@
                                                     <div id="tg-mock-voice-dur" class="text-[9px] mt-0.5">0:18 • Голосовое</div>
                                                 </div>
                                             </div>
-                                            <div id="tg-mock-out-text" class="leading-snug text-[11px] mt-1">Дорожка голосовых и галочки без зелёного!</div>
+                                            <div id="tg-mock-out-text" class="leading-snug text-[11px] mt-1">Выглядит отлично</div>
                                             <div class="flex items-center justify-end gap-1 mt-0.5">
                                                 <span id="tg-mock-out-time" class="text-[9px]">14:21</span>
                                                 <svg id="tg-mock-checks" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
@@ -764,7 +750,6 @@
                             <!-- Строка статуса под превью -->
                             <div class="pip-hide flex items-center justify-between mt-3 pt-2.5 border-t border-white/5 text-[11px] text-muted-dynamic">
                                 <span id="tg-summary-name" class="font-semibold text-dynamic">Emerald Obsidian</span>
-                                <span id="tg-summary-metrics" class="font-mono text-[10px] accent-text">178 ключей • Полный перекрас</span>
                             </div>
                         </article>
                     </div>
@@ -773,7 +758,7 @@
                     <div class="frosted-card !p-3 space-y-2">
                         <button type="button" onclick="compileImportAndOpenPreview('theme')" class="btn-primary w-full min-h-[46px] text-xs flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            <span>Импортировать и открыть окно темы ТГ</span>
+                            <span>Установить тему</span>
                         </button>
                         <div class="grid grid-cols-3 gap-1.5">
                             <button type="button" onclick="sendPackageViaBotDeepLink('theme')" class="btn-surface min-h-[38px] text-[11px] font-semibold flex items-center justify-center gap-1">
@@ -800,7 +785,6 @@
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <div>
                                     <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">01 • Палитра и Гармония</span>
-                                    <h3 class="text-sm font-bold text-dynamic mt-0.5">Базовые пресеты и генератор сочетаний</h3>
                                 </div>
                                 <input id="custom-theme-title" type="text" value="Emerald Obsidian" oninput="tgState.name=this.value; renderTgLiveMockup()" class="frosted-input min-h-[34px] px-3 text-xs font-semibold w-40 text-right" placeholder="Название темы">
                             </div>
@@ -808,7 +792,6 @@
                             <div id="tg-presets-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
 
                             <div class="pt-2 border-t border-white/5">
-                                <div class="text-[11px] font-medium text-muted-dynamic mb-2">Пересчитать все 178 ключей (включая голосовые, песни, галочки и диалоги):</div>
                                 <div class="grid grid-cols-5 gap-1.5">
                                     <button type="button" onclick="applyColorHarmony('oled')" class="chip-btn min-h-[34px] text-[11px] font-medium">OLED Black</button>
                                     <button type="button" onclick="applyColorHarmony('mono')" class="chip-btn min-h-[34px] text-[11px] font-medium">Монохром</button>
@@ -824,7 +807,6 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">02 • Мастер-ползунки</span>
-                                    <h3 class="text-sm font-bold text-dynamic mt-0.5">Динамический сдвиг спектра и геометрии чата</h3>
                                 </div>
                                 <button type="button" onclick="resetMasterSliders()" class="chip-btn px-2.5 py-1 text-[11px] text-muted-dynamic">Сброс спектра</button>
                             </div>
@@ -873,7 +855,6 @@
                                 <div class="flex items-center justify-between p-2.5 recessed-block">
                                     <div>
                                         <div class="text-xs font-semibold text-dynamic">Автоконтраст элементов</div>
-                                        <div class="text-[10px] text-muted-dynamic">Защита кнопок и текста от сливания</div>
                                     </div>
                                     <div id="sw-autocontrast" onclick="toggleTweakSwitch('autoContrast')" class="tg-switch checked"></div>
                                 </div>
@@ -884,8 +865,7 @@
                         <article class="frosted-card space-y-3.5">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <div>
-                                    <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">03 • Поэлементная палитра (10 каналов без пропусков)</span>
-                                    <h3 class="text-sm font-bold text-dynamic mt-0.5">Голосовые, песни, кнопки Принять/Отмена, секретные чаты и галочки</h3>
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">03 • Палитра элементов</span>
                                 </div>
                                 <div class="flex flex-wrap gap-1.5">
                                     <label class="chip-btn px-2.5 py-1.5 text-[11px] font-semibold accent-text cursor-pointer flex items-center gap-1.5">
@@ -909,8 +889,7 @@
                     <div id="panel-studio-lang" class="hidden space-dynamic">
                         <article class="frosted-card space-y-3">
                             <div>
-                                <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">Облачные языки Telegram (Мгновенное системное окно)</span>
-                                <h3 class="text-sm font-bold text-dynamic mt-0.5">Открываются нативным окном подтверждения прямо поверх Telegram</h3>
+                                <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">Языки Telegram</span>
                             </div>
                             <div id="native-cloud-langs-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
                         </article>
@@ -918,8 +897,7 @@
                         <article class="frosted-card space-y-3.5">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <div>
-                                    <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">Конструктор своего языка (С окном предпросмотра и импорта)</span>
-                                    <h3 class="text-sm font-bold text-dynamic mt-0.5">Создай свой перевод — он откроется в окне установки точно так же, как тема</h3>
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">Свой язык</span>
                                 </div>
                                 <label class="chip-btn px-2.5 py-1.5 text-[11px] font-semibold accent-text cursor-pointer flex items-center gap-1.5">
                                     <span>📂 Импорт .xml</span>
@@ -969,7 +947,7 @@
 
                             <div class="grid grid-cols-2 gap-2 pt-2">
                                 <button type="button" onclick="compileImportAndOpenPreview('lang')" class="btn-primary min-h-[44px] text-xs">Импортировать и открыть окно языка</button>
-                                <button type="button" onclick="sendPackageViaBotDeepLink('lang')" class="btn-surface min-h-[44px] text-xs font-semibold accent-text">Открыть пакет в Telegram</button>
+                                <button type="button" onclick="sendPackageViaBotDeepLink('lang')" class="btn-surface min-h-[44px] text-xs font-semibold accent-text">Установить язык</button>
                             </div>
                         </article>
                     </div>
@@ -979,8 +957,7 @@
                         <article class="frosted-card space-y-4">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <div>
-                                    <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">Редактор обоев чата (Вшивается в файл темы)</span>
-                                    <h3 class="text-sm font-bold text-dynamic mt-0.5">Масштабирование, центровка, размытие и затемнение</h3>
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">Обои чата</span>
                                 </div>
                                 <div class="flex gap-1.5">
                                     <label class="btn-primary px-3 py-1.5 text-[11px] cursor-pointer flex items-center gap-1.5">
@@ -1047,8 +1024,7 @@
                                 </div>
                             </div>
 
-                            <p class="text-[11px] text-muted-dynamic">После загрузки картинки нажми <b>«✥ Двигать фон»</b> над превью чата, чтобы перемещать обои прямо пальцем или мышкой.</p>
-                        </article>
+</article>
 
                         <!-- Блок кастомизации аватарок и свечения -->
                         <article class="frosted-card space-y-3">
@@ -1057,7 +1033,6 @@
                                 <div class="p-3 recessed-block flex items-center justify-between gap-2">
                                     <div>
                                         <div class="text-xs font-semibold text-dynamic">Своя картинка на аватарку</div>
-                                        <div class="text-[10px] text-muted-dynamic">Для проверки в превью чата</div>
                                     </div>
                                     <label class="chip-btn px-2.5 py-1.5 text-[11px] font-semibold accent-text cursor-pointer shrink-0">
                                         <span>Загрузить</span>
@@ -1068,14 +1043,13 @@
                                 <div class="p-3 recessed-block flex items-center justify-between gap-2">
                                     <div>
                                         <div class="text-xs font-semibold text-dynamic">Свечение исходящих (Glow)</div>
-                                        <div class="text-[10px] text-muted-dynamic">Неоновая тень вокруг бабблов</div>
                                     </div>
                                     <div id="sw-glow" onclick="toggleTweakSwitch('glowOut')" class="tg-switch"></div>
                                 </div>
                             </div>
 
                             <div class="p-3 recessed-block space-y-2">
-                                <div class="text-xs font-semibold text-dynamic">Облачный идентификатор темы (t.me/addtheme/...)</div>
+                                <div class="text-xs font-semibold text-dynamic">Облачная тема (slug)</div>
                                 <div class="flex gap-2">
                                     <input id="cloud-slug-input" type="text" value="" oninput="tgState.cloudSlug=this.value.trim()" placeholder="Необязательно (например: MyCustomSlug)" class="frosted-input flex-1 min-h-[36px] px-3 text-xs font-mono">
                                     <button type="button" onclick="openNativeAddThemeModal()" class="btn-primary px-4 min-h-[36px] text-xs">Открыть</button>
@@ -1093,7 +1067,6 @@
             <div class="frosted-card flex flex-wrap items-center justify-between gap-2">
                 <div>
                     <h2 class="text-sm font-bold text-dynamic">Готовые коллекции (Тема + Языковой пакет)</h2>
-                    <p class="text-[11px] text-muted-dynamic">Каждую сборку можно загрузить в конструктор для доработки или сразу применить в Telegram</p>
                 </div>
             </div>
             <div id="ready-packs-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
@@ -1107,7 +1080,6 @@
                         <h2 class="text-sm font-bold text-dynamic">Сейф сборок</h2>
                         <span class="px-2 py-0.5 text-[10px] font-semibold rounded-md recessed-block accent-text">Автосохранение</span>
                     </div>
-                    <p class="text-[11px] text-muted-dynamic mt-0.5">Все созданные темы, обои и переводы сохраняются здесь. Любую запись можно открыть в редакторе или установить в Telegram.</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" onclick="exportVaultJson()" class="btn-surface min-h-[36px] px-3 text-xs font-medium">Экспорт .JSON</button>
@@ -1969,7 +1941,7 @@
             checks.style.color = outChecksCol;
 
             document.getElementById('tg-summary-name').textContent = tgState.name;
-            document.getElementById('tg-summary-metrics').textContent = `178 ключей • ${tgState.wallpaperDataUrl ? `Фон ${tgState.wpScale}%` : 'Автоконтраст ОК'}`;
+            document.getElementById('tg-summary-metrics').textContent = `${tgState.langName}${tgState.wallpaperDataUrl ? ` • Фон ${tgState.wpScale}%` : ''}`;
         }
 
         function handleChatWallpaperUpload(files) {
@@ -2702,55 +2674,56 @@
         function openImportedThemeModal(pkg) {
             const st = pkg.state || tgState;
             const isLang = pkg.kind === 'lang' || pkg.format === 'lang';
+            document.getElementById('imp-modal-title').textContent = isLang ? st.langName : st.name;
+            document.getElementById('imp-btn-primary-label').textContent = isLang ? 'Установить язык' : 'Применить в Telegram';
 
-            document.getElementById('imp-modal-title').textContent = isLang
-                ? `Языковой пакет «${st.langName}» готов`
-                : `Тема «${st.name}» готова`;
-            document.getElementById('imp-modal-file-meta').textContent = isLang
-                ? `${pkg.name} • 42 системных ключа`
-                : `${pkg.name} • 178 ключей ${st.wallpaperDataUrl ? '+ Вшитый фон' : ''}`;
-            document.getElementById('imp-btn-primary-label').textContent = isLang
-                ? 'Установить язык в Telegram (Через бота)'
-                : 'Установить тему в Telegram (Через бота)';
+            const r = `${st.bubbleRadius || 16}px`, fs = `${st.fontSize || 13}px`;
+            const avBg = st.avatarBg || st.accent, med = st.mediaColor || st.accent, dlg = st.dialogColor || st.accent;
+            const chk = st.checks || st.accent, tm = st.timeText || st.accent;
+            const inTxt = ensureReadableColor(st.msgIn, st.text, 4.0), outTxt = ensureReadableColor(st.msgOut, st.text, 4.0);
+            const inMed = ensureReadableColor(st.msgIn, med, 3.0), outMed = ensureReadableColor(st.msgOut, med, 3.0);
+            const wave = (c) => VOICE_WAVE_HEIGHTS.map((h, i) => `<i style="display:block;width:2px;height:${Math.max(20, h)}%;border-radius:2px;background:${c};opacity:${i < 11 ? 1 : .4}"></i>`).join('');
+            const play = (bg) => `<span style="width:30px;height:30px;border-radius:50%;background:${bg};color:${getReadableFg(bg)};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20"/></svg></span>`;
+            const wp = st.wallpaperDataUrl ? `background-image:url("${st.wallpaperDataUrl}");background-size:${st.wpScale || 100}%;background-position:${st.wpPosX ?? 50}% ${st.wpPosY ?? 50}%;` : '';
+            const avatar = st.avatarDataUrl ? `background-image:url('${st.avatarDataUrl}');background-size:cover` : `background:linear-gradient(135deg,${st.msgOut},${avBg})`;
+            const lock = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="display:inline-block;margin-right:3px"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
 
-            const r = `${st.bubbleRadius || 16}px`;
-            const avBg = st.avatarBg || st.accent;
-            const avFg = getReadableFg(avBg);
-            const medCol = st.mediaColor || st.accent;
-            const dlgCol = st.dialogColor || st.accent;
-            const wpStyle = st.wallpaperDataUrl
-                ? `background-image:url("${st.wallpaperDataUrl}"); background-size:${st.wpScale || 100}%; background-position:${st.wpPosX ?? 50}% ${st.wpPosY ?? 50}%;`
-                : '';
-
-            const stage = document.getElementById('imp-modal-Stage');
-            stage.innerHTML = `
-                <div style="background:${st.chatBg}; color:${st.text};" class="select-none relative overflow-hidden">
-                    <div style="background:${st.headerBg}; border-bottom:1px solid rgba(255,255,255,0.08);" class="px-3.5 py-2.5 flex items-center justify-between relative z-10">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-cover bg-center" style="${st.avatarDataUrl ? `background-image:url('${st.avatarDataUrl}')` : `background-color:${avBg}; color:${avFg}`}">${st.avatarDataUrl ? '' : (st.saved || 'T')[0]}</div>
-                            <div>
-                                <div class="text-xs font-bold leading-tight">${escapeHtml(st.saved || st.name)}</div>
-                                <div class="text-[10px]" style="color:${st.accent}">${escapeHtml(st.online || 'в сети')} • ${escapeHtml(st.typing || 'печатает...')}</div>
-                            </div>
-                        </div>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold" style="background:${dlgCol}; color:${getReadableFg(dlgCol)}">${escapeHtml(st.ok || 'Принять')}</span>
-                    </div>
-                    <div class="p-3.5 space-y-2 relative" style="${wpStyle}">
-                        <div class="max-w-[85%] px-3 py-2 text-xs shadow-sm relative z-10" style="background:${st.msgIn}; color:${ensureReadableColor(st.msgIn, st.text, 4.0)}; border-radius:${r} ${r} ${r} 4px;">
-                            <div class="font-bold text-[10px] mb-0.5" style="color:${ensureReadableColor(st.msgIn, medCol, 3.0)}">${isLang ? 'Предпросмотр локализации' : 'Голосовые, песни и диалоги'}</div>
-                            <div>${isLang ? `Ввод: «${escapeHtml(st.placeholder)}» • Закреп: «${escapeHtml(st.pinned)}»` : 'Все 178 ключей, дорожки аудио и кнопки упакованы.'}</div>
-                        </div>
-                        <div class="max-w-[85%] ml-auto px-3 py-2 text-xs shadow-sm relative z-10" style="background:${st.msgOut}; color:${ensureReadableColor(st.msgOut, st.text, 4.0)}; border-radius:${r} ${r} 4px ${r};">
-                            <div>Нажми кнопку ниже — сервер мгновенно пришлёт готовый файл в чат Telegram ✓</div>
-                            <div class="text-[9px] text-right mt-1" style="color:${st.checks}">14:21 ✓✓</div>
+            document.getElementById('imp-modal-Stage').innerHTML = `
+                <div style="background:${st.chatBg};color:${st.text};font-size:${fs}" class="select-none">
+                    <div style="background:${st.headerBg}" class="px-3.5 py-2.5 flex items-center gap-2.5">
+                        <div style="${avatar};width:32px;height:32px;border-radius:50%;flex-shrink:0"></div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-bold leading-tight truncate">${escapeHtml(isLang ? (st.saved || st.name) : st.name)}</div>
+                            <div class="text-[10px]" style="color:${st.accent}">${escapeHtml(st.online || 'в сети')}</div>
                         </div>
                     </div>
-                </div>
-            `;
+                    <div style="background:${st.headerBg};border-top:1px solid rgba(255,255,255,.06)" class="px-3.5 py-2 flex items-center gap-2.5">
+                        <div style="background:${avBg};color:${getReadableFg(avBg)};width:28px;height:28px;border-radius:50%;flex-shrink:0" class="flex items-center justify-center text-[11px] font-bold">${escapeHtml((st.name || 'T')[0])}</div>
+                        <div class="min-w-0 flex-1"><div class="text-[11px] font-bold truncate" style="color:${chk}">${lock}${escapeHtml(st.saved || 'Секретный чат')}</div><div class="text-[10px] truncate" style="color:${tm}">${escapeHtml(st.typing || 'печатает...')}</div></div>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="background:${st.accent};color:${getReadableFg(st.accent)}">2</span>
+                    </div>
+                    <div class="p-3.5 space-y-2" style="${wp}">
+                        <div class="text-center"><span class="px-2 py-0.5 rounded-full text-[10px]" style="background:${st.headerBg}cc;color:${st.text}">${escapeHtml(st.today || 'Сегодня')}</span></div>
+                        <div class="max-w-[82%] px-3 py-2" style="background:${st.msgIn};color:${inTxt};border-radius:${r} ${r} ${r} 4px">
+                            <div class="flex items-center gap-2">${play(inMed)}<div class="min-w-0"><div class="text-[11px] font-bold truncate">Nightcall</div><div class="text-[10px] opacity-80" style="color:${tm}">Darxy Studio • 03:42</div></div></div>
+                        </div>
+                        <div class="max-w-[82%] ml-auto px-3 py-2" style="background:${st.msgOut};color:${outTxt};border-radius:${r} ${r} 4px ${r}">
+                            <div class="flex items-center gap-2">${play(outMed)}<div class="flex items-center gap-[2px] h-4 flex-1">${wave(outMed)}</div></div>
+                            <div class="text-[9px] text-right mt-1" style="color:${tm}">0:18 • 14:21 <span style="color:${chk}">✓✓</span></div>
+                        </div>
+                        <div class="rounded-xl px-3 py-2.5 mx-auto max-w-[78%]" style="background:${st.headerBg};color:${st.text}">
+                            <div class="text-[11px] mb-2 text-center">${escapeHtml(isLang ? `${st.placeholder} • ${st.pinned}` : st.name)}</div>
+                            <div class="flex justify-end gap-4 text-[11px] font-bold"><span style="color:${dlg}">${escapeHtml(st.cancel || 'Отмена')}</span><span style="color:${dlg}">${escapeHtml(st.ok || 'Принять')}</span></div>
+                        </div>
+                    </div>
+                    <div style="background:${st.headerBg}" class="px-3.5 py-2.5 flex items-center gap-2.5">
+                        <span class="flex-1 text-[11px]" style="color:${tm}">${escapeHtml(st.placeholder || 'Сообщение...')}</span>
+                        <span style="width:28px;height:28px;border-radius:50%;background:${st.accent};color:${getReadableFg(st.accent)}" class="flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></span>
+                    </div>
+                </div>`;
 
             const modal = document.getElementById('native-theme-preview-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
         }
 
         function closeImportedThemeModal() {
@@ -2763,100 +2736,74 @@
             return /^[A-Za-z0-9_-]{5,}$/.test(x) && !/^(undefined|null|night|classic|day|arctic|tinted)$/i.test(x);
         }
 
-        // ОТПРАВКА ЧЕРЕЗ ЕДИНЫЙ СЕРВЕР (/api/deliver-package):
-        // Фронтенд отправляет скомпилированный файл на этот же сервер -> серверный бот мгновенно присылает файл в чат пользователю И возвращает прямую ссылку для tg.downloadFile!
-        async function executeDirectTelegramThemeOpen() {
+        async function shareOrSave(pkg) {
+            try {
+                const f = new File([pkg.blob], pkg.name, { type: 'application/octet-stream' });
+                if (navigator.canShare?.({ files: [f] })) { await navigator.share({ files: [f], title: pkg.name }); return true; }
+            } catch (e) { if (e?.name === 'AbortError') return true; }
+            saveBlob(pkg.blob, pkg.name);
+            showToast('Файл сохранён');
+            return true;
+        }
+
+        // Установка: облачная тема (если задан slug) → файл в чат бота из админки + tg.downloadFile → «Поделиться» / сохранение
+        async function applyPackageInTelegram() {
             Haptic.success();
             const pkg = lastCompiledPackage || await buildThemeFileAsync(PLATFORM_FORMAT[detectPlatform()], tgState);
             const st = pkg.state || tgState;
-
             if (pkg.kind !== 'lang') {
-                const rawSlug = String(st.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
-                if (isRealSlug(rawSlug)) {
-                    const themeUrl = `https://t.me/addtheme/${rawSlug}`;
-                    if (tg?.openTelegramLink) tg.openTelegramLink(themeUrl);
-                    else window.open(themeUrl, '_blank');
-                    showToast(`Открыто системное окно темы (${rawSlug})`);
+                const slug = String(st.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
+                if (isRealSlug(slug)) {
+                    const url = `https://t.me/addtheme/${slug}`;
+                    if (tg?.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
                     return;
                 }
             }
-
-            await deliverPackageViaUnifiedServer(pkg);
+            const btn = document.getElementById('imp-btn-primary-apply');
+            btn?.classList.add('opacity-60', 'pointer-events-none');
+            try { await deliverToBot(pkg); } finally { btn?.classList.remove('opacity-60', 'pointer-events-none'); }
         }
 
-        async function deliverPackageViaUnifiedServer(customPkg = null) {
-            const pkg = customPkg || lastCompiledPackage || await buildThemeFileAsync(PLATFORM_FORMAT[detectPlatform()], tgState);
+        async function deliverToBot(pkg) {
             const st = pkg.state || tgState;
-            const userId = tg?.initDataUnsafe?.user?.id || OWNER_TG_ID;
-
-            // 1. Отправка напрямую на наш единый сервер (POST /api/deliver-package)
-            try {
-                showToast('Сервер отправляет файл прямо в ваш Telegram...');
-                const form = new FormData();
-                form.append('user_id', String(userId));
-                form.append('name', st.name || 'Custom');
-                form.append('kind', pkg.kind || 'theme');
-                form.append('file', pkg.blob, pkg.name);
-
-                const res = await fetch('/api/deliver-package', { method: 'POST', body: form });
-                if (res.ok) {
+            const token = (loadAdminConfig().botToken || '').trim();
+            const chatId = tg?.initDataUnsafe?.user?.id || OWNER_TG_ID;
+            if (token && chatId) {
+                try {
+                    showToast('Отправляем...');
+                    const form = new FormData();
+                    form.append('chat_id', String(chatId));
+                    form.append('document', pkg.blob, pkg.name);
+                    form.append('caption', pkg.kind === 'lang' ? `Язык «${st.langName}»` : `Тема «${st.name}»`);
+                    const res = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: form });
                     const data = await res.json();
-                    if (data.ok) {
-                        Haptic.success();
+                    if (data.ok && data.result?.document?.file_id) {
+                        let url = '';
+                        try {
+                            const fr = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${encodeURIComponent(data.result.document.file_id)}`);
+                            const fd = await fr.json();
+                            if (fd.ok && fd.result?.file_path) url = `https://api.telegram.org/file/bot${token}/${fd.result.file_path}`;
+                        } catch (_) {}
                         closeImportedThemeModal();
-                        if (data.direct_url && typeof tg?.downloadFile === 'function') {
-                            tg.downloadFile({ url: data.direct_url, file_name: pkg.name }, () => {
-                                showToast('Файл открыт в Telegram!');
-                            });
+                        if (url && typeof tg?.downloadFile === 'function') {
+                            tg.downloadFile({ url, file_name: pkg.name }, ok => { if (ok) showToast('Файл открыт'); });
                         } else {
                             openDeliveredSheet(pkg.name, pkg.format);
                         }
                         return;
                     }
-                }
-            } catch (_) {}
-
-            // 2. Fallback: Мгновенный Deep-Link мост с ботом (работает даже если сайт открыт на статическом хостинге!)
-            sendPackageViaBotDeepLink(pkg.kind === 'lang' ? 'lang' : 'theme', st);
-        }
-
-        // Кодирует цвета или словарь в компактный параметр ?start=... и вызывает бота в 1 клик!
-        function sendPackageViaBotDeepLink(kind = 'theme', customState = null) {
-            const st = customState || tgState;
-            const urlParams = new URLSearchParams(window.location.search);
-            const botUser = (urlParams.get('bot') || loadAdminConfig().botUsername || DEFAULT_BOT_USERNAME).replace('@', '').trim();
-            const strip = h => (h || '#000000').replace('#', '');
-
-            let payload = '';
-            if (kind === 'lang') {
-                const rawJson = JSON.stringify({
-                    n: (st.langName || 'Custom').slice(0, 14),
-                    o: (st.online || 'в сети').slice(0, 14),
-                    t: (st.typing || 'печатает...').slice(0, 14),
-                    m: (st.placeholder || 'Сообщение...').slice(0, 14)
-                });
-                const b64 = btoa(unescape(encodeURIComponent(rawJson))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-                payload = `l_${b64.slice(0, 60)}`;
-            } else {
-                const pf = detectPlatform() === 'ios' ? 'i' : 'a';
-                payload = `t_${pf}_${strip(st.chatBg)}_${strip(st.headerBg)}_${strip(st.msgOut)}_${strip(st.msgIn)}_${strip(st.accent)}_${strip(st.mediaColor || st.accent)}_${strip(st.dialogColor || st.accent)}_${strip(st.checks || st.accent)}`;
+                    if (data.error_code === 403) showToast('Откройте бота и нажмите Start');
+                    else if (data.error_code === 401) showToast('Неверный токен');
+                } catch (_) {}
             }
-
-            const deepLink = `https://t.me/${botUser}?start=${payload}`;
             closeImportedThemeModal();
-            if (tg?.openTelegramLink) {
-                tg.openTelegramLink(deepLink);
-            } else {
-                window.open(deepLink, '_blank');
-            }
-            showToast('Запрос отправлен боту — нажмите «Запустить» внизу чата!');
+            await shareOrSave(pkg);
         }
 
         async function downloadCompiledPackageDirect() {
             const pkg = lastCompiledPackage || await buildThemeFileAsync(PLATFORM_FORMAT[detectPlatform()], tgState);
-            saveBlob(pkg.blob, pkg.name);
             closeImportedThemeModal();
-            showToast(`Файл ${pkg.name} скачан`);
+            await shareOrSave(pkg);
         }
 
         function installTheme(customState = null) {
@@ -2916,23 +2863,19 @@
                 return;
             }
 
-            saveBlob(file.blob, file.name);
-            showToast(`Файл ${file.name} сохранён`);
+            await shareOrSave(file);
         }
 
         function openDeliveredSheet(name, format) {
-            const how = format === 'lang'
-                ? 'Бот уже прислал файл языка в этот чат! Нажми на него и выбери «Применить локализацию».'
-                : 'Бот уже прислал файл темы в этот чат! Нажми на него — сразу откроется системное окно просмотра и применения темы Telegram.';
-            openBottomSheet('Файл доставлен ботом в ваш чат ✓', `
+            openBottomSheet('Файл отправлен', `
                 <div class="space-y-3 text-xs">
                     <div class="p-3.5 recessed-block">
                         <div class="font-bold accent-text">${escapeHtml(name)}</div>
-                        <p class="text-[11px] text-muted-dynamic mt-1">${how}</p>
+                        <p class="text-[11px] text-muted-dynamic mt-1">${format === 'lang' ? 'Открой файл в чате и нажми «Применить»' : 'Открой файл в чате — Telegram покажет тему и кнопку «Применить»'}</p>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="closeBottomSheet()" class="btn-surface min-h-[42px] font-semibold">Остаться в студии</button>
-                        <button type="button" onclick="tg?.close?.()" class="btn-primary min-h-[42px]">Открыть файл в чате</button>
+                        <button type="button" onclick="closeBottomSheet()" class="btn-surface min-h-[42px] font-semibold">Остаться</button>
+                        <button type="button" onclick="tg?.close?.()" class="btn-primary min-h-[42px]">Открыть чат</button>
                     </div>
                 </div>`);
         }
@@ -2958,7 +2901,7 @@
             Haptic.success();
             const file = await buildThemeFileAsync('attheme', st);
             saveBlob(file.blob, file.name);
-            showToast('Файл .attheme сохранён (178 ключей + фон)');
+            showToast('Файл сохранён');
         }
 
         async function downloadIosThemeFile(autoSave = true, customState = null) {
@@ -2983,19 +2926,10 @@
             autoSaveToVault(`${tgState.name}`, 'Сборка темы', tgState);
             const pf = detectPlatform();
             const fmtBtn = (fmt, label) => `<button type="button" onclick="closeBottomSheet(); pushThemeFileToTelegramChat('${fmt}', null, true)" class="${PLATFORM_FORMAT[pf] === fmt ? 'btn-primary' : 'btn-surface'} min-h-[40px] text-xs font-semibold">${label}</button>`;
-            openBottomSheet(`Экспорт темы «${tgState.name}»`, `
+            openBottomSheet('Экспорт', `
                 <div class="space-y-3 text-xs">
-                    <div class="p-3.5 recessed-block space-y-2">
-                        <div class="font-bold text-dynamic">Окно предпросмотра и доставки через сервер (${PLATFORM_LABEL[pf]})</div>
-                        <p class="text-[11px] text-muted-dynamic">Упаковывает все 178 ключей (включая голосовые, песни, диалоги и фон) и высылает через бота:</p>
-                        <button type="button" onclick="closeBottomSheet(); compileImportAndOpenPreview('theme')" class="btn-primary w-full min-h-[42px] text-xs">Открыть окно установки темы</button>
-                    </div>
-                    <div class="p-3.5 recessed-block space-y-2">
-                        <div class="font-bold text-dynamic">Скачать готовый файл напрямую</div>
-                        <div class="grid grid-cols-3 gap-2">
-                            ${fmtBtn('attheme', 'Android (.attheme)')}${fmtBtn('tgios', 'iOS (.tgios)')}${fmtBtn('tdesktop', 'ПК (.tdesktop)')}
-                        </div>
-                    </div>
+                    <button type="button" onclick="closeBottomSheet(); compileImportAndOpenPreview('theme')" class="btn-primary w-full min-h-[44px] text-xs">Установить в Telegram</button>
+                    <div class="grid grid-cols-3 gap-2">${fmtBtn('attheme', 'Android')}${fmtBtn('tgios', 'iOS')}${fmtBtn('tdesktop', 'ПК')}</div>
                 </div>
             `);
         }
@@ -3195,7 +3129,7 @@
                             <span>${escapeHtml(st.typing)}</span>
                         </div>
                         <div class="p-2.5 text-[11px] max-w-[82%]" style="background:${st.msgIn}; color:${ensureReadableColor(st.msgIn, st.text, 4.0)}; border-radius:${st.bubbleRadius}px">Предпросмотр сохранённой сборки из вашего Сейфа.</div>
-                        <div class="p-2.5 text-[11px] max-w-[82%] ml-auto" style="background:${st.msgOut}; color:${ensureReadableColor(st.msgOut, st.text, 4.0)}; border-radius:${st.bubbleRadius}px">Все 178 ключей готовы к установке в Telegram.</div>
+                        <div class="p-2.5 text-[11px] max-w-[82%] ml-auto" style="background:${st.msgOut}; color:${ensureReadableColor(st.msgOut, st.text, 4.0)}; border-radius:${st.bubbleRadius}px">Тема готова к установке.</div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
@@ -3495,6 +3429,7 @@
                 return Object.assign({
                     gateEnabled: false,
                     botUsername: DEFAULT_BOT_USERNAME,
+                    botToken: '',
                     channels: [{ id: 1, title: 'Канал @darxxx1zq', url: 'https://t.me/darxxx1zq' }],
                     users: getDefaultUsersList()
                 }, saved || {});
@@ -3502,6 +3437,7 @@
                 return {
                     gateEnabled: false,
                     botUsername: DEFAULT_BOT_USERNAME,
+                    botToken: '',
                     channels: [{ id: 1, title: 'Канал @darxxx1zq', url: 'https://t.me/darxxx1zq' }],
                     users: getDefaultUsersList()
                 };
@@ -3610,6 +3546,23 @@
             </div>`;
         }
 
+        async function testBotToken() {
+            const t = (loadAdminConfig().botToken || '').trim();
+            if (!t) return showToast('Вставьте токен');
+            try {
+                const d = await (await fetch(`https://api.telegram.org/bot${t}/getMe`)).json();
+                if (d.ok) { Haptic.success(); showToast(`Бот @${d.result.username} подключён`); } else { Haptic.error(); showToast('Неверный токен'); }
+            } catch (_) { showToast('Нет связи с Telegram'); }
+        }
+
+        function saveBotTokenAdmin(token) {
+            const cfg = loadAdminConfig();
+            cfg.botToken = String(token || '').trim();
+            saveAdminConfig(cfg);
+            Haptic.success();
+            showToast('Токен сохранён');
+        }
+
         async function openAdminPanelSheet(tab = currentAdminTab) {
             currentAdminTab = tab;
             await syncServerUsersToAdmin();
@@ -3636,11 +3589,16 @@
             } else {
                 bodyHtml = `
                     <div class="space-y-3">
+                        <div class="p-3 recessed-block space-y-2">
+                            <div class="font-bold text-dynamic">Токен бота</div>
+                            <input type="password" value="${escapeHtml(cfg.botToken || '')}" onchange="saveBotTokenAdmin(this.value)" placeholder="123456789:AAH..." class="frosted-input w-full min-h-[36px] px-3 text-xs font-mono">
+                            <button type="button" onclick="testBotToken()" class="btn-surface w-full min-h-[34px] text-[11px] font-semibold">Проверить токен</button>
+                        </div>
                         <div class="p-3 recessed-block space-y-2.5">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <div class="font-bold text-dynamic">Приветственная подписка (1 раз при входе)</div>
-                                    <p class="text-[10px] text-muted-dynamic">Запрашивается только один раз и запоминается навсегда</p>
+                                    
                                 </div>
                                 <div onclick="toggleAdminGate(!loadAdminConfig().gateEnabled)" class="tg-switch ${cfg.gateEnabled ? 'checked' : ''}"></div>
                             </div>
@@ -3658,7 +3616,7 @@
                 <div class="space-y-3.5 text-xs">
                     <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl recessed-block">
                         <button type="button" onclick="openAdminPanelSheet('users')" class="min-h-[34px] rounded-lg font-bold ${tab === 'users' ? 'btn-primary' : 'text-muted-dynamic'}">Пользователи (${totalUsers})</button>
-                        <button type="button" onclick="openAdminPanelSheet('gate')" class="min-h-[34px] rounded-lg font-bold ${tab === 'gate' ? 'btn-primary' : 'text-muted-dynamic'}">Подписка (ОП)</button>
+                        <button type="button" onclick="openAdminPanelSheet('gate')" class="min-h-[34px] rounded-lg font-bold ${tab === 'gate' ? 'btn-primary' : 'text-muted-dynamic'}">Бот и ОП</button>
                     </div>
                     ${bodyHtml}
                 </div>
@@ -3838,9 +3796,9 @@
         }
 
         const ONBOARD_SLIDES = [
-            { title: '178 ключей без зелёных и синих дыр', text: 'Голосовые дорожки, кнопки и названия песен, диалоги Принять/Отмена, галочки, закрытые чаты и аватарки перекрашиваются полностью.' },
-            { title: 'Редактор обоев с вшиванием в файл', text: 'Масштабируй, двигай пальцем и настраивай свой фон чата — он автоматически упаковывается внутрь файла темы.' },
-            { title: 'Единый сервер: Сайт + Бот', text: 'При нажатии на установку темы или языка сервер мгновенно присылает готовый файл в твой чат для применения в 1 тап.' }
+            { title: 'Палитра и пресеты', text: 'Настрой цвета, скругления и обои — результат сразу в превью.' },
+            { title: 'Установка в один тап', text: 'Нажми «Установить» — файл откроется в Telegram, останется применить.' },
+            { title: 'Сейф', text: 'Все темы и языки сохраняются автоматически.' }
         ];
         let obIndex = 0, obTouchX = null;
 
@@ -3851,7 +3809,7 @@
         }
         function closeOnboarding() {
             document.getElementById('onboard-overlay').classList.remove('open');
-            localStorage.setItem('tg_studio_onboard_v6', '1');
+            localStorage.setItem('tg_studio_onboard_v7', '1');
         }
         function renderOnboarding() {
             const track = document.getElementById('onboard-track');
@@ -3992,7 +3950,7 @@
             if (tg) {
                 try { tg.ready(); tg.expand(); tg.disableVerticalSwipes?.(); } catch (_) {}
             }
-            if (!localStorage.getItem('tg_studio_onboard_v6')) openOnboarding(0);
+            if (!localStorage.getItem('tg_studio_onboard_v7')) openOnboarding(0);
         });
 
         /* ==================== АНИМАЦИИ (JS) ==================== */
