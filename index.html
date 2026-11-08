@@ -550,16 +550,13 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-sm font-bold tracking-tight text-dynamic">TG STUDIO</h1>
-                        <button type="button" onclick="openVipModal()" class="px-2 py-0.5 text-[10px] font-semibold rounded-md recessed-block accent-text">
-                            <span id="header-refs-count">PRO 0/3</span>
-                        </button>
                     </div>
                     <p class="text-[11px] text-muted-dynamic leading-none mt-0.5">@darxxx1zq</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-1.5">
-                <button type="button" id="admin-header-btn" onclick="openAdminPanelSheet('users')" class="chip-btn min-h-[36px] px-2.5 flex items-center gap-1.5 text-[11px] font-semibold" title="Панель управления">
+                <button type="button" id="admin-header-btn" onclick="openAdminPanelSheet()" class="chip-btn min-h-[36px] px-2.5 flex items-center gap-1.5 text-[11px] font-semibold" title="Панель управления">
                     <svg class="w-3.5 h-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     <span class="hidden sm:inline">Админ</span>
                 </button>
@@ -1120,8 +1117,7 @@
         /* ==================== КОНСТАНТЫ ==================== */
         const OWNER_TG_ID = 5881813602;
         const OWNER_USERNAME = 'darxxx1zq';
-        const DEFAULT_BOT_USERNAME = 'DarxyNN_bot'; // Автоматически подхватывается из URL ?bot=... или используется этот
-        const ADMIN_CONFIG_KEY = 'tg_studio_admin_v6';
+                const ADMIN_CONFIG_KEY = 'tg_studio_admin_v6';
         const VAULT_KEY = 'tg_studio_vault_v6';
         const SITE_THEME_KEY = 'tg_studio_app_style_v6';
         const SAVED_PRESETS_KEY = 'tg_studio_saved_styles_v6';
@@ -2351,7 +2347,11 @@
                 chat_inContactNameText: acc, chat_outContactNameText: outTxt, chat_inContactBackground: medIn, chat_outContactBackground: medOut,
                 chat_inContactIcon: medInIconFg, chat_outContactIcon: medOutIconFg,
                 chat_inLocationBackground: medIn, chat_outLocationBackground: medOut, chat_inLocationIcon: medInIconFg, chat_outLocationIcon: medOutIconFg,
-                chat_inMenu: tm, chat_outMenu: tm, chat_inTimeSelectedText: tm, chat_outTimeSelectedText: tm, chat_topPanelLine: acc
+                chat_inMenu: tm, chat_outMenu: tm, chat_inTimeSelectedText: tm, chat_outTimeSelectedText: tm, chat_topPanelLine: acc,
+                chats_attachMessage: acc, chats_actionMessage: acc, chats_nameMessage: acc, chats_nameMessage_threeLines: acc, chats_message_threeLines: tm,
+                chat_inReplyMediaMessageText: acc, chat_outReplyMediaMessageText: outTxt, chat_inReplyMediaMessageSelectedText: acc, chat_outReplyMediaMessageSelectedText: outTxt,
+                chat_inReplyMessageText: txt, chat_outReplyMessageText: outTxt, chat_stickerReplyNameText: acc, chat_stickerReplyLine: acc,
+                chat_stickerReplyMessageText: tm, chat_stickerViaBotNameText: acc
             };
             Object.entries(extra).forEach(([k, v]) => lines.push(`${k}=${v}`));
 
@@ -2577,7 +2577,7 @@
             const m = {
                 windowBg: st.chatBg, windowFg: st.text, windowSubTextFg: tm, windowActiveTextFg: dlg, activeButtonBg: dlg, activeButtonFg: getReadableFg(dlg),
                 titleBg: st.headerBg, titleFg: st.text, titleBgActive: st.headerBg, titleFgActive: st.text,
-                dialogsBg: st.chatBg, dialogsNameFg: st.text, dialogsSecretNameFg: chk, dialogsTextFg: tm, dialogsDateFg: tm, dialogsSentIconFg: chk, dialogsUnreadBg: st.accent, dialogsUnreadFg: getReadableFg(st.accent),
+                dialogsBg: st.chatBg, dialogsNameFg: st.text, dialogsSecretNameFg: chk, dialogsTextFg: tm, dialogsDateFg: tm, dialogsSentIconFg: chk, dialogsUnreadBg: st.accent, dialogsTextFgService: st.accent, dialogsTextFgServiceActive: st.text, dialogsUnreadFg: getReadableFg(st.accent),
                 dialogsBgActive: st.msgOut, dialogsNameFgActive: st.text, dialogsTextFgActive: st.text, dialogsDateFgActive: st.text,
                 historyComposeAreaBg: st.headerBg, historyComposeAreaFg: st.text,
                 historyTextInFg: st.text, historyTextOutFg: st.text, msgInBg: st.msgIn, msgOutBg: st.msgOut,
@@ -2773,7 +2773,7 @@
                     showToast('Отправляем...');
                     const form = new FormData();
                     form.append('chat_id', String(chatId));
-                    form.append('document', pkg.blob, pkg.name);
+                    form.append('document', new Blob([pkg.blob], { type: pkg.kind === 'lang' ? 'application/xml' : 'application/octet-stream' }), pkg.name);
                     form.append('caption', pkg.kind === 'lang' ? `Язык «${st.langName}»` : `Тема «${st.name}»`);
                     const res = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: form });
                     const data = await res.json();
@@ -2785,11 +2785,8 @@
                             if (fd.ok && fd.result?.file_path) url = `https://api.telegram.org/file/bot${token}/${fd.result.file_path}`;
                         } catch (_) {}
                         closeImportedThemeModal();
-                        if (url && typeof tg?.downloadFile === 'function') {
-                            tg.downloadFile({ url, file_name: pkg.name }, ok => { if (ok) showToast('Файл открыт'); });
-                        } else {
-                            openDeliveredSheet(pkg.name, pkg.format);
-                        }
+                        if (url) { try { tg?.downloadFile?.({ url, file_name: pkg.name }, () => {}); } catch (_) {} }
+                        openDeliveredSheet(pkg.name, pkg.format);
                         return;
                     }
                     if (data.error_code === 403) showToast('Откройте бота и нажмите Start');
@@ -3396,50 +3393,19 @@
         }
 
         /* ==================== 8. АДМИН-ПАНЕЛЬ (СИНХРОНИЗАЦИЯ С СЕРВЕРОМ /api/admin) ==================== */
-        let currentAdminTab = 'users';
-        let adminUserFilter = 'ALL';
-        let adminUserSearchQuery = '';
-
-        function getDefaultUsersList() {
-            const list = [
-                { id: 5881813602, username: 'darxxx1zq', name: 'Owner // Admin', refs: 15, gens: 94, vip: true, banned: false, joined: 'Сегодня, 12:00', online: true },
-                { id: 619284012, username: 'alex_theme', name: 'Alexey UI', refs: 4, gens: 34, vip: true, banned: false, joined: 'Сегодня, 14:22', online: true },
-                { id: 840192834, username: 'kira_custom', name: 'Kira', refs: 2, gens: 19, vip: false, banned: false, joined: 'Сегодня, 16:05', online: true }
-            ];
-            const curUser = tg?.initDataUnsafe?.user;
-            if (curUser && !list.some(u => u.id === curUser.id)) {
-                list.unshift({
-                    id: curUser.id,
-                    username: curUser.username || 'tg_user',
-                    name: [curUser.first_name, curUser.last_name].filter(Boolean).join(' ') || 'User',
-                    refs: getRefsCount(),
-                    gens: getVaultList().length,
-                    vip: getRefsCount() >= 3,
-                    banned: false,
-                    joined: 'Сейчас',
-                    online: true
-                });
-            }
-            return list;
-        }
-
         function loadAdminConfig() {
             try {
                 const saved = JSON.parse(localStorage.getItem(ADMIN_CONFIG_KEY) || 'null');
                 return Object.assign({
                     gateEnabled: false,
-                    botUsername: DEFAULT_BOT_USERNAME,
                     botToken: '',
-                    channels: [{ id: 1, title: 'Канал @darxxx1zq', url: 'https://t.me/darxxx1zq' }],
-                    users: getDefaultUsersList()
+                    channels: [{ id: 1, title: 'Канал @darxxx1zq', url: 'https://t.me/darxxx1zq' }]
                 }, saved || {});
             } catch {
                 return {
                     gateEnabled: false,
-                    botUsername: DEFAULT_BOT_USERNAME,
                     botToken: '',
-                    channels: [{ id: 1, title: 'Канал @darxxx1zq', url: 'https://t.me/darxxx1zq' }],
-                    users: getDefaultUsersList()
+                    channels: [{ id: 1, title: 'Канал @darxxx1zq', url: 'https://t.me/darxxx1zq' }]
                 };
             }
         }
@@ -3449,33 +3415,10 @@
             checkSponsorGateOnLoad();
         }
 
-        async function syncServerUsersToAdmin() {
-            try {
-                const res = await fetch('/api/admin/users');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data.users) && data.users.length) {
-                        const cfg = loadAdminConfig();
-                        cfg.users = data.users;
-                        saveAdminConfig(cfg);
-                    }
-                }
-            } catch (_) {}
-        }
-
         function checkSponsorGateOnLoad() {
             const cfg = loadAdminConfig();
             const overlay = document.getElementById('sponsor-gate-overlay');
             const passedForever = localStorage.getItem(GATE_PASSED_KEY) === 'true';
-
-            const curId = tg?.initDataUnsafe?.user?.id;
-            const bannedUser = cfg.users.find(u => u.id === curId && u.banned);
-            if (bannedUser && curId !== OWNER_TG_ID) {
-                overlay.innerHTML = `<div class="frosted-card max-w-sm w-full text-center space-y-3"><h2 class="text-base font-bold text-rose-400">Доступ ограничен</h2><p class="text-xs text-muted-dynamic">Ваш аккаунт заблокирован администратором @${OWNER_USERNAME}.</p></div>`;
-                overlay.classList.remove('hidden');
-                overlay.classList.add('flex');
-                return;
-            }
 
             if (!cfg.gateEnabled || cfg.channels.length === 0 || passedForever) {
                 overlay.classList.add('hidden');
@@ -3513,39 +3456,6 @@
             showToast('Доступ открыт навсегда!');
         }
 
-        function adminFilteredUsers(cfg) {
-            const q = adminUserSearchQuery.trim().toLowerCase().replace(/^@/, '');
-            return cfg.users.filter(u => {
-                if (adminUserFilter === 'VIP' && !u.vip) return false;
-                if (adminUserFilter === 'BANNED' && !u.banned) return false;
-                if (!q) return true;
-                return String(u.id).includes(q) || (u.username || '').toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q);
-            });
-        }
-
-        function adminUsersTableHtml(list) {
-            if (!list.length) return '<div class="p-4 text-center text-muted-dynamic">Пользователи не найдены</div>';
-            return `<div class="space-y-2">
-                ${list.map(u => `
-                    <div class="p-3 rounded-xl recessed-block flex flex-wrap items-center justify-between gap-2 ${u.banned ? 'opacity-55' : ''}">
-                        <div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="font-bold text-xs text-dynamic">${escapeHtml(u.name)}</span>
-                                ${u.vip ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300">PRO</span>' : ''}
-                                ${u.banned ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-500/20 text-rose-300">BAN</span>' : ''}
-                            </div>
-                            <div class="text-[10px] font-mono text-muted-dynamic mt-0.5">@${escapeHtml(u.username)} • ID: ${u.id} • Сборок: ${u.gens}</div>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <button type="button" onclick="adminToggleUserVip(${u.id})" class="chip-btn px-2 py-1 text-[10px] font-semibold ${u.vip ? 'text-amber-300' : 'accent-text'}">${u.vip ? 'Снять PRO' : '+PRO'}</button>
-                            ${u.id !== OWNER_TG_ID ? `<button type="button" onclick="adminToggleUserBan(${u.id})" class="chip-btn px-2 py-1 text-[10px] font-semibold ${u.banned ? 'accent-text' : 'text-rose-400'}">${u.banned ? 'Разбан' : 'Бан'}</button>` : ''}
-                            <button type="button" onclick="window.open('https://t.me/${escapeHtml(u.username)}','_blank')" class="chip-btn px-2 py-1 text-[10px]">ЛС ↗</button>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>`;
-        }
-
         async function testBotToken() {
             const t = (loadAdminConfig().botToken || '').trim();
             if (!t) return showToast('Вставьте токен');
@@ -3563,93 +3473,28 @@
             showToast('Токен сохранён');
         }
 
-        async function openAdminPanelSheet(tab = currentAdminTab) {
-            currentAdminTab = tab;
-            await syncServerUsersToAdmin();
+        async function openAdminPanelSheet() {
             const cfg = loadAdminConfig();
-            const totalUsers = cfg.users.length;
-            const vipUsers = cfg.users.filter(u => u.vip).length;
-            const bannedUsers = cfg.users.filter(u => u.banned).length;
-
-            let bodyHtml = '';
-            if (tab === 'users') {
-                bodyHtml = `
-                    <div class="space-y-3">
-                        <div class="flex gap-1.5">
-                            <input type="text" value="${escapeHtml(adminUserSearchQuery)}" oninput="adminUserSearchQuery=this.value; refreshAdminUsers()" placeholder="Поиск по @username, имени или ID..." class="frosted-input flex-1 min-h-[36px] px-3 text-xs">
-                        </div>
-                        <div class="grid grid-cols-3 gap-1.5">
-                            <button type="button" onclick="adminUserFilter='ALL'; openAdminPanelSheet('users')" class="chip-btn min-h-[32px] text-[11px] ${adminUserFilter === 'ALL' ? 'active' : ''}">Все (${totalUsers})</button>
-                            <button type="button" onclick="adminUserFilter='VIP'; openAdminPanelSheet('users')" class="chip-btn min-h-[32px] text-[11px] ${adminUserFilter === 'VIP' ? 'active' : ''}">PRO (${vipUsers})</button>
-                            <button type="button" onclick="adminUserFilter='BANNED'; openAdminPanelSheet('users')" class="chip-btn min-h-[32px] text-[11px] ${adminUserFilter === 'BANNED' ? 'active' : ''}">Бан (${bannedUsers})</button>
-                        </div>
-                        <div id="admin-users-list" class="max-h-[320px] overflow-y-auto pr-1">${adminUsersTableHtml(adminFilteredUsers(cfg))}</div>
+            openBottomSheet('Админ', `
+                <div class="space-y-3 text-xs">
+                    <div class="p-3 recessed-block space-y-2">
+                        <div class="font-bold text-dynamic">Токен бота</div>
+                        <input type="password" value="${escapeHtml(cfg.botToken || '')}" onchange="saveBotTokenAdmin(this.value)" placeholder="123456789:AAH..." class="frosted-input w-full min-h-[36px] px-3 text-xs font-mono">
+                        <button type="button" onclick="testBotToken()" class="btn-surface w-full min-h-[34px] text-[11px] font-semibold">Проверить токен</button>
                     </div>
-                `;
-            } else {
-                bodyHtml = `
-                    <div class="space-y-3">
-                        <div class="p-3 recessed-block space-y-2">
-                            <div class="font-bold text-dynamic">Токен бота</div>
-                            <input type="password" value="${escapeHtml(cfg.botToken || '')}" onchange="saveBotTokenAdmin(this.value)" placeholder="123456789:AAH..." class="frosted-input w-full min-h-[36px] px-3 text-xs font-mono">
-                            <button type="button" onclick="testBotToken()" class="btn-surface w-full min-h-[34px] text-[11px] font-semibold">Проверить токен</button>
+                    <div class="p-3 recessed-block space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <div class="font-bold text-dynamic">Подписка на канал</div>
+                            <div onclick="toggleAdminGate(!loadAdminConfig().gateEnabled)" class="tg-switch ${cfg.gateEnabled ? 'checked' : ''}"></div>
                         </div>
-                        <div class="p-3 recessed-block space-y-2.5">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="font-bold text-dynamic">Приветственная подписка (1 раз при входе)</div>
-                                    
-                                </div>
-                                <div onclick="toggleAdminGate(!loadAdminConfig().gateEnabled)" class="tg-switch ${cfg.gateEnabled ? 'checked' : ''}"></div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-1.5">
-                                <input id="admin-ch-title" type="text" value="${escapeHtml(cfg.channels[0]?.title || '')}" placeholder="Название канала" class="frosted-input min-h-[34px] px-3 text-[11px]">
-                                <input id="admin-ch-url" type="text" value="${escapeHtml(cfg.channels[0]?.url || '')}" placeholder="https://t.me/..." class="frosted-input min-h-[34px] px-3 text-[11px] font-mono">
-                            </div>
-                            <button type="button" onclick="addAdminChannel()" class="btn-primary w-full min-h-[36px] text-[11px]">Сохранить канал ОП</button>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <input id="admin-ch-title" type="text" value="${escapeHtml(cfg.channels[0]?.title || '')}" placeholder="Название канала" class="frosted-input min-h-[34px] px-3 text-[11px]">
+                            <input id="admin-ch-url" type="text" value="${escapeHtml(cfg.channels[0]?.url || '')}" placeholder="https://t.me/..." class="frosted-input min-h-[34px] px-3 text-[11px] font-mono">
                         </div>
+                        <button type="button" onclick="addAdminChannel()" class="btn-primary w-full min-h-[36px] text-[11px]">Сохранить канал</button>
                     </div>
-                `;
-            }
-
-            openBottomSheet('Панель администратора @darxxx1zq', `
-                <div class="space-y-3.5 text-xs">
-                    <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl recessed-block">
-                        <button type="button" onclick="openAdminPanelSheet('users')" class="min-h-[34px] rounded-lg font-bold ${tab === 'users' ? 'btn-primary' : 'text-muted-dynamic'}">Пользователи (${totalUsers})</button>
-                        <button type="button" onclick="openAdminPanelSheet('gate')" class="min-h-[34px] rounded-lg font-bold ${tab === 'gate' ? 'btn-primary' : 'text-muted-dynamic'}">Бот и ОП</button>
-                    </div>
-                    ${bodyHtml}
                 </div>
             `);
-        }
-
-        function refreshAdminUsers() {
-            const box = document.getElementById('admin-users-list');
-            if (box) box.innerHTML = adminUsersTableHtml(adminFilteredUsers(loadAdminConfig()));
-        }
-
-        async function adminToggleUserVip(userId) {
-            Haptic.success();
-            const cfg = loadAdminConfig();
-            const u = cfg.users.find(x => x.id === userId);
-            if (!u) return;
-            u.vip = !u.vip;
-            saveAdminConfig(cfg);
-            refreshAdminUsers();
-            try { await fetch('/api/admin/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: userId, field: 'vip', value: u.vip }) }); } catch (_) {}
-            showToast(u.vip ? `@${u.username} выдан статус PRO` : `У @${u.username} снят статус PRO`);
-        }
-
-        async function adminToggleUserBan(userId) {
-            Haptic.pop();
-            const cfg = loadAdminConfig();
-            const u = cfg.users.find(x => x.id === userId);
-            if (!u || u.id === OWNER_TG_ID) return;
-            u.banned = !u.banned;
-            saveAdminConfig(cfg);
-            refreshAdminUsers();
-            try { await fetch('/api/admin/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: userId, field: 'banned', value: u.banned }) }); } catch (_) {}
-            showToast(u.banned ? `@${u.username} заблокирован` : `@${u.username} разблокирован`);
         }
 
         function toggleAdminGate(enabled) {
@@ -3741,28 +3586,6 @@
             renderNavigationBar();
             if (viewId === 'view-vault') renderVault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function getRefsCount() {
-            return parseInt(localStorage.getItem('vibe_refs_count') || '0', 10);
-        }
-
-        function updateVipUI() {
-            const refs = Math.min(3, getRefsCount());
-            document.getElementById('header-refs-count').textContent = `PRO ${refs}/3`;
-        }
-
-        function openVipModal() {
-            const refs = getRefsCount();
-            openBottomSheet('Статус PRO', `
-                <div class="space-y-3 text-xs">
-                    <div class="p-3.5 rounded-xl recessed-block">
-                        <div class="font-bold accent-text">Приглашено пользователей: ${refs} из 3</div>
-                        <p class="text-[11px] text-muted-dynamic mt-1">Активируйте полный PRO-доступ ниже:</p>
-                    </div>
-                    <button type="button" onclick="localStorage.setItem('vibe_refs_count','3'); updateVipUI(); closeBottomSheet(); showToast('PRO 3/3 активирован')" class="btn-primary w-full min-h-[42px] text-xs">Активировать PRO 3/3</button>
-                </div>
-            `);
         }
 
         function openBottomSheet(title, htmlContent) {
@@ -3943,7 +3766,6 @@
             SoundFX.syncIcon();
             snapshotBasePalette();
             applyUserSiteTheme(loadUserSiteTheme());
-            updateVipUI();
             initStudioGrids();
             renderVault();
             checkSponsorGateOnLoad();
