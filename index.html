@@ -2941,7 +2941,7 @@
             const enc = new TextEncoder();
 
             if (!wpBytes) {
-                return { blob: new Blob([enc.encode(headerText)], { type: 'application/octet-stream' }), rawText: headerText };
+                return { blob: new Blob([enc.encode(headerText)], { type: 'text/plain;charset=utf-8' }), rawText: headerText };
             }
 
             const p1 = enc.encode(headerText + 'WPS\n');
@@ -2951,7 +2951,7 @@
             combined.set(wpBytes, p1.length);
             combined.set(p3, p1.length + wpBytes.length);
 
-            return { blob: new Blob([combined], { type: 'application/octet-stream' }), rawText: headerText };
+            return { blob: new Blob([combined], { type: 'text/plain;charset=utf-8' }), rawText: headerText };
         }
 
         // Полный генератор .tgios-theme с секциями rootController и list (защищает Профиль и Настройки на iPhone от сливания!)
@@ -3264,75 +3264,20 @@
         const PLATFORM_FORMAT = { ios: 'tgios', android: 'attheme', desktop: 'tdesktop' };
         const PLATFORM_LABEL = { ios: 'iPhone / iPad', android: 'Android', desktop: 'ПК / Mac' };
 
-        function crc32(u8) {
-            if (!crc32.t) crc32.t = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
-            let r = -1; for (const b of u8) r = crc32.t[(r ^ b) & 255] ^ (r >>> 8);
-            return (r ^ -1) >>> 0;
-        }
-
-        function makeMultiFileZip(entries) {
-            const enc = new TextEncoder();
-            const localParts = [];
-            const centralParts = [];
-            let offset = 0;
-
-            for (const entry of entries) {
-                const nameBytes = enc.encode(entry.name);
-                const dataBytes = entry.data instanceof Uint8Array ? entry.data : enc.encode(String(entry.data));
-                const crc = crc32(dataBytes);
-
-                const lh = new DataView(new ArrayBuffer(30));
-                lh.setUint32(0, 0x04034b50, true);
-                lh.setUint16(4, 20, true);
-                lh.setUint32(14, crc, true);
-                lh.setUint32(18, dataBytes.length, true);
-                lh.setUint32(22, dataBytes.length, true);
-                lh.setUint16(26, nameBytes.length, true);
-
-                localParts.push(new Uint8Array(lh.buffer), nameBytes, dataBytes);
-
-                const ch = new DataView(new ArrayBuffer(46));
-                ch.setUint32(0, 0x02014b50, true);
-                ch.setUint16(4, 20, true);
-                ch.setUint16(6, 20, true);
-                ch.setUint32(16, crc, true);
-                ch.setUint32(20, dataBytes.length, true);
-                ch.setUint32(24, dataBytes.length, true);
-                ch.setUint16(28, nameBytes.length, true);
-                ch.setUint32(42, offset, true);
-
-                centralParts.push(new Uint8Array(ch.buffer), nameBytes);
-                offset += 30 + nameBytes.length + dataBytes.length;
-            }
-
-            const centralSize = centralParts.reduce((s, a) => s + a.byteLength, 0);
-            const eo = new DataView(new ArrayBuffer(22));
-            eo.setUint32(0, 0x06054b50, true);
-            eo.setUint16(8, entries.length, true);
-            eo.setUint16(10, entries.length, true);
-            eo.setUint32(12, centralSize, true);
-            eo.setUint32(16, offset, true);
-
-            return new Blob([...localParts, ...centralParts, new Uint8Array(eo.buffer)], { type: 'application/zip' });
-        }
-
         async function buildThemeFileAsync(format, st = tgState) {
             const safe = (st.name || 'theme').toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '') || 'theme';
             if (format === 'tgios') {
                 const txt = buildIosThemeContent(st);
-                return { rawText: txt, blob: new Blob([txt], { type: 'application/octet-stream' }), name: `${safe}.tgios-theme`, format: 'tgios', kind: 'theme' };
+                return { rawText: txt, blob: new Blob([txt], { type: 'text/plain;charset=utf-8' }), name: `${safe}.tgios-theme`, format: 'tgios', kind: 'theme' };
             }
             if (format === 'tdesktop') {
                 const palText = buildDesktopPalette(st);
-                const wpBytes = await bakeWallpaperToJpegBytes(st);
-                const files = [{ name: 'colors.tdesktop-theme', data: palText }];
-                if (wpBytes) files.push({ name: 'background.jpg', data: wpBytes });
-                return { rawText: palText, blob: makeMultiFileZip(files), name: `${safe}.tdesktop-theme`, format: 'tdesktop', kind: 'theme' };
+                return { rawText: palText, blob: new Blob([palText], { type: 'text/plain;charset=utf-8' }), name: `${safe}.tdesktop-theme`, format: 'tdesktop', kind: 'theme' };
             }
             if (format === 'lang') {
                 const safeLang = (st.langName || 'custom').toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '') || 'custom';
                 const xml = buildLangXmlContent(st);
-                return { rawText: xml, blob: new Blob([xml], { type: 'text/xml' }), name: `${safeLang}_lang.xml`, format: 'lang', kind: 'lang' };
+                return { rawText: xml, blob: new Blob([xml], { type: 'text/xml;charset=utf-8' }), name: `${safeLang}_lang.xml`, format: 'lang', kind: 'lang' };
             }
             const built = await buildAtThemeBinaryBlob(st);
             return { rawText: built.rawText, blob: built.blob, name: `${safe}.attheme`, format: 'attheme', kind: 'theme' };
@@ -3567,7 +3512,7 @@
             const isInsideTgWebview = !!(tg && tg.initData);
             if (!isInsideTgWebview && typeof navigator.canShare === 'function' && typeof navigator.share === 'function') {
                 try {
-                    const f = new File([pkg.blob], pkg.name, { type: 'application/octet-stream' });
+                    const f = new File([pkg.blob], pkg.name, { type: 'text/plain;charset=utf-8' });
                     if (navigator.canShare({ files: [f] })) {
                         const shared = await Promise.race([
                             navigator.share({ files: [f], title: pkg.name }).then(() => true),
@@ -3861,36 +3806,6 @@
             `);
         }
 
-        async function inflateRaw(raw) {
-            const ds = new DecompressionStream('deflate-raw');
-            const w = ds.writable.getWriter(); w.write(raw); w.close();
-            return new Uint8Array(await new Response(ds.readable).arrayBuffer());
-        }
-        async function readZipEntries(buf) {
-            const dv = new DataView(buf), u8 = new Uint8Array(buf), dec = new TextDecoder();
-            let e = u8.length - 22;
-            while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
-            if (e < 0) throw new Error('Это не архив темы');
-            const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true); const out = {};
-            for (let i = 0; i < n; i++) {
-                const method = dv.getUint16(p + 10, true), cs = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lo = dv.getUint32(p + 42, true);
-                const name = dec.decode(u8.subarray(p + 46, p + 46 + nl));
-                const start = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true);
-                const raw = u8.subarray(start, start + cs);
-                out[name] = method === 0 ? raw : await inflateRaw(raw);
-                p += 46 + nl + el + cl;
-            }
-            return out;
-        }
-        function findSeq(u8, str, from = 0) {
-            const q = Array.from(str).map(c => c.charCodeAt(0));
-            outer: for (let i = from; i <= u8.length - q.length; i++) { for (let j = 0; j < q.length; j++) if (u8[i + j] !== q[j]) continue outer; return i; }
-            return -1;
-        }
-        function bytesToDataUrl(u8, mime) {
-            let bin = ''; for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
-            return `data:${mime};base64,${btoa(bin)}`;
-        }
         function parseDesktopPalette(text, name) {
             const map = {};
             text.split(/\r?\n/).forEach(l => { const m = l.match(/^\s*([A-Za-z0-9_]+)\s*:\s*([^;]+);/); if (m) map[m[1]] = m[2].trim(); });
@@ -3903,27 +3818,16 @@
             p.checks = col('historyOutIconFg') || p.checks;
             return p;
         }
+
         async function importAtThemeFile(files) {
             if (!files || !files[0]) return;
             const file = files[0];
             try {
-                const buf = await file.arrayBuffer(), u8 = new Uint8Array(buf), dec = new TextDecoder('utf-8');
-                let text = '', wp = null;
-                if (u8[0] === 0x50 && u8[1] === 0x4B) {
-                    const z = await readZipEntries(buf), names = Object.keys(z);
-                    const nm = names.find(k => /colors\.tdesktop-theme$|\.tdesktop-palette$/i.test(k)) || names.find(k => /\.tdesktop-theme$/i.test(k));
-                    if (!nm) throw new Error('в архиве нет палитры');
-                    text = dec.decode(z[nm]);
-                    const bg = names.find(k => /(^|\/)background\.(jpe?g|png)$/i.test(k));
-                    if (bg) wp = bytesToDataUrl(z[bg], /png$/i.test(bg) ? 'image/png' : 'image/jpeg');
-                } else {
-                    let end = u8.length; const mark = findSeq(u8, 'WPS\n');
-                    if (mark >= 0) { end = mark; const e2 = findSeq(u8, '\nWPE\n', mark); wp = bytesToDataUrl(u8.subarray(mark + 4, e2 >= 0 ? e2 : u8.length), 'image/jpeg'); }
-                    text = dec.decode(u8.subarray(0, end));
-                }
+                const rawText = await file.text();
+                const wpsIdx = rawText.indexOf('WPS\n');
+                const text = wpsIdx >= 0 ? rawText.slice(0, wpsIdx) : rawText;
                 const cleanName = file.name.replace(/\.(attheme|tgios-theme|tdesktop-theme|tdesktop-palette)$/i, '');
                 const parsed = /(^|\n)\s*windowBg\s*:/.test(text) ? parseDesktopPalette(text, cleanName) : parseThemeTextToState(text, cleanName);
-                if (wp) parsed.wallpaperDataUrl = wp;
                 Object.assign(tgState, parsed);
                 snapshotBasePalette(); syncInputsFromTgState(); renderColorChannelsGrid(); renderTgLiveMockup();
                 await compileImportAndOpenPreview('theme', tgState);
@@ -4496,7 +4400,7 @@
                 <div class="space-y-3 text-xs">
                     <div class="p-3 recessed-block space-y-2">
                         <div class="font-bold text-dynamic">Токен бота</div>
-                        <input type="password" value="${escapeHtml(cfg.botToken || '')}" onchange="saveBotTokenAdmin(this.value)" placeholder="123456789:AAH..." class="frosted-input w-full min-h-[36px] px-3 text-xs font-mono">
+                        <input type="text" autocomplete="off" spellcheck="false" value="${escapeHtml(cfg.botToken || '')}" onchange="saveBotTokenAdmin(this.value)" placeholder="123456789:AAH..." class="frosted-input w-full min-h-[36px] px-3 text-xs font-mono">
                         <button type="button" onclick="testBotToken()" class="btn-surface w-full min-h-[34px] text-[11px] font-semibold">Проверить токен</button>
                     </div>
                     <div class="p-3 recessed-block space-y-2.5">
