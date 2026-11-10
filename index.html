@@ -299,40 +299,52 @@
             font-weight: 700;
         }
 
-        /* Ползунки с защитой вертикального скролла */
+        /* Премиальные плавные ползунки с защитой от случайного касания при скролле */
         input[type="range"].ios-slider {
+            --slider-pct: 50%;
             -webkit-appearance: none;
             appearance: none;
             width: 100%;
-            height: 5px;
+            height: 7px;
+            margin: 7px 0;
+            padding: 0;
             border-radius: 999px;
-            background: rgba(148, 163, 184, 0.24);
+            background: linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-secondary) var(--slider-pct), rgba(148, 163, 184, 0.18) var(--slider-pct), rgba(148, 163, 184, 0.18) 100%);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45);
             outline: none;
             cursor: pointer;
             touch-action: pan-y;
-            padding: 10px 0;
-            background-clip: content-box;
+            user-select: none;
+            -webkit-user-select: none;
         }
         input[type="range"].ios-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 18px;
-            height: 18px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f4f4f5 65%, #e4e4e7 100%);
+            border: 2.5px solid var(--accent-primary);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55), 0 0 0 3px color-mix(in srgb, var(--accent-primary) 18%, transparent);
+            transition: transform 180ms var(--ease-spring), box-shadow 180ms ease, border-color 180ms ease;
+        }
+        input[type="range"].ios-slider::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             background: #ffffff;
             border: 2.5px solid var(--accent-primary);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
-            transition: transform 160ms var(--ease-spring);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55), 0 0 0 3px color-mix(in srgb, var(--accent-primary) 18%, transparent);
+            transition: transform 180ms var(--ease-spring), box-shadow 180ms ease;
         }
-        input[type="range"].ios-slider:active::-webkit-slider-thumb {
-            transform: scale(1.25);
+        input[type="range"].ios-slider:active::-webkit-slider-thumb,
+        input[type="range"].ios-slider.slider-engaged::-webkit-slider-thumb {
+            transform: scale(1.22);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 0 6px color-mix(in srgb, var(--accent-primary) 28%, transparent);
         }
-
         input[type="range"].hue-slider {
-            background: linear-gradient(to right, #ef4444, #eab308, #22c55e, #06b6d4, #3b82f6, #a855f7, #ef4444);
-            height: 6px;
-            padding: 0;
-            margin: 8px 0;
+            background: linear-gradient(to right, #ef4444, #eab308, #22c55e, #06b6d4, #3b82f6, #a855f7, #ef4444) !important;
+            height: 8px;
         }
 
         /* Кастомный свитчер */
@@ -959,7 +971,7 @@
                                         <span class="text-muted-dynamic">Оттенок</span>
                                         <span id="val-hue-shift" class="font-mono text-dynamic font-semibold">0°</span>
                                     </div>
-                                    <input type="range" id="slider-hue-shift" min="-180" max="180" step="5" value="0" oninput="applySpectrumSliders()" class="ios-slider hue-slider">
+                                    <input type="range" id="slider-hue-shift" min="-180" max="180" step="1" value="0" oninput="applySpectrumSliders()" class="ios-slider hue-slider">
                                 </div>
 
                                 <div>
@@ -967,7 +979,7 @@
                                         <span class="text-muted-dynamic">Насыщенность</span>
                                         <span id="val-sat-scale" class="font-mono accent-text font-semibold">100%</span>
                                     </div>
-                                    <input type="range" id="slider-sat-scale" min="20" max="180" step="5" value="100" oninput="applySpectrumSliders()" class="ios-slider">
+                                    <input type="range" id="slider-sat-scale" min="20" max="180" step="1" value="100" oninput="applySpectrumSliders()" class="ios-slider">
                                 </div>
 
                                 <div>
@@ -975,7 +987,7 @@
                                         <span class="text-muted-dynamic">Яркость фона</span>
                                         <span id="val-bg-light" class="font-mono accent-text font-semibold">100%</span>
                                     </div>
-                                    <input type="range" id="slider-bg-light" min="0" max="160" step="5" value="100" oninput="applySpectrumSliders()" class="ios-slider">
+                                    <input type="range" id="slider-bg-light" min="0" max="160" step="1" value="100" oninput="applySpectrumSliders()" class="ios-slider">
                                 </div>
 
                                 <div>
@@ -983,7 +995,7 @@
                                         <span class="text-muted-dynamic">Скругление сообщений</span>
                                         <span id="val-bubble-rad" class="font-mono accent-text font-semibold">16px</span>
                                     </div>
-                                    <input type="range" id="slider-bubble-rad" min="4" max="24" step="1" value="16" oninput="updateGeometrySliders()" class="ios-slider">
+                                    <input type="range" id="slider-bubble-rad" min="4" max="24" step="0.5" value="16" oninput="updateGeometrySliders()" class="ios-slider">
                                 </div>
 
                                 <div>
@@ -991,7 +1003,7 @@
                                         <span class="text-muted-dynamic">Размер текста сообщений</span>
                                         <span id="val-font-size" class="font-mono accent-text font-semibold">13px</span>
                                     </div>
-                                    <input type="range" id="slider-font-size" min="11" max="16" step="1" value="13" oninput="updateGeometrySliders()" class="ios-slider">
+                                    <input type="range" id="slider-font-size" min="11" max="16" step="0.5" value="13" oninput="updateGeometrySliders()" class="ios-slider">
                                 </div>
 
                                 <div class="flex items-center justify-between p-2.5 recessed-block">
@@ -1122,7 +1134,7 @@
                                         <span class="text-muted-dynamic">Масштаб</span>
                                         <span id="val-wp-scale" class="font-mono accent-text font-semibold">100%</span>
                                     </div>
-                                    <input type="range" id="slider-wp-scale" min="50" max="300" step="5" value="100" oninput="updateWallpaperTransformSliders()" class="ios-slider">
+                                    <input type="range" id="slider-wp-scale" min="50" max="300" step="1" value="100" oninput="updateWallpaperTransformSliders()" class="ios-slider">
                                 </div>
 
                                 <div>
@@ -1146,7 +1158,7 @@
                                         <span class="text-muted-dynamic">Затемнение</span>
                                         <span id="val-wp-dim" class="font-mono accent-text font-semibold">20%</span>
                                     </div>
-                                    <input type="range" id="slider-wp-dim" min="0" max="85" step="5" value="20" oninput="updateWallpaperTransformSliders()" class="ios-slider">
+                                    <input type="range" id="slider-wp-dim" min="0" max="85" step="1" value="20" oninput="updateWallpaperTransformSliders()" class="ios-slider">
                                 </div>
 
                                 <div>
@@ -1154,7 +1166,7 @@
                                         <span class="text-muted-dynamic">Размытие</span>
                                         <span id="val-wp-blur" class="font-mono accent-text font-semibold">0px</span>
                                     </div>
-                                    <input type="range" id="slider-wp-blur" min="0" max="20" step="1" value="0" oninput="updateWallpaperTransformSliders()" class="ios-slider">
+                                    <input type="range" id="slider-wp-blur" min="0" max="20" step="0.5" value="0" oninput="updateWallpaperTransformSliders()" class="ios-slider">
                                 </div>
 
                                 <div>
@@ -1162,7 +1174,7 @@
                                         <span class="text-muted-dynamic">Непрозрачность картинки</span>
                                         <span id="val-pattern-op" class="font-mono accent-text font-semibold">90%</span>
                                     </div>
-                                    <input type="range" id="slider-pattern-op" min="10" max="100" step="5" value="90" oninput="updateGeometrySliders()" class="ios-slider">
+                                    <input type="range" id="slider-pattern-op" min="10" max="100" step="1" value="90" oninput="updateGeometrySliders()" class="ios-slider">
                                 </div>
                             </div>
                         </article>
@@ -1655,10 +1667,20 @@
             if (vh) vh.textContent = '0°';
             if (vs) vs.textContent = '100%';
             if (vb) vb.textContent = '100%';
+            syncAllSliderFills();
         }
 
+        let _specRaf = 0;
         function applySpectrumSliders() {
             SoundFX.tick();
+            syncAllSliderFills();
+            if (_specRaf) cancelAnimationFrame(_specRaf);
+            _specRaf = requestAnimationFrame(() => {
+                _specRaf = 0;
+                _applySpectrumSlidersNow();
+            });
+        }
+        function _applySpectrumSlidersNow() {
             const hueDelta = Number(document.getElementById('slider-hue-shift').value);
             const satMult = Number(document.getElementById('slider-sat-scale').value) / 100;
             const bgLightMult = Number(document.getElementById('slider-bg-light').value) / 100;
@@ -1850,9 +1872,9 @@
             document.getElementById('slider-bubble-rad').value = tgState.bubbleRadius;
             document.getElementById('slider-pattern-op').value = tgState.patternOpacity;
             document.getElementById('slider-font-size').value = tgState.fontSize;
-            document.getElementById('val-bubble-rad').textContent = `${tgState.bubbleRadius}px`;
+            document.getElementById('val-bubble-rad').textContent = `${Math.round(tgState.bubbleRadius)}px`;
             document.getElementById('val-pattern-op').textContent = `${tgState.patternOpacity}%`;
-            document.getElementById('val-font-size').textContent = `${tgState.fontSize}px`;
+            document.getElementById('val-font-size').textContent = `${Math.round(tgState.fontSize * 10) / 10}px`;
             document.getElementById('cloud-slug-input').value = tgState.cloudSlug || '';
 
             document.getElementById('slider-wp-scale').value = tgState.wpScale || 100;
@@ -1864,7 +1886,7 @@
             document.getElementById('val-wp-x').textContent = `${Math.round(tgState.wpPosX ?? 50)}%`;
             document.getElementById('val-wp-y').textContent = `${Math.round(tgState.wpPosY ?? 50)}%`;
             document.getElementById('val-wp-dim').textContent = `${tgState.wpDim ?? 20}%`;
-            document.getElementById('val-wp-blur').textContent = `${tgState.wpBlur ?? 0}px`;
+            document.getElementById('val-wp-blur').textContent = `${Math.round(tgState.wpBlur ?? 0)}px`;
 
             document.getElementById('sw-glow')?.classList.toggle('checked', !!tgState.glowOut);
             document.getElementById('sw-autocontrast')?.classList.toggle('checked', tgState.autoContrast !== false);
@@ -1879,6 +1901,7 @@
             document.getElementById('lang-ok').value = tgState.ok || 'Принять';
             document.getElementById('lang-cancel').value = tgState.cancel || 'Отмена';
 
+            syncAllSliderFills();
             const dragBtn = document.getElementById('btn-drag-wp-toggle');
             if (dragBtn) dragBtn.classList.toggle('hidden', !tgState.wallpaperDataUrl);
         }
@@ -1888,9 +1911,9 @@
             tgState.bubbleRadius = Number(document.getElementById('slider-bubble-rad').value);
             tgState.patternOpacity = Number(document.getElementById('slider-pattern-op').value);
             tgState.fontSize = Number(document.getElementById('slider-font-size').value);
-            document.getElementById('val-bubble-rad').textContent = `${tgState.bubbleRadius}px`;
+            document.getElementById('val-bubble-rad').textContent = `${Math.round(tgState.bubbleRadius)}px`;
             document.getElementById('val-pattern-op').textContent = `${tgState.patternOpacity}%`;
-            document.getElementById('val-font-size').textContent = `${tgState.fontSize}px`;
+            document.getElementById('val-font-size').textContent = `${Math.round(tgState.fontSize * 10) / 10}px`;
             renderTgLiveMockup();
         }
 
@@ -1906,7 +1929,7 @@
             document.getElementById('val-wp-x').textContent = `${Math.round(tgState.wpPosX)}%`;
             document.getElementById('val-wp-y').textContent = `${Math.round(tgState.wpPosY)}%`;
             document.getElementById('val-wp-dim').textContent = `${tgState.wpDim}%`;
-            document.getElementById('val-wp-blur').textContent = `${tgState.wpBlur}px`;
+            document.getElementById('val-wp-blur').textContent = `${Math.round(tgState.wpBlur)}px`;
             renderTgLiveMockup();
         }
 
@@ -3540,18 +3563,70 @@
         }
 
         async function shareOrSave(pkg) {
-            try {
-                const f = new File([pkg.blob], pkg.name, { type: 'application/octet-stream' });
-                if (navigator.canShare?.({ files: [f] })) { await navigator.share({ files: [f], title: pkg.name }); return true; }
-            } catch (e) { if (e?.name === 'AbortError') return true; }
+            // Защита от зависания navigator.share внутри Telegram WebApp с таймаутом 1.8 сек
+            const isInsideTgWebview = !!(tg && tg.initData);
+            if (!isInsideTgWebview && typeof navigator.canShare === 'function' && typeof navigator.share === 'function') {
+                try {
+                    const f = new File([pkg.blob], pkg.name, { type: 'application/octet-stream' });
+                    if (navigator.canShare({ files: [f] })) {
+                        const shared = await Promise.race([
+                            navigator.share({ files: [f], title: pkg.name }).then(() => true),
+                            new Promise(r => setTimeout(() => r(false), 1800))
+                        ]);
+                        if (shared) {
+                            showToast(`Файл «${pkg.name}» отправлен`);
+                            return true;
+                        }
+                    }
+                } catch (e) {
+                    if (e?.name === 'AbortError') return true;
+                }
+            }
             saveBlob(pkg.blob, pkg.name);
-            showToast('Файл сохранён');
+            openReadyDownloadSheet(pkg);
             return true;
+        }
+
+        function openReadyDownloadSheet(pkg) {
+            const url = URL.createObjectURL(pkg.blob);
+            const hasToken = !!(loadAdminConfig().botToken || '').trim();
+            openBottomSheet('Готово к установке', `
+                <div class="space-y-3 text-xs">
+                    <div class="p-3.5 recessed-block space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold accent-text truncate">${escapeHtml(pkg.name)}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-muted-dynamic">Готов</span>
+                        </div>
+                        <p class="text-[11px] text-muted-dynamic leading-relaxed">
+                            ${hasToken
+                                ? 'Файл скачан. Если бот не прислал его в личку, убедитесь, что вы нажали /start в боте.'
+                                : 'Файл темы собран! Нажмите «Скачать файл» ниже или подключите токен бота в кнопке «Админ» вверху, чтобы бот присылал файл прямо в чат Telegram.'}
+                        </p>
+                    </div>
+                    <a href="${url}" download="${escapeHtml(pkg.name)}" onclick="showToast('Загрузка началась')" class="btn-primary w-full min-h-[44px] text-xs flex items-center justify-center gap-2 no-underline">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Скачать ${escapeHtml(pkg.name)}</span>
+                    </a>
+                    ${!hasToken ? `
+                        <button type="button" onclick="closeBottomSheet(); openAdminPanelSheet()" class="btn-surface w-full min-h-[40px] text-xs font-semibold accent-text">
+                            Подключить токен бота для авто-отправки в чат
+                        </button>
+                    ` : ''}
+                    <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2 text-left">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase accent-bg-soft accent-text shrink-0">AD</span>
+                            <span class="text-[11px] font-semibold text-dynamic truncate">Тут могла быть ваша реклама</span>
+                        </div>
+                        <span class="text-[10px] font-mono accent-text shrink-0">@darxxx1zq</span>
+                    </button>
+                </div>
+            `);
         }
 
         async function installDirect(customState = null) {
             const st = (customState && typeof customState === 'object') ? customState : tgState;
             Haptic.success();
+            showToast('Собираем тему...');
             const f = await buildThemeFileAsync(PLATFORM_FORMAT[detectPlatform()], st);
             lastCompiledPackage = { ...f, state: { ...st } };
             autoSaveToVault(`Тема: ${st.name}`, `Файл ${f.name}`, st);
@@ -3562,7 +3637,14 @@
             Haptic.success();
             const pkg = lastCompiledPackage || await buildThemeFileAsync(PLATFORM_FORMAT[detectPlatform()], tgState);
             const st = pkg.state || tgState;
-            if (pkg.kind !== 'lang') {
+            if (pkg.kind === 'lang' || pkg.format === 'lang') {
+                const token = (loadAdminConfig().botToken || '').trim();
+                if (!token) {
+                    closeImportedThemeModal();
+                    openNativeSetLanguageModal(st.langSlug || 'ru');
+                    return;
+                }
+            } else {
                 const slug = String(st.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
                 if (isRealSlug(slug)) {
                     const url = `https://t.me/addtheme/${slug}`;
@@ -3571,18 +3653,26 @@
                 }
             }
             const btn = document.getElementById('imp-btn-primary-apply');
+            const lbl = document.getElementById('imp-btn-primary-label');
+            const prevText = lbl ? lbl.textContent : 'Применить в Telegram';
             btn?.classList.add('opacity-60', 'pointer-events-none');
-            try { await deliverToBot(pkg); } finally { btn?.classList.remove('opacity-60', 'pointer-events-none'); }
+            if (lbl) lbl.textContent = 'Отправка...';
+            try {
+                await deliverToBot(pkg);
+            } finally {
+                btn?.classList.remove('opacity-60', 'pointer-events-none');
+                if (lbl) lbl.textContent = prevText;
+            }
         }
 
         async function deliverToBot(pkg) {
             const st = pkg.state || tgState;
             const urlParams = new URLSearchParams(window.location.search);
             const token = (loadAdminConfig().botToken || urlParams.get('bot_token') || '').trim();
-            const chatId = tg?.initDataUnsafe?.user?.id || urlParams.get('chat_id') || OWNER_TG_ID;
+            const chatId = tg?.initDataUnsafe?.user?.id || urlParams.get('chat_id') || localStorage.getItem('tg_studio_user_chat_id') || OWNER_TG_ID;
             if (token && chatId) {
                 try {
-                    showToast('Отправляем в бота...');
+                    showToast('Отправляем файл в ваш Telegram...');
                     const form = new FormData();
                     form.append('chat_id', String(chatId));
                     form.append('document', pkg.blob, pkg.name);
@@ -3599,14 +3689,27 @@
                         } catch (_) {}
                         closeImportedThemeModal();
                         if (url && typeof tg?.downloadFile === 'function') {
-                            try { tg.downloadFile({ url, file_name: pkg.name }, ok => { if (ok) showToast('Файл передан в Telegram'); }); return; } catch (_) {}
+                            try {
+                                tg.downloadFile({ url, file_name: pkg.name }, ok => {
+                                    if (ok) showToast('Файл загружен в Telegram!');
+                                    else openDeliveredSheet(pkg.name, pkg.format);
+                                });
+                                return;
+                            } catch (_) {}
                         }
                         openDeliveredSheet(pkg.name, pkg.format);
                         return;
                     }
-                    if (data.error_code === 403) showToast('Откройте бота и нажмите /start');
-                    else if (data.error_code === 401) showToast('Проверьте токен бота в Админ-панели');
-                } catch (_) {}
+                    if (data.error_code === 403) {
+                        showToast('Нажмите /start в боте, чтобы получать файлы');
+                    } else if (data.error_code === 401) {
+                        showToast('Неверный токен бота в Админ-панели');
+                    } else if (data.description) {
+                        showToast('Ошибка бота: ' + data.description.slice(0, 38));
+                    }
+                } catch (_) {
+                    showToast('Сеть недоступна, сохраняем файл напрямую...');
+                }
             }
             closeImportedThemeModal();
             await shareOrSave(pkg);
@@ -4187,7 +4290,7 @@
                                 <button type="button" onclick="updateCustomThemeField('density', '${d.id}', true)" class="min-h-[34px] rounded-lg font-semibold ${cfg.density === d.id ? 'btn-primary' : 'text-muted-dynamic'}">${d.label}</button>
                             `).join('')}
                         </div>
-                        <input type="range" min="12" max="28" step="2" value="${cfg.radius}" oninput="updateCustomThemeField('radius', Number(this.value), false)" class="ios-slider">
+                        <input type="range" min="12" max="28" step="1" value="${cfg.radius}" oninput="updateCustomThemeField('radius', Number(this.value), false)" class="ios-slider">
                     </div>
 
                     <div>
@@ -4708,32 +4811,91 @@
             });
         })();
 
+        function syncAllSliderFills() {
+            document.querySelectorAll('input[type="range"].ios-slider').forEach(el => {
+                const min = parseFloat(el.min || 0);
+                const max = parseFloat(el.max || 100);
+                const val = parseFloat(el.value || 0);
+                const pct = Math.max(0, Math.min(100, ((val - min) / (max - min || 1)) * 100));
+                el.style.setProperty('--slider-pct', pct.toFixed(1) + '%');
+            });
+        }
+
         (function guardSliders() {
-            let sx = 0, sy = 0, startVal = null, vertical = false, active = null;
+            let sx = 0, sy = 0, startVal = null, mode = 'none', active = null;
+            // mode: 'none' | 'pending' | 'vertical' | 'horizontal'
+
+            function isTouchNearThumb(el, clientX) {
+                const rect = el.getBoundingClientRect();
+                const min = parseFloat(el.min || 0);
+                const max = parseFloat(el.max || 100);
+                const val = parseFloat(el.value || 0);
+                const ratio = (val - min) / (max - min || 1);
+                const thumbX = rect.left + 11 + ratio * Math.max(1, rect.width - 22);
+                return Math.abs(clientX - thumbX) <= 26;
+            }
+
             document.addEventListener('touchstart', e => {
                 const el = e.target.closest?.('input[type="range"].ios-slider');
-                if (!el) return;
+                if (!el || !e.touches[0]) return;
                 active = el;
                 startVal = el.value;
-                vertical = false;
                 sx = e.touches[0].clientX;
                 sy = e.touches[0].clientY;
-            }, { passive: true });
+                // Если палец лёг прямо на бегунок — разрешаем горизонтальный жест сразу, иначе ждём подтверждения горизонтального сдвига
+                if (isTouchNearThumb(el, sx)) {
+                    mode = 'pending';
+                } else {
+                    mode = 'track-wait';
+                }
+            }, { passive: true, capture: true });
+
             document.addEventListener('touchmove', e => {
-                if (!active) return;
+                if (!active || !e.touches[0]) return;
                 const dx = Math.abs(e.touches[0].clientX - sx);
                 const dy = Math.abs(e.touches[0].clientY - sy);
-                if (!vertical && dy > 6 && dy > dx) vertical = true;
-                if (vertical) active.value = startVal;
-            }, { passive: true });
-            const end = () => { if (active && vertical) active.value = startVal; active = null; vertical = false; };
-            document.addEventListener('touchend', end, { passive: true });
-            document.addEventListener('touchcancel', end, { passive: true });
-            document.addEventListener('input', e => {
-                if (vertical && e.target === active) {
-                    e.target.value = startVal;
-                    e.stopImmediatePropagation();
+
+                if (mode === 'pending' || mode === 'track-wait') {
+                    if (dy > 5 && dy >= dx * 0.8) {
+                        mode = 'vertical';
+                        active.classList.remove('slider-engaged');
+                    } else if (dx > 9 && dx > dy * 1.65) {
+                        mode = 'horizontal';
+                        active.classList.add('slider-engaged');
+                    }
                 }
+
+                if (mode !== 'horizontal') {
+                    active.value = startVal;
+                    syncAllSliderFills();
+                }
+            }, { passive: true, capture: true });
+
+            const endTouch = () => {
+                if (!active) return;
+                if (mode !== 'horizontal' && startVal !== null) {
+                    active.value = startVal;
+                    syncAllSliderFills();
+                }
+                active.classList.remove('slider-engaged');
+                active = null;
+                startVal = null;
+                mode = 'none';
+            };
+            document.addEventListener('touchend', endTouch, { passive: true, capture: true });
+            document.addEventListener('touchcancel', endTouch, { passive: true, capture: true });
+
+            // Перехватываем событие input на фазе захвата: если жест не подтверждён как горизонтальный — блокируем случайное срабатывание при скролле!
+            document.addEventListener('input', e => {
+                const el = e.target;
+                if (!el || !el.classList?.contains('ios-slider')) return;
+                if (active === el && mode !== 'horizontal') {
+                    el.value = startVal;
+                    syncAllSliderFills();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+                syncAllSliderFills();
             }, true);
         })();
 
