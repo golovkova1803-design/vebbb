@@ -548,94 +548,78 @@
         html.paused *, html.paused *::before, html.paused *::after { animation-play-state: paused !important; }
         @media (max-width: 640px) { .aurora i { filter: blur(46px); } }
 
-        /* ==================== MOTION BLUR ПРИ ДВИЖЕНИИ И LIVE-АНИМАЦИИ ==================== */
-        @keyframes motionBlurPulse {
-            0% { filter: blur(0px); transform: scale(1); }
-            35% { filter: blur(5px) saturate(1.2); transform: scale(0.985) translateY(3px); }
-            100% { filter: blur(0px); transform: scale(1) translateY(0); }
+        /* ==================== ЗОЛОТОЙ ПЕРЕЛИВ ЗАГОЛОВКА • ФИЗИКА ТКАНИ PiP • ЧИСТЫЕ АНИМАЦИИ ==================== */
+        @keyframes goldShimmerFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        @keyframes motionSlideBlur {
-            0% { filter: blur(7px); opacity: 0; transform: translate3d(0, 14px, 0) scale(0.97); }
-            60% { filter: blur(1.5px); opacity: 1; transform: translate3d(0, -1px, 0) scale(1.005); }
-            100% { filter: blur(0px); opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        .gold-shimmer-title {
+            background: linear-gradient(110deg, #bf953f 0%, #fcf6ba 22%, #b38728 45%, #fbf5b7 68%, #aa771c 88%, #fcf6ba 100%) !important;
+            background-size: 260% 100% !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            color: transparent !important;
+            animation: goldShimmerFlow 4.2s ease-in-out infinite !important;
+            filter: drop-shadow(0 2px 10px rgba(232, 185, 35, 0.28));
+            letter-spacing: 0.03em;
         }
-        @keyframes msgPopBlur {
-            0% { opacity: 0; filter: blur(6px); transform: translate3d(0, 12px, 0) scale(0.92); }
-            65% { opacity: 1; filter: blur(0.5px); transform: translate3d(0, -1px, 0) scale(1.015); }
-            100% { opacity: 1; filter: blur(0px); transform: translate3d(0, 0, 0) scale(1); }
+        #pip-window.pip {
+            will-change: left, top, transform;
+            transform-origin: 50% 12%;
+            transition: box-shadow 220ms ease;
         }
-        @keyframes chatRowSlide {
-            0% { opacity: 0; filter: blur(6px); transform: translate3d(-16px, 0, 0); }
-            70% { opacity: 1; filter: blur(0.5px); transform: translate3d(2px, 0, 0); }
-            100% { opacity: 1; filter: blur(0px); transform: translate3d(0, 0, 0); }
+        #pip-window.pip.dragging {
+            box-shadow: 0 28px 56px -10px rgba(0,0,0,0.92), 0 0 0 1.5px var(--accent-primary);
         }
-        @keyframes profStagger {
-            0% { opacity: 0; filter: blur(8px); transform: translate3d(0, 14px, 0) scale(0.95); }
-            100% { opacity: 1; filter: blur(0px); transform: translate3d(0, 0, 0) scale(1); }
+        @keyframes cleanMsgSlide {
+            0% { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.97); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes cleanRowSlide {
+            0% { opacity: 0; transform: translate3d(-10px, 0, 0); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        @keyframes cleanProfFade {
+            0% { opacity: 0; transform: translate3d(0, 10px, 0); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0); }
         }
         @keyframes typingDotBounce {
-            0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
-            40% { transform: translateY(-3.5px); opacity: 1; }
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40% { transform: translateY(-3px); opacity: 1; }
         }
-        @keyframes adShimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .motion-blur-active {
-            animation: motionBlurPulse 360ms var(--ease-ios);
-        }
-        .stage-enter-blur {
-            animation: motionSlideBlur 420ms var(--ease-ios) backwards;
-        }
-        .live-msg-anim {
-            animation: msgPopBlur 380ms var(--ease-spring) backwards;
-        }
-        .live-row-anim {
-            animation: chatRowSlide 380ms var(--ease-spring) backwards;
-        }
-        .prof-reveal {
-            animation: profStagger 420ms var(--ease-spring) backwards;
-            animation-delay: calc(var(--step, 0) * 95ms);
+        .clean-msg-in { animation: cleanMsgSlide 280ms var(--ease-ios) backwards; }
+        .clean-row-in { animation: cleanRowSlide 280ms var(--ease-ios) backwards; }
+        .clean-prof-in {
+            animation: cleanProfFade 320ms var(--ease-ios) backwards;
+            animation-delay: calc(var(--step, 0) * 80ms);
         }
         .typing-dot {
             display: inline-block;
-            width: 4px;
-            height: 4px;
+            width: 3.5px;
+            height: 3.5px;
             border-radius: 50%;
             background: currentColor;
             margin: 0 1px;
-            animation: typingDotBounce 1.1s infinite ease-in-out;
+            animation: typingDotBounce 1.05s infinite ease-in-out;
         }
-        .typing-dot:nth-child(2) { animation-delay: 0.16s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.32s; }
-        body.is-scrolling-fast main {
-            filter: blur(1.4px);
-            transition: filter 110ms ease;
-        }
-        main {
-            transition: filter 200ms ease, transform 240ms var(--ease-ios);
+        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.30s; }
+        /* Отключаем конфликтную CSS-анимацию внутри #imp-modal-Stage, чтобы окно после сохранения не ломалось */
+        #native-theme-preview-modal #imp-modal-Stage > div {
+            animation: none !important;
         }
         .ad-slot-banner {
             position: relative;
             overflow: hidden;
-            border-radius: 16px;
-            padding: 12px 14px;
-            background: linear-gradient(125deg, color-mix(in srgb, var(--accent-primary) 14%, var(--input-bg)), color-mix(in srgb, var(--accent-secondary) 10%, var(--code-bg)));
-            border: 1px dashed color-mix(in srgb, var(--accent-primary) 48%, transparent);
-            transition: transform 200ms var(--ease-spring), border-color 200ms ease;
+            border-radius: 14px;
+            padding: 10px 12px;
+            background: linear-gradient(125deg, color-mix(in srgb, var(--accent-primary) 14%, var(--input-bg)), color-mix(in srgb, var(--accent-secondary) 8%, var(--code-bg)));
+            border: 1px dashed color-mix(in srgb, var(--accent-primary) 45%, transparent);
+            transition: transform 180ms var(--ease-spring), border-color 180ms ease;
         }
         .ad-slot-banner:hover {
-            transform: translateY(-1px);
             border-color: var(--accent-primary);
-        }
-        .ad-slot-banner::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-            background-size: 200% 100%;
-            animation: adShimmer 4.5s infinite linear;
         }
 
     </style>
@@ -648,14 +632,12 @@
     <div id="bg-gradient-layer" class="bg-layer"></div>
     <div id="bg-pattern-layer" class="bg-layer"></div>
 
-    <!-- ==================== ОКНО ПРОСМОТРА И СОХРАНЕНИЯ ==================== -->
+    <!-- ==================== ОКНО ПРОСМОТРА И УСТАНОВКИ ==================== -->
     <div id="native-theme-preview-modal" class="fixed inset-0 z-[55] bg-black/80 backdrop-blur-xl hidden items-end sm:items-center justify-center p-3" onclick="if(event.target===this)closeImportedThemeModal()">
         <div class="imp-sheet frosted-card max-w-md w-full space-y-2.5">
             <div class="flex items-center justify-between gap-2">
-                <div class="min-w-0">
-                    <h3 id="imp-modal-title" class="text-sm font-bold text-dynamic truncate"></h3>
-                </div>
-                <div class="flex items-center gap-1">
+                <h3 id="imp-modal-title" class="text-sm font-bold text-dynamic truncate"></h3>
+                <div class="flex items-center gap-1 shrink-0">
                     <div class="flex items-center gap-0.5 p-0.5 rounded-lg recessed-block">
                         <button type="button" id="modal-tab-chat" onclick="setModalStageTab('chat')" class="px-2 py-1 rounded-md text-[10px] font-semibold bg-white/10 text-dynamic">Диалог</button>
                         <button type="button" id="modal-tab-list" onclick="setModalStageTab('list')" class="px-2 py-1 rounded-md text-[10px] font-medium text-muted-dynamic">Чаты</button>
@@ -664,16 +646,13 @@
                     <button type="button" onclick="closeImportedThemeModal()" class="chip-btn min-w-[28px] min-h-[28px] rounded-full text-xs">✕</button>
                 </div>
             </div>
-            <div id="imp-modal-Stage" class="rounded-2xl overflow-hidden border border-white/15 shadow-2xl min-h-[270px] flex flex-col justify-between"></div>
-            <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2.5 text-left">
-                <div class="flex items-center gap-2.5 min-w-0">
-                    <span class="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider accent-bg-soft accent-text shrink-0">AD</span>
-                    <div class="min-w-0">
-                        <div class="text-xs font-bold text-dynamic truncate">Тут могла быть ваша реклама</div>
-                        <div class="text-[10px] text-muted-dynamic truncate">Размещение и связь — @darxxx1zq</div>
-                    </div>
+            <div id="imp-modal-Stage" class="rounded-2xl overflow-hidden border border-white/15 shadow-2xl"></div>
+            <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2 text-left">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase accent-bg-soft accent-text shrink-0">AD</span>
+                    <span class="text-[11px] font-semibold text-dynamic truncate">Тут могла быть ваша реклама</span>
                 </div>
-                <span class="px-2.5 py-1 rounded-lg btn-surface text-[10px] font-bold accent-text shrink-0">Написать</span>
+                <span class="text-[10px] font-mono accent-text shrink-0">@darxxx1zq</span>
             </button>
             <div id="imp-compat" class="hidden grid-cols-2 gap-1 p-1 rounded-xl recessed-block">
                 <button type="button" id="compat-full" onclick="setCompat('full')">Полная</button>
@@ -706,43 +685,29 @@
 
     <!-- ==================== ШАПКА ==================== -->
     <header class="frosted-header select-none">
-        <div class="px-4 lg:px-8 py-2.5 max-w-md lg:max-w-6xl mx-auto flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl recessed-block flex items-center justify-center shrink-0">
-                    <svg class="w-4 h-4 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-sm font-bold tracking-tight text-dynamic">TG STUDIO</h1>
-                    </div>
-                    <p class="text-[11px] text-muted-dynamic leading-none mt-0.5">@darxxx1zq</p>
-                </div>
+        <div class="px-3 sm:px-6 lg:px-8 py-2.5 max-w-md lg:max-w-6xl mx-auto flex items-center justify-between gap-1.5">
+            <div class="min-w-0 shrink-0">
+                <h1 class="gold-shimmer-title text-[15px] sm:text-base font-extrabold tracking-tight leading-none">TG STUDIO</h1>
+                <button type="button" onclick="contactAuthorTg()" class="text-[10px] text-muted-dynamic leading-none mt-1 block hover:underline">@darxxx1zq</button>
             </div>
 
-            <div class="flex items-center gap-1.5">
-                <button type="button" id="admin-header-btn" onclick="openAdminPanelSheet()" class="chip-btn min-h-[36px] px-2.5 flex items-center gap-1.5 text-[11px] font-semibold" title="Панель управления">
-                    <svg class="w-3.5 h-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    <span class="hidden sm:inline">Админ</span>
+            <div class="flex items-center gap-1 shrink-0">
+                <button type="button" id="admin-header-btn" onclick="openAdminPanelSheet()" class="chip-btn min-h-[32px] px-2 flex items-center gap-1 text-[10px] font-semibold" title="Админ">
+                    <svg class="w-3 h-3 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Админ</span>
                 </button>
 
-                <button type="button" onclick="openHelpSupportSheet()" class="chip-btn min-h-[36px] px-2.5 flex items-center gap-1.5 text-[11px] font-semibold" title="Помощь и связь @darxxx1zq">
-                    <svg class="w-3.5 h-3.5 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    <span>Помощь</span>
+                <button type="button" onclick="openHelpSupportSheet()" class="chip-btn min-h-[32px] px-2 flex items-center gap-1 text-[10px] font-semibold" title="Помощь и связь">
+                    <svg class="w-3 h-3 accent-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <span>Гид</span>
                 </button>
 
-                <button type="button" onclick="openOnboarding(0)" class="chip-btn min-h-[36px] px-2.5 flex items-center gap-1.5 text-[11px] font-medium" title="Гид">
-                    <svg class="w-3.5 h-3.5 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    <span class="hidden sm:inline">Гид</span>
-                </button>
-
-                <button type="button" onclick="openPersonalizeSheet()" class="chip-btn min-h-[36px] px-2.5 flex items-center gap-1.5 text-[11px] font-medium" title="Стиль студии и графика">
-                    <svg class="w-3.5 h-3.5 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+                <button type="button" onclick="openPersonalizeSheet()" class="chip-btn min-h-[32px] px-2 flex items-center gap-1 text-[10px] font-semibold" title="Стиль">
+                    <svg class="w-3 h-3 accent-icon shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
                     <span>Стиль</span>
                 </button>
 
-                <button type="button" onclick="SoundFX.toggleMute()" id="sound-toggle-btn" aria-label="Звук" class="chip-btn min-w-[36px] min-h-[36px] flex items-center justify-center">
+                <button type="button" onclick="SoundFX.toggleMute()" id="sound-toggle-btn" aria-label="Звук" class="chip-btn min-w-[32px] min-h-[32px] flex items-center justify-center shrink-0">
                     <svg id="svg-sound-on" class="w-3.5 h-3.5 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
                     <svg id="svg-sound-off" class="w-3.5 h-3.5 text-rose-400 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
                 </button>
@@ -753,7 +718,13 @@
     <!-- ==================== ОНБОРДИНГ ==================== -->
     <div id="onboard-overlay" class="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4" onclick="if(event.target===this)closeOnboarding()">
         <div class="neon-card w-full max-w-sm">
-            <div class="ob-hero" id="ob-hero-box" style="background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--accent-primary) 35%, transparent), var(--surface-1));"><img id="ob-hero-img" alt="" decoding="async" class="hidden" onerror="this.remove()"></div>
+            <div class="ob-hero" id="ob-hero-wrap" style="background: radial-gradient(circle at 25% 20%, rgba(232,185,35,0.38), transparent 55%), radial-gradient(circle at 80% 75%, rgba(184,134,11,0.32), transparent 60%), linear-gradient(135deg, #161209 0%, #090806 100%);">
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none z-0">
+                    <span class="gold-shimmer-title text-2xl font-extrabold tracking-widest">TG STUDIO</span>
+                    <span class="text-[10px] text-amber-200/70 mt-1 font-mono uppercase tracking-widest">@darxxx1zq</span>
+                </div>
+                <img id="ob-welcome-img" alt="" decoding="async" class="relative z-10 w-full h-full object-cover" style="opacity:0; transition:opacity 300ms ease;" onload="this.style.opacity='1'" onerror="this.style.display='none'">
+            </div>
             <div class="overflow-hidden">
                 <div id="onboard-track"></div>
             </div>
@@ -1039,12 +1010,9 @@
                                     <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">03 • Палитра элементов</span>
                                 </div>
                                 <div class="flex flex-wrap gap-1.5">
-                                    <button type="button" onclick="applyGithubPicWallpaper()" class="chip-btn px-2.5 py-1.5 text-[11px] font-semibold accent-text flex items-center gap-1.5">
+                                    <label class="chip-btn px-2.5 py-1.5 text-[11px] font-semibold accent-text cursor-pointer flex items-center gap-1.5">
                                         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                        <span>Обои pic.jpg</span>
-                                    </button>
-                                    <label class="chip-btn px-2.5 py-1.5 text-[11px] font-medium cursor-pointer flex items-center gap-1.5">
-                                        <span>Своё фото</span>
+                                        <span>Загрузить фон чата</span>
                                         <input type="file" accept="image/*" onchange="handleChatWallpaperUpload(this.files)" class="hidden">
                                     </label>
                                     <label class="chip-btn px-2.5 py-1.5 text-[11px] font-medium cursor-pointer flex items-center gap-1.5">
@@ -1120,10 +1088,8 @@
                             </div>
 
                             <div class="grid grid-cols-2 gap-2 pt-2">
-                                <button type="button" onclick="openNativeSetLanguageModal()" class="btn-primary min-h-[44px] text-xs flex items-center justify-center gap-1.5">
-                                    <span>Установить язык</span>
-                                </button>
-                                <button type="button" onclick="compileImportAndOpenPreview('lang')" class="btn-surface min-h-[44px] text-xs font-semibold accent-text">Предпросмотр и .XML</button>
+                                <button type="button" onclick="compileImportAndOpenPreview('lang')" class="btn-primary min-h-[44px] text-xs">Установить язык</button>
+                                <button type="button" onclick="installLanguage()" class="btn-surface min-h-[44px] text-xs font-semibold accent-text">Установить язык</button>
                             </div>
                         </article>
                     </div>
@@ -1135,12 +1101,9 @@
                                 <div>
                                     <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">Обои чата</span>
                                 </div>
-                                <div class="flex flex-wrap gap-1.5">
-                                    <button type="button" onclick="applyGithubPicWallpaper()" class="btn-primary px-3 py-1.5 text-[11px] flex items-center gap-1.5">
-                                        <span>Обои pic.jpg</span>
-                                    </button>
-                                    <label class="btn-surface px-3 py-1.5 text-[11px] font-semibold accent-text cursor-pointer flex items-center gap-1.5">
-                                        <span>Своя картинка</span>
+                                <div class="flex gap-1.5">
+                                    <label class="btn-primary px-3 py-1.5 text-[11px] cursor-pointer flex items-center gap-1.5">
+                                        <span>Выбрать картинку</span>
                                         <input type="file" accept="image/*" onchange="handleChatWallpaperUpload(this.files)" class="hidden">
                                     </label>
                                     <button type="button" onclick="clearChatWallpaper()" class="chip-btn px-2.5 py-1.5 text-[11px] text-rose-400 font-semibold">Удалить фон</button>
@@ -1310,7 +1273,7 @@
         let lastCompiledPackage = null;
         let wpDragActive = false;
 
-        /* ==================== 1. ЗВУКОВОЙ ДВИЖОК WEB AUDIO API ==================== */
+        /* ==================== 1. ПРЕМИАЛЬНЫЙ MЯГКИЙ ЗВУКОВОЙ ДВИЖОК (SOFT iOS CHIMES) ==================== */
         const SoundFX = {
             ctx: null,
             muted: localStorage.getItem('vibe_sound_muted') === 'true',
@@ -1332,94 +1295,68 @@
                 if (!this.muted) this.success();
                 showToast(this.muted ? 'Звук выключен' : 'Звук включён');
             },
-            tap(freq = 340) {
+            note(freq, dur = 0.08, vol = 0.035, delay = 0, endFreq = null) {
                 if (this.muted) return;
                 try {
                     this.init();
-                    const now = this.ctx.currentTime;
+                    const t0 = this.ctx.currentTime + delay;
                     const osc = this.ctx.createOscillator();
+                    const sub = this.ctx.createOscillator();
+                    const filter = this.ctx.createBiquadFilter();
                     const gain = this.ctx.createGain();
+
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, now);
-                    osc.frequency.exponentialRampToValueAtTime(95, now + 0.038);
-                    gain.gain.setValueAtTime(0.06, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.038);
-                    osc.connect(gain); gain.connect(this.ctx.destination);
-                    osc.start(now); osc.stop(now + 0.042);
+                    sub.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, t0);
+                    sub.frequency.setValueAtTime(freq * 0.5, t0);
+                    if (endFreq) {
+                        osc.frequency.exponentialRampToValueAtTime(endFreq, t0 + dur);
+                        sub.frequency.exponentialRampToValueAtTime(endFreq * 0.5, t0 + dur);
+                    }
+
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(1800, t0);
+
+                    gain.gain.setValueAtTime(0.0001, t0);
+                    gain.gain.linearRampToValueAtTime(vol, t0 + 0.008);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+                    osc.connect(filter);
+                    sub.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(t0);
+                    sub.start(t0);
+                    osc.stop(t0 + dur + 0.01);
+                    sub.stop(t0 + dur + 0.01);
                 } catch (_) {}
+            },
+            tap(freq = 680) {
+                this.note(freq, 0.042, 0.028, 0, freq * 0.72);
             },
             tick() {
                 const nowMs = performance.now();
-                if (this.muted || nowMs - this.lastTick < 40) return;
+                if (this.muted || nowMs - this.lastTick < 48) return;
                 this.lastTick = nowMs;
-                this.tap(540);
+                this.note(820, 0.026, 0.016, 0, 640);
             },
             pop() {
-                if (this.muted) return;
-                try {
-                    this.init();
-                    const now = this.ctx.currentTime;
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(260, now);
-                    osc.frequency.exponentialRampToValueAtTime(620, now + 0.055);
-                    gain.gain.setValueAtTime(0.065, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-                    osc.connect(gain); gain.connect(this.ctx.destination);
-                    osc.start(now); osc.stop(now + 0.065);
-                } catch (_) {}
+                this.note(440, 0.075, 0.032, 0, 740);
             },
             switchTab() {
-                if (this.muted) return;
-                try {
-                    this.init();
-                    [392, 523.25].forEach((f, i) => {
-                        const now = this.ctx.currentTime + i * 0.04;
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(f, now);
-                        gain.gain.setValueAtTime(0.045, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                        osc.connect(gain); gain.connect(this.ctx.destination);
-                        osc.start(now); osc.stop(now + 0.11);
-                    });
-                } catch (_) {}
+                this.note(587.33, 0.085, 0.026, 0);
+                this.note(880.0, 0.12, 0.03, 0.045);
             },
             success() {
-                if (this.muted) return;
-                try {
-                    this.init();
-                    [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
-                        const now = this.ctx.currentTime + idx * 0.045;
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
-                        osc.type = 'triangle';
-                        osc.frequency.setValueAtTime(freq, now);
-                        gain.gain.setValueAtTime(0.055, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-                        osc.connect(gain); gain.connect(this.ctx.destination);
-                        osc.start(now); osc.stop(now + 0.21);
-                    });
-                } catch (_) {}
+                // Мягкий бархатный аккорд Maj9 (F#4 - A#4 - C#5 - F5)
+                [587.33, 740.0, 880.0, 1174.66].forEach((f, i) => {
+                    this.note(f, 0.24, 0.026, i * 0.05);
+                });
             },
             error() {
-                if (this.muted) return;
-                try {
-                    this.init();
-                    [170, 135].forEach((freq, idx) => {
-                        const now = this.ctx.currentTime + idx * 0.075;
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
-                        osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(freq, now);
-                        gain.gain.setValueAtTime(0.04, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
-                        osc.connect(gain); gain.connect(this.ctx.destination);
-                        osc.start(now); osc.stop(now + 0.095);
-                    });
-                } catch (_) {}
+                this.note(311.13, 0.11, 0.03, 0, 277.18);
+                this.note(261.63, 0.15, 0.03, 0.08, 220.0);
             }
         };
 
@@ -2016,13 +1953,6 @@
             while (liveSimTimers.length) clearTimeout(liveSimTimers.pop());
         }
 
-        function triggerElementMotionBlur(el) {
-            if (!el || document.documentElement.dataset.fx === 'min') return;
-            el.classList.remove('motion-blur-active');
-            void el.offsetWidth;
-            el.classList.add('motion-blur-active');
-        }
-
         function setPreviewScreen(mode) {
             Haptic.selection();
             previewScreenMode = mode;
@@ -2034,7 +1964,6 @@
                         : 'px-2 py-1 rounded-md text-[11px] font-medium text-muted-dynamic';
                 }
             });
-            triggerElementMotionBlur(document.getElementById('tg-live-mockup'));
             renderTgLiveMockup(true);
         }
 
@@ -2129,13 +2058,13 @@
 
             if (isList) {
                 const sampleChats = [
-                    { name: 'Darxy // Studio', msg: tgState.typing || 'печатает...', time: 'сейчас', unread: 1, typing: true, secret: false, sentCheck: false, id: 'live-chat-row-0' },
-                    { name: 'Секретный чат', msg: 'Все ключи защищены от синего', time: '14:25', unread: 0, secret: true, sentCheck: true, id: 'live-chat-row-1' },
-                    { name: tgState.saved || 'Избранное', msg: 'Nightcall.mp3 • pic.jpg', time: '14:22', unread: 2, secret: false, sentCheck: false, id: 'live-chat-row-2' },
-                    { name: 'Telegram Audio', msg: 'Голосовое сообщение (0:18)', time: 'Вчера', unread: 0, secret: false, sentCheck: true, id: 'live-chat-row-3' }
+                    { id: 'l-row-0', name: 'Darxy // Studio', msg: tgState.typing || 'печатает...', time: 'сейчас', unread: 1, typing: true, secret: false, sentCheck: false },
+                    { id: 'l-row-1', name: 'Секретный чат', msg: 'Замок и заголовок контрастные', time: '14:25', unread: 0, secret: true, sentCheck: true },
+                    { id: 'l-row-2', name: tgState.saved || 'Избранное', msg: 'Nightcall.mp3', time: '14:22', unread: 2, secret: false, sentCheck: false },
+                    { id: 'l-row-3', name: 'Telegram Audio', msg: 'Голосовое сообщение (0:18)', time: 'Вчера', unread: 0, secret: false, sentCheck: true }
                 ];
                 listView.innerHTML = sampleChats.map((c, idx) => `
-                    <div id="${c.id}" class="px-3.5 py-2.5 flex items-center gap-3 live-row-anim" style="animation-delay:${idx * 70}ms; color:${C.primaryTextOnBg}; border-bottom:1px solid ${C.dividerColor}">
+                    <div id="${c.id}" class="px-3.5 py-2.5 flex items-center gap-3 clean-row-in" style="animation-delay:${idx * 55}ms; color:${C.primaryTextOnBg}; border-bottom:1px solid ${C.dividerColor}">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0 bg-cover bg-center" style="${tgState.avatarDataUrl ? `background-image:url('${tgState.avatarDataUrl}')` : `background-color:${C.avatarBg}; color:${C.avatarFg}`}">${tgState.avatarDataUrl ? '' : c.name[0]}</div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-center">
@@ -2145,53 +2074,27 @@
                                 </span>
                                 <span class="text-[10px] flex items-center gap-1" style="color:${C.secondaryTextOnBg}">
                                     ${c.sentCheck ? `<svg class="w-3.5 h-3.5" style="color:${C.listChecks}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>` : ''}
-                                    <span class="chat-time-lbl">${c.time}</span>
+                                    ${c.time}
                                 </span>
                             </div>
                             <div class="flex justify-between items-center mt-0.5">
-                                <span class="chat-msg-lbl text-[11px] truncate flex items-center gap-1" style="color:${c.typing ? C.accentOnBg : C.secondaryTextOnBg}">
+                                <span class="l-msg text-[11px] truncate flex items-center gap-1" style="color:${c.typing ? C.accentOnBg : C.secondaryTextOnBg}">
                                     ${c.typing ? `<span class="inline-flex items-center mr-0.5"><i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i></span>` : ''}${escapeHtml(c.msg)}
                                 </span>
-                                <span class="chat-badge-lbl px-1.5 py-0.2 rounded-full text-[10px] font-bold ${c.unread ? '' : 'hidden'}" style="background:${C.actionBtnBg}; color:${C.actionBtnFg}">${c.unread || 1}</span>
+                                <span class="l-badge px-1.5 py-0.2 rounded-full text-[10px] font-bold ${c.unread ? '' : 'hidden'}" style="background:${C.actionBtnBg}; color:${C.actionBtnFg}">${c.unread || 1}</span>
                             </div>
                         </div>
                     </div>
                 `).join('');
 
-                // Живой приход сообщений в списке чатов (недолго, плавно)
                 liveSimTimers.push(setTimeout(() => {
-                    const r0 = document.getElementById('live-chat-row-0');
+                    const r0 = document.getElementById('l-row-0');
                     if (!r0) return;
-                    const msgEl = r0.querySelector('.chat-msg-lbl');
-                    const badgeEl = r0.querySelector('.chat-badge-lbl');
-                    if (msgEl) {
-                        msgEl.style.color = C.primaryTextOnBg;
-                        msgEl.innerHTML = 'Тема и обои pic.jpg готовы к установке!';
-                    }
-                    if (badgeEl) {
-                        badgeEl.textContent = '2';
-                        badgeEl.classList.remove('hidden');
-                        badgeEl.classList.add('live-msg-anim');
-                    }
-                    r0.classList.remove('live-row-anim');
-                    void r0.offsetWidth;
-                    r0.classList.add('live-row-anim');
-                }, 720));
-
-                liveSimTimers.push(setTimeout(() => {
-                    const r2 = document.getElementById('live-chat-row-2');
-                    if (!r2) return;
-                    const msgEl = r2.querySelector('.chat-msg-lbl');
-                    const badgeEl = r2.querySelector('.chat-badge-lbl');
-                    if (msgEl) {
-                        msgEl.style.color = C.accentOnBg;
-                        msgEl.innerHTML = 'Новое сохранение в Сейфе ✓';
-                    }
-                    if (badgeEl) {
-                        badgeEl.textContent = '3';
-                        badgeEl.classList.add('live-msg-anim');
-                    }
-                }, 1450));
+                    const mEl = r0.querySelector('.l-msg');
+                    const bEl = r0.querySelector('.l-badge');
+                    if (mEl) { mEl.style.color = C.primaryTextOnBg; mEl.textContent = 'Новая тема готова к установке ✓'; }
+                    if (bEl) { bEl.textContent = '2'; bEl.classList.remove('hidden'); bEl.classList.add('clean-msg-in'); }
+                }, 650));
             }
 
             // Рендер экрана ПРОФИЛЯ (Никнейм, Статус, Кнопки, Блок «О себе», Юзернейм и Вкладки Медиа)
@@ -2201,8 +2104,8 @@
                     : `background:${C.avatarBg}; color:${C.avatarFg};`;
                 profileView.innerHTML = `
                     <div>
-                        <!-- Шапка профиля (постепенное появление) -->
-                        <div class="prof-reveal px-4 pt-3 pb-3 flex flex-col items-center text-center relative" style="--step:0; background:${C.headerBg}; border-bottom:1px solid ${C.headerDivider}">
+                        <!-- Шапка профиля -->
+                        <div class="clean-prof-in px-4 pt-3 pb-3" style="--step:0; flex flex-col items-center text-center relative" background:${C.headerBg}; border-bottom:1px solid ${C.headerDivider}">
                             <div class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-base shadow-md mb-2" style="${avStyle}; border:2px solid ${C.accentOnHdr}">${tgState.avatarDataUrl ? '' : 'D'}</div>
                             <div class="text-sm font-bold leading-tight flex items-center gap-1" style="color:${C.primaryTextOnHdr}">
                                 <span>Darxy // TG Studio</span>
@@ -2221,7 +2124,7 @@
                         </div>
 
                         <!-- Карточка Информации («О себе» и Юзернейм) -->
-                        <div class="prof-reveal mx-3 my-2.5 rounded-xl overflow-hidden" style="--step:1; background:${C.chatBg}; border:1px solid ${C.dividerColor}">
+                        <div class="clean-prof-in mx-3 my-2.5 rounded-xl overflow-hidden" style="--step:1; background:${C.chatBg}; border:1px solid ${C.dividerColor}">
                             <div class="px-3.5 py-2" style="border-bottom:1px solid ${C.dividerColor}">
                                 <div class="text-[10px] font-bold uppercase tracking-wider" style="color:${C.accentOnBg}">Информация</div>
                                 <div class="text-xs font-medium mt-1 leading-snug" style="color:${C.primaryTextOnBg}">Создатель кастомных тем и локализаций Telegram. Текст описания никогда не сливается с фоном!</div>
@@ -2238,7 +2141,7 @@
                     </div>
 
                     <!-- Вкладки профиля (Медиа / Файлы / Голосовые) -->
-                    <div class="prof-reveal px-3 pt-2 pb-2.5" style="--step:2; background:${C.chatBg}; border-top:1px solid ${C.dividerColor}">
+                    <div class="clean-prof-in px-3 pt-2 pb-2.5" style="--step:2; background:${C.chatBg}; border-top:1px solid ${C.dividerColor}">
                         <div class="flex items-center justify-around text-[11px] font-bold pb-1.5" style="border-bottom:1px solid ${C.dividerColor}">
                             <span class="pb-1" style="color:${C.dialogBtnOnBg}; border-bottom:2px solid ${C.dialogBtnOnBg}">Медиа</span>
                             <span style="color:${C.secondaryTextOnBg}">Файлы</span>
@@ -2326,10 +2229,10 @@
             if (animateStage && isChat && document.documentElement.dataset.fx !== 'min') {
                 const inTextEl = document.getElementById('tg-mock-in-text');
                 const outTextEl = document.getElementById('tg-mock-out-text');
-                msgIn.classList.remove('live-msg-anim');
-                msgOut.classList.remove('live-msg-anim');
+                msgIn.classList.remove('clean-msg-in');
+                msgOut.classList.remove('clean-msg-in');
                 void msgIn.offsetWidth;
-                msgIn.classList.add('live-msg-anim');
+                msgIn.classList.add('clean-msg-in');
                 msgOut.style.opacity = '0';
 
                 if (inTextEl) {
@@ -2337,17 +2240,15 @@
                 }
                 liveSimTimers.push(setTimeout(() => {
                     if (inTextEl) inTextEl.textContent = 'Смотри, какая тема получилась';
-                }, 480));
+                }, 420));
                 liveSimTimers.push(setTimeout(() => {
                     msgOut.style.opacity = '1';
-                    msgOut.classList.add('live-msg-anim');
-                    if (outTextEl) {
-                        outTextEl.innerHTML = `<span class="inline-flex items-center gap-1"><i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i></span>`;
-                    }
-                }, 760));
+                    msgOut.classList.add('clean-msg-in');
+                    if (outTextEl) outTextEl.innerHTML = `<span class="inline-flex items-center gap-1"><i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i></span>`;
+                }, 680));
                 liveSimTimers.push(setTimeout(() => {
                     if (outTextEl) outTextEl.textContent = 'Выглядит отлично';
-                }, 1180));
+                }, 1050));
             } else {
                 msgOut.style.opacity = '1';
             }
@@ -2797,7 +2698,7 @@
             const basic = getCompatMode() === 'basic', map = new Map();
             String(text).split(/\r?\n/).forEach(raw => {
                 const m = raw.trim().match(/^([A-Za-z0-9_]+)=(-?\d+)$/);
-                if (!m || AT_INVALID_KEYS.has(m[1])) return;
+                if (!m || AT_INVALID_KEYS.has(m[1]) || (basic && !AT_BASIC_KEYS.has(m[1]))) return;
                 map.set(m[1], m[2]);
             });
             return [...map].map(([k, v]) => `${k}=${v}`).join('\n') + '\n';
@@ -2919,7 +2820,7 @@
             SA('chat_inTextSelectionHighlight', C.inAccent, '55');
             SA('chat_outTextSelectionHighlight', C.outText, '55');
 
-            // Полный перехват всех оставшихся синих ключей Telegram Android (Cursor, Mentions, Bots, Polls, Reactions, Stories, Tabs, Stickers, Media, Calls, Context Menu, Scrollbars)
+            // Полный перехват всех оставшихся синих ключей Telegram Android
             S('chat_inSelectionCursor chat_TextSelectionCursor', C.inAccent);
             S('chat_outSelectionCursor', C.outAccent);
             S('windowBackgroundWhiteValueText2 windowBackgroundWhiteBlueText8', C.dialogBtnOnBg);
@@ -2999,7 +2900,6 @@
             S('chats_storyCircleRead', C.dividerColor);
             S('stories_circle_closeFriends', C.listChecks);
             S('key_sheet_scrollUp', C.dividerColor);
-            S('key_ sheet_other', C.headerBg);
             S('key_player_progressBackground', A(C.inMedia, '35'));
             S('key_player_progress', C.accentOnBg);
             S('key_player_progressCachedBackground', A(C.inMedia, '55'));
@@ -3490,8 +3390,6 @@
                         : 'px-2 py-1 rounded-md text-[10px] font-medium text-muted-dynamic';
                 }
             });
-            const stage = document.getElementById('imp-modal-Stage');
-            triggerElementMotionBlur(stage);
             renderModalStageContent(lastCompiledPackage || { state: tgState, format: 'attheme', kind: 'theme' });
         }
 
@@ -3511,18 +3409,18 @@
             if (modalStageTab === 'list') {
                 const rows = [
                     { id: 'm-row-0', name: 'Darxy // Studio', msg: st.typing || 'печатает...', time: 'сейчас', unread: 1, typing: true, secret: false },
-                    { id: 'm-row-1', name: st.saved || 'Избранное', msg: 'Обои pic.jpg + палитра', time: '14:25', unread: 2, typing: false, secret: false },
-                    { id: 'm-row-2', name: 'Секретный чат', msg: '0% синего — всё под контролем', time: '14:20', unread: 0, typing: false, secret: true }
+                    { id: 'm-row-1', name: st.saved || 'Избранное', msg: 'Nightcall.mp3', time: '14:25', unread: 2, typing: false, secret: false },
+                    { id: 'm-row-2', name: 'Секретный чат', msg: 'Все элементы темы проверены', time: '14:20', unread: 0, typing: false, secret: true }
                 ];
                 stage.innerHTML = `
-                    <div style="background:${C.chatBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none flex-1 flex flex-col justify-between">
+                    <div style="background:${C.chatBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none">
                         <div style="background:${C.headerBg};border-bottom:1px solid ${C.headerDivider}" class="px-3.5 py-2 flex items-center justify-between">
                             <span class="text-xs font-bold" style="color:${C.primaryTextOnHdr}">Telegram</span>
                             <span class="text-[10px] font-medium" style="color:${C.accentOnHdr}">${escapeHtml(st.online || 'в сети')}</span>
                         </div>
-                        <div class="divide-y" style="border-color:${C.dividerColor}">
+                        <div>
                             ${rows.map((c, idx) => `
-                                <div id="${c.id}" class="px-3.5 py-2.5 flex items-center gap-2.5 live-row-anim" style="animation-delay:${idx * 75}ms;border-bottom:1px solid ${C.dividerColor}">
+                                <div id="${c.id}" class="px-3.5 py-2.5 flex items-center gap-2.5 clean-row-in" style="animation-delay:${idx * 60}ms;border-bottom:1px solid ${C.dividerColor}">
                                     <div style="${avatar};width:34px;height:34px;border-radius:50%;flex-shrink:0" class="flex items-center justify-center font-bold text-xs">${st.avatarDataUrl ? '' : escapeHtml(c.name[0])}</div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex justify-between items-center">
@@ -3545,17 +3443,17 @@
                     if (!r0) return;
                     const mEl = r0.querySelector('.m-msg');
                     const bEl = r0.querySelector('.m-badge');
-                    if (mEl) { mEl.style.color = C.primaryTextOnBg; mEl.textContent = 'Новое сообщение доставлено ✓'; }
-                    if (bEl) { bEl.textContent = '2'; bEl.classList.add('live-msg-anim'); }
-                }, 650));
+                    if (mEl) { mEl.style.color = C.primaryTextOnBg; mEl.textContent = 'Пакет готов к отправке ✓'; }
+                    if (bEl) { bEl.textContent = '2'; bEl.classList.add('clean-msg-in'); }
+                }, 600));
                 return;
             }
 
             if (modalStageTab === 'profile') {
                 stage.innerHTML = `
-                    <div style="background:${C.graySectionBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none flex-1 flex flex-col justify-between p-2.5 space-y-2">
-                        <div class="prof-reveal rounded-xl px-3 py-2.5 flex items-center gap-3" style="--step:0;background:${C.headerBg};border:1px solid ${C.headerDivider}">
-                            <div style="${avatar};width:42px;height:42px;border-radius:50%;border:2px solid ${C.accentOnHdr}" class="flex items-center justify-center font-bold text-sm shrink-0">${st.avatarDataUrl ? '' : 'D'}</div>
+                    <div style="background:${C.graySectionBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none p-2.5 space-y-2">
+                        <div class="clean-prof-in rounded-xl px-3 py-2.5 flex items-center gap-3" style="--step:0;background:${C.headerBg};border:1px solid ${C.headerDivider}">
+                            <div style="${avatar};width:40px;height:40px;border-radius:50%;border:2px solid ${C.accentOnHdr}" class="flex items-center justify-center font-bold text-sm shrink-0">${st.avatarDataUrl ? '' : 'D'}</div>
                             <div class="min-w-0 flex-1">
                                 <div class="text-xs font-bold truncate flex items-center gap-1" style="color:${C.primaryTextOnHdr}">
                                     <span>Darxy // TG Studio</span>
@@ -3564,11 +3462,11 @@
                                 <div class="text-[10px]" style="color:${C.accentOnHdr}">${escapeHtml(st.online || 'в сети')}</div>
                             </div>
                         </div>
-                        <div class="prof-reveal rounded-xl px-3 py-2 space-y-1" style="--step:1;background:${C.chatBg};border:1px solid ${C.dividerColor}">
-                            <div class="text-[9px] font-bold uppercase tracking-wider" style="color:${C.accentOnBg}">О себе</div>
-                            <div class="text-[11px] font-medium leading-snug" style="color:${C.primaryTextOnBg}">Кастомные темы, языковые пакеты и обои pic.jpg. Связь: <span style="color:${C.dialogBtnOnBg}">@darxxx1zq</span></div>
+                        <div class="clean-prof-in rounded-xl px-3 py-2 space-y-0.5" style="--step:1;background:${C.chatBg};border:1px solid ${C.dividerColor}">
+                            <div class="text-[9px] font-bold uppercase tracking-wider" style="color:${C.accentOnBg}">Информация</div>
+                            <div class="text-[11px] font-medium leading-snug" style="color:${C.primaryTextOnBg}">Автор тем и локализаций: <span style="color:${C.dialogBtnOnBg}">@darxxx1zq</span></div>
                         </div>
-                        <div class="prof-reveal rounded-xl px-3 py-2 grid grid-cols-3 gap-1.5 text-center text-[10px] font-bold" style="--step:2;background:${C.chatBg};border:1px solid ${C.dividerColor}">
+                        <div class="clean-prof-in rounded-xl px-3 py-2 grid grid-cols-3 gap-1.5 text-center text-[10px] font-bold" style="--step:2;background:${C.chatBg};border:1px solid ${C.dividerColor}">
                             <div class="py-1 rounded-lg" style="background:${C.msgIn};color:${C.inText}">Медиа</div>
                             <div class="py-1 rounded-lg" style="background:${C.msgOut};color:${C.outText}">Файлы</div>
                             <div class="py-1 rounded-lg" style="background:${C.headerBg};color:${C.dialogBtnOnHdr}">Ссылки</div>
@@ -3577,65 +3475,39 @@
                 return;
             }
 
-            // Default: 'chat' tab with gradual typing & message pop-in
             stage.innerHTML = `
-                <div style="background:${C.chatBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none flex-1 flex flex-col justify-between">
+                <div style="background:${C.chatBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none">
                     <div style="background:${C.headerBg};border-bottom:1px solid ${C.headerDivider}" class="px-3.5 py-2 flex items-center justify-between gap-2.5">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <div style="${avatar};width:32px;height:32px;border-radius:50%;flex-shrink:0" class="flex items-center justify-center font-bold text-xs">${st.avatarDataUrl ? '' : escapeHtml((st.name || 'D')[0])}</div>
                             <div class="min-w-0">
                                 <div class="text-xs font-bold leading-tight truncate" style="color:${C.primaryTextOnHdr}">${escapeHtml(isLang ? (st.saved || st.name) : st.name)}</div>
-                                <div id="modal-live-status" class="text-[10px] truncate" style="color:${C.accentOnHdr}">${escapeHtml(st.typing || 'печатает...')}</div>
+                                <div class="text-[10px] truncate" style="color:${C.secondaryTextOnHdr}"><span id="modal-live-st" style="color:${C.accentOnHdr}">${escapeHtml(st.online || 'в сети')}</span></div>
                             </div>
                         </div>
-                        <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:${C.dialogBtnOnHdr}22;color:${C.dialogBtnOnHdr}">${escapeHtml(st.today || 'Сегодня')}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[9px]" style="background:${C.dialogBtnOnHdr}20;color:${C.dialogBtnOnHdr}">${escapeHtml(st.today || 'Сегодня')}</span>
                     </div>
-                    <div class="p-3 space-y-2 flex-1 flex flex-col justify-center" style="${wp}">
-                        <div id="modal-msg-in" class="live-msg-anim max-w-[85%] px-3 py-2" style="background:${C.msgIn};color:${C.inText};border-radius:${r} ${r} ${r} 4px;border:1px solid ${C.dividerColor}">
+                    <div class="p-3 space-y-2" style="${wp}">
+                        <div class="clean-msg-in max-w-[84%] px-3 py-2" style="background:${C.msgIn};color:${C.inText};border-radius:${r} ${r} ${r} 4px;border:1px solid ${C.dividerColor}">
                             <div class="flex items-center gap-2">${play(C.inMedia, C.inMediaFg)}<div class="min-w-0"><div class="text-[11px] font-bold truncate" style="color:${C.inText}">Nightcall</div><div class="text-[10px]" style="color:${C.inTime}">Darxy Studio • 03:42</div></div></div>
-                            <div id="modal-msg-in-txt" class="text-[11px] mt-1"><span class="inline-flex items-center gap-1" style="color:${C.inAccent}"><i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i></span></div>
                         </div>
-                        <div id="modal-msg-out" class="max-w-[85%] ml-auto px-3 py-2 opacity-0" style="background:${C.msgOut};color:${C.outText};border-radius:${r} ${r} 4px ${r}">
+                        <div class="clean-msg-in max-w-[84%] ml-auto px-3 py-2" style="animation-delay:90ms;background:${C.msgOut};color:${C.outText};border-radius:${r} ${r} 4px ${r}">
                             <div class="flex items-center gap-2">${play(C.outMedia, C.outMediaFg)}<div class="flex items-center gap-[2px] h-4 flex-1">${wave(C.outMedia)}</div></div>
-                            <div id="modal-msg-out-txt" class="text-[11px] mt-1">Готово к установке!</div>
-                            <div class="text-[9px] text-right mt-0.5" style="color:${C.outTime}">0:18 • 14:21 <span style="color:${C.outChecks}">✓✓</span></div>
+                            <div class="text-[9px] text-right mt-1" style="color:${C.outTime}">0:18 • 14:21 <span style="color:${C.outChecks}">✓✓</span></div>
                         </div>
-                    </div>
-                    <div style="background:${C.headerBg};border-top:1px solid ${C.headerDivider}" class="px-3.5 py-2 flex items-center justify-between text-[11px]">
-                        <span class="truncate" style="color:${C.secondaryTextOnHdr}">${escapeHtml(st.placeholder || 'Сообщение...')}</span>
-                        <div class="flex items-center gap-3 font-bold">
-                            <span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.cancel || 'Отмена')}</span>
-                            <span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.ok || 'Принять')}</span>
+                        <div class="rounded-xl px-3 py-1.5 flex items-center justify-between text-[11px]" style="background:${C.headerBg};color:${C.primaryTextOnHdr};border:1px solid ${C.headerDivider}">
+                            <span class="truncate opacity-80">${escapeHtml(isLang ? st.placeholder : st.name)}</span>
+                            <div class="flex gap-3 font-bold shrink-0"><span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.cancel || 'Отмена')}</span><span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.ok || 'Принять')}</span></div>
                         </div>
                     </div>
                 </div>`;
-
-            modalStageTimers.push(setTimeout(() => {
-                const inTxt = document.getElementById('modal-msg-in-txt');
-                if (inTxt) inTxt.textContent = isLang ? `Пакет «${st.langName}» готов` : `Тема «${st.name}» проверена`;
-            }, 420));
-
-            modalStageTimers.push(setTimeout(() => {
-                const outBox = document.getElementById('modal-msg-out');
-                const stLbl = document.getElementById('modal-live-status');
-                if (outBox) {
-                    outBox.classList.remove('opacity-0');
-                    outBox.classList.add('live-msg-anim');
-                }
-                if (stLbl) stLbl.textContent = st.online || 'в сети';
-            }, 780));
         }
 
         function openImportedThemeModal(pkg) {
             const st = pkg.state || tgState;
             const isLang = pkg.kind === 'lang' || pkg.format === 'lang';
             document.getElementById('imp-modal-title').textContent = isLang ? st.langName : st.name;
-            document.getElementById('imp-btn-primary-label').textContent = isLang ? 'Окно «Изменить язык?»' : 'Применить в Telegram';
-
-            const cp = document.getElementById('imp-compat');
-            const showCompat = pkg.format === 'attheme';
-            cp.classList.toggle('hidden', !showCompat); cp.classList.toggle('grid', showCompat);
-            updateCompatUI();
+            document.getElementById('imp-btn-primary-label').textContent = isLang ? 'Установить язык' : 'Применить в Telegram';
 
             modalStageTab = 'chat';
             ['chat', 'list', 'profile'].forEach(t => {
@@ -3648,6 +3520,10 @@
             });
             renderModalStageContent(pkg);
 
+            const cp = document.getElementById('imp-compat');
+            const showCompat = pkg.format === 'attheme';
+            cp.classList.toggle('hidden', !showCompat); cp.classList.toggle('grid', showCompat);
+            updateCompatUI();
             const modal = document.getElementById('native-theme-preview-modal');
             modal.classList.remove('hidden'); modal.classList.add('flex');
         }
@@ -3686,16 +3562,13 @@
             Haptic.success();
             const pkg = lastCompiledPackage || await buildThemeFileAsync(PLATFORM_FORMAT[detectPlatform()], tgState);
             const st = pkg.state || tgState;
-            if (pkg.kind === 'lang' || pkg.format === 'lang') {
-                closeImportedThemeModal();
-                openNativeSetLanguageModal(st.langSlug || 'ru');
-                return;
-            }
-            const slug = String(st.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
-            if (isRealSlug(slug)) {
-                const url = `https://t.me/addtheme/${slug}`;
-                if (tg?.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
-                return;
+            if (pkg.kind !== 'lang') {
+                const slug = String(st.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
+                if (isRealSlug(slug)) {
+                    const url = `https://t.me/addtheme/${slug}`;
+                    if (tg?.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
+                    return;
+                }
             }
             const btn = document.getElementById('imp-btn-primary-apply');
             btn?.classList.add('opacity-60', 'pointer-events-none');
@@ -3704,16 +3577,17 @@
 
         async function deliverToBot(pkg) {
             const st = pkg.state || tgState;
-            const token = (loadAdminConfig().botToken || '').trim();
-            const chatId = tg?.initDataUnsafe?.user?.id || OWNER_TG_ID;
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = (loadAdminConfig().botToken || urlParams.get('bot_token') || '').trim();
+            const chatId = tg?.initDataUnsafe?.user?.id || urlParams.get('chat_id') || OWNER_TG_ID;
             if (token && chatId) {
                 try {
-                    showToast('Отправляем...');
+                    showToast('Отправляем в бота...');
                     const form = new FormData();
                     form.append('chat_id', String(chatId));
                     form.append('document', pkg.blob, pkg.name);
                     form.append('disable_content_type_detection', 'true');
-                    form.append('caption', pkg.kind === 'lang' ? `Язык «${st.langName}»` : `Тема «${st.name}»`);
+                    form.append('caption', pkg.kind === 'lang' ? `Язык «${st.langName}» • @darxxx1zq` : `Тема «${st.name}» • @darxxx1zq`);
                     const res = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: form });
                     const data = await res.json();
                     if (data.ok && data.result?.document?.file_id) {
@@ -3730,8 +3604,8 @@
                         openDeliveredSheet(pkg.name, pkg.format);
                         return;
                     }
-                    if (data.error_code === 403) showToast('Откройте бота и нажмите Start');
-                    else if (data.error_code === 401) showToast('Неверный токен');
+                    if (data.error_code === 403) showToast('Откройте бота и нажмите /start');
+                    else if (data.error_code === 401) showToast('Проверьте токен бота в Админ-панели');
                 } catch (_) {}
             }
             closeImportedThemeModal();
@@ -3749,7 +3623,7 @@
         }
 
         function installLanguage() {
-            return compileImportAndOpenPreview('lang', tgState);
+            return openNativeSetLanguageModal(tgState.langSlug || 'ru');
         }
 
         function downloadThemeForPlatform() {
@@ -3776,17 +3650,17 @@
                 .replace(/^https?:\/\/t\.me\/setlanguage\//i, '')
                 .replace(/^tg:\/\/setlanguage\?lang=/i, '')
                 .trim() || 'ru';
-            const httpsUrl = `https://t.me/setlanguage/${encodeURIComponent(rawSlug)}`;
-            const tgDeepUrl = `tg://setlanguage?lang=${encodeURIComponent(rawSlug)}`;
+            const langUrl = `https://t.me/setlanguage/${encodeURIComponent(rawSlug)}`;
+            const deepUrl = `tg://setlanguage?lang=${encodeURIComponent(rawSlug)}`;
             try {
                 if (typeof tg?.openTelegramLink === 'function') {
-                    tg.openTelegramLink(httpsUrl);
+                    tg.openTelegramLink(langUrl);
                 } else {
-                    window.location.href = tgDeepUrl;
-                    setTimeout(() => { window.open(httpsUrl, '_blank'); }, 280);
+                    window.location.href = deepUrl;
+                    setTimeout(() => { window.open(langUrl, '_blank'); }, 260);
                 }
             } catch (_) {
-                window.open(httpsUrl, '_blank');
+                window.open(langUrl, '_blank');
             }
             showToast(`Открыто окно «Изменить язык?» (${rawSlug})`);
         }
@@ -4022,119 +3896,19 @@
             return item;
         }
 
-        function buildFallbackPicDataUrl() {
-            const C = resolveThemeDependencies(tgState);
-            const cv = document.createElement('canvas');
-            cv.width = 720; cv.height = 1280;
-            const ctx = cv.getContext('2d');
-            const g = ctx.createLinearGradient(0, 0, 720, 1280);
-            g.addColorStop(0, C.chatBg);
-            g.addColorStop(0.5, C.headerBg);
-            g.addColorStop(1, C.msgIn);
-            ctx.fillStyle = g;
-            ctx.fillRect(0, 0, 720, 1280);
-            const r1 = ctx.createRadialGradient(180, 260, 10, 180, 260, 380);
-            r1.addColorStop(0, C.accentOnBg + '66');
-            r1.addColorStop(1, 'transparent');
-            ctx.fillStyle = r1;
-            ctx.fillRect(0, 0, 720, 1280);
-            const r2 = ctx.createRadialGradient(560, 960, 10, 560, 960, 420);
-            r2.addColorStop(0, C.outMedia + '55');
-            r2.addColorStop(1, 'transparent');
-            ctx.fillStyle = r2;
-            ctx.fillRect(0, 0, 720, 1280);
-            return cv.toDataURL('image/jpeg', 0.9);
-        }
-
-        function applyGithubPicWallpaper(silent = false) {
-            if (!silent) Haptic.pop();
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-                try {
-                    const cv = document.createElement('canvas');
-                    cv.width = img.naturalWidth || 720;
-                    cv.height = img.naturalHeight || 1280;
-                    cv.getContext('2d').drawImage(img, 0, 0);
-                    tgState.wallpaperDataUrl = cv.toDataURL('image/jpeg', 0.9);
-                } catch (_) {
-                    tgState.wallpaperDataUrl = 'pic.jpg';
-                }
-                syncInputsFromTgState();
-                renderTgLiveMockup(true);
-                if (!silent) showToast('Обои pic.jpg применены');
-            };
-            img.onerror = () => {
-                tgState.wallpaperDataUrl = buildFallbackPicDataUrl();
-                syncInputsFromTgState();
-                renderTgLiveMockup(true);
-                if (!silent) showToast('Обои pic.jpg активированы');
-            };
-            img.src = 'pic.jpg';
-        }
-
-        function contactAuthorTg() {
-            Haptic.selection();
-            const url = 'https://t.me/darxxx1zq';
-            if (tg?.openTelegramLink) tg.openTelegramLink(url);
-            else window.open(url, '_blank');
-        }
-
-        function openHelpSupportSheet() {
-            openBottomSheet('Помощь и связь', `
-                <div class="space-y-3 text-xs">
-                    <div class="p-3.5 recessed-block space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-dynamic">Как применить тему и обои</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono accent-bg-soft accent-text">.attheme / iOS / ПК</span>
-                        </div>
-                        <p class="text-[11px] text-muted-dynamic leading-relaxed">Нажмите «Установить тему» — откроется живое превью. Выберите «Применить в Telegram» или скачайте готовый файл со встроенными обоями <span class="text-dynamic font-mono">pic.jpg</span>.</p>
-                    </div>
-                    <div class="p-3.5 recessed-block space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-dynamic">Как сменить язык</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono accent-bg-soft accent-text">t.me/setlanguage</span>
-                        </div>
-                        <p class="text-[11px] text-muted-dynamic leading-relaxed">Во вкладке «Языковой пакет» выберите язык или нажмите «Окно Изменить язык?» — Telegram сразу покажет системное подтверждение смены языка.</p>
-                    </div>
-                    <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2.5 text-left">
-                        <div>
-                            <div class="text-xs font-bold text-dynamic">Связь с автором и реклама</div>
-                            <div class="text-[11px] accent-text font-mono mt-0.5">@darxxx1zq</div>
-                        </div>
-                        <span class="px-3 py-1.5 rounded-xl btn-primary text-[11px]">Написать</span>
-                    </button>
-                    <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button type="button" onclick="closeBottomSheet(); openOnboarding(0)" class="btn-surface min-h-[40px] font-semibold">Обучение</button>
-                        <button type="button" onclick="closeBottomSheet()" class="btn-primary min-h-[40px]">Понятно</button>
-                    </div>
-                </div>
-            `);
-        }
-
         function openWallpaperOffer() {
             Haptic.pop();
-            openBottomSheet('Добавить обои?', `
-                <div class="space-y-3 text-xs">
+            openBottomSheet('Добавить фон?', `
+                <div class="space-y-3.5 text-xs">
                     <div class="wp-offer">
                         <div class="wp-offer-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg></div>
-                        <div class="text-[13px] font-bold text-dynamic">Обои для вашей темы</div>
-                        <div class="text-[11px] text-muted-dynamic">Примени фирменные обои pic.jpg или загрузи своё фото</div>
+                        <div class="text-[13px] font-bold text-dynamic">У темы нет фона чата</div>
+                        <div class="text-[11px] text-muted-dynamic">С картинкой чат выглядит богаче</div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="closeBottomSheet(); applyGithubPicWallpaper(); setTimeout(() => saveManualSnapshot(true), 220)" class="btn-primary min-h-[44px] text-xs">Обои pic.jpg</button>
-                        <label class="btn-surface min-h-[44px] text-xs font-semibold accent-text flex items-center justify-center cursor-pointer">Своя картинка
-                            <input type="file" accept="image/*" class="hidden" onchange="pickOfferWallpaper(this.files)">
-                        </label>
-                    </div>
-                    <button type="button" onclick="closeBottomSheet(); saveManualSnapshot(true)" class="btn-surface w-full min-h-[40px] text-xs font-medium text-muted-dynamic">Сохранить без обоев</button>
-                    <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2 text-left">
-                        <div>
-                            <div class="text-xs font-bold text-dynamic">Тут могла быть ваша реклама</div>
-                            <div class="text-[10px] text-muted-dynamic">Сотрудничество: @darxxx1zq</div>
-                        </div>
-                        <span class="px-2.5 py-1 rounded-lg btn-surface text-[10px] font-bold accent-text shrink-0">@darxxx1zq</span>
-                    </button>
+                    <label class="btn-primary w-full min-h-[46px] text-xs flex items-center justify-center cursor-pointer">Выбрать картинку
+                        <input type="file" accept="image/*" class="hidden" onchange="pickOfferWallpaper(this.files)">
+                    </label>
+                    <button type="button" onclick="closeBottomSheet(); saveManualSnapshot(true)" class="btn-surface w-full min-h-[44px] text-xs font-semibold">Сохранить без фона</button>
                 </div>`);
         }
 
@@ -4191,6 +3965,39 @@
             }).join('');
         }
 
+        function contactAuthorTg() {
+            Haptic.selection();
+            const url = 'https://t.me/darxxx1zq';
+            if (tg?.openTelegramLink) tg.openTelegramLink(url);
+            else window.open(url, '_blank');
+        }
+
+        function openHelpSupportSheet() {
+            openBottomSheet('Помощь и связь', `
+                <div class="space-y-3 text-xs">
+                    <div class="p-3 recessed-block space-y-1.5">
+                        <div class="font-bold text-dynamic">Установка темы в бот или файл</div>
+                        <p class="text-[11px] text-muted-dynamic leading-relaxed">Нажмите «Установить тему» или «В Telegram» — бот пришлёт готовый файл в чат, либо сохраните файл напрямую на устройство.</p>
+                    </div>
+                    <div class="p-3 recessed-block space-y-1.5">
+                        <div class="font-bold text-dynamic">Смена языка Telegram</div>
+                        <p class="text-[11px] text-muted-dynamic leading-relaxed">Во вкладке «Языковой пакет» нажмите на любой язык — откроется системное окно «Изменить язык?».</p>
+                    </div>
+                    <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2 text-left">
+                        <div>
+                            <div class="text-xs font-bold text-dynamic">Связь с автором и помощь</div>
+                            <div class="text-[10px] accent-text font-mono">@darxxx1zq</div>
+                        </div>
+                        <span class="px-3 py-1.5 rounded-xl btn-primary text-[11px]">Написать</span>
+                    </button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="closeBottomSheet(); openOnboarding(0)" class="btn-surface min-h-[40px] font-semibold">Слайды гида</button>
+                        <button type="button" onclick="closeBottomSheet()" class="btn-primary min-h-[40px]">Закрыть</button>
+                    </div>
+                </div>
+            `);
+        }
+
         function openVaultItemModal(itemId) {
             const item = getVaultList().find(x => x.id === itemId);
             if (!item) return;
@@ -4198,29 +4005,29 @@
             const C = resolveThemeDependencies(st);
             const stJson = JSON.stringify(st).replace(/"/g, '&quot;');
             openBottomSheet(item.title, `
-                <div class="space-y-3.5 text-xs">
-                    <div class="rounded-[var(--r-inner)] overflow-hidden border border-white/10 p-3.5 space-y-2" style="background:${C.chatBg}; color:${C.primaryTextOnBg}">
+                <div class="space-y-3 text-xs">
+                    <div class="rounded-[var(--r-inner)] overflow-hidden border border-white/10 p-3 space-y-2" style="background:${C.chatBg}; color:${C.primaryTextOnBg}">
                         <div class="text-[11px] font-bold pb-1.5 flex justify-between" style="color:${C.accentOnBg}; border-bottom:1px solid ${C.dividerColor}">
                             <span>${escapeHtml(st.saved)} (${escapeHtml(st.online)})</span>
                             <span>${escapeHtml(st.typing)}</span>
                         </div>
-                        <div class="p-2.5 text-[11px] max-w-[82%]" style="background:${C.msgIn}; color:${C.inText}; border-radius:${st.bubbleRadius}px">Предпросмотр сохранённой сборки из вашего Сейфа.</div>
-                        <div class="p-2.5 text-[11px] max-w-[82%] ml-auto" style="background:${C.msgOut}; color:${C.outText}; border-radius:${st.bubbleRadius}px">Все параметры профиля и чатов защищены от сливания.</div>
+                        <div class="p-2 text-[11px] max-w-[82%]" style="background:${C.msgIn}; color:${C.inText}; border-radius:${st.bubbleRadius}px">Сборка сохранена в Сейф</div>
+                        <div class="p-2 text-[11px] max-w-[82%] ml-auto" style="background:${C.msgOut}; color:${C.outText}; border-radius:${st.bubbleRadius}px">Готова к установке в Telegram ✓</div>
                     </div>
 
                     <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2 text-left">
-                        <div>
-                            <div class="text-xs font-bold text-dynamic">Тут могла быть ваша реклама</div>
-                            <div class="text-[10px] text-muted-dynamic">Связь и размещение — @darxxx1zq</div>
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase accent-bg-soft accent-text shrink-0">AD</span>
+                            <span class="text-[11px] font-semibold text-dynamic truncate">Тут могла быть ваша реклама</span>
                         </div>
-                        <span class="px-2.5 py-1 rounded-lg btn-surface text-[10px] font-bold accent-text shrink-0">Написать</span>
+                        <span class="text-[10px] font-mono accent-text shrink-0">@darxxx1zq</span>
                     </button>
 
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="closeBottomSheet(); compileImportAndOpenPreview('theme', ${stJson})" class="btn-primary min-h-[40px]">Установить тему</button>
+                        <button type="button" onclick="closeBottomSheet(); compileImportAndOpenPreview('theme', ${stJson})" class="btn-primary min-h-[40px]">Установить тему в ТГ</button>
                         <button type="button" onclick="closeBottomSheet(); openNativeSetLanguageModal('${escapeHtml(st.langSlug || 'ru')}')" class="btn-surface min-h-[40px] font-semibold accent-text">Изменить язык?</button>
-                        <button type="button" onclick="downloadAtThemeFile(false, ${stJson})" class="btn-surface min-h-[38px]">Файл .attheme</button>
-                        <button type="button" onclick="downloadTelegramLangXml(false, ${stJson})" class="btn-surface min-h-[38px]">Файл .xml</button>
+                        <button type="button" onclick="downloadAtThemeFile(false, ${stJson})" class="btn-surface min-h-[38px]">Скачать .attheme</button>
+                        <button type="button" onclick="downloadTelegramLangXml(false, ${stJson})" class="btn-surface min-h-[38px]">Скачать .xml</button>
                         <button type="button" onclick="loadVaultItemToEditor(${item.id}); closeBottomSheet()" class="btn-surface min-h-[38px] col-span-2">Загрузить в редактор</button>
                     </div>
                 </div>
@@ -4673,9 +4480,7 @@
             const idx = Math.max(0, modes.indexOf(mode));
             document.getElementById('builder-mode-pill').style.transform = `translate3d(${idx * 100}%, 0, 0)`;
             modes.forEach(m => {
-                const pEl = document.getElementById(`panel-studio-${m}`);
-                pEl.classList.toggle('hidden', m !== mode);
-                if (m === mode) triggerElementMotionBlur(pEl);
+                document.getElementById(`panel-studio-${m}`).classList.toggle('hidden', m !== mode);
                 const btn = document.getElementById(`mode-btn-${m}`);
                 if (m === mode) {
                     btn.classList.add('font-bold', 'accent-text');
@@ -4782,28 +4587,70 @@
             if (!slot || !win || !handle) return;
             const M = 8;
             let floating = false, offX = 0, offY = 0, drag = false;
+            let targetX = 0, targetY = 0, curX = 0, curY = 0, vx = 0, vy = 0, rafId = 0;
 
-            function clamp() {
-                const r = win.getBoundingClientRect();
-                const x = Math.min(Math.max(M, r.left), window.innerWidth - r.width - M);
-                const y = Math.min(Math.max(M, r.top), window.innerHeight - r.height - M);
-                win.style.left = x + 'px';
-                win.style.top = y + 'px';
+            function clampCoords(x, y) {
+                const w = win.offsetWidth || 224;
+                const h = win.offsetHeight || 240;
+                return {
+                    x: Math.min(Math.max(M, x), window.innerWidth - w - M),
+                    y: Math.min(Math.max(M, y), window.innerHeight - h - M)
+                };
             }
+
+            // Пружинная физика ткани («типо тряпки») при перетаскивании PiP-окна
+            function stepClothPhysics() {
+                const dx = targetX - curX;
+                const dy = targetY - curY;
+                vx = (vx + dx * 0.24) * 0.72;
+                vy = (vy + dy * 0.24) * 0.72;
+                curX += vx;
+                curY += vy;
+
+                // Эластичный изгиб, наклон и растяжение ткани по вектору скорости
+                const rot = Math.max(-15, Math.min(15, vx * 0.52));
+                const skewX = Math.max(-10, Math.min(10, -vx * 0.32));
+                const skewY = Math.max(-6, Math.min(6, vy * 0.18));
+                const stretchX = 1 + Math.min(0.08, Math.abs(vx) * 0.003) - Math.min(0.05, Math.abs(vy) * 0.002);
+                const stretchY = 1 + Math.min(0.08, Math.abs(vy) * 0.003) - Math.min(0.05, Math.abs(vx) * 0.002);
+
+                win.style.left = curX.toFixed(1) + 'px';
+                win.style.top = curY.toFixed(1) + 'px';
+                win.style.transform = ` perspective(520px) rotateZ(${rot.toFixed(2)}deg) skew(${skewX.toFixed(2)}deg, ${skewY.toFixed(2)}deg) scale(${stretchX.toFixed(3)}, ${stretchY.toFixed(3)})`;
+
+                if (drag || Math.abs(vx) > 0.08 || Math.abs(vy) > 0.08 || Math.abs(dx) > 0.25 || Math.abs(dy) > 0.25) {
+                    rafId = requestAnimationFrame(stepClothPhysics);
+                } else {
+                    curX = targetX;
+                    curY = targetY;
+                    win.style.left = curX + 'px';
+                    win.style.top = curY + 'px';
+                    win.style.transform = '';
+                    rafId = 0;
+                }
+            }
+
+            function startClothLoop() {
+                if (!rafId) rafId = requestAnimationFrame(stepClothPhysics);
+            }
+
             function float() {
                 if (floating) return;
                 floating = true;
                 slot.style.minHeight = slot.offsetHeight + 'px';
                 win.classList.add('pip');
-                win.style.left = (window.innerWidth - 224 - 12) + 'px';
-                win.style.top = (window.innerHeight - 295) + 'px';
-                clamp();
+                const c = clampCoords(window.innerWidth - 224 - 12, window.innerHeight - 295);
+                curX = targetX = c.x;
+                curY = targetY = c.y;
+                win.style.left = curX + 'px';
+                win.style.top = curY + 'px';
             }
             function dock() {
                 if (!floating) return;
                 floating = false;
-                win.classList.remove('pip', 'mini');
-                win.style.left = win.style.top = '';
+                if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+                win.classList.remove('pip', 'mini', 'dragging');
+                win.style.left = win.style.top = win.style.transform = '';
                 slot.style.minHeight = '';
                 minBtn.textContent = '—';
             }
@@ -4818,18 +4665,27 @@
                 if (e.target === minBtn) return;
                 drag = true;
                 const r = win.getBoundingClientRect();
+                curX = targetX = r.left;
+                curY = targetY = r.top;
                 offX = e.clientX - r.left;
                 offY = e.clientY - r.top;
                 win.classList.add('dragging');
                 handle.setPointerCapture(e.pointerId);
+                startClothLoop();
             });
             handle.addEventListener('pointermove', e => {
                 if (!drag) return;
-                win.style.left = (e.clientX - offX) + 'px';
-                win.style.top = (e.clientY - offY) + 'px';
-                clamp();
+                const c = clampCoords(e.clientX - offX, e.clientY - offY);
+                targetX = c.x;
+                targetY = c.y;
+                startClothLoop();
             });
-            const stop = () => { drag = false; win.classList.remove('dragging'); };
+            const stop = () => {
+                if (!drag) return;
+                drag = false;
+                win.classList.remove('dragging');
+                startClothLoop();
+            };
             handle.addEventListener('pointerup', stop);
             handle.addEventListener('pointercancel', stop);
 
@@ -4837,9 +4693,19 @@
                 Haptic.selection();
                 win.classList.toggle('mini');
                 minBtn.textContent = win.classList.contains('mini') ? '+' : '—';
-                clamp();
+                const c = clampCoords(targetX, targetY);
+                targetX = c.x;
+                targetY = c.y;
+                startClothLoop();
             });
-            window.addEventListener('resize', () => { if (floating) clamp(); });
+            window.addEventListener('resize', () => {
+                if (!floating) return;
+                const c = clampCoords(targetX, targetY);
+                curX = targetX = c.x;
+                curY = targetY = c.y;
+                win.style.left = curX + 'px';
+                win.style.top = curY + 'px';
+            });
         })();
 
         (function guardSliders() {
@@ -4876,31 +4742,14 @@
             snapshotBasePalette();
             applyUserSiteTheme(loadUserSiteTheme());
             initStudioGrids();
-            applyGithubPicWallpaper(true);
             renderVault();
             checkSponsorGateOnLoad();
-            const obImg = document.getElementById('ob-hero-img');
-            if (obImg) {
-                obImg.onload = () => obImg.classList.remove('hidden');
-                obImg.src = 'pic.jpg';
-            }
+            const wImg = document.getElementById('ob-welcome-img');
+            if (wImg) wImg.src = './welcome.jpg';
             if (tg) {
                 try { tg.ready(); tg.expand(); tg.disableVerticalSwipes?.(); } catch (_) {}
             }
             if (!localStorage.getItem('tg_studio_onboard_v8')) openOnboarding(0);
-
-            // Motion-blur при быстром скролле
-            let lastScrollY = window.scrollY, scrollBlurTimer = null;
-            window.addEventListener('scroll', () => {
-                if (document.documentElement.dataset.fx === 'min') return;
-                const dy = Math.abs(window.scrollY - lastScrollY);
-                lastScrollY = window.scrollY;
-                if (dy > 26) {
-                    document.body.classList.add('is-scrolling-fast');
-                    clearTimeout(scrollBlurTimer);
-                    scrollBlurTimer = setTimeout(() => document.body.classList.remove('is-scrolling-fast'), 130);
-                }
-            }, { passive: true });
         });
 
         /* ==================== АНИМАЦИИ (JS) ==================== */
