@@ -547,6 +547,97 @@
             background-image: radial-gradient(1.6px 1.6px at 20% 30%, color-mix(in srgb, var(--accent-primary) 70%, #fff), transparent), radial-gradient(1px 1px at 70% 62%, color-mix(in srgb, var(--accent-primary) 60%, #fff), transparent), radial-gradient(1.6px 1.6px at 42% 82%, color-mix(in srgb, var(--accent-primary) 60%, #fff), transparent), radial-gradient(1px 1px at 86% 18%, color-mix(in srgb, var(--accent-primary) 65%, #fff), transparent); }
         html.paused *, html.paused *::before, html.paused *::after { animation-play-state: paused !important; }
         @media (max-width: 640px) { .aurora i { filter: blur(46px); } }
+
+        /* ==================== MOTION BLUR ПРИ ДВИЖЕНИИ И LIVE-АНИМАЦИИ ==================== */
+        @keyframes motionBlurPulse {
+            0% { filter: blur(0px); transform: scale(1); }
+            35% { filter: blur(5px) saturate(1.2); transform: scale(0.985) translateY(3px); }
+            100% { filter: blur(0px); transform: scale(1) translateY(0); }
+        }
+        @keyframes motionSlideBlur {
+            0% { filter: blur(7px); opacity: 0; transform: translate3d(0, 14px, 0) scale(0.97); }
+            60% { filter: blur(1.5px); opacity: 1; transform: translate3d(0, -1px, 0) scale(1.005); }
+            100% { filter: blur(0px); opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes msgPopBlur {
+            0% { opacity: 0; filter: blur(6px); transform: translate3d(0, 12px, 0) scale(0.92); }
+            65% { opacity: 1; filter: blur(0.5px); transform: translate3d(0, -1px, 0) scale(1.015); }
+            100% { opacity: 1; filter: blur(0px); transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes chatRowSlide {
+            0% { opacity: 0; filter: blur(6px); transform: translate3d(-16px, 0, 0); }
+            70% { opacity: 1; filter: blur(0.5px); transform: translate3d(2px, 0, 0); }
+            100% { opacity: 1; filter: blur(0px); transform: translate3d(0, 0, 0); }
+        }
+        @keyframes profStagger {
+            0% { opacity: 0; filter: blur(8px); transform: translate3d(0, 14px, 0) scale(0.95); }
+            100% { opacity: 1; filter: blur(0px); transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes typingDotBounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
+            40% { transform: translateY(-3.5px); opacity: 1; }
+        }
+        @keyframes adShimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .motion-blur-active {
+            animation: motionBlurPulse 360ms var(--ease-ios);
+        }
+        .stage-enter-blur {
+            animation: motionSlideBlur 420ms var(--ease-ios) backwards;
+        }
+        .live-msg-anim {
+            animation: msgPopBlur 380ms var(--ease-spring) backwards;
+        }
+        .live-row-anim {
+            animation: chatRowSlide 380ms var(--ease-spring) backwards;
+        }
+        .prof-reveal {
+            animation: profStagger 420ms var(--ease-spring) backwards;
+            animation-delay: calc(var(--step, 0) * 95ms);
+        }
+        .typing-dot {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: currentColor;
+            margin: 0 1px;
+            animation: typingDotBounce 1.1s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.16s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.32s; }
+        body.is-scrolling-fast main {
+            filter: blur(1.4px);
+            transition: filter 110ms ease;
+        }
+        main {
+            transition: filter 200ms ease, transform 240ms var(--ease-ios);
+        }
+        .ad-slot-banner {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            padding: 12px 14px;
+            background: linear-gradient(125deg, color-mix(in srgb, var(--accent-primary) 14%, var(--input-bg)), color-mix(in srgb, var(--accent-secondary) 10%, var(--code-bg)));
+            border: 1px dashed color-mix(in srgb, var(--accent-primary) 48%, transparent);
+            transition: transform 200ms var(--ease-spring), border-color 200ms ease;
+        }
+        .ad-slot-banner:hover {
+            transform: translateY(-1px);
+            border-color: var(--accent-primary);
+        }
+        .ad-slot-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            background-size: 200% 100%;
+            animation: adShimmer 4.5s infinite linear;
+        }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -557,14 +648,33 @@
     <div id="bg-gradient-layer" class="bg-layer"></div>
     <div id="bg-pattern-layer" class="bg-layer"></div>
 
-    <!-- ==================== ОКНО ПРОСМОТРА И УСТАНОВКИ ==================== -->
+    <!-- ==================== ОКНО ПРОСМОТРА И СОХРАНЕНИЯ ==================== -->
     <div id="native-theme-preview-modal" class="fixed inset-0 z-[55] bg-black/80 backdrop-blur-xl hidden items-end sm:items-center justify-center p-3" onclick="if(event.target===this)closeImportedThemeModal()">
-        <div class="imp-sheet frosted-card max-w-md w-full space-y-3">
+        <div class="imp-sheet frosted-card max-w-md w-full space-y-2.5">
             <div class="flex items-center justify-between gap-2">
-                <h3 id="imp-modal-title" class="text-sm font-bold text-dynamic truncate"></h3>
-                <button type="button" onclick="closeImportedThemeModal()" class="chip-btn min-w-[30px] min-h-[30px] rounded-full text-xs">✕</button>
+                <div class="min-w-0">
+                    <h3 id="imp-modal-title" class="text-sm font-bold text-dynamic truncate"></h3>
+                </div>
+                <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-0.5 p-0.5 rounded-lg recessed-block">
+                        <button type="button" id="modal-tab-chat" onclick="setModalStageTab('chat')" class="px-2 py-1 rounded-md text-[10px] font-semibold bg-white/10 text-dynamic">Диалог</button>
+                        <button type="button" id="modal-tab-list" onclick="setModalStageTab('list')" class="px-2 py-1 rounded-md text-[10px] font-medium text-muted-dynamic">Чаты</button>
+                        <button type="button" id="modal-tab-profile" onclick="setModalStageTab('profile')" class="px-2 py-1 rounded-md text-[10px] font-medium text-muted-dynamic">Профиль</button>
+                    </div>
+                    <button type="button" onclick="closeImportedThemeModal()" class="chip-btn min-w-[28px] min-h-[28px] rounded-full text-xs">✕</button>
+                </div>
             </div>
-            <div id="imp-modal-Stage" class="rounded-2xl overflow-hidden border border-white/15 shadow-2xl"></div>
+            <div id="imp-modal-Stage" class="rounded-2xl overflow-hidden border border-white/15 shadow-2xl min-h-[270px] flex flex-col justify-between"></div>
+            <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2.5 text-left">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider accent-bg-soft accent-text shrink-0">AD</span>
+                    <div class="min-w-0">
+                        <div class="text-xs font-bold text-dynamic truncate">Тут могла быть ваша реклама</div>
+                        <div class="text-[10px] text-muted-dynamic truncate">Размещение и связь — @darxxx1zq</div>
+                    </div>
+                </div>
+                <span class="px-2.5 py-1 rounded-lg btn-surface text-[10px] font-bold accent-text shrink-0">Написать</span>
+            </button>
             <div id="imp-compat" class="hidden grid-cols-2 gap-1 p-1 rounded-xl recessed-block">
                 <button type="button" id="compat-full" onclick="setCompat('full')">Полная</button>
                 <button type="button" id="compat-basic" onclick="setCompat('basic')">Базовая</button>
@@ -617,7 +727,12 @@
                     <span class="hidden sm:inline">Админ</span>
                 </button>
 
-                <button type="button" onclick="openOnboarding(0)" class="chip-btn min-h-[36px] px-2.5 flex items-center gap-1.5 text-[11px] font-medium" title="Справка">
+                <button type="button" onclick="openHelpSupportSheet()" class="chip-btn min-h-[36px] px-2.5 flex items-center gap-1.5 text-[11px] font-semibold" title="Помощь и связь @darxxx1zq">
+                    <svg class="w-3.5 h-3.5 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Помощь</span>
+                </button>
+
+                <button type="button" onclick="openOnboarding(0)" class="chip-btn min-h-[36px] px-2.5 flex items-center gap-1.5 text-[11px] font-medium" title="Гид">
                     <svg class="w-3.5 h-3.5 accent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                     <span class="hidden sm:inline">Гид</span>
                 </button>
@@ -638,7 +753,7 @@
     <!-- ==================== ОНБОРДИНГ ==================== -->
     <div id="onboard-overlay" class="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4" onclick="if(event.target===this)closeOnboarding()">
         <div class="neon-card w-full max-w-sm">
-            <div class="ob-hero"><img src="welcome.jpg" alt="" decoding="async" onerror="this.parentElement.remove()"></div>
+            <div class="ob-hero" id="ob-hero-box" style="background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--accent-primary) 35%, transparent), var(--surface-1));"><img id="ob-hero-img" alt="" decoding="async" class="hidden" onerror="this.remove()"></div>
             <div class="overflow-hidden">
                 <div id="onboard-track"></div>
             </div>
@@ -924,9 +1039,12 @@
                                     <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">03 • Палитра элементов</span>
                                 </div>
                                 <div class="flex flex-wrap gap-1.5">
-                                    <label class="chip-btn px-2.5 py-1.5 text-[11px] font-semibold accent-text cursor-pointer flex items-center gap-1.5">
+                                    <button type="button" onclick="applyGithubPicWallpaper()" class="chip-btn px-2.5 py-1.5 text-[11px] font-semibold accent-text flex items-center gap-1.5">
                                         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                        <span>Загрузить фон чата</span>
+                                        <span>Обои pic.jpg</span>
+                                    </button>
+                                    <label class="chip-btn px-2.5 py-1.5 text-[11px] font-medium cursor-pointer flex items-center gap-1.5">
+                                        <span>Своё фото</span>
                                         <input type="file" accept="image/*" onchange="handleChatWallpaperUpload(this.files)" class="hidden">
                                     </label>
                                     <label class="chip-btn px-2.5 py-1.5 text-[11px] font-medium cursor-pointer flex items-center gap-1.5">
@@ -1002,8 +1120,10 @@
                             </div>
 
                             <div class="grid grid-cols-2 gap-2 pt-2">
-                                <button type="button" onclick="compileImportAndOpenPreview('lang')" class="btn-primary min-h-[44px] text-xs">Установить язык</button>
-                                <button type="button" onclick="installLanguage()" class="btn-surface min-h-[44px] text-xs font-semibold accent-text">Установить язык</button>
+                                <button type="button" onclick="openNativeSetLanguageModal()" class="btn-primary min-h-[44px] text-xs flex items-center justify-center gap-1.5">
+                                    <span>Установить язык</span>
+                                </button>
+                                <button type="button" onclick="compileImportAndOpenPreview('lang')" class="btn-surface min-h-[44px] text-xs font-semibold accent-text">Предпросмотр и .XML</button>
                             </div>
                         </article>
                     </div>
@@ -1015,9 +1135,12 @@
                                 <div>
                                     <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">Обои чата</span>
                                 </div>
-                                <div class="flex gap-1.5">
-                                    <label class="btn-primary px-3 py-1.5 text-[11px] cursor-pointer flex items-center gap-1.5">
-                                        <span>Выбрать картинку</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button type="button" onclick="applyGithubPicWallpaper()" class="btn-primary px-3 py-1.5 text-[11px] flex items-center gap-1.5">
+                                        <span>Обои pic.jpg</span>
+                                    </button>
+                                    <label class="btn-surface px-3 py-1.5 text-[11px] font-semibold accent-text cursor-pointer flex items-center gap-1.5">
+                                        <span>Своя картинка</span>
                                         <input type="file" accept="image/*" onchange="handleChatWallpaperUpload(this.files)" class="hidden">
                                     </label>
                                     <button type="button" onclick="clearChatWallpaper()" class="chip-btn px-2.5 py-1.5 text-[11px] text-rose-400 font-semibold">Удалить фон</button>
@@ -1469,8 +1592,7 @@
             };
         }
 
-        // === КОНЕЦ ЧАСТИ 1 (Напиши «продолжить» для получения Части 2) ===
-        /* ==================== 3. ПАЛИТРЫ, 10 КАНАЛОВ И СОСТОЯНИЕ ТЕМЫ ==================== */
+                /* ==================== 3. ПАЛИТРЫ, 10 КАНАЛОВ И СОСТОЯНИЕ ТЕМЫ ==================== */
         const TG_THEME_PRESETS = [
             { name: 'Emerald Obsidian', chatBg: '#060d0b', headerBg: '#0b1613', msgOut: '#0d9468', msgIn: '#11221d', accent: '#10b981', mediaColor: '#34d399', dialogColor: '#10b981', avatarBg: '#059669', text: '#f4f4f5', timeText: '#86efac', checks: '#a7f3d0', cloudSlug: '' },
             { name: 'Linear Graphite', chatBg: '#09090b', headerBg: '#121216', msgOut: '#27272a', msgIn: '#16161a', accent: '#10b981', mediaColor: '#10b981', dialogColor: '#34d399', avatarBg: '#3f3f46', text: '#f4f4f5', timeText: '#a1a1aa', checks: '#10b981', cloudSlug: '' },
@@ -1889,6 +2011,18 @@
             renderTgLiveMockup();
         }
 
+        let liveSimTimers = [];
+        function clearLiveSimTimers() {
+            while (liveSimTimers.length) clearTimeout(liveSimTimers.pop());
+        }
+
+        function triggerElementMotionBlur(el) {
+            if (!el || document.documentElement.dataset.fx === 'min') return;
+            el.classList.remove('motion-blur-active');
+            void el.offsetWidth;
+            el.classList.add('motion-blur-active');
+        }
+
         function setPreviewScreen(mode) {
             Haptic.selection();
             previewScreenMode = mode;
@@ -1900,12 +2034,14 @@
                         : 'px-2 py-1 rounded-md text-[11px] font-medium text-muted-dynamic';
                 }
             });
-            renderTgLiveMockup();
+            triggerElementMotionBlur(document.getElementById('tg-live-mockup'));
+            renderTgLiveMockup(true);
         }
 
         const VOICE_WAVE_HEIGHTS = [35, 65, 95, 50, 80, 100, 60, 40, 85, 95, 70, 45, 90, 65, 50, 75, 95, 60, 40, 55, 80, 45];
 
-        function renderTgLiveMockup() {
+        function renderTgLiveMockup(animateStage = false) {
+            clearLiveSimTimers();
             const C = resolveThemeDependencies(tgState);
 
             const header = document.getElementById('tg-mock-header');
@@ -1993,13 +2129,13 @@
 
             if (isList) {
                 const sampleChats = [
-                    { name: 'Секретный чат (Encrypted)', msg: 'Замок и заголовок контрастные', time: '14:25', unread: 0, secret: true, sentCheck: true },
-                    { name: tgState.saved || 'Избранное', msg: 'Nightcall.mp3', time: '14:22', unread: 2, secret: false, sentCheck: false },
-                    { name: 'Darxy // Studio', msg: tgState.typing || 'печатает...', time: '12:10', unread: 0, typing: true, secret: false, sentCheck: false },
-                    { name: 'Telegram Audio', msg: 'Голосовое сообщение (0:18)', time: 'Вчера', unread: 0, secret: false, sentCheck: true }
+                    { name: 'Darxy // Studio', msg: tgState.typing || 'печатает...', time: 'сейчас', unread: 1, typing: true, secret: false, sentCheck: false, id: 'live-chat-row-0' },
+                    { name: 'Секретный чат', msg: 'Все ключи защищены от синего', time: '14:25', unread: 0, secret: true, sentCheck: true, id: 'live-chat-row-1' },
+                    { name: tgState.saved || 'Избранное', msg: 'Nightcall.mp3 • pic.jpg', time: '14:22', unread: 2, secret: false, sentCheck: false, id: 'live-chat-row-2' },
+                    { name: 'Telegram Audio', msg: 'Голосовое сообщение (0:18)', time: 'Вчера', unread: 0, secret: false, sentCheck: true, id: 'live-chat-row-3' }
                 ];
-                listView.innerHTML = sampleChats.map(c => `
-                    <div class="px-3.5 py-2.5 flex items-center gap-3" style="color:${C.primaryTextOnBg}; border-bottom:1px solid ${C.dividerColor}">
+                listView.innerHTML = sampleChats.map((c, idx) => `
+                    <div id="${c.id}" class="px-3.5 py-2.5 flex items-center gap-3 live-row-anim" style="animation-delay:${idx * 70}ms; color:${C.primaryTextOnBg}; border-bottom:1px solid ${C.dividerColor}">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0 bg-cover bg-center" style="${tgState.avatarDataUrl ? `background-image:url('${tgState.avatarDataUrl}')` : `background-color:${C.avatarBg}; color:${C.avatarFg}`}">${tgState.avatarDataUrl ? '' : c.name[0]}</div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-center">
@@ -2009,16 +2145,53 @@
                                 </span>
                                 <span class="text-[10px] flex items-center gap-1" style="color:${C.secondaryTextOnBg}">
                                     ${c.sentCheck ? `<svg class="w-3.5 h-3.5" style="color:${C.listChecks}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>` : ''}
-                                    ${c.time}
+                                    <span class="chat-time-lbl">${c.time}</span>
                                 </span>
                             </div>
                             <div class="flex justify-between items-center mt-0.5">
-                                <span class="text-[11px] truncate" style="color:${c.typing ? C.accentOnBg : C.secondaryTextOnBg}">${escapeHtml(c.msg)}</span>
-                                ${c.unread ? `<span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold" style="background:${C.actionBtnBg}; color:${C.actionBtnFg}">${c.unread}</span>` : ''}
+                                <span class="chat-msg-lbl text-[11px] truncate flex items-center gap-1" style="color:${c.typing ? C.accentOnBg : C.secondaryTextOnBg}">
+                                    ${c.typing ? `<span class="inline-flex items-center mr-0.5"><i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i></span>` : ''}${escapeHtml(c.msg)}
+                                </span>
+                                <span class="chat-badge-lbl px-1.5 py-0.2 rounded-full text-[10px] font-bold ${c.unread ? '' : 'hidden'}" style="background:${C.actionBtnBg}; color:${C.actionBtnFg}">${c.unread || 1}</span>
                             </div>
                         </div>
                     </div>
                 `).join('');
+
+                // Живой приход сообщений в списке чатов (недолго, плавно)
+                liveSimTimers.push(setTimeout(() => {
+                    const r0 = document.getElementById('live-chat-row-0');
+                    if (!r0) return;
+                    const msgEl = r0.querySelector('.chat-msg-lbl');
+                    const badgeEl = r0.querySelector('.chat-badge-lbl');
+                    if (msgEl) {
+                        msgEl.style.color = C.primaryTextOnBg;
+                        msgEl.innerHTML = 'Тема и обои pic.jpg готовы к установке!';
+                    }
+                    if (badgeEl) {
+                        badgeEl.textContent = '2';
+                        badgeEl.classList.remove('hidden');
+                        badgeEl.classList.add('live-msg-anim');
+                    }
+                    r0.classList.remove('live-row-anim');
+                    void r0.offsetWidth;
+                    r0.classList.add('live-row-anim');
+                }, 720));
+
+                liveSimTimers.push(setTimeout(() => {
+                    const r2 = document.getElementById('live-chat-row-2');
+                    if (!r2) return;
+                    const msgEl = r2.querySelector('.chat-msg-lbl');
+                    const badgeEl = r2.querySelector('.chat-badge-lbl');
+                    if (msgEl) {
+                        msgEl.style.color = C.accentOnBg;
+                        msgEl.innerHTML = 'Новое сохранение в Сейфе ✓';
+                    }
+                    if (badgeEl) {
+                        badgeEl.textContent = '3';
+                        badgeEl.classList.add('live-msg-anim');
+                    }
+                }, 1450));
             }
 
             // Рендер экрана ПРОФИЛЯ (Никнейм, Статус, Кнопки, Блок «О себе», Юзернейм и Вкладки Медиа)
@@ -2028,8 +2201,8 @@
                     : `background:${C.avatarBg}; color:${C.avatarFg};`;
                 profileView.innerHTML = `
                     <div>
-                        <!-- Шапка профиля -->
-                        <div class="px-4 pt-3 pb-3 flex flex-col items-center text-center relative" style="background:${C.headerBg}; border-bottom:1px solid ${C.headerDivider}">
+                        <!-- Шапка профиля (постепенное появление) -->
+                        <div class="prof-reveal px-4 pt-3 pb-3 flex flex-col items-center text-center relative" style="--step:0; background:${C.headerBg}; border-bottom:1px solid ${C.headerDivider}">
                             <div class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-base shadow-md mb-2" style="${avStyle}; border:2px solid ${C.accentOnHdr}">${tgState.avatarDataUrl ? '' : 'D'}</div>
                             <div class="text-sm font-bold leading-tight flex items-center gap-1" style="color:${C.primaryTextOnHdr}">
                                 <span>Darxy // TG Studio</span>
@@ -2048,7 +2221,7 @@
                         </div>
 
                         <!-- Карточка Информации («О себе» и Юзернейм) -->
-                        <div class="mx-3 my-2.5 rounded-xl overflow-hidden" style="background:${C.chatBg}; border:1px solid ${C.dividerColor}">
+                        <div class="prof-reveal mx-3 my-2.5 rounded-xl overflow-hidden" style="--step:1; background:${C.chatBg}; border:1px solid ${C.dividerColor}">
                             <div class="px-3.5 py-2" style="border-bottom:1px solid ${C.dividerColor}">
                                 <div class="text-[10px] font-bold uppercase tracking-wider" style="color:${C.accentOnBg}">Информация</div>
                                 <div class="text-xs font-medium mt-1 leading-snug" style="color:${C.primaryTextOnBg}">Создатель кастомных тем и локализаций Telegram. Текст описания никогда не сливается с фоном!</div>
@@ -2065,7 +2238,7 @@
                     </div>
 
                     <!-- Вкладки профиля (Медиа / Файлы / Голосовые) -->
-                    <div class="px-3 pt-2 pb-2.5" style="background:${C.chatBg}; border-top:1px solid ${C.dividerColor}">
+                    <div class="prof-reveal px-3 pt-2 pb-2.5" style="--step:2; background:${C.chatBg}; border-top:1px solid ${C.dividerColor}">
                         <div class="flex items-center justify-around text-[11px] font-bold pb-1.5" style="border-bottom:1px solid ${C.dividerColor}">
                             <span class="pb-1" style="color:${C.dialogBtnOnBg}; border-bottom:2px solid ${C.dialogBtnOnBg}">Медиа</span>
                             <span style="color:${C.secondaryTextOnBg}">Файлы</span>
@@ -2149,6 +2322,35 @@
             checks.style.color = C.outChecks;
 
             document.getElementById('tg-summary-name').textContent = tgState.name;
+
+            if (animateStage && isChat && document.documentElement.dataset.fx !== 'min') {
+                const inTextEl = document.getElementById('tg-mock-in-text');
+                const outTextEl = document.getElementById('tg-mock-out-text');
+                msgIn.classList.remove('live-msg-anim');
+                msgOut.classList.remove('live-msg-anim');
+                void msgIn.offsetWidth;
+                msgIn.classList.add('live-msg-anim');
+                msgOut.style.opacity = '0';
+
+                if (inTextEl) {
+                    inTextEl.innerHTML = `<span class="inline-flex items-center gap-1" style="color:${C.inAccent}"><i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i> ${escapeHtml(tgState.typing || 'печатает...')}</span>`;
+                }
+                liveSimTimers.push(setTimeout(() => {
+                    if (inTextEl) inTextEl.textContent = 'Смотри, какая тема получилась';
+                }, 480));
+                liveSimTimers.push(setTimeout(() => {
+                    msgOut.style.opacity = '1';
+                    msgOut.classList.add('live-msg-anim');
+                    if (outTextEl) {
+                        outTextEl.innerHTML = `<span class="inline-flex items-center gap-1"><i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i></span>`;
+                    }
+                }, 760));
+                liveSimTimers.push(setTimeout(() => {
+                    if (outTextEl) outTextEl.textContent = 'Выглядит отлично';
+                }, 1180));
+            } else {
+                msgOut.style.opacity = '1';
+            }
         }
 
         function handleChatWallpaperUpload(files) {
@@ -2595,7 +2797,7 @@
             const basic = getCompatMode() === 'basic', map = new Map();
             String(text).split(/\r?\n/).forEach(raw => {
                 const m = raw.trim().match(/^([A-Za-z0-9_]+)=(-?\d+)$/);
-                if (!m || AT_INVALID_KEYS.has(m[1]) || (basic && !AT_BASIC_KEYS.has(m[1]))) return;
+                if (!m || AT_INVALID_KEYS.has(m[1])) return;
                 map.set(m[1], m[2]);
             });
             return [...map].map(([k, v]) => `${k}=${v}`).join('\n') + '\n';
@@ -2717,6 +2919,96 @@
             SA('chat_inTextSelectionHighlight', C.inAccent, '55');
             SA('chat_outTextSelectionHighlight', C.outText, '55');
 
+            // Полный перехват всех оставшихся синих ключей Telegram Android (Cursor, Mentions, Bots, Polls, Reactions, Stories, Tabs, Stickers, Media, Calls, Context Menu, Scrollbars)
+            S('chat_inSelectionCursor chat_TextSelectionCursor', C.inAccent);
+            S('chat_outSelectionCursor', C.outAccent);
+            S('windowBackgroundWhiteValueText2 windowBackgroundWhiteBlueText8', C.dialogBtnOnBg);
+            S('actionBarActionModeDefaultSubtitle actionBarDefaultSubmenuItemIcon', C.secondaryTextOnHdr);
+            S('actionBarWhiteSelector', C.primaryTextOnHdr);
+            S('chats_tabUnreadActiveBackground chats_mentionIcon', C.actionBtnBg);
+            S('chats_tabUnreadUnactiveBackground', mixHex(C.actionBtnBg, C.chatBg, 0.45));
+            S('chats_UnreadCounterText', C.actionBtnFg);
+            S('avatar_nameInMessage', C.inAccent);
+            S('chat_inAudioCacheSeekbar', A(C.inMedia, '33'));
+            S('chat_outAudioCacheSeekbar', A(C.outMedia, '33'));
+            S('chat_inPreviewInstantText chat_inAdminSelectedText chat_inViaBotNameSelectedText chat_inForwardedNameSelectedText chat_inReplyNameSelectedText chat_inSiteNameSelectedText chat_inContactNameSelectedText', C.inAccent);
+            S('chat_outPreviewInstantText chat_outAdminSelectedText chat_outViaBotNameSelectedText chat_outForwardedNameSelectedText chat_outReplyNameSelectedText chat_outSiteNameSelectedText chat_outContactNameSelectedText', C.outAccent);
+            S('chat_inAdminText', C.inTime);
+            S('chat_outAdminText', C.outTime);
+            S('chat_inContactBackground chat_inFileSelectedIcon', C.inMedia);
+            S('chat_outContactBackground chat_outFileSelectedIcon', C.outMedia);
+            S('chat_inContactIcon', C.inMediaFg);
+            S('chat_outContactIcon', C.outMediaFg);
+            S('chat_inLocationBackground', A(C.inMedia, '28'));
+            S('chat_outLocationBackground', A(C.outMedia, '28'));
+            S('chat_inLocationIcon', C.inMedia);
+            S('chat_outLocationIcon', C.outMedia);
+            S('chat_linkSelectBackground', A(C.inAccent, '33'));
+            S('chat_outLinkSelectBackground', A(C.outAccent, '33'));
+            S('chat_textSelectBackground', A(C.inAccent, '44'));
+            S('chat_outTextSelectBackground', A(C.outAccent, '44'));
+            S('chat_messagePanelVoiceBackground chat_recordedVoiceBackground', C.actionBtnBg);
+            S('chat_messagePanelVoicePressed chat_recordedVoiceDot', C.actionBtnFg);
+            S('chat_recordedVoicePlayPause chat_recordedVoiceProgressInner', C.actionBtnFg);
+            S('chat_recordedVoiceProgress', A(C.actionBtnFg, '55'));
+            S('chat_goDownButton', C.headerBg);
+            S('chat_goDownButtonIcon', C.accentOnHdr);
+            S('chat_goDownButtonCounterBackground', C.actionBtnBg);
+            S('chat_goDownButtonCounter', C.actionBtnFg);
+            S('chat_searchPanelIcons chat_searchPanelText', C.accentOnHdr);
+            S('chat_unreadMessagesStartBackground', C.headerBg);
+            S('chat_unreadMessagesStartText chat_unreadMessagesStartArrowIcon', C.accentOnHdr);
+            S('chat_inlineResultIcon', C.accentOnBg);
+            S('chat_botButtonText', C.outText);
+            S('chat_botSwitchToInlineText', C.accentOnBg);
+            S('chat_botProgress', C.actionBtnFg);
+            S('chat_inPollCorrectAnswer chat_outPollCorrectAnswer', C.accentOnBg);
+            S('chat_inReactionButtonBackground', A(C.inMedia, '26'));
+            S('chat_outReactionButtonBackground', A(C.outMedia, '26'));
+            S('chat_inReactionButtonText', C.inMedia);
+            S('chat_outReactionButtonText', C.outMedia);
+            S('chat_inReactionButtonTextSelected', C.inMediaFg);
+            S('chat_outReactionButtonTextSelected', C.outMediaFg);
+            S('chat_inCodeBackground', A(C.inText, '16'));
+            S('chat_outCodeBackground', A(C.outText, '16'));
+            S('featuredStickers_addedIcon featuredStickers_unread', C.accentOnBg);
+            S('stickers_menu', C.secondaryTextOnBg);
+            S('stickers_menuSelector', A(C.accentOnBg, '22'));
+            S('sharedMedia_startStopLoadIcon', C.actionBtnBg);
+            S('sharedMedia_linkPlaceholder', C.headerBg);
+            S('sharedMedia_linkPlaceholderText', C.accentOnHdr);
+            S('sharedMedia_photoPlaceholder', C.headerBg);
+            S('contextProgressInner1 contextProgressInner2 contextProgressInner3', C.accentOnBg);
+            S('contextProgressOuter1 contextProgressOuter2 contextProgressOuter3', C.actionBtnFg);
+            S('login_progressInner', C.dividerColor);
+            S('login_progressOuter', C.accentOnBg);
+            S('groupcreate_cursor groupcreate_sectionText groupcreate_onlineText', C.accentOnBg);
+            S('groupcreate_hintText', C.secondaryTextOnBg);
+            S('groupcreate_spanBackground', C.headerBg);
+            S('groupcreate_spanText', C.primaryTextOnHdr);
+            S('groupcreate_spanDelete', C.accentOnHdr);
+            S('passport_bottomButton', C.dialogBtnOnBg);
+            S('location_sendLocationBackground location_sendLiveLocationBackground', C.actionBtnBg);
+            S('location_sendLocationIcon location_sendLiveLocationIcon location_sendLiveLocationText', C.actionBtnFg);
+            S('location_placeLocationBackground', C.accentOnBg);
+            S('calls_callReceivedGreenIcon calls_ratingStarSelected', C.accentOnBg);
+            S('undo_background', C.headerBg);
+            S('undo_cancelColor', C.accentOnHdr);
+            S('undo_infoColor', C.primaryTextOnHdr);
+            S('chats_storyCircleUnread', C.accentOnBg);
+            S('chats_storyCircleRead', C.dividerColor);
+            S('stories_circle_closeFriends', C.listChecks);
+            S('key_sheet_scrollUp', C.dividerColor);
+            S('key_ sheet_other', C.headerBg);
+            S('key_player_progressBackground', A(C.inMedia, '35'));
+            S('key_player_progress', C.accentOnBg);
+            S('key_player_progressCachedBackground', A(C.inMedia, '55'));
+            S('premiumGradient1 premiumGradient2 premiumGradient3 premiumGradient4', C.accentOnBg);
+            S('premiumStartGradient1 premiumStartGradient2', C.actionBtnBg);
+            S('topics_unreadCounter', C.actionBtnBg);
+            S('topics_unreadCounterText', C.actionBtnFg);
+            S('topics_unreadCounterMuted', C.hintTextOnBg);
+
             return Object.entries(k).map(([n, v]) => `${n}=${v}`).join('\n') + '\n';
         }
 
@@ -2815,7 +3107,26 @@
                 `  inputPanelPrimaryTextColor: ${C.primaryTextOnHdr}`,
                 `  inputPanelSecondaryTextColor: ${C.secondaryTextOnHdr}`,
                 `  inputPanelActionControlFillColor: ${C.actionBtnBg}`,
-                `  inputPanelActionControlForegroundColor: ${C.actionBtnFg}`
+                `  inputPanelActionControlForegroundColor: ${C.actionBtnFg}`,
+                `  inputPanelMediaRecordDotColor: ${C.actionBtnBg}`,
+                `  inputPanelMediaRecordControlFillColor: ${C.actionBtnBg}`,
+                `  incomingMediaIconColor: ${C.inMediaFg}`,
+                `  outgoingMediaIconColor: ${C.outMediaFg}`,
+                `  incomingFileTitleColor: ${C.inText}`,
+                `  outgoingFileTitleColor: ${C.outText}`,
+                `  incomingFileDescriptionColor: ${C.inTime}`,
+                `  outgoingFileDescriptionColor: ${C.outTime}`,
+                `  incomingLinkHighlightColor: ${C.inAccent}`,
+                `  outgoingLinkHighlightColor: ${C.outAccent}`,
+                `  incomingTextSelectionColor: ${C.inAccent}`,
+                `  outgoingTextSelectionColor: ${C.outAccent}`,
+                `  serviceMessageFillColor: ${C.headerBg}`,
+                `  serviceMessagePrimaryTextColor: ${C.primaryTextOnHdr}`,
+                `  navigateToMessageButtonFillColor: ${C.headerBg}`,
+                `  navigateToMessageButtonStrokeColor: ${C.headerDivider}`,
+                `  navigateToMessageButtonIconColor: ${C.accentOnHdr}`,
+                `  navigateToMessageButtonBadgeFillColor: ${C.actionBtnBg}`,
+                `  navigateToMessageButtonBadgeTextColor: ${C.actionBtnFg}`
             ].join('\n') + '\n';
         }
 
@@ -2885,7 +3196,48 @@
                 historyPeer6UserpicBg: C.avatarBg,
                 historyPeer7UserpicBg: C.avatarBg,
                 historyPeer8UserpicBg: C.avatarBg,
-                historyPeerUserpicFg: C.avatarFg
+                historyPeerUserpicFg: C.avatarFg,
+                dialogsDraftFg: C.accentOnBg,
+                dialogsVerifiedIconBg: C.dialogBtnOnBg,
+                dialogsVerifiedIconFg: getReadableFg(C.dialogBtnOnBg),
+                dialogsSendingIconFg: C.secondaryTextOnBg,
+                dialogsSentIconFgActive: C.outChecks,
+                dialogsUnreadBgMuted: C.msgIn,
+                dialogsUnreadBgMutedActive: C.headerBg,
+                historyReplyNameFg: C.accentOnHdr,
+                historyReplyIconFg: C.accentOnHdr,
+                historyComposeButtonBg: C.headerBg,
+                historyComposeButtonBgOver: C.msgIn,
+                historyComposeButtonBgRipple: C.msgOut,
+                historySendIconFg: C.accentOnHdr,
+                historySendIconFgOver: C.accentOnHdr,
+                historyPinnedBg: C.headerBg,
+                historyReplyBg: C.headerBg,
+                msgInServiceFg: C.inAccent,
+                msgOutServiceFg: C.outAccent,
+                msgInReplyBarColor: C.inAccent,
+                msgOutReplyBarColor: C.outAccent,
+                msgInMonoFg: C.inAccent,
+                msgOutMonoFg: C.outAccent,
+                msgFileThumbLinkInFg: C.inAccent,
+                msgFileThumbLinkOutFg: C.outAccent,
+                boxBg: C.headerBg,
+                boxTextFg: C.primaryTextOnHdr,
+                boxTitleFg: C.primaryTextOnHdr,
+                boxSearchBg: C.chatBg,
+                contactsBg: C.chatBg,
+                contactsBgOver: C.headerBg,
+                contactsNameFg: C.primaryTextOnBg,
+                contactsStatusFg: C.secondaryTextOnBg,
+                contactsStatusFgOnline: C.accentOnBg,
+                mainMenuBg: C.headerBg,
+                mainMenuCoverBg: C.msgOut,
+                mainMenuCoverFg: C.outText,
+                mediaPlayerBg: C.headerBg,
+                mediaPlayerActiveFg: C.accentOnHdr,
+                mediaPlayerInactiveFg: C.secondaryTextOnHdr,
+                ntfBg: C.headerBg,
+                ntfFg: C.primaryTextOnHdr
             };
             return Object.entries(m).map(([k, v]) => `${k}: ${v};`).join('\n') + '\n';
         }
@@ -3121,57 +3473,187 @@
             openImportedThemeModal(lastCompiledPackage);
         }
 
-        function openImportedThemeModal(pkg) {
-            const st = pkg.state || tgState;
-            const C = resolveThemeDependencies(st);
-            const isLang = pkg.kind === 'lang' || pkg.format === 'lang';
-            document.getElementById('imp-modal-title').textContent = isLang ? st.langName : st.name;
-            document.getElementById('imp-btn-primary-label').textContent = isLang ? 'Установить язык' : 'Применить в Telegram';
+        let modalStageTab = 'chat';
+        let modalStageTimers = [];
+        function clearModalStageTimers() {
+            while (modalStageTimers.length) clearTimeout(modalStageTimers.pop());
+        }
 
+        function setModalStageTab(tab) {
+            Haptic.selection();
+            modalStageTab = tab;
+            ['chat', 'list', 'profile'].forEach(t => {
+                const b = document.getElementById('modal-tab-' + t);
+                if (b) {
+                    b.className = (t === tab)
+                        ? 'px-2 py-1 rounded-md text-[10px] font-semibold bg-white/10 text-dynamic'
+                        : 'px-2 py-1 rounded-md text-[10px] font-medium text-muted-dynamic';
+                }
+            });
+            const stage = document.getElementById('imp-modal-Stage');
+            triggerElementMotionBlur(stage);
+            renderModalStageContent(lastCompiledPackage || { state: tgState, format: 'attheme', kind: 'theme' });
+        }
+
+        function renderModalStageContent(pkg) {
+            clearModalStageTimers();
+            const st = pkg?.state || tgState;
+            const C = resolveThemeDependencies(st);
+            const isLang = pkg?.kind === 'lang' || pkg?.format === 'lang';
             const r = `${st.bubbleRadius || 16}px`, fs = `${st.fontSize || 13}px`;
             const wave = (c) => VOICE_WAVE_HEIGHTS.map((h, i) => `<i style="display:block;width:2px;height:${Math.max(20, h)}%;border-radius:2px;background:${c};opacity:${i < 11 ? 1 : .4}"></i>`).join('');
-            const play = (bg, fg) => `<span style="width:30px;height:30px;border-radius:50%;background:${bg};color:${fg};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20"/></svg></span>`;
+            const play = (bg, fg) => `<span style="width:28px;height:28px;border-radius:50%;background:${bg};color:${fg};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20"/></svg></span>`;
             const wp = st.wallpaperDataUrl ? `background-image:url("${st.wallpaperDataUrl}");background-size:${st.wpScale || 100}%;background-position:${st.wpPosX ?? 50}% ${st.wpPosY ?? 50}%;` : '';
             const avatar = st.avatarDataUrl ? `background-image:url('${st.avatarDataUrl}');background-size:cover` : `background:${C.avatarBg};color:${C.avatarFg}`;
+            const stage = document.getElementById('imp-modal-Stage');
+            if (!stage) return;
 
-            document.getElementById('imp-modal-Stage').innerHTML = `
-                <div style="background:${C.chatBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none">
-                    <!-- Мини-профиль сверху (показывает контраст Ника и Описания) -->
-                    <div style="background:${C.headerBg};border-bottom:1px solid ${C.headerDivider}" class="px-3.5 py-2.5 flex items-center justify-between gap-2.5">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div style="${avatar};width:34px;height:34px;border-radius:50%;flex-shrink:0" class="flex items-center justify-center font-bold text-xs">${st.avatarDataUrl ? '' : escapeHtml((st.name || 'D')[0])}</div>
-                            <div class="min-w-0">
-                                <div class="text-xs font-bold leading-tight truncate" style="color:${C.primaryTextOnHdr}">${escapeHtml(isLang ? (st.saved || st.name) : st.name)}</div>
-                                <div class="text-[10px] truncate" style="color:${C.secondaryTextOnHdr}"><span style="color:${C.accentOnHdr}">${escapeHtml(st.online || 'в сети')}</span></div>
+            if (modalStageTab === 'list') {
+                const rows = [
+                    { id: 'm-row-0', name: 'Darxy // Studio', msg: st.typing || 'печатает...', time: 'сейчас', unread: 1, typing: true, secret: false },
+                    { id: 'm-row-1', name: st.saved || 'Избранное', msg: 'Обои pic.jpg + палитра', time: '14:25', unread: 2, typing: false, secret: false },
+                    { id: 'm-row-2', name: 'Секретный чат', msg: '0% синего — всё под контролем', time: '14:20', unread: 0, typing: false, secret: true }
+                ];
+                stage.innerHTML = `
+                    <div style="background:${C.chatBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none flex-1 flex flex-col justify-between">
+                        <div style="background:${C.headerBg};border-bottom:1px solid ${C.headerDivider}" class="px-3.5 py-2 flex items-center justify-between">
+                            <span class="text-xs font-bold" style="color:${C.primaryTextOnHdr}">Telegram</span>
+                            <span class="text-[10px] font-medium" style="color:${C.accentOnHdr}">${escapeHtml(st.online || 'в сети')}</span>
+                        </div>
+                        <div class="divide-y" style="border-color:${C.dividerColor}">
+                            ${rows.map((c, idx) => `
+                                <div id="${c.id}" class="px-3.5 py-2.5 flex items-center gap-2.5 live-row-anim" style="animation-delay:${idx * 75}ms;border-bottom:1px solid ${C.dividerColor}">
+                                    <div style="${avatar};width:34px;height:34px;border-radius:50%;flex-shrink:0" class="flex items-center justify-center font-bold text-xs">${st.avatarDataUrl ? '' : escapeHtml(c.name[0])}</div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-bold truncate" style="color:${c.secret ? C.listChecks : C.primaryTextOnBg}">${escapeHtml(c.name)}</span>
+                                            <span class="text-[10px]" style="color:${C.secondaryTextOnBg}">${c.time}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center mt-0.5">
+                                            <span class="m-msg text-[11px] truncate flex items-center gap-1" style="color:${c.typing ? C.accentOnBg : C.secondaryTextOnBg}">
+                                                ${c.typing ? `<span class="inline-flex items-center"><i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i></span>` : ''}${escapeHtml(c.msg)}
+                                            </span>
+                                            <span class="m-badge px-1.5 py-0.2 rounded-full text-[10px] font-bold ${c.unread ? '' : 'hidden'}" style="background:${C.actionBtnBg};color:${C.actionBtnFg}">${c.unread || 1}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                modalStageTimers.push(setTimeout(() => {
+                    const r0 = document.getElementById('m-row-0');
+                    if (!r0) return;
+                    const mEl = r0.querySelector('.m-msg');
+                    const bEl = r0.querySelector('.m-badge');
+                    if (mEl) { mEl.style.color = C.primaryTextOnBg; mEl.textContent = 'Новое сообщение доставлено ✓'; }
+                    if (bEl) { bEl.textContent = '2'; bEl.classList.add('live-msg-anim'); }
+                }, 650));
+                return;
+            }
+
+            if (modalStageTab === 'profile') {
+                stage.innerHTML = `
+                    <div style="background:${C.graySectionBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none flex-1 flex flex-col justify-between p-2.5 space-y-2">
+                        <div class="prof-reveal rounded-xl px-3 py-2.5 flex items-center gap-3" style="--step:0;background:${C.headerBg};border:1px solid ${C.headerDivider}">
+                            <div style="${avatar};width:42px;height:42px;border-radius:50%;border:2px solid ${C.accentOnHdr}" class="flex items-center justify-center font-bold text-sm shrink-0">${st.avatarDataUrl ? '' : 'D'}</div>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-xs font-bold truncate flex items-center gap-1" style="color:${C.primaryTextOnHdr}">
+                                    <span>Darxy // TG Studio</span>
+                                    <span class="w-3.5 h-3.5 rounded-full inline-flex items-center justify-center text-[8px]" style="background:${C.dialogBtnOnHdr};color:${getReadableFg(C.dialogBtnOnHdr)}">✓</span>
+                                </div>
+                                <div class="text-[10px]" style="color:${C.accentOnHdr}">${escapeHtml(st.online || 'в сети')}</div>
                             </div>
                         </div>
+                        <div class="prof-reveal rounded-xl px-3 py-2 space-y-1" style="--step:1;background:${C.chatBg};border:1px solid ${C.dividerColor}">
+                            <div class="text-[9px] font-bold uppercase tracking-wider" style="color:${C.accentOnBg}">О себе</div>
+                            <div class="text-[11px] font-medium leading-snug" style="color:${C.primaryTextOnBg}">Кастомные темы, языковые пакеты и обои pic.jpg. Связь: <span style="color:${C.dialogBtnOnBg}">@darxxx1zq</span></div>
+                        </div>
+                        <div class="prof-reveal rounded-xl px-3 py-2 grid grid-cols-3 gap-1.5 text-center text-[10px] font-bold" style="--step:2;background:${C.chatBg};border:1px solid ${C.dividerColor}">
+                            <div class="py-1 rounded-lg" style="background:${C.msgIn};color:${C.inText}">Медиа</div>
+                            <div class="py-1 rounded-lg" style="background:${C.msgOut};color:${C.outText}">Файлы</div>
+                            <div class="py-1 rounded-lg" style="background:${C.headerBg};color:${C.dialogBtnOnHdr}">Ссылки</div>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            // Default: 'chat' tab with gradual typing & message pop-in
+            stage.innerHTML = `
+                <div style="background:${C.chatBg};color:${C.primaryTextOnBg};font-size:${fs}" class="select-none flex-1 flex flex-col justify-between">
+                    <div style="background:${C.headerBg};border-bottom:1px solid ${C.headerDivider}" class="px-3.5 py-2 flex items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div style="${avatar};width:32px;height:32px;border-radius:50%;flex-shrink:0" class="flex items-center justify-center font-bold text-xs">${st.avatarDataUrl ? '' : escapeHtml((st.name || 'D')[0])}</div>
+                            <div class="min-w-0">
+                                <div class="text-xs font-bold leading-tight truncate" style="color:${C.primaryTextOnHdr}">${escapeHtml(isLang ? (st.saved || st.name) : st.name)}</div>
+                                <div id="modal-live-status" class="text-[10px] truncate" style="color:${C.accentOnHdr}">${escapeHtml(st.typing || 'печатает...')}</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:${C.dialogBtnOnHdr}22;color:${C.dialogBtnOnHdr}">${escapeHtml(st.today || 'Сегодня')}</span>
                     </div>
-                    <!-- Секция чата -->
-                    <div class="p-3.5 space-y-2" style="${wp}">
-                        <div class="text-center"><span class="px-2 py-0.5 rounded-full text-[10px]" style="background:${C.headerBg}e6;color:${C.primaryTextOnHdr};border:1px solid ${C.headerDivider}">${escapeHtml(st.today || 'Сегодня')}</span></div>
-                        <div class="max-w-[82%] px-3 py-2" style="background:${C.msgIn};color:${C.inText};border-radius:${r} ${r} ${r} 4px;border:1px solid ${C.dividerColor}">
+                    <div class="p-3 space-y-2 flex-1 flex flex-col justify-center" style="${wp}">
+                        <div id="modal-msg-in" class="live-msg-anim max-w-[85%] px-3 py-2" style="background:${C.msgIn};color:${C.inText};border-radius:${r} ${r} ${r} 4px;border:1px solid ${C.dividerColor}">
                             <div class="flex items-center gap-2">${play(C.inMedia, C.inMediaFg)}<div class="min-w-0"><div class="text-[11px] font-bold truncate" style="color:${C.inText}">Nightcall</div><div class="text-[10px]" style="color:${C.inTime}">Darxy Studio • 03:42</div></div></div>
+                            <div id="modal-msg-in-txt" class="text-[11px] mt-1"><span class="inline-flex items-center gap-1" style="color:${C.inAccent}"><i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i></span></div>
                         </div>
-                        <div class="max-w-[82%] ml-auto px-3 py-2" style="background:${C.msgOut};color:${C.outText};border-radius:${r} ${r} 4px ${r}">
+                        <div id="modal-msg-out" class="max-w-[85%] ml-auto px-3 py-2 opacity-0" style="background:${C.msgOut};color:${C.outText};border-radius:${r} ${r} 4px ${r}">
                             <div class="flex items-center gap-2">${play(C.outMedia, C.outMediaFg)}<div class="flex items-center gap-[2px] h-4 flex-1">${wave(C.outMedia)}</div></div>
-                            <div class="text-[9px] text-right mt-1" style="color:${C.outTime}">0:18 • 14:21 <span style="color:${C.outChecks}">✓✓</span></div>
+                            <div id="modal-msg-out-txt" class="text-[11px] mt-1">Готово к установке!</div>
+                            <div class="text-[9px] text-right mt-0.5" style="color:${C.outTime}">0:18 • 14:21 <span style="color:${C.outChecks}">✓✓</span></div>
                         </div>
-                        <div class="rounded-xl px-3 py-2 mx-auto max-w-[82%]" style="background:${C.headerBg};color:${C.primaryTextOnHdr};border:1px solid ${C.headerDivider}">
-                            <div class="text-[11px] mb-1.5 text-center">${escapeHtml(isLang ? `${st.placeholder} • ${st.pinned}` : st.name)}</div>
-                            <div class="flex justify-end gap-4 text-[11px] font-bold"><span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.cancel || 'Отмена')}</span><span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.ok || 'Принять')}</span></div>
+                    </div>
+                    <div style="background:${C.headerBg};border-top:1px solid ${C.headerDivider}" class="px-3.5 py-2 flex items-center justify-between text-[11px]">
+                        <span class="truncate" style="color:${C.secondaryTextOnHdr}">${escapeHtml(st.placeholder || 'Сообщение...')}</span>
+                        <div class="flex items-center gap-3 font-bold">
+                            <span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.cancel || 'Отмена')}</span>
+                            <span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.ok || 'Принять')}</span>
                         </div>
                     </div>
                 </div>`;
+
+            modalStageTimers.push(setTimeout(() => {
+                const inTxt = document.getElementById('modal-msg-in-txt');
+                if (inTxt) inTxt.textContent = isLang ? `Пакет «${st.langName}» готов` : `Тема «${st.name}» проверена`;
+            }, 420));
+
+            modalStageTimers.push(setTimeout(() => {
+                const outBox = document.getElementById('modal-msg-out');
+                const stLbl = document.getElementById('modal-live-status');
+                if (outBox) {
+                    outBox.classList.remove('opacity-0');
+                    outBox.classList.add('live-msg-anim');
+                }
+                if (stLbl) stLbl.textContent = st.online || 'в сети';
+            }, 780));
+        }
+
+        function openImportedThemeModal(pkg) {
+            const st = pkg.state || tgState;
+            const isLang = pkg.kind === 'lang' || pkg.format === 'lang';
+            document.getElementById('imp-modal-title').textContent = isLang ? st.langName : st.name;
+            document.getElementById('imp-btn-primary-label').textContent = isLang ? 'Окно «Изменить язык?»' : 'Применить в Telegram';
 
             const cp = document.getElementById('imp-compat');
             const showCompat = pkg.format === 'attheme';
             cp.classList.toggle('hidden', !showCompat); cp.classList.toggle('grid', showCompat);
             updateCompatUI();
+
+            modalStageTab = 'chat';
+            ['chat', 'list', 'profile'].forEach(t => {
+                const b = document.getElementById('modal-tab-' + t);
+                if (b) {
+                    b.className = (t === 'chat')
+                        ? 'px-2 py-1 rounded-md text-[10px] font-semibold bg-white/10 text-dynamic'
+                        : 'px-2 py-1 rounded-md text-[10px] font-medium text-muted-dynamic';
+                }
+            });
+            renderModalStageContent(pkg);
+
             const modal = document.getElementById('native-theme-preview-modal');
             modal.classList.remove('hidden'); modal.classList.add('flex');
         }
 
         function closeImportedThemeModal() {
+            clearModalStageTimers();
             const modal = document.getElementById('native-theme-preview-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
@@ -3204,13 +3686,16 @@
             Haptic.success();
             const pkg = lastCompiledPackage || await buildThemeFileAsync(PLATFORM_FORMAT[detectPlatform()], tgState);
             const st = pkg.state || tgState;
-            if (pkg.kind !== 'lang') {
-                const slug = String(st.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
-                if (isRealSlug(slug)) {
-                    const url = `https://t.me/addtheme/${slug}`;
-                    if (tg?.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
-                    return;
-                }
+            if (pkg.kind === 'lang' || pkg.format === 'lang') {
+                closeImportedThemeModal();
+                openNativeSetLanguageModal(st.langSlug || 'ru');
+                return;
+            }
+            const slug = String(st.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
+            if (isRealSlug(slug)) {
+                const url = `https://t.me/addtheme/${slug}`;
+                if (tg?.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
+                return;
             }
             const btn = document.getElementById('imp-btn-primary-apply');
             btn?.classList.add('opacity-60', 'pointer-events-none');
@@ -3286,12 +3771,24 @@
 
         function openNativeSetLanguageModal(customSlug = null) {
             Haptic.success();
-            autoSaveToVault(`Язык: ${tgState.langName}`, 'Облачный язык', tgState);
-            const rawSlug = (customSlug || tgState.langSlug || 'ru').replace(/^https?:\/\/t\.me\/setlanguage\//i, '').trim();
-            const langUrl = `https://t.me/setlanguage/${rawSlug}`;
-            if (tg?.openTelegramLink) tg.openTelegramLink(langUrl);
-            else window.open(langUrl, '_blank');
-            showToast(`Открыто окно смены языка (${rawSlug})`);
+            autoSaveToVault(`Язык: ${tgState.langName}`, 'Окно смены языка', tgState);
+            const rawSlug = String(customSlug || tgState.langSlug || 'ru')
+                .replace(/^https?:\/\/t\.me\/setlanguage\//i, '')
+                .replace(/^tg:\/\/setlanguage\?lang=/i, '')
+                .trim() || 'ru';
+            const httpsUrl = `https://t.me/setlanguage/${encodeURIComponent(rawSlug)}`;
+            const tgDeepUrl = `tg://setlanguage?lang=${encodeURIComponent(rawSlug)}`;
+            try {
+                if (typeof tg?.openTelegramLink === 'function') {
+                    tg.openTelegramLink(httpsUrl);
+                } else {
+                    window.location.href = tgDeepUrl;
+                    setTimeout(() => { window.open(httpsUrl, '_blank'); }, 280);
+                }
+            } catch (_) {
+                window.open(httpsUrl, '_blank');
+            }
+            showToast(`Открыто окно «Изменить язык?» (${rawSlug})`);
         }
 
         function saveBlob(blob, name) {
@@ -3525,19 +4022,119 @@
             return item;
         }
 
+        function buildFallbackPicDataUrl() {
+            const C = resolveThemeDependencies(tgState);
+            const cv = document.createElement('canvas');
+            cv.width = 720; cv.height = 1280;
+            const ctx = cv.getContext('2d');
+            const g = ctx.createLinearGradient(0, 0, 720, 1280);
+            g.addColorStop(0, C.chatBg);
+            g.addColorStop(0.5, C.headerBg);
+            g.addColorStop(1, C.msgIn);
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 720, 1280);
+            const r1 = ctx.createRadialGradient(180, 260, 10, 180, 260, 380);
+            r1.addColorStop(0, C.accentOnBg + '66');
+            r1.addColorStop(1, 'transparent');
+            ctx.fillStyle = r1;
+            ctx.fillRect(0, 0, 720, 1280);
+            const r2 = ctx.createRadialGradient(560, 960, 10, 560, 960, 420);
+            r2.addColorStop(0, C.outMedia + '55');
+            r2.addColorStop(1, 'transparent');
+            ctx.fillStyle = r2;
+            ctx.fillRect(0, 0, 720, 1280);
+            return cv.toDataURL('image/jpeg', 0.9);
+        }
+
+        function applyGithubPicWallpaper(silent = false) {
+            if (!silent) Haptic.pop();
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                try {
+                    const cv = document.createElement('canvas');
+                    cv.width = img.naturalWidth || 720;
+                    cv.height = img.naturalHeight || 1280;
+                    cv.getContext('2d').drawImage(img, 0, 0);
+                    tgState.wallpaperDataUrl = cv.toDataURL('image/jpeg', 0.9);
+                } catch (_) {
+                    tgState.wallpaperDataUrl = 'pic.jpg';
+                }
+                syncInputsFromTgState();
+                renderTgLiveMockup(true);
+                if (!silent) showToast('Обои pic.jpg применены');
+            };
+            img.onerror = () => {
+                tgState.wallpaperDataUrl = buildFallbackPicDataUrl();
+                syncInputsFromTgState();
+                renderTgLiveMockup(true);
+                if (!silent) showToast('Обои pic.jpg активированы');
+            };
+            img.src = 'pic.jpg';
+        }
+
+        function contactAuthorTg() {
+            Haptic.selection();
+            const url = 'https://t.me/darxxx1zq';
+            if (tg?.openTelegramLink) tg.openTelegramLink(url);
+            else window.open(url, '_blank');
+        }
+
+        function openHelpSupportSheet() {
+            openBottomSheet('Помощь и связь', `
+                <div class="space-y-3 text-xs">
+                    <div class="p-3.5 recessed-block space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-dynamic">Как применить тему и обои</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono accent-bg-soft accent-text">.attheme / iOS / ПК</span>
+                        </div>
+                        <p class="text-[11px] text-muted-dynamic leading-relaxed">Нажмите «Установить тему» — откроется живое превью. Выберите «Применить в Telegram» или скачайте готовый файл со встроенными обоями <span class="text-dynamic font-mono">pic.jpg</span>.</p>
+                    </div>
+                    <div class="p-3.5 recessed-block space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-dynamic">Как сменить язык</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono accent-bg-soft accent-text">t.me/setlanguage</span>
+                        </div>
+                        <p class="text-[11px] text-muted-dynamic leading-relaxed">Во вкладке «Языковой пакет» выберите язык или нажмите «Окно Изменить язык?» — Telegram сразу покажет системное подтверждение смены языка.</p>
+                    </div>
+                    <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2.5 text-left">
+                        <div>
+                            <div class="text-xs font-bold text-dynamic">Связь с автором и реклама</div>
+                            <div class="text-[11px] accent-text font-mono mt-0.5">@darxxx1zq</div>
+                        </div>
+                        <span class="px-3 py-1.5 rounded-xl btn-primary text-[11px]">Написать</span>
+                    </button>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button type="button" onclick="closeBottomSheet(); openOnboarding(0)" class="btn-surface min-h-[40px] font-semibold">Обучение</button>
+                        <button type="button" onclick="closeBottomSheet()" class="btn-primary min-h-[40px]">Понятно</button>
+                    </div>
+                </div>
+            `);
+        }
+
         function openWallpaperOffer() {
             Haptic.pop();
-            openBottomSheet('Добавить фон?', `
-                <div class="space-y-3.5 text-xs">
+            openBottomSheet('Добавить обои?', `
+                <div class="space-y-3 text-xs">
                     <div class="wp-offer">
                         <div class="wp-offer-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg></div>
-                        <div class="text-[13px] font-bold text-dynamic">У темы нет фона чата</div>
-                        <div class="text-[11px] text-muted-dynamic">С картинкой чат выглядит богаче</div>
+                        <div class="text-[13px] font-bold text-dynamic">Обои для вашей темы</div>
+                        <div class="text-[11px] text-muted-dynamic">Примени фирменные обои pic.jpg или загрузи своё фото</div>
                     </div>
-                    <label class="btn-primary w-full min-h-[46px] text-xs flex items-center justify-center cursor-pointer">Выбрать картинку
-                        <input type="file" accept="image/*" class="hidden" onchange="pickOfferWallpaper(this.files)">
-                    </label>
-                    <button type="button" onclick="closeBottomSheet(); saveManualSnapshot(true)" class="btn-surface w-full min-h-[44px] text-xs font-semibold">Сохранить без фона</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="closeBottomSheet(); applyGithubPicWallpaper(); setTimeout(() => saveManualSnapshot(true), 220)" class="btn-primary min-h-[44px] text-xs">Обои pic.jpg</button>
+                        <label class="btn-surface min-h-[44px] text-xs font-semibold accent-text flex items-center justify-center cursor-pointer">Своя картинка
+                            <input type="file" accept="image/*" class="hidden" onchange="pickOfferWallpaper(this.files)">
+                        </label>
+                    </div>
+                    <button type="button" onclick="closeBottomSheet(); saveManualSnapshot(true)" class="btn-surface w-full min-h-[40px] text-xs font-medium text-muted-dynamic">Сохранить без обоев</button>
+                    <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2 text-left">
+                        <div>
+                            <div class="text-xs font-bold text-dynamic">Тут могла быть ваша реклама</div>
+                            <div class="text-[10px] text-muted-dynamic">Сотрудничество: @darxxx1zq</div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg btn-surface text-[10px] font-bold accent-text shrink-0">@darxxx1zq</span>
+                    </button>
                 </div>`);
         }
 
@@ -3611,11 +4208,19 @@
                         <div class="p-2.5 text-[11px] max-w-[82%] ml-auto" style="background:${C.msgOut}; color:${C.outText}; border-radius:${st.bubbleRadius}px">Все параметры профиля и чатов защищены от сливания.</div>
                     </div>
 
+                    <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2 text-left">
+                        <div>
+                            <div class="text-xs font-bold text-dynamic">Тут могла быть ваша реклама</div>
+                            <div class="text-[10px] text-muted-dynamic">Связь и размещение — @darxxx1zq</div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg btn-surface text-[10px] font-bold accent-text shrink-0">Написать</span>
+                    </button>
+
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="closeBottomSheet(); compileImportAndOpenPreview('theme', ${stJson})" class="btn-primary min-h-[40px]">Установить тему в ТГ</button>
-                        <button type="button" onclick="closeBottomSheet(); compileImportAndOpenPreview('lang', ${stJson})" class="btn-surface min-h-[40px] font-semibold accent-text">Установить язык в ТГ</button>
-                        <button type="button" onclick="downloadAtThemeFile(false, ${stJson})" class="btn-surface min-h-[38px]">Скачать .attheme</button>
-                        <button type="button" onclick="downloadTelegramLangXml(false, ${stJson})" class="btn-surface min-h-[38px]">Скачать .xml</button>
+                        <button type="button" onclick="closeBottomSheet(); compileImportAndOpenPreview('theme', ${stJson})" class="btn-primary min-h-[40px]">Установить тему</button>
+                        <button type="button" onclick="closeBottomSheet(); openNativeSetLanguageModal('${escapeHtml(st.langSlug || 'ru')}')" class="btn-surface min-h-[40px] font-semibold accent-text">Изменить язык?</button>
+                        <button type="button" onclick="downloadAtThemeFile(false, ${stJson})" class="btn-surface min-h-[38px]">Файл .attheme</button>
+                        <button type="button" onclick="downloadTelegramLangXml(false, ${stJson})" class="btn-surface min-h-[38px]">Файл .xml</button>
                         <button type="button" onclick="loadVaultItemToEditor(${item.id}); closeBottomSheet()" class="btn-surface min-h-[38px] col-span-2">Загрузить в редактор</button>
                     </div>
                 </div>
@@ -4068,7 +4673,9 @@
             const idx = Math.max(0, modes.indexOf(mode));
             document.getElementById('builder-mode-pill').style.transform = `translate3d(${idx * 100}%, 0, 0)`;
             modes.forEach(m => {
-                document.getElementById(`panel-studio-${m}`).classList.toggle('hidden', m !== mode);
+                const pEl = document.getElementById(`panel-studio-${m}`);
+                pEl.classList.toggle('hidden', m !== mode);
+                if (m === mode) triggerElementMotionBlur(pEl);
                 const btn = document.getElementById(`mode-btn-${m}`);
                 if (m === mode) {
                     btn.classList.add('font-bold', 'accent-text');
@@ -4269,12 +4876,31 @@
             snapshotBasePalette();
             applyUserSiteTheme(loadUserSiteTheme());
             initStudioGrids();
+            applyGithubPicWallpaper(true);
             renderVault();
             checkSponsorGateOnLoad();
+            const obImg = document.getElementById('ob-hero-img');
+            if (obImg) {
+                obImg.onload = () => obImg.classList.remove('hidden');
+                obImg.src = 'pic.jpg';
+            }
             if (tg) {
                 try { tg.ready(); tg.expand(); tg.disableVerticalSwipes?.(); } catch (_) {}
             }
             if (!localStorage.getItem('tg_studio_onboard_v8')) openOnboarding(0);
+
+            // Motion-blur при быстром скролле
+            let lastScrollY = window.scrollY, scrollBlurTimer = null;
+            window.addEventListener('scroll', () => {
+                if (document.documentElement.dataset.fx === 'min') return;
+                const dy = Math.abs(window.scrollY - lastScrollY);
+                lastScrollY = window.scrollY;
+                if (dy > 26) {
+                    document.body.classList.add('is-scrolling-fast');
+                    clearTimeout(scrollBlurTimer);
+                    scrollBlurTimer = setTimeout(() => document.body.classList.remove('is-scrolling-fast'), 130);
+                }
+            }, { passive: true });
         });
 
         /* ==================== АНИМАЦИИ (JS) ==================== */
