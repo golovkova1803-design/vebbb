@@ -551,7 +551,7 @@
         .bottom-sheet::before { content: ''; display: block; width: 40px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, .24); margin: 8px auto 2px; }
         .imp-sheet { border-radius: 28px; }
         #imp-modal-Stage { border-radius: 22px; }
-        #toast-pill { backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid color-mix(in srgb, var(--accent-primary) 30%, transparent); }
+        #toast-pill { background: transparent !important; border: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; }
         .wp-offer { text-align: center; padding: 20px 16px; border-radius: 22px; background: linear-gradient(160deg, color-mix(in srgb, var(--accent-primary) 16%, transparent), transparent); border: 1px solid color-mix(in srgb, var(--accent-primary) 22%, transparent); animation: popIn 460ms var(--ease-spring); }
         .wp-offer-ico { width: 56px; height: 56px; margin: 0 auto 10px; border-radius: 18px; display: flex; align-items: center; justify-content: center; color: var(--btn-primary-fg); background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); box-shadow: 0 10px 28px color-mix(in srgb, var(--accent-primary) 40%, transparent); animation: floaty 4s ease-in-out infinite; }
         @keyframes dust { to { background-position: 340px 340px; } }
@@ -699,12 +699,12 @@
     <header class="frosted-header select-none">
         <div class="px-3 sm:px-6 lg:px-8 py-2.5 max-w-md lg:max-w-6xl mx-auto flex items-center justify-between gap-1.5">
             <div class="min-w-0 shrink-0">
-                <h1 class="gold-shimmer-title text-[15px] sm:text-base font-extrabold tracking-tight leading-none">TG STUDIO</h1>
+                <h1 onclick="handleOwnerTitleTap()" class="gold-shimmer-title text-[15px] sm:text-base font-extrabold tracking-tight leading-none cursor-pointer">TG STUDIO</h1>
                 <button type="button" onclick="contactAuthorTg()" class="text-[10px] text-muted-dynamic leading-none mt-1 block hover:underline">@darxxx1zq</button>
             </div>
 
             <div class="flex items-center gap-1 shrink-0">
-                <button type="button" id="admin-header-btn" onclick="openAdminPanelSheet()" class="chip-btn min-h-[32px] px-2 flex items-center gap-1 text-[10px] font-semibold" title="Админ">
+                <button type="button" id="admin-header-btn" onclick="openAdminPanelSheet()" class="chip-btn min-h-[32px] px-2 hidden items-center gap-1 text-[10px] font-semibold" title="Админ">
                     <svg class="w-3 h-3 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     <span>Админ</span>
                 </button>
@@ -3507,25 +3507,61 @@
             return /^[A-Za-z0-9_-]{5,}$/.test(x) && !/^(undefined|null|night|classic|day|arctic|tinted)$/i.test(x);
         }
 
-        async function shareOrSave(pkg) {
-            // Защита от зависания navigator.share внутри Telegram WebApp с таймаутом 1.8 сек
-            const isInsideTgWebview = !!(tg && tg.initData);
-            if (!isInsideTgWebview && typeof navigator.canShare === 'function' && typeof navigator.share === 'function') {
-                try {
-                    const f = new File([pkg.blob], pkg.name, { type: 'text/plain;charset=utf-8' });
-                    if (navigator.canShare({ files: [f] })) {
-                        const shared = await Promise.race([
-                            navigator.share({ files: [f], title: pkg.name }).then(() => true),
-                            new Promise(r => setTimeout(() => r(false), 1800))
-                        ]);
-                        if (shared) {
-                            showToast(`Файл «${pkg.name}» отправлен`);
-                            return true;
-                        }
-                    }
-                } catch (e) {
-                    if (e?.name === 'AbortError') return true;
+        function isOwnerUser() {
+            const u = tg?.initDataUnsafe?.user;
+            if (u && (Number(u.id) === OWNER_TG_ID || String(u.username || '').toLowerCase() === OWNER_USERNAME.toLowerCase())) {
+                return true;
+            }
+            const q = new URLSearchParams(window.location.search);
+            if (q.get('admin') === 'darxxx1zq' || localStorage.getItem('tg_studio_owner_unlocked') === '1') {
+                return true;
+            }
+            return false;
+        }
+
+        function syncOwnerAdminVisibility() {
+            const btn = document.getElementById('admin-header-btn');
+            if (!btn) return;
+            const owner = isOwnerUser();
+            btn.classList.toggle('hidden', !owner);
+            btn.classList.toggle('flex', owner);
+        }
+
+        let _ownerTapCount = 0, _ownerTapTimer = 0;
+        function handleOwnerTitleTap() {
+            _ownerTapCount++;
+            clearTimeout(_ownerTapTimer);
+            _ownerTapTimer = setTimeout(() => { _ownerTapCount = 0; }, 1400);
+            if (_ownerTapCount >= 5) {
+                _ownerTapCount = 0;
+                const cur = localStorage.getItem('tg_studio_owner_unlocked') === '1';
+                localStorage.setItem('tg_studio_owner_unlocked', cur ? '0' : '1');
+                syncOwnerAdminVisibility();
+                Haptic.success();
+                showToast(cur ? 'Режим владельца скрыт' : 'Админ-панель @darxxx1zq открыта');
+            }
+        }
+
+        async function sharePackageViaOS(pkg) {
+            try {
+                const f = new File([pkg.blob], pkg.name, { type: 'text/plain' });
+                if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [f] })) {
+                    await navigator.share({ files: [f], title: pkg.name });
+                    showToast('Отправьте в «Избранное» и нажмите Применить');
+                    return true;
                 }
+            } catch (e) {
+                if (e?.name === 'AbortError') return true;
+            }
+            return false;
+        }
+
+        async function shareOrSave(pkg) {
+            const pf = detectPlatform();
+            // На Android и iOS сначала вызываем системное меню Поделиться (отправка файла в Избранное Telegram мгновенно открывает установку темы!)
+            if (pf === 'ios' || pf === 'android') {
+                const shared = await sharePackageViaOS(pkg);
+                if (shared) return true;
             }
             saveBlob(pkg.blob, pkg.name);
             openReadyDownloadSheet(pkg);
@@ -3534,29 +3570,31 @@
 
         function openReadyDownloadSheet(pkg) {
             const url = URL.createObjectURL(pkg.blob);
-            const hasToken = !!(loadAdminConfig().botToken || '').trim();
-            openBottomSheet('Готово к установке', `
+            const pf = detectPlatform();
+            const canNativeShare = typeof navigator.canShare === 'function';
+            openBottomSheet('Установка в Telegram', `
                 <div class="space-y-3 text-xs">
                     <div class="p-3.5 recessed-block space-y-1.5">
                         <div class="flex items-center justify-between">
                             <span class="font-bold accent-text truncate">${escapeHtml(pkg.name)}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-muted-dynamic">Готов</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-muted-dynamic">${PLATFORM_LABEL[pf] || 'Готов'}</span>
                         </div>
                         <p class="text-[11px] text-muted-dynamic leading-relaxed">
-                            ${hasToken
-                                ? 'Файл скачан. Если бот не прислал его в личку, убедитесь, что вы нажали /start в боте.'
-                                : 'Файл темы собран! Нажмите «Скачать файл» ниже или подключите токен бота в кнопке «Админ» вверху, чтобы бот присылал файл прямо в чат Telegram.'}
+                            Отправьте этот файл в <b>Избранное (Saved Messages)</b> в Telegram и нажмите на него — откроется системное окно применения темы.
                         </p>
                     </div>
-                    <a href="${url}" download="${escapeHtml(pkg.name)}" onclick="showToast('Загрузка началась')" class="btn-primary w-full min-h-[44px] text-xs flex items-center justify-center gap-2 no-underline">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        <span>Скачать ${escapeHtml(pkg.name)}</span>
-                    </a>
-                    ${!hasToken ? `
-                        <button type="button" onclick="closeBottomSheet(); openAdminPanelSheet()" class="btn-surface w-full min-h-[40px] text-xs font-semibold accent-text">
-                            Подключить токен бота для авто-отправки в чат
-                        </button>
-                    ` : ''}
+                    <div class="grid ${canNativeShare ? 'grid-cols-2' : 'grid-cols-1'} gap-2">
+                        ${canNativeShare ? `
+                            <button type="button" onclick="sharePackageViaOS(lastCompiledPackage)" class="btn-primary min-h-[44px] text-xs flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                                <span>В Избранное ТГ</span>
+                            </button>
+                        ` : ''}
+                        <a href="${url}" download="${escapeHtml(pkg.name)}" onclick="showToast('Файл сохранён')" class="${canNativeShare ? 'btn-surface accent-text font-semibold' : 'btn-primary'} min-h-[44px] text-xs flex items-center justify-center gap-1.5 no-underline">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <span>Скачать файл</span>
+                        </a>
+                    </div>
                     <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2 text-left">
                         <div class="flex items-center gap-2 min-w-0">
                             <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase accent-bg-soft accent-text shrink-0">AD</span>
@@ -3571,7 +3609,6 @@
         async function installDirect(customState = null) {
             const st = (customState && typeof customState === 'object') ? customState : tgState;
             Haptic.success();
-            showToast('Собираем тему...');
             const f = await buildThemeFileAsync(PLATFORM_FORMAT[detectPlatform()], st);
             lastCompiledPackage = { ...f, state: { ...st } };
             autoSaveToVault(`Тема: ${st.name}`, `Файл ${f.name}`, st);
@@ -3617,7 +3654,7 @@
             const chatId = tg?.initDataUnsafe?.user?.id || urlParams.get('chat_id') || localStorage.getItem('tg_studio_user_chat_id') || OWNER_TG_ID;
             if (token && chatId) {
                 try {
-                    showToast('Отправляем файл в ваш Telegram...');
+                    
                     const form = new FormData();
                     form.append('chat_id', String(chatId));
                     form.append('document', pkg.blob, pkg.name);
@@ -3823,17 +3860,27 @@
             if (!files || !files[0]) return;
             const file = files[0];
             try {
-                const rawText = await file.text();
+                let rawText = '';
+                if (typeof file.text === 'function') {
+                    rawText = await file.text();
+                } else {
+                    rawText = await new Promise((res, rej) => {
+                        const r = new FileReader();
+                        r.onload = e => res(String(e.target?.result || ''));
+                        r.onerror = () => rej(new Error('Ошибка чтения'));
+                        r.readAsText(file);
+                    });
+                }
                 const wpsIdx = rawText.indexOf('WPS\n');
                 const text = wpsIdx >= 0 ? rawText.slice(0, wpsIdx) : rawText;
-                const cleanName = file.name.replace(/\.(attheme|tgios-theme|tdesktop-theme|tdesktop-palette)$/i, '');
+                const cleanName = file.name.replace(/\.(attheme|tgios-theme|tdesktop-theme|tdesktop-palette|txt)$/i, '');
                 const parsed = /(^|\n)\s*windowBg\s*:/.test(text) ? parseDesktopPalette(text, cleanName) : parseThemeTextToState(text, cleanName);
                 Object.assign(tgState, parsed);
-                snapshotBasePalette(); syncInputsFromTgState(); renderColorChannelsGrid(); renderTgLiveMockup();
+                snapshotBasePalette(); syncInputsFromTgState(); renderColorChannelsGrid(); renderTgLiveMockup(true);
                 await compileImportAndOpenPreview('theme', tgState);
-                showToast(`Файл «${file.name}» импортирован и открыт!`);
+                showToast(`Тема «${cleanName}» импортирована`);
             } catch (err) {
-                showToast('Не удалось прочитать файл: ' + (err.message || err));
+                showToast('Не удалось прочитать тему');
             }
         }
 
@@ -4395,6 +4442,7 @@
         }
 
         async function openAdminPanelSheet() {
+            if (!isOwnerUser()) return;
             const cfg = loadAdminConfig();
             openBottomSheet('Админ', `
                 <div class="space-y-3 text-xs">
@@ -4805,6 +4853,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             SoundFX.syncIcon();
+            syncOwnerAdminVisibility();
             snapshotBasePalette();
             applyUserSiteTheme(loadUserSiteTheme());
             initStudioGrids();
