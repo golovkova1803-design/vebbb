@@ -634,6 +634,32 @@
             border-color: var(--accent-primary);
         }
 
+
+        /* ==================== PRO BADGE & CLEAN LOCK ==================== */
+        .pro-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--btn-primary-fg);
+        }
+        .pro-card-locked {
+            position: relative;
+        }
+        .pro-lock-icon {
+            width: 13px;
+            height: 13px;
+            opacity: 0.85;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -707,6 +733,10 @@
                 <button type="button" id="admin-header-btn" onclick="openAdminPanelSheet()" class="chip-btn min-h-[32px] px-2 hidden items-center gap-1 text-[10px] font-semibold" title="Админ">
                     <svg class="w-3 h-3 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     <span>Админ</span>
+                </button>
+
+                <button type="button" id="pro-header-btn" onclick="openProModalSheet()" class="chip-btn min-h-[32px] px-2 flex items-center gap-1 text-[10px] font-bold accent-text" title="PRO доступ">
+                    <span id="pro-header-label">PRO</span>
                 </button>
 
                 <button type="button" onclick="openHelpSupportSheet()" class="chip-btn min-h-[32px] px-2 flex items-center gap-1 text-[10px] font-semibold" title="Помощь и связь">
@@ -1037,6 +1067,22 @@
 
                             <div id="color-channels-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2"></div>
                         </article>
+
+                        <!-- Блок 4: Новые PRO-функции (Эксклюзивные палитры + Авто-палитра по фото) -->
+                        <article class="frosted-card space-y-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider accent-text">04 • PRO Опции</span>
+                                    <span class="pro-badge">PRO</span>
+                                </div>
+                                <button type="button" onclick="triggerProPhotoPalette()" class="chip-btn px-2.5 py-1.5 text-[11px] font-semibold accent-text flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                    <span>Палитра по фото</span>
+                                </button>
+                                <input id="pro-photo-palette-inp" type="file" accept="image/*" onchange="extractPaletteFromPhoto(this.files); this.value=''" class="hidden">
+                            </div>
+                            <div id="pro-presets-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+                        </article>
                     </div>
 
                     <!-- ==================== ПАНЕЛЬ B: ЯЗЫКОВОЙ ПАКЕТ ==================== -->
@@ -1206,6 +1252,27 @@
                                 <div class="flex gap-2">
                                     <input id="cloud-slug-input" type="text" value="" oninput="tgState.cloudSlug=this.value.trim()" placeholder="Необязательно (например: MyCustomSlug)" class="frosted-input flex-1 min-h-[36px] px-3 text-xs font-mono">
                                     <button type="button" onclick="openNativeAddThemeModal()" class="btn-primary px-4 min-h-[36px] text-xs">Открыть</button>
+                                </div>
+                            </div>
+
+                            <!-- Новые PRO-эффекты фона и водяной знак -->
+                            <div class="p-3 recessed-block space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-semibold text-dynamic">Генератор 4K-фона и подпись</span>
+                                        <span class="pro-badge">PRO</span>
+                                    </div>
+                                    <button type="button" onclick="openProModalSheet()" class="text-[10px] font-mono accent-text hover:underline" id="pro-status-mini">Открыть PRO</button>
+                                </div>
+                                <div class="grid grid-cols-4 gap-1.5">
+                                    <button type="button" onclick="generateProProceduralWallpaper('liquid')" class="chip-btn min-h-[34px] text-[10px] font-semibold">Liquid Gold</button>
+                                    <button type="button" onclick="generateProProceduralWallpaper('mesh')" class="chip-btn min-h-[34px] text-[10px] font-semibold">Silk Mesh</button>
+                                    <button type="button" onclick="generateProProceduralWallpaper('grid')" class="chip-btn min-h-[34px] text-[10px] font-semibold">Cyber Grid</button>
+                                    <button type="button" onclick="generateProProceduralWallpaper('stars')" class="chip-btn min-h-[34px] text-[10px] font-semibold">Obsidian</button>
+                                </div>
+                                <div class="flex items-center justify-between pt-1">
+                                    <span class="text-[11px] text-muted-dynamic">Свой водяной знак на обоях</span>
+                                    <input id="pro-wm-input" type="text" value="" onfocus="if(!hasProAccess()){this.blur();openProModalSheet();}" oninput="if(hasProAccess()){tgState.proWatermark=this.value;renderTgLiveMockup();}" placeholder="@username (PRO)" class="frosted-input min-h-[30px] px-2.5 text-[11px] w-36 text-right">
                                 </div>
                             </div>
                         </article>
@@ -1565,6 +1632,13 @@
             { name: 'iOS Light', chatBg: '#f2f2f7', headerBg: '#ffffff', msgOut: '#007aff', msgIn: '#e9e9eb', accent: '#007aff', mediaColor: '#007aff', dialogColor: '#007aff', avatarBg: '#5ac8fa', text: '#000000', timeText: '#8e8e93', checks: '#ffffff', cloudSlug: '' }
         ];
 
+        const PRO_THEME_PRESETS = [
+            { name: 'Imperial Gold 24K', chatBg: '#080603', headerBg: '#120e07', msgOut: '#c59b27', msgIn: '#18130a', accent: '#ffd700', mediaColor: '#ffe066', dialogColor: '#f5c542', avatarBg: '#9a7412', text: '#fffbeb', timeText: '#fde68a', checks: '#1a1204', cloudSlug: '' },
+            { name: 'Liquid Chrome', chatBg: '#07080a', headerBg: '#101216', msgOut: '#3b4252', msgIn: '#15181e', accent: '#e2e8f0', mediaColor: '#f8fafc', dialogColor: '#cbd5e1', avatarBg: '#475569', text: '#f8fafc', timeText: '#94a3b8', checks: '#ffffff', cloudSlug: '' },
+            { name: 'Velvet Amethyst', chatBg: '#08040f', headerBg: '#120921', msgOut: '#7e22ce', msgIn: '#1b0d30', accent: '#d8b4fe', mediaColor: '#e9d5ff', dialogColor: '#c084fc', avatarBg: '#6b21a8', text: '#faf5ff', timeText: '#d8b4fe', checks: '#f3e8ff', cloudSlug: '' },
+            { name: 'Tokyo Neon 2099', chatBg: '#040611', headerBg: '#090d24', msgOut: '#e11d48', msgIn: '#101738', accent: '#00f5d4', mediaColor: '#00bbf9', dialogColor: '#00f5d4', avatarBg: '#be123c', text: '#f0fdf4', timeText: '#99f6e4', checks: '#00f5d4', cloudSlug: '' }
+        ];
+
         const COLOR_CHANNELS_META = [
             { key: 'chatBg', label: 'Фон и Профиль' },
             { key: 'headerBg', label: 'Шапка и Карточки' },
@@ -1628,6 +1702,7 @@
             wpDim: 20,
             wpBlur: 0,
             avatarDataUrl: '',
+            proWatermark: '',
             langName: 'Custom Russian',
             online: 'в сети',
             typing: 'печатает...',
@@ -1700,6 +1775,7 @@
             tgState.timeText = shiftHexColor(basePaletteSnapshot.timeText, hueDelta, satMult, 1);
             tgState.checks = shiftHexColor(basePaletteSnapshot.checks, hueDelta, satMult, 1);
 
+            renderProPresetsGrid();
             renderColorChannelsGrid();
             renderTgLiveMockup();
         }
@@ -2457,6 +2533,14 @@
                     if (dimAlpha > 0) {
                         ctx.fillStyle = `rgba(0,0,0,${dimAlpha.toFixed(2)})`;
                         ctx.fillRect(0, 0, W, H);
+                    }
+                    if (st.proWatermark && String(st.proWatermark).trim()) {
+                        ctx.save();
+                        ctx.font = 'bold 20px Inter, sans-serif';
+                        ctx.fillStyle = 'rgba(255,255,255,0.28)';
+                        ctx.textAlign = 'right';
+                        ctx.fillText(String(st.proWatermark).trim(), W - 28, H - 34);
+                        ctx.restore();
                     }
 
                     cv.toBlob(async (blob) => {
@@ -3321,6 +3405,7 @@
             const pkg = await buildThemeFileAsync(fmt, st);
 
             lastCompiledPackage = { ...pkg, state: { ...st } };
+            recordUserExportAction();
             autoSaveToVault(isLang ? `Язык: ${st.langName}` : `Тема: ${st.name}`, `Пакет (${pkg.name})`, st);
             Haptic.success();
             burst();
@@ -3533,7 +3618,9 @@
                 _ownerTapCount = 0;
                 const cur = localStorage.getItem('tg_studio_owner_unlocked') === '1';
                 localStorage.setItem('tg_studio_owner_unlocked', cur ? '0' : '1');
-                syncOwnerAdminVisibility();
+                ensureCurrentUserInDb();
+            syncOwnerAdminVisibility();
+            syncProUiStatus();
                 Haptic.success();
                 showToast(cur ? 'Режим владельца скрыт' : 'Админ-панель @darxxx1zq открыта');
             }
@@ -4252,7 +4339,409 @@
             openPersonalizeSheet();
         }
 
-        /* ==================== 8. АДМИН-ПАНЕЛЬ ==================== */
+        /* ==================== 8. БАЗА ДАННЫХ ПОЛЬЗОВАТЕЛЕЙ, PRO-ЛИМИТЫ И АДМИН-ПАНЕЛЬ ==================== */
+        const USERS_DB_KEY = 'tg_studio_users_db_v1';
+        const PRO_TOKEN_STORAGE_KEY = 'tg_studio_pro_token_v1';
+
+        function getCurrentTgUser() {
+            const u = tg?.initDataUnsafe?.user;
+            if (u && u.id) {
+                return { id: Number(u.id), username: String(u.username || '').trim(), firstName: String(u.first_name || 'User').trim() };
+            }
+            const q = new URLSearchParams(window.location.search);
+            const qid = Number(q.get('uid') || localStorage.getItem('tg_studio_fallback_uid') || 0);
+            if (qid) return { id: qid, username: q.get('uname') || 'user', firstName: 'TG User' };
+            let anonId = Number(localStorage.getItem('tg_studio_anon_id') || 0);
+            if (!anonId) {
+                anonId = Math.floor(100000000 + Math.random() * 899999999);
+                try { localStorage.setItem('tg_studio_anon_id', String(anonId)); } catch (_) {}
+            }
+            return { id: anonId, username: 'guest', firstName: 'Гость' };
+        }
+
+        // Генератор детерминированного ключа активации PRO по Telegram ID (совпадает с алгоритмом в bot.py!)
+        function computeProKeyForUser(userId) {
+            const uidStr = String(userId || '').trim();
+            let h = 2166136261;
+            const salt = 'DARXY_PRO_2026_' + uidStr;
+            for (let i = 0; i < salt.length; i++) {
+                h ^= salt.charCodeAt(i);
+                h = Math.imul(h, 16777619);
+            }
+            const code = (h >>> 0).toString(36).toUpperCase().padStart(6, '0').slice(0, 6);
+            return `PRO-${uidStr}-${code}`;
+        }
+
+        function verifyProKeyString(rawKey, currentUid = null) {
+            const clean = String(rawKey || '').trim().toUpperCase();
+            const m = clean.match(/^PRO-(\d+)-([A-Z0-9]{4,8})$/);
+            if (!m) return null;
+            const targetUid = Number(m[1]);
+            const expected = computeProKeyForUser(targetUid);
+            if (clean !== expected) return null;
+            if (currentUid && Number(currentUid) !== targetUid && !isOwnerUser()) return null;
+            return targetUid;
+        }
+
+        function loadUsersDb() {
+            try {
+                const raw = JSON.parse(localStorage.getItem(USERS_DB_KEY) || '{}');
+                return (raw && typeof raw === 'object') ? raw : {};
+            } catch (_) {
+                return {};
+            }
+        }
+
+        function saveUsersDb(db) {
+            try { localStorage.setItem(USERS_DB_KEY, JSON.stringify(db)); } catch (_) {}
+        }
+
+        function ensureCurrentUserInDb() {
+            const u = getCurrentTgUser();
+            const db = loadUsersDb();
+            const key = String(u.id);
+            const nowStr = new Date().toLocaleDateString('ru-RU');
+            if (!db[key]) {
+                db[key] = {
+                    id: u.id,
+                    username: u.username || '',
+                    firstName: u.firstName || 'User',
+                    isPro: (u.id === OWNER_TG_ID || String(u.username).toLowerCase() === OWNER_USERNAME.toLowerCase()),
+                    proUntil: 'Навсегда',
+                    exportsUsed: 0,
+                    dailyLimit: (u.id === OWNER_TG_ID) ? 9999 : 15,
+                    lastSeen: nowStr
+                };
+            } else {
+                if (u.username) db[key].username = u.username;
+                if (u.firstName) db[key].firstName = u.firstName;
+                db[key].lastSeen = nowStr;
+                if (u.id === OWNER_TG_ID) { db[key].isPro = true; db[key].dailyLimit = 9999; }
+            }
+            // Проверяем URL-параметр ?pro=1 или ?pro_key=PRO-... от бота
+            const q = new URLSearchParams(window.location.search);
+            const urlKey = q.get('pro_key');
+            if (urlKey && verifyProKeyString(urlKey)) {
+                db[key].isPro = true;
+                db[key].dailyLimit = 999;
+                try { localStorage.setItem(PRO_TOKEN_STORAGE_KEY, urlKey.trim().toUpperCase()); } catch (_) {}
+            } else if (q.get('pro') === '1') {
+                db[key].isPro = true;
+                db[key].dailyLimit = 999;
+            }
+            const savedToken = localStorage.getItem(PRO_TOKEN_STORAGE_KEY);
+            if (savedToken && verifyProKeyString(savedToken)) {
+                db[key].isPro = true;
+                db[key].dailyLimit = 999;
+            }
+            saveUsersDb(db);
+            return db[key];
+        }
+
+        function hasProAccess() {
+            if (isOwnerUser()) return true;
+            const rec = ensureCurrentUserInDb();
+            return !!rec.isPro;
+        }
+
+        function recordUserExportAction() {
+            const u = getCurrentTgUser();
+            const db = loadUsersDb();
+            const key = String(u.id);
+            if (!db[key]) ensureCurrentUserInDb();
+            if (db[key]) {
+                db[key].exportsUsed = (Number(db[key].exportsUsed) || 0) + 1;
+                saveUsersDb(db);
+            }
+        }
+
+        function syncProUiStatus() {
+            const pro = hasProAccess();
+            const lbl = document.getElementById('pro-header-label');
+            const mini = document.getElementById('pro-status-mini');
+            if (lbl) lbl.textContent = pro ? 'PRO ✓' : 'PRO';
+            if (mini) mini.textContent = pro ? 'PRO Активен ✓' : 'Открыть PRO';
+            renderProPresetsGrid();
+        }
+
+        function renderProPresetsGrid() {
+            const box = document.getElementById('pro-presets-grid');
+            if (!box) return;
+            const unlocked = hasProAccess();
+            box.innerHTML = PRO_THEME_PRESETS.map((p, idx) => {
+                const safeTitle = ensureReadableColor(p.chatBg, p.text, 4.5);
+                return `
+                    <button type="button" onclick="applyProPreset(${idx})" class="pro-card-locked p-2.5 rounded-[var(--r-inner)] border border-white/10 text-left transition hover:border-white/30 flex flex-col justify-between gap-2" style="background:${p.chatBg}">
+                        <div class="flex items-center justify-between w-full gap-1">
+                            <span class="text-xs font-bold truncate" style="color:${safeTitle}">${p.name}</span>
+                            ${unlocked
+                                ? `<span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${p.accent}"></span>`
+                                : `<svg class="pro-lock-icon shrink-0" style="color:${p.accent}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+                            }
+                        </div>
+                        <div class="flex gap-1 w-full">
+                            <span class="h-1.5 flex-1 rounded-full" style="background:${p.headerBg}"></span>
+                            <span class="h-1.5 flex-1 rounded-full" style="background:${p.msgOut}"></span>
+                            <span class="h-1.5 flex-1 rounded-full" style="background:${p.accent}"></span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function applyProPreset(idx) {
+            if (!hasProAccess()) {
+                Haptic.error();
+                openProModalSheet();
+                return;
+            }
+            Haptic.selection();
+            const p = PRO_THEME_PRESETS[idx];
+            if (!p) return;
+            Object.assign(tgState, {
+                name: p.name, chatBg: p.chatBg, headerBg: p.headerBg,
+                msgOut: p.msgOut, msgIn: p.msgIn, accent: p.accent,
+                mediaColor: p.mediaColor || p.accent,
+                dialogColor: p.dialogColor || p.accent,
+                avatarBg: p.avatarBg || p.accent,
+                text: p.text, timeText: p.timeText, checks: p.checks,
+                cloudSlug: p.cloudSlug || ''
+            });
+            snapshotBasePalette();
+            syncInputsFromTgState();
+            renderColorChannelsGrid();
+            renderTgLiveMockup(true);
+            showToast(`PRO-тема: ${p.name}`);
+        }
+
+        function triggerProPhotoPalette() {
+            if (!hasProAccess()) {
+                Haptic.error();
+                openProModalSheet();
+                return;
+            }
+            document.getElementById('pro-photo-palette-inp')?.click();
+        }
+
+        function extractPaletteFromPhoto(files) {
+            if (!files || !files[0]) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = () => {
+                    const cv = document.createElement('canvas');
+                    cv.width = 48; cv.height = 48;
+                    const ctx = cv.getContext('2d');
+                    ctx.drawImage(img, 0, 0, 48, 48);
+                    const data = ctx.getImageData(0, 0, 48, 48).data;
+                    let rSum = 0, gSum = 0, bSum = 0, count = 0;
+                    let maxSat = -1, bestH = 45, bestS = 80;
+                    for (let i = 0; i < data.length; i += 16) {
+                        const r = data[i], g = data[i + 1], b = data[i + 2];
+                        rSum += r; gSum += g; bSum += b; count++;
+                        const hx = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+                        const hsl = hexToHsl(hx);
+                        if (hsl.s > maxSat && hsl.l > 20 && hsl.l < 85) {
+                            maxSat = hsl.s; bestH = hsl.h; bestS = Math.max(65, hsl.s);
+                        }
+                    }
+                    tgState.chatBg = hslToHex(bestH, Math.min(35, bestS * 0.4), 7);
+                    tgState.headerBg = hslToHex(bestH, Math.min(38, bestS * 0.45), 12);
+                    tgState.msgIn = hslToHex(bestH, Math.min(40, bestS * 0.5), 17);
+                    tgState.msgOut = hslToHex(bestH, Math.min(82, bestS), 32);
+                    tgState.accent = hslToHex(bestH, Math.min(95, bestS), 60);
+                    tgState.mediaColor = hslToHex((bestH + 15) % 360, Math.min(95, bestS), 66);
+                    tgState.dialogColor = tgState.accent;
+                    tgState.avatarBg = hslToHex(bestH, Math.min(80, bestS), 40);
+                    tgState.text = '#f8fafc';
+                    tgState.timeText = hslToHex(bestH, 45, 76);
+                    tgState.checks = hslToHex(bestH, 85, 75);
+                    tgState.wallpaperDataUrl = String(e.target?.result || '');
+                    tgState.name = 'Photo AI Theme';
+                    snapshotBasePalette();
+                    syncInputsFromTgState();
+                    renderColorChannelsGrid();
+                    renderTgLiveMockup(true);
+                    Haptic.success();
+                    showToast('Палитра и обои созданы по фото');
+                };
+                img.src = String(e.target?.result || '');
+            };
+            reader.readAsDataURL(files[0]);
+        }
+
+        function generateProProceduralWallpaper(style) {
+            if (!hasProAccess()) {
+                Haptic.error();
+                openProModalSheet();
+                return;
+            }
+            Haptic.pop();
+            const C = resolveThemeDependencies(tgState);
+            const cv = document.createElement('canvas');
+            cv.width = 720; cv.height = 1280;
+            const ctx = cv.getContext('2d');
+            ctx.fillStyle = C.chatBg;
+            ctx.fillRect(0, 0, 720, 1280);
+
+            if (style === 'liquid') {
+                for (let i = 0; i < 5; i++) {
+                    const g = ctx.createRadialGradient(140 + i * 110, 220 + i * 210, 20, 140 + i * 110, 220 + i * 210, 380);
+                    g.addColorStop(0, (i % 2 === 0 ? C.accentOnBg : C.outMedia) + '66');
+                    g.addColorStop(1, 'transparent');
+                    ctx.fillStyle = g;
+                    ctx.fillRect(0, 0, 720, 1280);
+                }
+            } else if (style === 'mesh') {
+                const g = ctx.createLinearGradient(0, 0, 720, 1280);
+                g.addColorStop(0, C.chatBg);
+                g.addColorStop(0.5, C.msgOut);
+                g.addColorStop(1, C.headerBg);
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, 720, 1280);
+            } else if (style === 'grid') {
+                ctx.strokeStyle = C.accentOnBg + '26';
+                ctx.lineWidth = 1.5;
+                for (let x = 0; x < 720; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1280); ctx.stroke(); }
+                for (let y = 0; y < 1280; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(720, y); ctx.stroke(); }
+            } else {
+                for (let i = 0; i < 90; i++) {
+                    ctx.fillStyle = (i % 3 === 0 ? C.accentOnBg : '#ffffff') + '55';
+                    ctx.beginPath();
+                    ctx.arc((i * 173) % 720, (i * 293) % 1280, (i % 3) + 1, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            tgState.wallpaperDataUrl = cv.toDataURL('image/jpeg', 0.9);
+            syncInputsFromTgState();
+            renderTgLiveMockup(true);
+            showToast('4K-фон сгенерирован');
+        }
+
+        function activateProKeyInput() {
+            const inp = document.getElementById('user-pro-key-inp');
+            const raw = (inp?.value || '').trim().toUpperCase();
+            const uid = verifyProKeyString(raw);
+            if (!uid) {
+                Haptic.error();
+                showToast('Неверный ключ PRO');
+                return;
+            }
+            try { localStorage.setItem(PRO_TOKEN_STORAGE_KEY, raw); } catch (_) {}
+            const db = loadUsersDb();
+            const cur = getCurrentTgUser();
+            const k = String(cur.id);
+            if (!db[k]) ensureCurrentUserInDb();
+            if (db[k]) {
+                db[k].isPro = true;
+                db[k].dailyLimit = 999;
+                saveUsersDb(db);
+            }
+            syncProUiStatus();
+            Haptic.success();
+            burst();
+            closeBottomSheet();
+            showToast('PRO-режим активирован!');
+        }
+
+        function openProModalSheet() {
+            const u = ensureCurrentUserInDb();
+            const pro = hasProAccess();
+            openBottomSheet(pro ? 'PRO Статус активен' : 'TG STUDIO PRO', `
+                <div class="space-y-3 text-xs">
+                    <div class="p-3.5 recessed-block flex items-center justify-between">
+                        <div>
+                            <div class="text-[11px] text-muted-dynamic">Ваш Telegram ID</div>
+                            <div class="text-sm font-bold font-mono text-dynamic mt-0.5">${u.id}</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="pro-badge">${pro ? 'PRO АКТИВЕН' : 'БАЗОВЫЙ'}</span>
+                            <div class="text-[10px] text-muted-dynamic mt-1">Экспортов: <b class="text-dynamic">${u.exportsUsed || 0} / ${u.dailyLimit || 15}</b></div>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 recessed-block space-y-1.5 text-[11px]">
+                        <div class="font-bold text-dynamic">Что добавляет PRO:</div>
+                        <div class="text-muted-dynamic">• 4 эксклюзивные палитры (Imperial Gold 24K, Liquid Chrome, Velvet, Tokyo Neon)</div>
+                        <div class="text-muted-dynamic">• Авто-генерация палитры и обоев по любому вашему фото в 1 клик</div>
+                        <div class="text-muted-dynamic">• Генератор 4K-обоев и личный водяной знак на фоне чата</div>
+                        <div class="text-muted-dynamic">• Безлимитные сборки в Сейфе (до 999 лимитов)</div>
+                    </div>
+
+                    ${!pro ? `
+                        <div class="p-3 recessed-block space-y-2">
+                            <div class="font-bold text-dynamic text-[11px]">Активация по ключу</div>
+                            <div class="flex gap-1.5">
+                                <input id="user-pro-key-inp" type="text" placeholder="PRO-${u.id}-XXXXXX" class="frosted-input flex-1 min-h-[36px] px-3 text-xs font-mono uppercase">
+                                <button type="button" onclick="activateProKeyInput()" class="btn-primary px-3.5 min-h-[36px] text-xs">Ок</button>
+                            </div>
+                        </div>
+                        <button type="button" onclick="contactAuthorTg()" class="btn-primary w-full min-h-[44px] text-xs flex items-center justify-center gap-1.5">
+                            <span>Получить PRO у @darxxx1zq</span>
+                        </button>
+                    ` : `
+                        <button type="button" onclick="closeBottomSheet()" class="btn-primary w-full min-h-[42px] text-xs">Продолжить работу</button>
+                    `}
+                </div>
+            `);
+        }
+
+        function adminGrantProById() {
+            const uidInput = (document.getElementById('adm-grant-uid')?.value || '').trim();
+            const limitInput = Number(document.getElementById('adm-grant-limit')?.value || 999);
+            const uid = Number(uidInput);
+            if (!uid) { Haptic.error(); showToast('Введите Telegram ID'); return; }
+            const db = loadUsersDb();
+            const k = String(uid);
+            if (!db[k]) {
+                db[k] = { id: uid, username: 'user_' + uid, firstName: 'User', isPro: true, proUntil: 'Навсегда', exportsUsed: 0, dailyLimit: limitInput, lastSeen: new Date().toLocaleDateString('ru-RU') };
+            } else {
+                db[k].isPro = true;
+                db[k].dailyLimit = limitInput;
+            }
+            saveUsersDb(db);
+            const keyStr = computeProKeyForUser(uid);
+            syncProUiStatus();
+            Haptic.success();
+            openAdminPanelSheet();
+            showToast(`PRO выдан! Ключ: ${keyStr}`);
+        }
+
+        function adminToggleUserPro(uid) {
+            const db = loadUsersDb();
+            const k = String(uid);
+            if (!db[k]) return;
+            db[k].isPro = !db[k].isPro;
+            db[k].dailyLimit = db[k].isPro ? 999 : 15;
+            saveUsersDb(db);
+            syncProUiStatus();
+            Haptic.selection();
+            openAdminPanelSheet();
+        }
+
+        function adminStepUserLimit(uid, delta) {
+            const db = loadUsersDb();
+            const k = String(uid);
+            if (!db[k]) return;
+            db[k].dailyLimit = Math.max(1, (Number(db[k].dailyLimit) || 15) + delta);
+            saveUsersDb(db);
+            Haptic.light();
+            openAdminPanelSheet();
+        }
+
+        function copyProKeyToClipboard(uid) {
+            const keyStr = computeProKeyForUser(uid);
+            try {
+                navigator.clipboard.writeText(keyStr);
+            } catch (_) {
+                const ta = document.createElement('textarea');
+                ta.value = keyStr; document.body.appendChild(ta); ta.select();
+                document.execCommand('copy'); ta.remove();
+            }
+            Haptic.success();
+            showToast(`Скопировано: ${keyStr}`);
+        }
+
         function loadAdminConfig() {
             try {
                 const saved = JSON.parse(localStorage.getItem(ADMIN_CONFIG_KEY) || 'null');
@@ -4358,9 +4847,69 @@
 
         async function openAdminPanelSheet() {
             if (!isOwnerUser()) return;
+            ensureCurrentUserInDb();
             const cfg = loadAdminConfig();
-            openBottomSheet('Админ', `
+            const db = loadUsersDb();
+            const users = Object.values(db).sort((a, b) => (b.isPro ? 1 : 0) - (a.isPro ? 1 : 0));
+            const proCount = users.filter(u => u.isPro).length;
+            const totalExports = users.reduce((s, u) => s + (Number(u.exportsUsed) || 0), 0);
+
+            openBottomSheet('Админ-панель @darxxx1zq', `
                 <div class="space-y-3 text-xs">
+                    <!-- Сводка БД -->
+                    <div class="grid grid-cols-3 gap-1.5 text-center">
+                        <div class="p-2.5 recessed-block">
+                            <div class="text-[10px] text-muted-dynamic">Юзеров в БД</div>
+                            <div class="text-sm font-bold text-dynamic mt-0.5">${users.length}</div>
+                        </div>
+                        <div class="p-2.5 recessed-block">
+                            <div class="text-[10px] text-muted-dynamic">PRO доступ</div>
+                            <div class="text-sm font-bold accent-text mt-0.5">${proCount}</div>
+                        </div>
+                        <div class="p-2.5 recessed-block">
+                            <div class="text-[10px] text-muted-dynamic">Скачиваний</div>
+                            <div class="text-sm font-bold text-dynamic mt-0.5">${totalExports}</div>
+                        </div>
+                    </div>
+
+                    <!-- Выдача PRO и лимитов по Telegram ID -->
+                    <div class="p-3 recessed-block space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-dynamic">Выдать PRO / Лимит по ID</span>
+                            <span class="pro-badge">БД + Ключ</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <input id="adm-grant-uid" type="number" placeholder="TG ID юзера" class="frosted-input col-span-2 min-h-[34px] px-2.5 text-[11px] font-mono">
+                            <input id="adm-grant-limit" type="number" value="999" placeholder="Лимит" class="frosted-input min-h-[34px] px-2 text-[11px] font-mono text-center">
+                        </div>
+                        <button type="button" onclick="adminGrantProById()" class="btn-primary w-full min-h-[36px] text-[11px]">Выдать PRO и сгенерировать ключ</button>
+                    </div>
+
+                    <!-- Список пользователей и управление лимитами -->
+                    <div class="p-3 recessed-block space-y-2">
+                        <div class="font-bold text-dynamic">База пользователей и лимиты</div>
+                        <div class="space-y-1.5 max-h-44 overflow-y-auto pr-0.5">
+                            ${users.map(u => `
+                                <div class="p-2 rounded-xl bg-black/25 border border-white/5 flex items-center justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-mono font-bold text-[11px] text-dynamic">${u.id}</span>
+                                            ${u.username ? `<span class="text-[10px] accent-text truncate">@${escapeHtml(u.username)}</span>` : ''}
+                                            ${u.isPro ? `<span class="pro-badge">PRO</span>` : ''}
+                                        </div>
+                                        <div class="text-[10px] text-muted-dynamic mt-0.5">Сборок: <b class="text-dynamic">${u.exportsUsed || 0}</b> • Лимит: <b class="text-dynamic">${u.dailyLimit || 15}</b></div>
+                                    </div>
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        <button type="button" onclick="adminStepUserLimit(${u.id}, 10)" class="chip-btn px-1.5 py-1 text-[10px] font-mono" title="Добавить +10 к лимиту">+10</button>
+                                        <button type="button" onclick="copyProKeyToClipboard(${u.id})" class="chip-btn px-2 py-1 text-[10px] font-semibold accent-text" title="Скопировать PRO-ключ">Ключ</button>
+                                        <button type="button" onclick="adminToggleUserPro(${u.id})" class="chip-btn px-2 py-1 text-[10px] font-bold ${u.isPro ? 'text-rose-400' : 'text-emerald-400'}">${u.isPro ? 'Снять' : 'PRO'}</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Токен бота и ОП -->
                     <div class="p-3 recessed-block space-y-2">
                         <div class="font-bold text-dynamic">Токен бота</div>
                         <input type="text" autocomplete="off" spellcheck="false" value="${escapeHtml(cfg.botToken || '')}" onchange="saveBotTokenAdmin(this.value)" placeholder="123456789:AAH..." class="frosted-input w-full min-h-[36px] px-3 text-xs font-mono">
@@ -4368,7 +4917,7 @@
                     </div>
                     <div class="p-3 recessed-block space-y-2.5">
                         <div class="flex items-center justify-between">
-                            <div class="font-bold text-dynamic">Подписка на канал</div>
+                            <div class="font-bold text-dynamic">Подписка на канал (ОП)</div>
                             <div onclick="toggleAdminGate(!loadAdminConfig().gateEnabled)" class="tg-switch ${cfg.gateEnabled ? 'checked' : ''}"></div>
                         </div>
                         <div class="grid grid-cols-2 gap-1.5">
