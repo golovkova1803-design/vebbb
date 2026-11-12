@@ -2388,13 +2388,13 @@
 
         /* ==================== 4. КОМПИЛЯТОР ТЕМ С ЗАЩИТОЙ ПРОФИЛЯ, ОПИСАНИЯ, НИКА И КНОПОК ОТ СЛИВАНИЯ ==================== */
         function hexToSignedInt(hex) {
-            const clean = (hex || '#000000').replace('#', '').slice(0, 6);
+            const clean = String(hex || '#000000').replace('#', '').slice(0, 6);
             const num = parseInt('ff' + clean.padStart(6, '0'), 16);
             return (num | 0);
         }
 
         function hexWithAlphaToSignedInt(hex, alphaByte = '55') {
-            const clean = (hex || '#000000').replace('#', '').slice(0, 6);
+            const clean = String(hex || '#000000').replace('#', '').slice(0, 6);
             const num = parseInt(alphaByte + clean.padStart(6, '0'), 16);
             return (num | 0);
         }
@@ -2853,8 +2853,8 @@
             S('chats_tabUnreadUnactiveBackground', mixHex(C.actionBtnBg, C.chatBg, 0.45));
             S('chats_UnreadCounterText', C.actionBtnFg);
             S('avatar_nameInMessage', C.inAccent);
-            S('chat_inAudioCacheSeekbar', A(C.inMedia, '33'));
-            S('chat_outAudioCacheSeekbar', A(C.outMedia, '33'));
+            SA('chat_inAudioCacheSeekbar', C.inMedia, '33');
+            SA('chat_outAudioCacheSeekbar', C.outMedia, '33');
             S('chat_inPreviewInstantText chat_inAdminSelectedText chat_inViaBotNameSelectedText chat_inForwardedNameSelectedText chat_inReplyNameSelectedText chat_inSiteNameSelectedText chat_inContactNameSelectedText', C.inAccent);
             S('chat_outPreviewInstantText chat_outAdminSelectedText chat_outViaBotNameSelectedText chat_outForwardedNameSelectedText chat_outReplyNameSelectedText chat_outSiteNameSelectedText chat_outContactNameSelectedText', C.outAccent);
             S('chat_inAdminText', C.inTime);
@@ -2863,18 +2863,18 @@
             S('chat_outContactBackground chat_outFileSelectedIcon', C.outMedia);
             S('chat_inContactIcon', C.inMediaFg);
             S('chat_outContactIcon', C.outMediaFg);
-            S('chat_inLocationBackground', A(C.inMedia, '28'));
-            S('chat_outLocationBackground', A(C.outMedia, '28'));
+            SA('chat_inLocationBackground', C.inMedia, '28');
+            SA('chat_outLocationBackground', C.outMedia, '28');
             S('chat_inLocationIcon', C.inMedia);
             S('chat_outLocationIcon', C.outMedia);
-            S('chat_linkSelectBackground', A(C.inAccent, '33'));
-            S('chat_outLinkSelectBackground', A(C.outAccent, '33'));
-            S('chat_textSelectBackground', A(C.inAccent, '44'));
-            S('chat_outTextSelectBackground', A(C.outAccent, '44'));
+            SA('chat_linkSelectBackground', C.inAccent, '33');
+            SA('chat_outLinkSelectBackground', C.outAccent, '33');
+            SA('chat_textSelectBackground', C.inAccent, '44');
+            SA('chat_outTextSelectBackground', C.outAccent, '44');
             S('chat_messagePanelVoiceBackground chat_recordedVoiceBackground', C.actionBtnBg);
             S('chat_messagePanelVoicePressed chat_recordedVoiceDot', C.actionBtnFg);
             S('chat_recordedVoicePlayPause chat_recordedVoiceProgressInner', C.actionBtnFg);
-            S('chat_recordedVoiceProgress', A(C.actionBtnFg, '55'));
+            SA('chat_recordedVoiceProgress', C.actionBtnFg, '55');
             S('chat_goDownButton', C.headerBg);
             S('chat_goDownButtonIcon', C.accentOnHdr);
             S('chat_goDownButtonCounterBackground', C.actionBtnBg);
@@ -2887,17 +2887,17 @@
             S('chat_botSwitchToInlineText', C.accentOnBg);
             S('chat_botProgress', C.actionBtnFg);
             S('chat_inPollCorrectAnswer chat_outPollCorrectAnswer', C.accentOnBg);
-            S('chat_inReactionButtonBackground', A(C.inMedia, '26'));
-            S('chat_outReactionButtonBackground', A(C.outMedia, '26'));
+            SA('chat_inReactionButtonBackground', C.inMedia, '26');
+            SA('chat_outReactionButtonBackground', C.outMedia, '26');
             S('chat_inReactionButtonText', C.inMedia);
             S('chat_outReactionButtonText', C.outMedia);
             S('chat_inReactionButtonTextSelected', C.inMediaFg);
             S('chat_outReactionButtonTextSelected', C.outMediaFg);
-            S('chat_inCodeBackground', A(C.inText, '16'));
-            S('chat_outCodeBackground', A(C.outText, '16'));
+            SA('chat_inCodeBackground', C.inText, '16');
+            SA('chat_outCodeBackground', C.outText, '16');
             S('featuredStickers_addedIcon featuredStickers_unread', C.accentOnBg);
             S('stickers_menu', C.secondaryTextOnBg);
-            S('stickers_menuSelector', A(C.accentOnBg, '22'));
+            SA('stickers_menuSelector', C.accentOnBg, '22');
             S('sharedMedia_startStopLoadIcon', C.actionBtnBg);
             S('sharedMedia_linkPlaceholder', C.headerBg);
             S('sharedMedia_linkPlaceholderText', C.accentOnHdr);
@@ -2923,9 +2923,9 @@
             S('chats_storyCircleRead', C.dividerColor);
             S('stories_circle_closeFriends', C.listChecks);
             S('key_sheet_scrollUp', C.dividerColor);
-            S('key_player_progressBackground', A(C.inMedia, '35'));
+            SA('key_player_progressBackground', C.inMedia, '35');
             S('key_player_progress', C.accentOnBg);
-            S('key_player_progressCachedBackground', A(C.inMedia, '55'));
+            SA('key_player_progressCachedBackground', C.inMedia, '55');
             S('premiumGradient1 premiumGradient2 premiumGradient3 premiumGradient4', C.accentOnBg);
             S('premiumStartGradient1 premiumStartGradient2', C.actionBtnBg);
             S('topics_unreadCounter', C.actionBtnBg);
@@ -2941,7 +2941,7 @@
             const enc = new TextEncoder();
 
             if (!wpBytes) {
-                return { blob: new Blob([enc.encode(headerText)], { type: 'text/plain;charset=utf-8' }), rawText: headerText };
+                return { blob: new Blob([enc.encode(headerText)], { type: 'application/octet-stream' }), rawText: headerText };
             }
 
             const p1 = enc.encode(headerText + 'WPS\n');
@@ -2951,7 +2951,7 @@
             combined.set(wpBytes, p1.length);
             combined.set(p3, p1.length + wpBytes.length);
 
-            return { blob: new Blob([combined], { type: 'text/plain;charset=utf-8' }), rawText: headerText };
+            return { blob: new Blob([combined], { type: 'application/octet-stream' }), rawText: headerText };
         }
 
         // Полный генератор .tgios-theme с секциями rootController и list (защищает Профиль и Настройки на iPhone от сливания!)
@@ -3030,26 +3030,7 @@
                 `  inputPanelPrimaryTextColor: ${C.primaryTextOnHdr}`,
                 `  inputPanelSecondaryTextColor: ${C.secondaryTextOnHdr}`,
                 `  inputPanelActionControlFillColor: ${C.actionBtnBg}`,
-                `  inputPanelActionControlForegroundColor: ${C.actionBtnFg}`,
-                `  inputPanelMediaRecordDotColor: ${C.actionBtnBg}`,
-                `  inputPanelMediaRecordControlFillColor: ${C.actionBtnBg}`,
-                `  incomingMediaIconColor: ${C.inMediaFg}`,
-                `  outgoingMediaIconColor: ${C.outMediaFg}`,
-                `  incomingFileTitleColor: ${C.inText}`,
-                `  outgoingFileTitleColor: ${C.outText}`,
-                `  incomingFileDescriptionColor: ${C.inTime}`,
-                `  outgoingFileDescriptionColor: ${C.outTime}`,
-                `  incomingLinkHighlightColor: ${C.inAccent}`,
-                `  outgoingLinkHighlightColor: ${C.outAccent}`,
-                `  incomingTextSelectionColor: ${C.inAccent}`,
-                `  outgoingTextSelectionColor: ${C.outAccent}`,
-                `  serviceMessageFillColor: ${C.headerBg}`,
-                `  serviceMessagePrimaryTextColor: ${C.primaryTextOnHdr}`,
-                `  navigateToMessageButtonFillColor: ${C.headerBg}`,
-                `  navigateToMessageButtonStrokeColor: ${C.headerDivider}`,
-                `  navigateToMessageButtonIconColor: ${C.accentOnHdr}`,
-                `  navigateToMessageButtonBadgeFillColor: ${C.actionBtnBg}`,
-                `  navigateToMessageButtonBadgeTextColor: ${C.actionBtnFg}`
+                `  inputPanelActionControlForegroundColor: ${C.actionBtnFg}`
             ].join('\n') + '\n';
         }
 
@@ -3268,7 +3249,7 @@
             const safe = (st.name || 'theme').toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '') || 'theme';
             if (format === 'tgios') {
                 const txt = buildIosThemeContent(st);
-                return { rawText: txt, blob: new Blob([txt], { type: 'text/plain;charset=utf-8' }), name: `${safe}.tgios-theme`, format: 'tgios', kind: 'theme' };
+                return { rawText: txt, blob: new Blob([txt], { type: 'application/octet-stream' }), name: `${safe}.tgios-theme`, format: 'tgios', kind: 'theme' };
             }
             if (format === 'tdesktop') {
                 const palText = buildDesktopPalette(st);
@@ -3542,68 +3523,14 @@
             }
         }
 
-        async function sharePackageViaOS(pkg) {
-            try {
-                const f = new File([pkg.blob], pkg.name, { type: 'text/plain' });
-                if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [f] })) {
-                    await navigator.share({ files: [f], title: pkg.name });
-                    showToast('Отправьте в «Избранное» и нажмите Применить');
-                    return true;
-                }
-            } catch (e) {
-                if (e?.name === 'AbortError') return true;
-            }
-            return false;
-        }
-
         async function shareOrSave(pkg) {
-            const pf = detectPlatform();
-            // На Android и iOS сначала вызываем системное меню Поделиться (отправка файла в Избранное Telegram мгновенно открывает установку темы!)
-            if (pf === 'ios' || pf === 'android') {
-                const shared = await sharePackageViaOS(pkg);
-                if (shared) return true;
-            }
+            try {
+                const f = new File([pkg.blob], pkg.name, { type: 'application/octet-stream' });
+                if (navigator.canShare?.({ files: [f] })) { await navigator.share({ files: [f], title: pkg.name }); return true; }
+            } catch (e) { if (e?.name === 'AbortError') return true; }
             saveBlob(pkg.blob, pkg.name);
-            openReadyDownloadSheet(pkg);
+            showToast('Файл сохранён');
             return true;
-        }
-
-        function openReadyDownloadSheet(pkg) {
-            const url = URL.createObjectURL(pkg.blob);
-            const pf = detectPlatform();
-            const canNativeShare = typeof navigator.canShare === 'function';
-            openBottomSheet('Установка в Telegram', `
-                <div class="space-y-3 text-xs">
-                    <div class="p-3.5 recessed-block space-y-1.5">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold accent-text truncate">${escapeHtml(pkg.name)}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-muted-dynamic">${PLATFORM_LABEL[pf] || 'Готов'}</span>
-                        </div>
-                        <p class="text-[11px] text-muted-dynamic leading-relaxed">
-                            Отправьте этот файл в <b>Избранное (Saved Messages)</b> в Telegram и нажмите на него — откроется системное окно применения темы.
-                        </p>
-                    </div>
-                    <div class="grid ${canNativeShare ? 'grid-cols-2' : 'grid-cols-1'} gap-2">
-                        ${canNativeShare ? `
-                            <button type="button" onclick="sharePackageViaOS(lastCompiledPackage)" class="btn-primary min-h-[44px] text-xs flex items-center justify-center gap-1.5">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                                <span>В Избранное ТГ</span>
-                            </button>
-                        ` : ''}
-                        <a href="${url}" download="${escapeHtml(pkg.name)}" onclick="showToast('Файл сохранён')" class="${canNativeShare ? 'btn-surface accent-text font-semibold' : 'btn-primary'} min-h-[44px] text-xs flex items-center justify-center gap-1.5 no-underline">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            <span>Скачать файл</span>
-                        </a>
-                    </div>
-                    <button type="button" onclick="contactAuthorTg()" class="ad-slot-banner w-full flex items-center justify-between gap-2 text-left">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase accent-bg-soft accent-text shrink-0">AD</span>
-                            <span class="text-[11px] font-semibold text-dynamic truncate">Тут могла быть ваша реклама</span>
-                        </div>
-                        <span class="text-[10px] font-mono accent-text shrink-0">@darxxx1zq</span>
-                    </button>
-                </div>
-            `);
         }
 
         async function installDirect(customState = null) {
@@ -3619,14 +3546,7 @@
             Haptic.success();
             const pkg = lastCompiledPackage || await buildThemeFileAsync(PLATFORM_FORMAT[detectPlatform()], tgState);
             const st = pkg.state || tgState;
-            if (pkg.kind === 'lang' || pkg.format === 'lang') {
-                const token = (loadAdminConfig().botToken || '').trim();
-                if (!token) {
-                    closeImportedThemeModal();
-                    openNativeSetLanguageModal(st.langSlug || 'ru');
-                    return;
-                }
-            } else {
+            if (pkg.kind !== 'lang') {
                 const slug = String(st.cloudSlug || '').replace(/^https?:\/\/t\.me\/addtheme\//i, '').trim();
                 if (isRealSlug(slug)) {
                     const url = `https://t.me/addtheme/${slug}`;
@@ -3635,31 +3555,22 @@
                 }
             }
             const btn = document.getElementById('imp-btn-primary-apply');
-            const lbl = document.getElementById('imp-btn-primary-label');
-            const prevText = lbl ? lbl.textContent : 'Применить в Telegram';
             btn?.classList.add('opacity-60', 'pointer-events-none');
-            if (lbl) lbl.textContent = 'Отправка...';
-            try {
-                await deliverToBot(pkg);
-            } finally {
-                btn?.classList.remove('opacity-60', 'pointer-events-none');
-                if (lbl) lbl.textContent = prevText;
-            }
+            try { await deliverToBot(pkg); } finally { btn?.classList.remove('opacity-60', 'pointer-events-none'); }
         }
 
         async function deliverToBot(pkg) {
             const st = pkg.state || tgState;
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = (loadAdminConfig().botToken || urlParams.get('bot_token') || '').trim();
-            const chatId = tg?.initDataUnsafe?.user?.id || urlParams.get('chat_id') || localStorage.getItem('tg_studio_user_chat_id') || OWNER_TG_ID;
+            const token = (loadAdminConfig().botToken || '').trim();
+            const chatId = tg?.initDataUnsafe?.user?.id || OWNER_TG_ID;
             if (token && chatId) {
                 try {
-                    
+                    showToast('Отправляем...');
                     const form = new FormData();
                     form.append('chat_id', String(chatId));
                     form.append('document', pkg.blob, pkg.name);
                     form.append('disable_content_type_detection', 'true');
-                    form.append('caption', pkg.kind === 'lang' ? `Язык «${st.langName}» • @darxxx1zq` : `Тема «${st.name}» • @darxxx1zq`);
+                    form.append('caption', pkg.kind === 'lang' ? `Язык «${st.langName}»` : `Тема «${st.name}»`);
                     const res = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: form });
                     const data = await res.json();
                     if (data.ok && data.result?.document?.file_id) {
@@ -3671,27 +3582,14 @@
                         } catch (_) {}
                         closeImportedThemeModal();
                         if (url && typeof tg?.downloadFile === 'function') {
-                            try {
-                                tg.downloadFile({ url, file_name: pkg.name }, ok => {
-                                    if (ok) showToast('Файл загружен в Telegram!');
-                                    else openDeliveredSheet(pkg.name, pkg.format);
-                                });
-                                return;
-                            } catch (_) {}
+                            try { tg.downloadFile({ url, file_name: pkg.name }, ok => { if (ok) showToast('Файл передан в Telegram'); }); return; } catch (_) {}
                         }
                         openDeliveredSheet(pkg.name, pkg.format);
                         return;
                     }
-                    if (data.error_code === 403) {
-                        showToast('Нажмите /start в боте, чтобы получать файлы');
-                    } else if (data.error_code === 401) {
-                        showToast('Неверный токен бота в Админ-панели');
-                    } else if (data.description) {
-                        showToast('Ошибка бота: ' + data.description.slice(0, 38));
-                    }
-                } catch (_) {
-                    showToast('Сеть недоступна, сохраняем файл напрямую...');
-                }
+                    if (data.error_code === 403) showToast('Откройте бота и нажмите Start');
+                    else if (data.error_code === 401) showToast('Неверный токен');
+                } catch (_) {}
             }
             closeImportedThemeModal();
             await shareOrSave(pkg);
@@ -3843,6 +3741,15 @@
             `);
         }
 
+        function findSeq(u8, str, from = 0) {
+            const q = Array.from(str).map(c => c.charCodeAt(0));
+            outer: for (let i = from; i <= u8.length - q.length; i++) { for (let j = 0; j < q.length; j++) if (u8[i + j] !== q[j]) continue outer; return i; }
+            return -1;
+        }
+        function bytesToDataUrl(u8, mime) {
+            let bin = ''; for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+            return `data:${mime};base64,${btoa(bin)}`;
+        }
         function parseDesktopPalette(text, name) {
             const map = {};
             text.split(/\r?\n/).forEach(l => { const m = l.match(/^\s*([A-Za-z0-9_]+)\s*:\s*([^;]+);/); if (m) map[m[1]] = m[2].trim(); });
@@ -3855,32 +3762,24 @@
             p.checks = col('historyOutIconFg') || p.checks;
             return p;
         }
-
         async function importAtThemeFile(files) {
             if (!files || !files[0]) return;
             const file = files[0];
             try {
-                let rawText = '';
-                if (typeof file.text === 'function') {
-                    rawText = await file.text();
-                } else {
-                    rawText = await new Promise((res, rej) => {
-                        const r = new FileReader();
-                        r.onload = e => res(String(e.target?.result || ''));
-                        r.onerror = () => rej(new Error('Ошибка чтения'));
-                        r.readAsText(file);
-                    });
-                }
-                const wpsIdx = rawText.indexOf('WPS\n');
-                const text = wpsIdx >= 0 ? rawText.slice(0, wpsIdx) : rawText;
-                const cleanName = file.name.replace(/\.(attheme|tgios-theme|tdesktop-theme|tdesktop-palette|txt)$/i, '');
+                const buf = await file.arrayBuffer(), u8 = new Uint8Array(buf), dec = new TextDecoder('utf-8');
+                let text = '', wp = null;
+                let end = u8.length; const mark = findSeq(u8, 'WPS\n');
+                if (mark >= 0) { end = mark; const e2 = findSeq(u8, '\nWPE\n', mark); wp = bytesToDataUrl(u8.subarray(mark + 4, e2 >= 0 ? e2 : u8.length), 'image/jpeg'); }
+                text = dec.decode(u8.subarray(0, end));
+                const cleanName = file.name.replace(/\.(attheme|tgios-theme|tdesktop-theme|tdesktop-palette)$/i, '');
                 const parsed = /(^|\n)\s*windowBg\s*:/.test(text) ? parseDesktopPalette(text, cleanName) : parseThemeTextToState(text, cleanName);
+                if (wp) parsed.wallpaperDataUrl = wp;
                 Object.assign(tgState, parsed);
-                snapshotBasePalette(); syncInputsFromTgState(); renderColorChannelsGrid(); renderTgLiveMockup(true);
+                snapshotBasePalette(); syncInputsFromTgState(); renderColorChannelsGrid(); renderTgLiveMockup();
                 await compileImportAndOpenPreview('theme', tgState);
-                showToast(`Тема «${cleanName}» импортирована`);
+                showToast(`Файл «${file.name}» импортирован и открыт!`);
             } catch (err) {
-                showToast('Не удалось прочитать тему');
+                showToast('Не удалось прочитать файл: ' + (err.message || err));
             }
         }
 
