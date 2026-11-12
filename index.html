@@ -1134,7 +1134,7 @@
                                         <span class="text-muted-dynamic">Масштаб</span>
                                         <span id="val-wp-scale" class="font-mono accent-text font-semibold">100%</span>
                                     </div>
-                                    <input type="range" id="slider-wp-scale" min="50" max="300" step="1" value="100" oninput="updateWallpaperTransformSliders()" class="ios-slider">
+                                    <input type="range" id="slider-wp-scale" min="25" max="300" step="1" value="100" oninput="updateWallpaperTransformSliders()" class="ios-slider">
                                 </div>
 
                                 <div>
@@ -2183,17 +2183,20 @@
             if (tgState.wallpaperDataUrl) {
                 wpImg.style.backgroundImage = `url("${tgState.wallpaperDataUrl}")`;
                 wpImg.style.opacity = ((tgState.patternOpacity ?? 90) / 100).toFixed(2);
-                const scale = tgState.wpScale || 100;
-                if (tgState.wpFit === 'contain' && scale === 100) wpImg.style.backgroundSize = 'contain';
-                else if (scale === 100) wpImg.style.backgroundSize = 'cover';
-                else wpImg.style.backgroundSize = `${scale}%`;
-                wpImg.style.backgroundPosition = `${tgState.wpPosX ?? 50}% ${tgState.wpPosY ?? 50}%`;
+                wpImg.style.backgroundSize = (tgState.wpFit === 'contain') ? 'contain' : 'cover';
+                wpImg.style.backgroundPosition = 'center center';
+                const scaleFactor = (tgState.wpScale || 100) / 100;
+                const shiftX = ((tgState.wpPosX ?? 50) - 50) * 1.6;
+                const shiftY = ((tgState.wpPosY ?? 50) - 50) * 1.6;
+                wpImg.style.transformOrigin = 'center center';
+                wpImg.style.transform = `translate3d(${shiftX.toFixed(1)}%, ${shiftY.toFixed(1)}%, 0) scale(${scaleFactor.toFixed(3)})`;
                 wpImg.style.filter = (tgState.wpBlur > 0) ? `blur(${tgState.wpBlur}px)` : 'none';
                 wpImg.classList.remove('hidden');
 
                 wpDim.style.opacity = ((tgState.wpDim ?? 20) / 100).toFixed(2);
                 wpDim.classList.remove('hidden');
             } else {
+                wpImg.style.transform = '';
                 wpImg.classList.add('hidden');
                 wpDim.classList.add('hidden');
             }
@@ -2332,8 +2335,8 @@
                 if (!draggingWp) return;
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
-                tgState.wpPosX = Math.max(0, Math.min(100, initPosX - dx * 0.25));
-                tgState.wpPosY = Math.max(0, Math.min(100, initPosY - dy * 0.25));
+                tgState.wpPosX = Math.max(0, Math.min(100, initPosX + dx * 0.22));
+                tgState.wpPosY = Math.max(0, Math.min(100, initPosY + dy * 0.22));
                 syncInputsFromTgState();
                 renderTgLiveMockup();
             });
@@ -2427,24 +2430,27 @@
                     if (st.wpBlur > 0) ctx.filter = `blur(${st.wpBlur * 2}px)`;
 
                     const scaleFactor = (st.wpScale || 100) / 100;
-                    const imgAspect = img.width / img.height;
+                    const imgAspect = (img.width || 720) / (img.height || 1280);
                     const canvasAspect = W / H;
-                    let drawW, drawH;
+                    let baseW, baseH;
 
                     if (st.wpFit === 'contain') {
-                        if (imgAspect > canvasAspect) { drawW = W; drawH = W / imgAspect; }
-                        else { drawH = H; drawW = H * imgAspect; }
+                        if (imgAspect > canvasAspect) { baseW = W; baseH = W / imgAspect; }
+                        else { baseH = H; baseW = H * imgAspect; }
                     } else {
-                        if (imgAspect > canvasAspect) { drawH = H; drawW = H * imgAspect; }
-                        else { drawW = W; drawH = W / imgAspect; }
+                        if (imgAspect > canvasAspect) { baseH = H; baseW = H * imgAspect; }
+                        else { baseW = W; baseH = W / imgAspect; }
                     }
 
-                    drawW *= scaleFactor;
-                    drawH *= scaleFactor;
+                    const drawW = baseW * scaleFactor;
+                    const drawH = baseH * scaleFactor;
 
-                    const posX = (st.wpPosX ?? 50) / 100;
-                    const posY = (st.wpPosY ?? 50) / 100;
-                    ctx.drawImage(img, (W - drawW) * posX, (H - drawH) * posY, drawW, drawH);
+                    // Точное смещение относительно центра холста (совпадает 1-в-1 с превью!)
+                    const shiftX = (((st.wpPosX ?? 50) - 50) * 1.6 / 100) * W;
+                    const shiftY = (((st.wpPosY ?? 50) - 50) * 1.6 / 100) * H;
+                    const drawX = (W - drawW) / 2 + shiftX;
+                    const drawY = (H - drawH) / 2 + shiftY;
+                    ctx.drawImage(img, drawX, drawY, drawW, drawH);
                     ctx.restore();
 
                     const dimAlpha = (st.wpDim ?? 20) / 100;
@@ -3350,7 +3356,16 @@
             const r = `${st.bubbleRadius || 16}px`, fs = `${st.fontSize || 13}px`;
             const wave = (c) => VOICE_WAVE_HEIGHTS.map((h, i) => `<i style="display:block;width:2px;height:${Math.max(20, h)}%;border-radius:2px;background:${c};opacity:${i < 11 ? 1 : .4}"></i>`).join('');
             const play = (bg, fg) => `<span style="width:28px;height:28px;border-radius:50%;background:${bg};color:${fg};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20"/></svg></span>`;
-            const wp = st.wallpaperDataUrl ? `background-image:url("${st.wallpaperDataUrl}");background-size:${st.wpScale || 100}%;background-position:${st.wpPosX ?? 50}% ${st.wpPosY ?? 50}%;` : '';
+            const mScale = ((st.wpScale || 100) / 100).toFixed(3);
+            const mShiftX = (((st.wpPosX ?? 50) - 50) * 1.6).toFixed(1);
+            const mShiftY = (((st.wpPosY ?? 50) - 50) * 1.6).toFixed(1);
+            const mOp = ((st.patternOpacity ?? 90) / 100).toFixed(2);
+            const mDim = ((st.wpDim ?? 20) / 100).toFixed(2);
+            const mBlur = (st.wpBlur > 0) ? `filter:blur(${st.wpBlur}px);` : '';
+            const mFit = (st.wpFit === 'contain') ? 'contain' : 'cover';
+            const wpLayerHtml = st.wallpaperDataUrl
+                ? `<div class="absolute inset-0 pointer-events-none" style="background-image:url('${st.wallpaperDataUrl}');background-repeat:no-repeat;background-position:center center;background-size:${mFit};opacity:${mOp};transform-origin:center center;transform:translate3d(${mShiftX}%,${mShiftY}%,0) scale(${mScale});${mBlur}"></div><div class="absolute inset-0 pointer-events-none" style="background:#000;opacity:${mDim}"></div>`
+                : '';
             const avatar = st.avatarDataUrl ? `background-image:url('${st.avatarDataUrl}');background-size:cover` : `background:${C.avatarBg};color:${C.avatarFg}`;
             const stage = document.getElementById('imp-modal-Stage');
             if (!stage) return;
@@ -3436,15 +3451,16 @@
                         </div>
                         <span class="px-2 py-0.5 rounded-full text-[9px]" style="background:${C.dialogBtnOnHdr}20;color:${C.dialogBtnOnHdr}">${escapeHtml(st.today || 'Сегодня')}</span>
                     </div>
-                    <div class="p-3 space-y-2" style="${wp}">
-                        <div class="clean-msg-in max-w-[84%] px-3 py-2" style="background:${C.msgIn};color:${C.inText};border-radius:${r} ${r} ${r} 4px;border:1px solid ${C.dividerColor}">
+                    <div class="p-3 space-y-2 relative overflow-hidden">
+                        ${wpLayerHtml}
+                        <div class="relative z-10 clean-msg-in max-w-[84%] px-3 py-2" style="background:${C.msgIn};color:${C.inText};border-radius:${r} ${r} ${r} 4px;border:1px solid ${C.dividerColor}">
                             <div class="flex items-center gap-2">${play(C.inMedia, C.inMediaFg)}<div class="min-w-0"><div class="text-[11px] font-bold truncate" style="color:${C.inText}">Nightcall</div><div class="text-[10px]" style="color:${C.inTime}">Darxy Studio • 03:42</div></div></div>
                         </div>
-                        <div class="clean-msg-in max-w-[84%] ml-auto px-3 py-2" style="animation-delay:90ms;background:${C.msgOut};color:${C.outText};border-radius:${r} ${r} 4px ${r}">
+                        <div class="relative z-10 clean-msg-in max-w-[84%] ml-auto px-3 py-2" style="animation-delay:90ms;background:${C.msgOut};color:${C.outText};border-radius:${r} ${r} 4px ${r}">
                             <div class="flex items-center gap-2">${play(C.outMedia, C.outMediaFg)}<div class="flex items-center gap-[2px] h-4 flex-1">${wave(C.outMedia)}</div></div>
                             <div class="text-[9px] text-right mt-1" style="color:${C.outTime}">0:18 • 14:21 <span style="color:${C.outChecks}">✓✓</span></div>
                         </div>
-                        <div class="rounded-xl px-3 py-1.5 flex items-center justify-between text-[11px]" style="background:${C.headerBg};color:${C.primaryTextOnHdr};border:1px solid ${C.headerDivider}">
+                        <div class="relative z-10 rounded-xl px-3 py-1.5 flex items-center justify-between text-[11px]" style="background:${C.headerBg};color:${C.primaryTextOnHdr};border:1px solid ${C.headerDivider}">
                             <span class="truncate opacity-80">${escapeHtml(isLang ? st.placeholder : st.name)}</span>
                             <div class="flex gap-3 font-bold shrink-0"><span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.cancel || 'Отмена')}</span><span style="color:${C.dialogBtnOnHdr}">${escapeHtml(st.ok || 'Принять')}</span></div>
                         </div>
