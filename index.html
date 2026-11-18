@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#050505" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>MY WAVE — SoundCloud Discovery Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -109,10 +112,36 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); border-radius: 999px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.45); }
+  
+    :root { --acc: 212,175,55; }
+    html, body { height: 100%; }
+    body { overflow: hidden; }
+    #bg-art { position: fixed; inset: -12%; z-index: 0; pointer-events: none; background-size: cover; background-position: center;
+      filter: blur(60px) saturate(1.4); opacity: 0; transition: opacity .8s ease; transform: translateZ(0); }
+    #bg-art.on { opacity: .4; }
+    .bg-veil { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(5,5,5,.5), rgba(5,5,5,.92)); }
+    .orb-size { width: clamp(200px, 40dvh, 340px); height: clamp(200px, 40dvh, 340px); }
+    .focus-mode .orb-size { width: clamp(240px, 56dvh, 520px); height: clamp(240px, 56dvh, 520px); }
+    .focus-mode #top-header, .focus-mode #vibe-pills-container { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #orb-art { position: absolute; left: 25.3%; top: 25.3%; width: 49.4%; height: 49.4%; border-radius: 50%; object-fit: cover;
+      pointer-events: none; opacity: 0; transition: opacity .5s; animation: spin 18s linear infinite; animation-play-state: paused;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.07), 0 8px 30px rgba(0,0,0,.6); }
+    #orb-art.on { opacity: 1; }
+    .is-playing #orb-art { animation-play-state: running; }
+    #orb-hole { position: absolute; left: 47%; top: 47%; width: 6%; height: 6%; border-radius: 50%; background: #050505;
+      border: 1px solid rgba(255,255,255,.18); pointer-events: none; }
+    .cb { position: relative; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center;
+      border-radius: 9999px; color: rgba(255,255,255,.55); transition: all .15s; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+    .cb:hover { color: #e5e5e5; background: rgba(255,255,255,.06); }
+    .cb:active { transform: scale(.9); }
+    .cb.on { color: rgb(var(--acc)); }
+    @media (prefers-reduced-motion: reduce) { #orb-art { animation: none; } }
   </style>
 </head>
-<body class="min-h-[100dvh] bg-obsidian text-silver selection:bg-gold/20 selection:text-gold flex flex-col justify-between relative">
+<body class="h-[100dvh] bg-obsidian text-silver selection:bg-gold/20 selection:text-gold flex flex-col relative">
 
+  <div id="bg-art"></div><div class="bg-veil"></div>
   <!-- Subtle GPU-composited ambient backdrop -->
   <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden">
     <div
@@ -122,7 +151,7 @@
   </div>
 
   <!-- Top Navigation & Search + Account -->
-  <header class="relative z-30 w-full max-w-6xl mx-auto px-4 sm:px-5 pt-4 sm:pt-5 pb-2 flex flex-col md:flex-row items-center justify-between gap-3">
+  <header id="top-header" class="shrink-0 relative z-30 w-full max-w-6xl mx-auto px-4 sm:px-5 pt-4 sm:pt-5 pb-2 flex flex-col md:flex-row items-center justify-between gap-3">
     <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
       <div class="flex items-center gap-2.5">
         <div id="header-eq" class="eq-paused flex items-end gap-[2px] h-3 w-3.5" aria-hidden="true">
@@ -185,176 +214,116 @@
     </div>
   </header>
 
-  <!-- Main Centerpiece: Orb + Vibe Pills -->
-  <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pb-44 sm:pb-36 pt-2 sm:pt-4">
-    <div class="text-center mb-2 sm:mb-3 max-w-md px-4 min-h-[44px] flex flex-col items-center justify-center">
-      <p id="center-track-title" class="text-sm sm:text-base font-medium text-silver tracking-tight truncate max-w-full">
-        Click the Wave Orb or Sign In to start
-      </p>
-      <p id="center-track-meta" class="font-mono text-[11px] text-white/45 mt-0.5 truncate max-w-full">
-        IDLE · READY
-      </p>
-    </div>
-
-    <div class="relative flex items-center justify-center my-1" style="contain: layout paint;">
-      <button id="orb-toggle-btn" type="button" aria-label="Toggle Play or Pause" class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-200 active:scale-[0.97]">
-        <canvas id="wave-orb-canvas" class="block w-[230px] h-[230px] sm:w-[300px] sm:h-[300px]"></canvas>
-        <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-          <div class="w-11 h-11 rounded-full glass border border-white/15 flex items-center justify-center text-silver shadow-lg">
-            <svg id="orb-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="6 3 20 12 6 21 6 3"></polygon>
-            </svg>
-            <svg id="orb-icon-pause" class="hidden w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="10" x2="10" y1="4" y2="20"></line>
-              <line x1="14" x2="14" y1="4" y2="20"></line>
-            </svg>
+  <!-- Player stage -->
+  <main class="relative z-10 flex-1 min-h-0 overflow-y-auto px-4">
+    <div class="min-h-full flex flex-col items-center justify-center py-2 gap-2">
+      <div id="ctx-badge" class="font-mono text-[10px] uppercase tracking-[0.22em] text-white/40">Now playing · My Wave</div>
+      <div id="orb-stage" class="relative flex items-center justify-center select-none" style="touch-action: pan-y; contain: layout paint;">
+        <button id="orb-toggle-btn" type="button" aria-label="Toggle Play or Pause" class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-200 active:scale-[0.98]">
+          <canvas id="wave-orb-canvas" class="block orb-size"></canvas>
+          <img id="orb-art" alt="" />
+          <div id="orb-hole"></div>
+          <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+            <div class="w-11 h-11 rounded-full glass border border-white/15 flex items-center justify-center text-silver shadow-lg">
+              <svg id="orb-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+              <svg id="orb-icon-pause" class="hidden w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="10" y1="4" y2="20"></line><line x1="14" x2="14" y1="4" y2="20"></line></svg>
+            </div>
           </div>
-        </div>
-      </button>
-    </div>
-
-    <!-- Interactive Vibe & Discovery Pills (spaced cleanly for mobile taps) -->
-    <div id="vibe-pills-container" class="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-2.5 max-w-xl px-1">
+        </button>
+      </div>
+      <div class="text-center max-w-md w-full px-4 min-h-[48px] flex flex-col items-center justify-center">
+        <p id="center-track-title" class="text-base sm:text-lg font-semibold text-silver tracking-tight truncate max-w-full">Click the Wave Orb or Sign In to start</p>
+        <p id="center-track-meta" class="font-mono text-[11px] text-white/45 mt-0.5 truncate max-w-full">IDLE · READY</p>
+      </div>
+      <div id="vibe-pills-container" class="flex flex-wrap items-center justify-center gap-2 max-w-xl px-1">
       <button data-filter="bodroe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Бодрое</button>
       <button data-filter="spokoynoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Спокойное</button>
       <button data-filter="tyomnoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Тёмное</button>
       <button data-filter="lyubimoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Любимое</button>
       <button data-filter="neznakomoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Незнакомое</button>
       <button data-filter="andegraund" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Андеграунд</button>
+      <button data-filter="korotkoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Короткое</button>
+      <button data-filter="sety" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Сеты</button>
+      <button data-filter="svezhee" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Свежее</button>
+      </div>
+      <p id="engine-toast" class="font-mono text-[11px] h-4 opacity-0 transition-opacity duration-200 text-center px-2" style="color: rgb(var(--acc));"></p>
     </div>
-
-    <p id="engine-toast" class="mt-3.5 font-mono text-[11px] text-gold/90 h-4 opacity-0 transition-opacity duration-200 text-center px-2"></p>
   </main>
 
-  <!-- Floating Frosted Bottom Dock (2-row responsive on mobile, 1-row on desktop) -->
-  <footer class="fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-1rem)] sm:w-[calc(100%-1.5rem)] max-w-5xl z-40 pb-[env(safe-area-inset-bottom)]">
-    <div class="glass-surface border border-white/10 border-t-white/15 rounded-2xl px-3.5 py-3 sm:px-4 shadow-2xl">
-      <!-- Scrubbing Timeline -->
-      <div class="relative mb-3 sm:mb-2.5 group">
-        <div id="timeline-hover-tooltip" class="pointer-events-none hidden absolute -top-7 -translate-x-1/2 bg-surface border border-white/15 rounded px-1.5 py-0.5 font-mono text-[10px] text-silver shadow-lg">00:00</div>
-        <div id="timeline-track" class="relative w-full h-2 sm:h-1.5 bg-white/10 rounded-full cursor-pointer overflow-hidden sm:group-hover:h-2 transition-all duration-150">
-          <div id="timeline-hover-bar" class="absolute inset-y-0 left-0 bg-white/20 pointer-events-none w-0"></div>
-          <div id="timeline-progress" class="absolute inset-0 bg-gradient-to-r from-silver to-gold rounded-full origin-left" style="transform: scaleX(0); will-change: transform;"></div>
+  <!-- Player panel -->
+  <footer class="shrink-0 relative z-40 w-full max-w-3xl mx-auto px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div class="glass-surface border border-white/10 rounded-3xl px-4 pt-3 pb-2.5 shadow-2xl">
+      <div class="flex items-center gap-3">
+        <span id="time-current" class="font-mono text-[10px] text-white/45 w-9 text-right">00:00</span>
+        <div id="timeline-track" class="relative flex-1 h-5 flex items-center cursor-pointer group">
+          <div id="timeline-hover-tooltip" class="pointer-events-none hidden absolute -top-6 -translate-x-1/2 bg-surface border border-white/15 rounded px-1.5 py-0.5 font-mono text-[10px] text-silver shadow-lg">00:00</div>
+          <div class="relative w-full h-1.5 group-hover:h-2 bg-white/10 rounded-full overflow-hidden transition-all duration-150">
+            <div id="timeline-hover-bar" class="absolute inset-y-0 left-0 bg-white/20 pointer-events-none w-0"></div>
+            <div id="timeline-progress" class="absolute inset-0 rounded-full origin-left" style="background: linear-gradient(to right, #e5e5e5, rgb(var(--acc))); transform: scaleX(0); will-change: transform;"></div>
+          </div>
+          <div id="timeline-thumb" class="pointer-events-none absolute top-1/2 w-3 h-3 -ml-1.5 -mt-1.5 rounded-full bg-silver shadow" style="left: 0%;"></div>
         </div>
+        <span id="time-total" class="font-mono text-[10px] text-white/45 w-9">00:00</span>
       </div>
 
-      <!-- Dock Controls: stacks cleanly into 2 spacious rows on mobile, single row on sm+ -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
-        <!-- Row 1 (mobile): Track Info + Mobile Queue Button -->
-        <div class="flex items-center justify-between gap-3 min-w-0 sm:flex-1">
-          <div class="flex items-center gap-3 min-w-0 flex-1">
-            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-surface border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
-              <img id="dock-artwork" src="" alt="" class="hidden w-full h-full object-cover" />
-              <svg id="dock-artwork-fallback" class="w-5 h-5 text-white/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 18V5l12-2v13"></path>
-                <circle cx="6" cy="18" r="3"></circle>
-                <circle cx="18" cy="16" r="3"></circle>
-              </svg>
-            </div>
-            <div class="min-w-0 flex-1">
-              <div id="dock-title" class="text-xs sm:text-sm font-medium text-silver truncate">No track loaded</div>
-              <div class="flex items-center gap-2 mt-0.5">
-                <span id="dock-artist" class="text-[11px] text-white/50 truncate">—</span>
-                <span class="font-mono text-[10px] text-white/35 shrink-0">
-                  <span id="time-current">00:00</span> / <span id="time-total">00:00</span>
-                </span>
+      <div class="mt-1 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-3">
+        <div class="hidden md:flex items-center gap-3 min-w-0">
+          <div class="w-11 h-11 rounded-lg bg-surface border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+            <img id="dock-artwork" src="" alt="" class="hidden w-full h-full object-cover" />
+            <svg id="dock-artwork-fallback" class="w-5 h-5 text-white/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          </div>
+          <div class="min-w-0">
+            <div id="dock-title" class="text-sm font-medium text-silver truncate">No track loaded</div>
+            <div id="dock-artist" class="text-[11px] text-white/50 truncate">—</div>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center">
+          <div class="flex items-center justify-center gap-1.5">
+            <button id="btn-shuffle" type="button" title="Shuffle (S)" class="cb"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></button>
+            <button id="btn-prev" type="button" title="Previous (P)" class="cb !w-11 !h-11 !text-white/80"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" x2="5" y1="19" y2="5"></line></svg></button>
+            <button id="btn-play-pause" type="button" title="Play / Pause (Space)" class="w-14 h-14 rounded-full bg-silver text-obsidian flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+              <svg id="dock-icon-play" class="w-5 h-5 ml-0.5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+              <svg id="dock-icon-pause" class="hidden w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="9" x2="9" y1="4" y2="20"></line><line x1="15" x2="15" y1="4" y2="20"></line></svg>
+            </button>
+            <button id="btn-next" type="button" title="Next (N)" class="cb !w-11 !h-11 !text-white/80"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" x2="19" y1="5" y2="19"></line></svg></button>
+            <button id="btn-repeat" type="button" title="Repeat track (R)" class="cb"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg><span id="repeat-one-badge" class="hidden absolute top-1 right-1 text-[8px] leading-none">1</span></button>
+          </div>
+          <div class="flex items-center justify-center gap-0.5 mt-0.5">
+            <button id="btn-dislike" type="button" title="Dislike & Block" class="cb"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"></path><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"></path></svg></button>
+            <button id="btn-like" type="button" title="Like (L)" class="cb hover:!text-gold">
+              <svg id="icon-like" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+            </button>
+            <div class="relative">
+              <button id="btn-add-to-playlist" type="button" title="Add to Playlist" class="cb"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></button>
+              <div id="add-playlist-popover" class="hidden absolute bottom-12 left-1/2 -translate-x-1/2 w-56 bg-surface border border-white/10 rounded-xl shadow-2xl p-2 z-50">
+                <div class="px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-white/40 border-b border-white/10 mb-1">Add to Playlist</div>
+                <div id="add-playlist-options" class="max-h-44 overflow-y-auto space-y-0.5"></div>
               </div>
             </div>
-          </div>
-
-          <!-- Mobile-only Queue Toggle on Row 1 so Row 2 has generous room -->
-          <button id="btn-queue-toggle-mobile" type="button" title="Wave Buffer & Playlists" class="sm:hidden p-2.5 rounded-full border border-white/10 text-white/65 active:scale-95 transition-transform shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="8" x2="21" y1="6" y2="6"></line>
-              <line x1="8" x2="21" y1="12" y2="12"></line>
-              <line x1="8" x2="21" y1="18" y2="18"></line>
-              <line x1="3" x2="3.01" y1="6" y2="6"></line>
-              <line x1="3" x2="3.01" y1="12" y2="12"></line>
-              <line x1="3" x2="3.01" y1="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Row 2 (mobile) / Center (desktop): Spacious Transport Buttons -->
-        <div class="flex items-center justify-around sm:justify-center gap-2 sm:gap-2 shrink-0 pt-1 sm:pt-0 border-t border-white/[0.06] sm:border-t-0">
-          <button id="btn-dislike" type="button" title="Dislike & Blacklist" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-white/45 hover:text-silver hover:bg-white/[0.05] active:scale-90 transition-all">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 14V2"></path>
-              <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"></path>
-            </svg>
-          </button>
-
-          <button id="btn-prev" type="button" title="Previous Track" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-white/65 hover:text-silver hover:bg-white/[0.05] active:scale-90 transition-all">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="19 20 9 12 19 4 19 20"></polygon>
-              <line x1="5" x2="5" y1="19" y2="5"></line>
-            </svg>
-          </button>
-
-          <button id="btn-play-pause" type="button" title="Play / Pause" class="w-11 h-11 sm:w-9 sm:h-9 rounded-full border border-white/20 bg-white/[0.08] hover:border-gold/60 text-silver flex items-center justify-center active:scale-90 transition-all">
-            <svg id="dock-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="6 3 20 12 6 21 6 3"></polygon>
-            </svg>
-            <svg id="dock-icon-pause" class="hidden w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="10" x2="10" y1="4" y2="20"></line>
-              <line x1="14" x2="14" y1="4" y2="20"></line>
-            </svg>
-          </button>
-
-          <button id="btn-next" type="button" title="Next Track" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-white/65 hover:text-silver hover:bg-white/[0.05] active:scale-90 transition-all">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="5 4 15 12 5 20 5 4"></polygon>
-              <line x1="19" x2="19" y1="5" y2="19"></line>
-            </svg>
-          </button>
-
-          <button id="btn-like" type="button" title="Like & Add to Wave Seeds" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-white/45 hover:text-gold hover:bg-white/[0.05] active:scale-90 transition-all">
-            <svg id="icon-like" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-            </svg>
-          </button>
-
-          <div class="relative">
-            <button id="btn-add-to-playlist" type="button" title="Add to Playlist" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-white/45 hover:text-silver hover:bg-white/[0.05] active:scale-90 transition-all">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14"></path>
-                <path d="M5 12h14"></path>
-              </svg>
-            </button>
-            <div id="add-playlist-popover" class="hidden absolute bottom-12 right-0 w-56 bg-surface border border-white/10 rounded-xl shadow-2xl p-2 z-50">
-              <div class="px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-white/40 border-b border-white/10 mb-1">Add to Playlist</div>
-              <div id="add-playlist-options" class="max-h-44 overflow-y-auto space-y-0.5"></div>
+            <button id="btn-speed" type="button" title="Playback speed" class="cb">1×</button>
+            <div class="relative">
+              <button id="btn-sleep" type="button" title="Sleep timer" class="cb"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+              <div id="sleep-popover" class="hidden absolute bottom-12 left-1/2 -translate-x-1/2 w-40 bg-surface border border-white/10 rounded-xl shadow-2xl p-1.5 z-50 font-mono text-[11px]">
+                <button data-sleep="15" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-white/[0.06]">15 min</button>
+                <button data-sleep="30" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-white/[0.06]">30 min</button>
+                <button data-sleep="60" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-white/[0.06]">60 min</button>
+                <button data-sleep="eot" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-white/[0.06]">End of track</button>
+                <button data-sleep="0" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-white/[0.06] text-white/50">Off</button>
+              </div>
             </div>
+            <button id="btn-focus" type="button" title="Full-screen player (F)" class="cb"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+            <button id="btn-queue-toggle-mobile" type="button" title="Queue" class="cb md:!hidden"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"></line><line x1="8" x2="21" y1="12" y2="12"></line><line x1="8" x2="21" y1="18" y2="18"></line><line x1="3" x2="3.01" y1="6" y2="6"></line><line x1="3" x2="3.01" y1="12" y2="12"></line><line x1="3" x2="3.01" y1="18" y2="18"></line></svg></button>
           </div>
         </div>
 
-        <!-- Desktop Volume + Queue Toggle -->
-        <div class="hidden sm:flex items-center gap-3 shrink-0">
-          <div class="hidden md:flex items-center gap-2.5">
-            <button id="btn-mute" type="button" class="text-white/50 hover:text-silver transition-colors">
-              <svg id="icon-vol-on" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-              </svg>
-              <svg id="icon-vol-off" class="hidden w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                <line x1="22" x2="16" y1="9" y2="15"></line>
-                <line x1="16" x2="22" y1="9" y2="15"></line>
-              </svg>
-            </button>
-            <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.85" class="volume-slider w-20" />
-          </div>
-
-          <button id="btn-queue-toggle" type="button" title="Wave Buffer & Playlists" class="p-2 rounded-full border border-white/10 text-white/60 hover:text-silver hover:border-white/25 active:scale-95 transition-all shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="8" x2="21" y1="6" y2="6"></line>
-              <line x1="8" x2="21" y1="12" y2="12"></line>
-              <line x1="8" x2="21" y1="18" y2="18"></line>
-              <line x1="3" x2="3.01" y1="6" y2="6"></line>
-              <line x1="3" x2="3.01" y1="12" y2="12"></line>
-              <line x1="3" x2="3.01" y1="18" y2="18"></line>
-            </svg>
+        <div class="hidden md:flex items-center justify-end gap-2">
+          <button id="btn-mute" type="button" class="text-white/50 hover:text-silver transition-colors">
+            <svg id="icon-vol-on" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <svg id="icon-vol-off" class="hidden w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" x2="16" y1="9" y2="15"></line><line x1="16" x2="22" y1="9" y2="15"></line></svg>
           </button>
+          <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.85" class="volume-slider w-20" />
+          <button id="btn-queue-toggle" type="button" title="Queue (Q)" class="cb"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"></line><line x1="8" x2="21" y1="12" y2="12"></line><line x1="8" x2="21" y1="18" y2="18"></line><line x1="3" x2="3.01" y1="6" y2="6"></line><line x1="3" x2="3.01" y1="12" y2="12"></line><line x1="3" x2="3.01" y1="18" y2="18"></line></svg></button>
         </div>
       </div>
     </div>
@@ -370,6 +339,7 @@
       <div class="flex items-center gap-1.5">
         <button data-drawer-tab="wave" type="button" class="drawer-tab-btn px-3 py-1.5 rounded-full font-mono text-[11px] uppercase tracking-wider border border-gold/60 text-gold bg-gold/10 transition-colors">Wave</button>
         <button data-drawer-tab="playlists" type="button" class="drawer-tab-btn px-3 py-1.5 rounded-full font-mono text-[11px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Playlists</button>
+        <button data-drawer-tab="blocked" type="button" class="drawer-tab-btn px-3 py-1.5 rounded-full font-mono text-[11px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Blocked</button>
       </div>
       <button id="btn-queue-close" type="button" class="p-2 text-white/45 hover:text-silver transition-colors">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -424,6 +394,14 @@
 
       <div id="playlists-container" class="flex-1 overflow-y-auto p-3 space-y-2.5"></div>
     </div>
+  <div id="drawer-panel-blocked" class="hidden flex-1 flex flex-col min-h-0">
+      <div id="blocked-list" class="flex-1 overflow-y-auto divide-y divide-white/[0.06] px-2 py-2"></div>
+      <div class="p-4 border-t border-white/10 flex items-center gap-2.5">
+        <button id="btn-export" type="button" class="flex-1 py-2.5 rounded-xl glass border border-white/10 hover:border-gold/50 text-xs text-silver transition-colors">Export backup</button>
+        <button id="btn-import" type="button" class="flex-1 py-2.5 rounded-xl glass border border-white/10 hover:border-gold/50 text-xs text-silver transition-colors">Import backup</button>
+        <input id="import-file" type="file" accept="application/json" class="hidden" />
+      </div>
+    </div>
   </aside>
 
   <!-- Account / Sign In Modal -->
@@ -476,6 +454,19 @@
     </div>
   </div>
 
+  <div id="undo-bar" class="hidden fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom)+11rem)] z-[60] glass-surface border border-white/15 rounded-full pl-4 pr-1.5 py-1.5 flex items-center gap-3 text-xs shadow-2xl">
+    <span id="undo-text" class="text-silver"></span>
+    <button id="undo-btn" type="button" class="px-3 py-1 rounded-full border border-gold/50 text-gold font-mono text-[11px] uppercase">Undo</button>
+  </div>
+  <div id="help-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80" onclick="this.classList.add('hidden')">
+    <div class="w-full max-w-sm bg-surface border border-white/10 rounded-2xl p-5 font-mono text-[11px] text-white/70 space-y-1.5">
+      <div class="text-xs uppercase tracking-[0.2em] text-silver mb-2">Hotkeys</div>
+      <div>Space — play / pause</div><div>← / → — seek 10s (Shift: 30s)</div><div>↑ / ↓ — volume</div>
+      <div>N / P — next / previous</div><div>L — like · M — mute</div><div>S — shuffle · R — repeat track</div>
+      <div>Q — queue · F — full-screen player</div><div>/ — search · ? — this help · Esc — close</div>
+      <div class="pt-2 text-white/40">Orb: double-tap = like, swipe = prev / next</div>
+    </div>
+  </div>
   <audio id="audio-element" preload="auto"></audio>
 
   <script>
@@ -485,6 +476,8 @@
       const ACCOUNT_KEY = "my_wave_account_v1";
       const PLAYLISTS_KEY = "my_wave_playlists_v1";
       const ENGINE_KEY = "my_wave_engine_v1";
+      let repeatOne = false, shuffleOn = false, sleepEOT = false, isScrubbing = false, lastSearchTracks = [];
+      let ACC = [212, 175, 55], ACC_T = [212, 175, 55];
 
       let accountState = { user: null, oauthToken: "" };
       try {
@@ -535,6 +528,7 @@
           this.history = [];
           this.recentCompleted = [];
           this.blacklist = { tracks: [], artists: [] };
+          this.blocked = [];
           this.activeFilters = {
             bodroe: false,
             spokoynoe: false,
@@ -542,6 +536,9 @@
             lyubimoe: false,
             neznakomoe: false,
             andegraund: false,
+            korotkoe: false,
+            sety: false,
+            svezhee: false,
           };
           this.queue = [];
           this.playStack = [];
@@ -559,6 +556,7 @@
             if (Array.isArray(parsed.likedSeeds)) this.likedSeeds = parsed.likedSeeds;
             if (Array.isArray(parsed.history)) this.history = parsed.history;
             if (Array.isArray(parsed.recentCompleted)) this.recentCompleted = parsed.recentCompleted;
+            if (Array.isArray(parsed.blocked)) this.blocked = parsed.blocked;
             if (parsed.blacklist) {
               this.blacklist = {
                 tracks: Array.isArray(parsed.blacklist.tracks) ? parsed.blacklist.tracks : [],
@@ -582,6 +580,7 @@
                 likedSeeds: this.likedSeeds.slice(-150),
                 history: this.history.slice(-500),
                 recentCompleted: this.recentCompleted.slice(-50),
+                blocked: this.blocked.slice(-300),
                 blacklist: {
                   tracks: this.blacklist.tracks.slice(-500),
                   artists: this.blacklist.artists.slice(-300),
@@ -597,6 +596,7 @@
           this.history = [];
           this.recentCompleted = [];
           this.blacklist = { tracks: [], artists: [] };
+          this.blocked = [];
           this.queue = [];
           this.lastSuccessfulSeed = null;
           localStorage.removeItem(ENGINE_KEY);
@@ -662,15 +662,22 @@
           this.saveState();
         }
 
-        blacklistAndFlush(track) {
+        blacklistAndFlush(track, withArtist = true) {
           if (!track) return;
-          if (!this.blacklist.tracks.includes(track.id)) {
-            this.blacklist.tracks.push(track.id);
-          }
-          if (track.user?.id && !this.blacklist.artists.includes(track.user.id)) {
-            this.blacklist.artists.push(track.user.id);
-          }
+          if (!this.blacklist.tracks.includes(track.id)) this.blacklist.tracks.push(track.id);
+          const aid = track.user?.id;
+          if (withArtist && aid && !this.blacklist.artists.includes(aid)) this.blacklist.artists.push(aid);
+          this.blocked = this.blocked.filter((b) => b.id !== track.id);
+          this.blocked.push({ id: track.id, title: track.title, artist: track.user?.username || "", artistId: aid || null, withArtist: Boolean(withArtist && aid) });
           this.queue = [];
+          this.saveState();
+        }
+
+        unblock(id) {
+          const b = this.blocked.find((x) => x.id === id);
+          this.blacklist.tracks = this.blacklist.tracks.filter((x) => x !== id);
+          if (b && b.withArtist && b.artistId) this.blacklist.artists = this.blacklist.artists.filter((x) => x !== b.artistId);
+          this.blocked = this.blocked.filter((x) => x.id !== id);
           this.saveState();
         }
 
@@ -717,6 +724,12 @@
 
           if (this.activeFilters.andegraund && (track.playback_count || 0) > 50000) return false;
           if (this.activeFilters.neznakomoe && (track.playback_count || 0) > 150000) return false;
+          if (this.activeFilters.korotkoe && track.duration > 240000) return false;
+          if (this.activeFilters.sety && track.duration < 1200000) return false;
+          if (this.activeFilters.svezhee) {
+            const ts = Date.parse(track.created_at || track.release_date || "");
+            if (ts && Date.now() - ts > 60 * 864e5) return false;
+          }
 
           const vibeText = `${track.genre || ""} ${track.tag_list || ""} ${track.title || ""}`.toLowerCase();
           const activeVibes = ["bodroe", "spokoynoe", "tyomnoe"].filter((k) => this.activeFilters[k]);
@@ -752,6 +765,8 @@
               [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
             }
 
+            const recentArtists = new Set([this.currentTrack, ...this.playStack.slice(-3)].filter(Boolean).map((t) => t.user?.id));
+            filtered.sort((a, b) => (recentArtists.has(a.user?.id) ? 1 : 0) - (recentArtists.has(b.user?.id) ? 1 : 0));
             const needed = Math.max(0, 6 - this.queue.length);
             this.queue.push(...filtered.slice(0, needed));
             this.lastSuccessfulSeed = seed;
@@ -943,6 +958,8 @@
         // Throttle idle state to ~20fps
         if (!isPlaying && now - lastIdleFrame < 48) return;
         lastIdleFrame = now;
+        for (let k = 0; k < 3; k++) ACC[k] += (ACC_T[k] - ACC[k]) * 0.06;
+        const ar = Math.round(ACC[0]), ag = Math.round(ACC[1]), ab = Math.round(ACC[2]);
 
         const w = canvas.clientWidth;
         const h = canvas.clientHeight;
@@ -966,7 +983,7 @@
 
         // 1. Soft radial aura
         const aura = ctx.createRadialGradient(cx, cy, baseRadius * 0.25, cx, cy, baseRadius * 1.85);
-        aura.addColorStop(0, `rgba(212, 175, 55, ${0.14 + smoothBass * 0.22})`);
+        aura.addColorStop(0, `rgba(${ar}, ${ag}, ${ab}, ${0.14 + smoothBass * 0.22})`);
         aura.addColorStop(0.55, `rgba(229, 229, 229, ${0.04 + smoothMid * 0.08})`);
         aura.addColorStop(1, "rgba(5, 5, 5, 0)");
         ctx.fillStyle = aura;
@@ -995,7 +1012,7 @@
           const px = cx + Math.cos(p.angle) * r;
           const py = cy + Math.sin(p.angle) * r;
           ctx.fillStyle = p.isGold
-            ? `rgba(212, 175, 55, ${isPlaying ? 0.65 : 0.25})`
+            ? `rgba(${ar}, ${ag}, ${ab}, ${isPlaying ? 0.65 : 0.25})`
             : `rgba(229, 229, 229, ${isPlaying ? 0.45 : 0.18})`;
           ctx.beginPath();
           ctx.arc(px, py, p.size, 0, Math.PI * 2);
@@ -1022,7 +1039,7 @@
           ctx.closePath();
 
           ctx.strokeStyle = r === 0
-            ? `rgba(212, 175, 55, ${0.46 + smoothBass * 0.42})`
+            ? `rgba(${ar}, ${ag}, ${ab}, ${0.46 + smoothBass * 0.42})`
             : `rgba(229, 229, 229, ${0.24 - r * 0.05 + smoothMid * 0.22})`;
           ctx.lineWidth = r === 0 ? 1.5 : 0.9;
           ctx.stroke();
@@ -1038,7 +1055,7 @@
           baseRadius * 0.92
         );
         coreGrad.addColorStop(0, `rgba(229, 229, 229, ${isPlaying ? 0.2 : 0.12})`);
-        coreGrad.addColorStop(0.35, `rgba(212, 175, 55, ${isPlaying ? 0.08 + smoothBass * 0.1 : 0.03})`);
+        coreGrad.addColorStop(0.35, `rgba(${ar}, ${ag}, ${ab}, ${isPlaying ? 0.08 + smoothBass * 0.1 : 0.03})`);
         coreGrad.addColorStop(0.7, "rgba(14, 14, 14, 0.95)");
         coreGrad.addColorStop(1, "rgba(5, 5, 5, 0.99)");
 
@@ -1193,41 +1210,39 @@
         els.statSeeds.textContent = String(engine.likedSeeds.length);
         els.statHistory.textContent = String(engine.history.length);
         els.statBlacklist.textContent = String(engine.blacklist.tracks.length);
+        els.drawerSeedInfo.textContent = `SEED: ${engine.lastSuccessfulSeed?.title || "NONE"}`;
 
-        const seedTitle = engine.lastSuccessfulSeed?.title || "NONE";
-        els.drawerSeedInfo.textContent = `SEED: ${seedTitle}`;
-
-        if (engine.queue.length === 0) {
-          els.queueList.innerHTML = `<div class="px-4 py-8 text-center font-mono text-xs text-white/35">Buffer empty. Search or sign in to start My Wave.</div>`;
-          return;
-        }
-
-        els.queueList.innerHTML = engine.queue
-          .map((t, idx) => {
-            const art = getHighResArtwork(t.artwork_url);
-            const dur = formatTime((t.duration || 0) / 1000);
-            return `
-              <button data-queue-idx="${idx}" class="w-full text-left flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors group">
+        els.queueList.innerHTML = engine.queue.length
+          ? engine.queue.map((t, idx) => {
+              const art = getHighResArtwork(t.artwork_url);
+              return `<div data-q="${idx}" class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/[0.04] cursor-pointer group">
                 <span class="font-mono text-[10px] text-white/30 w-4 text-right">${idx + 1}</span>
-                <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">
-                  ${art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : ""}
-                </div>
+                <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">${art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : ""}</div>
                 <div class="min-w-0 flex-1">
                   <div class="text-xs text-silver truncate group-hover:text-gold transition-colors">${escapeHtml(t.title)}</div>
                   <div class="text-[11px] text-white/45 truncate">${escapeHtml(t.user?.username)}</div>
                 </div>
-                <span class="font-mono text-[10px] text-white/35">${dur}</span>
-              </button>
-            `;
-          })
-          .join("");
+                <span class="font-mono text-[10px] text-white/35">${formatTime((t.duration || 0) / 1000)}</span>
+                <button data-q-top type="button" title="Play next" class="cb !w-7 !h-7"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></button>
+                <button data-q-rm type="button" title="Remove" class="cb !w-7 !h-7"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>`;
+            }).join("")
+          : `<div class="px-4 py-8 text-center font-mono text-xs text-white/35">Buffer empty. Search or sign in to start My Wave.</div>`;
 
-        els.queueList.querySelectorAll("[data-queue-idx]").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const picked = engine.queue.splice(Number(btn.dataset.queueIdx), 1)[0];
-            if (picked) playTrack(picked, true);
-          });
-        });
+        const bl = document.getElementById("blocked-list");
+        if (bl) {
+          const old = engine.blacklist.tracks.length - engine.blocked.length;
+          bl.innerHTML = (engine.blocked.length
+            ? engine.blocked.slice().reverse().map((b) => `<div class="flex items-center gap-3 p-2.5">
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs text-silver truncate">${escapeHtml(b.title)}</div>
+                  <div class="font-mono text-[10px] text-white/40 truncate">${escapeHtml(b.artist)}${b.withArtist ? " · artist blocked" : ""}</div>
+                </div>
+                <button data-unblock="${escapeHtml(String(b.id))}" type="button" class="px-2.5 py-1 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase">Unblock</button>
+              </div>`).join("")
+            : `<div class="px-4 py-8 text-center font-mono text-xs text-white/35">Nothing blocked.</div>`)
+            + (old > 0 ? `<div class="px-4 py-3 font-mono text-[10px] text-white/30">+${old} older entries without details (Reset clears them).</div>` : "");
+        }
       }
 
       function renderPlaylists() {
@@ -1330,7 +1345,7 @@
             const pl = playlists.find((p) => p.id === btn.dataset.plPlay);
             const idx = Number(btn.dataset.trackIdx);
             if (!pl || !pl.tracks[idx]) return;
-            engine.queue = pl.tracks.slice(idx + 1, idx + 8);
+            engine.queue = shuffleOn ? shuffled(pl.tracks.filter((_, i) => i !== idx)).slice(0, 12) : pl.tracks.slice(idx + 1, idx + 8);
             await playTrack(pl.tracks[idx], true);
           });
         });
@@ -1428,8 +1443,8 @@
       async function playNext(checkSkipLearning = true) {
         const cur = engine.currentTrack;
         if (checkSkipLearning && cur && audioEl.currentTime > 0 && audioEl.currentTime < 15) {
-          engine.blacklistAndFlush(cur);
-          showToast("Skipped early — blacklisted & regenerating wave");
+          engine.blacklistAndFlush(cur, false);
+          showUndo("Skipped early — track blocked", cur);
           await engine.ensureBuffer(0, engine.lastSuccessfulSeed);
         } else if (cur) {
           const dur = audioEl.duration || (cur.duration || 0) / 1000;
@@ -1440,7 +1455,11 @@
           await engine.ensureBuffer(0);
         }
 
-        const nextTrack = engine.queue.shift();
+        let nextTrack = engine.queue.shift();
+        if (!nextTrack) {
+          await engine.ensureBuffer(0, engine.lastSuccessfulSeed || engine.currentTrack);
+          nextTrack = engine.queue.shift();
+        }
         if (nextTrack) {
           await playTrack(nextTrack, true);
         } else {
@@ -1535,6 +1554,7 @@
       audioEl.addEventListener("pause", () => updatePlayStateIcons(false));
 
       audioEl.addEventListener("timeupdate", () => {
+        if (isScrubbing) return;
         const current = audioEl.currentTime || 0;
         const duration = Number.isFinite(audioEl.duration) && audioEl.duration > 0
           ? audioEl.duration
@@ -1566,6 +1586,7 @@
 
       audioEl.addEventListener("ended", () => {
         if (engine.currentTrack) engine.markCompleted(engine.currentTrack);
+        if (sleepEOT) { sleepEOT = false; document.getElementById("btn-sleep").classList.remove("on"); showToast("Sleep timer: stopped"); return; }
         playNext(false);
       });
 
@@ -1588,7 +1609,7 @@
         else audioEl.pause();
       }
 
-      els.orbToggleBtn.addEventListener("click", togglePlayPause);
+      
       els.btnPlayPause.addEventListener("click", togglePlayPause);
       els.btnNext.addEventListener("click", () => { consecutivePlayErrors = 0; playNext(true); });
 
@@ -1611,8 +1632,9 @@
 
       els.btnDislike.addEventListener("click", async () => {
         if (!engine.currentTrack) return;
-        engine.blacklistAndFlush(engine.currentTrack);
-        showToast("Track & artist blacklisted — regenerating wave");
+        const _bt = engine.currentTrack;
+        engine.blacklistAndFlush(_bt, true);
+        showUndo("Track & artist blocked", _bt);
         await engine.ensureBuffer(0, engine.lastSuccessfulSeed);
         const next = engine.queue.shift();
         if (next) await playTrack(next, false);
@@ -1732,8 +1754,8 @@
             b.classList.toggle("border-transparent", !active);
             b.classList.toggle("text-white/50", !active);
           });
-          els.drawerPanelWave.classList.toggle("hidden", tab !== "wave");
-          els.drawerPanelPlaylists.classList.toggle("hidden", tab !== "playlists");
+          document.querySelectorAll("[id^=drawer-panel-]").forEach((p) => p.classList.toggle("hidden", p.id !== "drawer-panel-" + tab));
+          renderStatsAndQueue();
         });
       });
 
@@ -1857,6 +1879,7 @@
       }
 
       function renderTrackResults(tracks) {
+        lastSearchTracks = tracks;
         if (!tracks.length) {
           els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">No tracks found.</div>`;
           return;
@@ -1865,7 +1888,7 @@
           .map((t, i) => {
             const art = getHighResArtwork(t.artwork_url);
             return `
-              <button data-res-idx="${i}" type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.04] transition-colors">
+              <div data-res-idx="${i}" role="button" tabindex="0" class="cursor-pointer w-full text-left flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.04] transition-colors">
                 <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">
                   ${art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : ""}
                 </div>
@@ -1873,8 +1896,9 @@
                   <div class="text-xs text-silver truncate">${escapeHtml(t.title)}</div>
                   <div class="text-[11px] text-white/45 truncate">${escapeHtml(t.user?.username)}</div>
                 </div>
+                <button data-res-next="${i}" type="button" title="Play next" class="px-2 py-1 rounded-lg border border-white/15 hover:border-gold/50 hover:text-gold font-mono text-[10px] text-white/55 shrink-0">+ Next</button>
                 <span class="font-mono text-[10px] text-white/35">${formatTime((t.duration || 0) / 1000)}</span>
-              </button>
+              </div>
             `;
           })
           .join("");
@@ -1970,6 +1994,260 @@
           });
         });
       }
+
+      
+      // =========================================================================
+      // PLAYER UPGRADE: accent colors, Media Session, hotkeys, scrubbing, sleep, speed, backup
+      // =========================================================================
+      const $ = (id) => document.getElementById(id);
+      const getVol = () => Number(els.volumeSlider.value);
+      function shuffled(a) {
+        a = [...a];
+        for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+        return a;
+      }
+
+      const _utu = updateTrackUI;
+      updateTrackUI = function (track) { _utu(track); onTrackChanged(track); };
+      const _upi = updatePlayStateIcons;
+      updatePlayStateIcons = function (p) {
+        _upi(p);
+        document.body.classList.toggle("is-playing", p);
+        if ("mediaSession" in navigator) navigator.mediaSession.playbackState = p ? "playing" : "paused";
+      };
+
+      function onTrackChanged(track) {
+        if (!track) return;
+        const art = getHighResArtwork(track.artwork_url || track.user?.avatar_url);
+        const oa = $("orb-art"), bg = $("bg-art");
+        if (art) {
+          oa.src = art; oa.classList.add("on");
+          bg.style.backgroundImage = `url("${art.replace(/"/g, "%22")}")`; bg.classList.add("on");
+          extractAccent(art);
+        } else {
+          oa.classList.remove("on"); bg.classList.remove("on");
+          ACC_T = [212, 175, 55]; document.documentElement.style.setProperty("--acc", "212,175,55");
+        }
+        document.title = `${track.title} — MY WAVE`;
+        if ("mediaSession" in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: track.title, artist: track.user?.username || "", album: "MY WAVE",
+            artwork: art ? [{ src: art, sizes: "500x500", type: "image/jpeg" }] : [],
+          });
+        }
+      }
+
+      function extractAccent(url) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          try {
+            const c = document.createElement("canvas"); c.width = c.height = 12;
+            const x = c.getContext("2d"); x.drawImage(img, 0, 0, 12, 12);
+            const d = x.getImageData(0, 0, 12, 12).data;
+            let r = 0, g = 0, b = 0, w = 0;
+            for (let i = 0; i < d.length; i += 4) {
+              const mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]);
+              const sat = (mx - mn) / (mx || 1), wt = sat * sat + 0.02;
+              r += d[i] * wt; g += d[i + 1] * wt; b += d[i + 2] * wt; w += wt;
+            }
+            r /= w; g /= w; b /= w;
+            const k = Math.min(1.6, 200 / (Math.max(r, g, b) || 1));
+            ACC_T = [r, g, b].map((v) => Math.max(40, Math.min(255, Math.round(v * k))));
+            document.documentElement.style.setProperty("--acc", ACC_T.join(","));
+          } catch {}
+        };
+        img.src = url;
+      }
+
+      if ("mediaSession" in navigator) {
+        const ms = navigator.mediaSession, h = (a, f) => { try { ms.setActionHandler(a, f); } catch {} };
+        h("play", () => audioEl.play().catch(() => {})); h("pause", () => audioEl.pause());
+        h("previoustrack", () => els.btnPrev.click()); h("nexttrack", () => els.btnNext.click());
+        h("seekbackward", () => { audioEl.currentTime = Math.max(0, audioEl.currentTime - 10); });
+        h("seekforward", () => { audioEl.currentTime += 10; });
+        h("seekto", (d) => { if (d.seekTime != null) audioEl.currentTime = d.seekTime; });
+      }
+
+      let lastPos = 0;
+      audioEl.addEventListener("timeupdate", () => {
+        const d = audioEl.duration, c = audioEl.currentTime;
+        if (!isScrubbing && d > 0 && isFinite(d)) $("timeline-thumb").style.left = `${Math.min(100, (c / d) * 100)}%`;
+        const now = Date.now();
+        if ("mediaSession" in navigator && now - lastPos > 1000 && d > 0 && isFinite(d)) {
+          lastPos = now;
+          try { navigator.mediaSession.setPositionState({ duration: d, playbackRate: audioEl.playbackRate || 1, position: Math.min(c, d) }); } catch {}
+        }
+      });
+
+      // Drag-to-seek (mouse + touch)
+      const tl = els.timelineTrack;
+      tl.style.touchAction = "none";
+      const ratioAt = (e) => { const r = tl.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); };
+      const paint = (ratio) => {
+        els.timelineProgress.style.transform = `scaleX(${ratio})`;
+        $("timeline-thumb").style.left = `${ratio * 100}%`;
+        els.timeCurrent.textContent = formatTime(ratio * (audioEl.duration || 0));
+      };
+      tl.addEventListener("pointerdown", (e) => { if (!(audioEl.duration > 0)) return; isScrubbing = true; tl.setPointerCapture(e.pointerId); paint(ratioAt(e)); });
+      tl.addEventListener("pointermove", (e) => { if (isScrubbing) paint(ratioAt(e)); });
+      tl.addEventListener("pointerup", (e) => { if (!isScrubbing) return; isScrubbing = false; audioEl.currentTime = ratioAt(e) * audioEl.duration; });
+      tl.addEventListener("pointercancel", () => { isScrubbing = false; });
+
+      // Shuffle / repeat / speed
+      $("btn-shuffle").addEventListener("click", () => {
+        shuffleOn = !shuffleOn; $("btn-shuffle").classList.toggle("on", shuffleOn);
+        if (shuffleOn) { engine.queue = shuffled(engine.queue); renderStatsAndQueue(); }
+        showToast(shuffleOn ? "Shuffle on" : "Shuffle off");
+      });
+      $("btn-repeat").addEventListener("click", () => {
+        repeatOne = !repeatOne; audioEl.loop = repeatOne;
+        $("btn-repeat").classList.toggle("on", repeatOne); $("repeat-one-badge").classList.toggle("hidden", !repeatOne);
+        showToast(repeatOne ? "Repeat track" : "Repeat off");
+      });
+      const RATES = [0.75, 1, 1.25, 1.5, 2]; let rateIdx = 1;
+      $("btn-speed").addEventListener("click", () => {
+        rateIdx = (rateIdx + 1) % RATES.length; const r = RATES[rateIdx];
+        audioEl.defaultPlaybackRate = r; audioEl.playbackRate = r; audioEl.preservesPitch = true;
+        $("btn-speed").textContent = `${r}×`; $("btn-speed").classList.toggle("on", r !== 1);
+      });
+
+      // Sleep timer (fades out the last 20 seconds)
+      let sleepEnd = 0, sleepTimer = null;
+      function setSleep(v) {
+        clearInterval(sleepTimer); sleepEOT = false; sleepEnd = 0; audioEl.volume = getVol();
+        $("btn-sleep").classList.toggle("on", v !== "0");
+        if (v === "eot") { sleepEOT = true; showToast("Stops after this track"); }
+        else if (v !== "0") {
+          sleepEnd = Date.now() + Number(v) * 60000;
+          sleepTimer = setInterval(() => {
+            const left = sleepEnd - Date.now();
+            if (left <= 0) { clearInterval(sleepTimer); audioEl.pause(); audioEl.volume = getVol(); $("btn-sleep").classList.remove("on"); showToast("Sleep timer: paused"); }
+            else if (left < 20000) audioEl.volume = getVol() * (left / 20000);
+          }, 500);
+          showToast(`Sleep in ${v} min`);
+        } else showToast("Sleep timer off");
+        $("sleep-popover").classList.add("hidden");
+      }
+      $("btn-sleep").addEventListener("click", (e) => { e.stopPropagation(); $("sleep-popover").classList.toggle("hidden"); });
+      $("sleep-popover").querySelectorAll("[data-sleep]").forEach((b) => b.addEventListener("click", () => setSleep(b.dataset.sleep)));
+      document.addEventListener("click", (e) => { if (!$("sleep-popover").contains(e.target) && e.target.closest("#btn-sleep") === null) $("sleep-popover").classList.add("hidden"); });
+
+      // Orb gestures: double-tap = like, swipe = prev / next, tap = play / pause
+      const stage = $("orb-stage"); let sx = 0, sy = 0, swiped = false, tapTimer = null;
+      stage.addEventListener("pointerdown", (e) => { sx = e.clientX; sy = e.clientY; swiped = false; });
+      stage.addEventListener("pointerup", (e) => {
+        const dx = e.clientX - sx, dy = e.clientY - sy;
+        if (Math.abs(dx) > 60 && Math.abs(dy) < 50) { swiped = true; (dx < 0 ? els.btnNext : els.btnPrev).click(); }
+      });
+      els.orbToggleBtn.addEventListener("click", () => {
+        if (swiped) { swiped = false; return; }
+        if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; els.btnLike.click(); return; }
+        tapTimer = setTimeout(() => { tapTimer = null; togglePlayPause(); }, 260);
+      });
+
+      // Full-screen player
+      function toggleFocus() {
+        const on = document.body.classList.toggle("focus-mode");
+        try {
+          if (on) document.documentElement.requestFullscreen?.()?.catch(() => {});
+          else if (document.fullscreenElement) document.exitFullscreen?.();
+        } catch {}
+        setTimeout(resizeOrbCanvas, 60);
+      }
+      $("btn-focus").addEventListener("click", toggleFocus);
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement && document.body.classList.contains("focus-mode")) { document.body.classList.remove("focus-mode"); setTimeout(resizeOrbCanvas, 60); }
+      });
+
+      // Undo for blocks
+      let undoTimer = null, undoTrack = null;
+      function showUndo(msg, track) {
+        undoTrack = track; $("undo-text").textContent = msg; $("undo-bar").classList.remove("hidden");
+        clearTimeout(undoTimer); undoTimer = setTimeout(() => $("undo-bar").classList.add("hidden"), 6000);
+        renderStatsAndQueue();
+      }
+      $("undo-btn").addEventListener("click", () => {
+        if (undoTrack) { engine.unblock(undoTrack.id); showToast("Restored"); renderStatsAndQueue(); }
+        $("undo-bar").classList.add("hidden");
+      });
+      $("blocked-list").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-unblock]"); if (!b) return;
+        const id = b.dataset.unblock; engine.unblock(/^\d+$/.test(id) ? Number(id) : id); renderStatsAndQueue();
+      });
+
+      // Queue: click = play, ▲ = play next, ✕ = remove
+      els.queueList.addEventListener("click", (e) => {
+        const row = e.target.closest("[data-q]"); if (!row) return;
+        const i = Number(row.dataset.q);
+        if (e.target.closest("[data-q-rm]")) { engine.queue.splice(i, 1); renderStatsAndQueue(); return; }
+        if (e.target.closest("[data-q-top]")) { const [t] = engine.queue.splice(i, 1); engine.queue.unshift(t); renderStatsAndQueue(); showToast("Plays next"); return; }
+        const picked = engine.queue.splice(i, 1)[0]; if (picked) playTrack(picked, true);
+      });
+
+      // Search: "+ Next" (capture phase so the row's own click doesn't fire)
+      els.searchResultsList.addEventListener("click", (e) => {
+        const n = e.target.closest("[data-res-next]"); if (!n) return;
+        e.stopPropagation();
+        const t = lastSearchTracks[Number(n.dataset.resNext)];
+        if (t && !engine.isBlacklisted(t)) { engine.queue.unshift(t); renderStatsAndQueue(); showToast("Added to play next"); }
+      }, true);
+
+      // Backup
+      $("btn-export").addEventListener("click", () => {
+        engine.saveState();
+        const data = { app: "my-wave", v: 1, at: new Date().toISOString(), engine: JSON.parse(localStorage.getItem(ENGINE_KEY) || "{}"), playlists };
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "application/json" }));
+        a.download = `my-wave-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000); showToast("Backup exported");
+      });
+      $("btn-import").addEventListener("click", () => $("import-file").click());
+      $("import-file").addEventListener("change", async (e) => {
+        const f = e.target.files[0]; if (!f) return;
+        try {
+          const d = JSON.parse(await f.text()); if (d.app !== "my-wave") throw new Error("bad");
+          const E = d.engine || {};
+          const uni = (a, b, key) => { const m = new Map(); [...(a || []), ...(b || [])].forEach((x) => m.set(key(x), x)); return [...m.values()]; };
+          engine.likedSeeds = uni(engine.likedSeeds, E.likedSeeds, (t) => t.id);
+          engine.history = [...new Set([...engine.history, ...(E.history || [])])];
+          engine.blacklist.tracks = [...new Set([...engine.blacklist.tracks, ...(E.blacklist?.tracks || [])])];
+          engine.blacklist.artists = [...new Set([...engine.blacklist.artists, ...(E.blacklist?.artists || [])])];
+          engine.blocked = uni(engine.blocked, E.blocked, (b) => b.id);
+          playlists = uni(playlists, d.playlists, (p) => p.id);
+          engine.saveState(); savePlaylists(); renderStatsAndQueue(); renderPlaylists(); showToast("Backup imported");
+        } catch { showToast("Invalid backup file"); }
+        e.target.value = "";
+      });
+
+      // Hotkeys (Space is handled by the original listener below)
+      document.addEventListener("keydown", (e) => {
+        const tag = document.activeElement?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || e.ctrlKey || e.metaKey || e.altKey) return;
+        const k = e.key; let hit = true;
+        if (k === "ArrowRight") audioEl.currentTime += e.shiftKey ? 30 : 10;
+        else if (k === "ArrowLeft") audioEl.currentTime = Math.max(0, audioEl.currentTime - (e.shiftKey ? 30 : 10));
+        else if (k === "ArrowUp" || k === "ArrowDown") {
+          els.volumeSlider.value = Math.max(0, Math.min(1, getVol() + (k === "ArrowUp" ? 0.05 : -0.05)));
+          els.volumeSlider.dispatchEvent(new Event("input"));
+        }
+        else if (k === "n" || k === "N") els.btnNext.click();
+        else if (k === "p" || k === "P") els.btnPrev.click();
+        else if (k === "l" || k === "L") els.btnLike.click();
+        else if (k === "m" || k === "M") els.btnMute.click();
+        else if (k === "s" || k === "S") $("btn-shuffle").click();
+        else if (k === "r" || k === "R") $("btn-repeat").click();
+        else if (k === "f" || k === "F") toggleFocus();
+        else if (k === "q" || k === "Q") openDrawer();
+        else if (k === "/") els.searchInput.focus();
+        else if (k === "?") $("help-modal").classList.toggle("hidden");
+        else if (k === "Escape") {
+          $("help-modal").classList.add("hidden"); els.queueDrawer.classList.add("translate-x-full"); els.accountModal.classList.add("hidden");
+          if (document.body.classList.contains("focus-mode")) toggleFocus();
+          hit = false;
+        } else hit = false;
+        if (hit) e.preventDefault();
+      });
 
       document.addEventListener("keydown", (e) => {
         const tag = document.activeElement?.tagName;
