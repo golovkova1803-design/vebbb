@@ -64,7 +64,12 @@ async function requestV2(url, params = {}, oauthToken = null, retryOnAuth = true
   }
   target.searchParams.set("client_id", clientId);
 
-  const headers = { "User-Agent": USER_AGENT, Accept: "application/json" };
+  const headers = {
+    "User-Agent": USER_AGENT,
+    Accept: "application/json",
+    Origin: "https://soundcloud.com",
+    Referer: "https://soundcloud.com/",
+  };
   if (oauthToken) {
     headers.Authorization = `OAuth ${oauthToken}`;
   }
@@ -407,10 +412,17 @@ module.exports = async function handler(req, res) {
       const fallbackTranscoding =
         primaryTranscoding === progressive && hls ? hls : primaryTranscoding === hls && progressive ? progressive : null;
 
+      const errors = [];
       const [primaryRes, fallbackRes] = await Promise.all([
-        resolveTranscoding(primaryTranscoding, trackData.track_authorization, oauthToken).catch(() => null),
+        resolveTranscoding(primaryTranscoding, trackData.track_authorization, oauthToken).catch((e) => {
+          errors.push(`primary:${e.status || e.message}`);
+          return null;
+        }),
         fallbackTranscoding
-          ? resolveTranscoding(fallbackTranscoding, trackData.track_authorization, oauthToken).catch(() => null)
+          ? resolveTranscoding(fallbackTranscoding, trackData.track_authorization, oauthToken).catch((e) => {
+              errors.push(`fallback:${e.status || e.message}`);
+              return null;
+            })
           : Promise.resolve(null),
       ]);
 
@@ -418,7 +430,11 @@ module.exports = async function handler(req, res) {
       const fallback = primaryRes?.url && fallbackRes?.url ? fallbackRes : null;
 
       if (!primary?.url) {
-        return res.status(404).json({ detail: "No working stream URL returned by SoundCloud" });
+        return res.status(502).json({
+          detail: "No working stream URL returned by SoundCloud",
+          errors,
+          transcodings_count: transcodings.length,
+        });
       }
 
       return res.status(200).json({
