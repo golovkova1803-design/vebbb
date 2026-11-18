@@ -407,15 +407,18 @@ module.exports = async function handler(req, res) {
       const fallbackTranscoding =
         primaryTranscoding === progressive && hls ? hls : primaryTranscoding === hls && progressive ? progressive : null;
 
-      const [primary, fallback] = await Promise.all([
-        resolveTranscoding(primaryTranscoding, trackData.track_authorization, oauthToken),
+      const [primaryRes, fallbackRes] = await Promise.all([
+        resolveTranscoding(primaryTranscoding, trackData.track_authorization, oauthToken).catch(() => null),
         fallbackTranscoding
           ? resolveTranscoding(fallbackTranscoding, trackData.track_authorization, oauthToken).catch(() => null)
           : Promise.resolve(null),
       ]);
 
+      const primary = primaryRes?.url ? primaryRes : fallbackRes;
+      const fallback = primaryRes?.url && fallbackRes?.url ? fallbackRes : null;
+
       if (!primary?.url) {
-        return res.status(502).json({ detail: "SoundCloud did not return a stream URL" });
+        return res.status(404).json({ detail: "No working stream URL returned by SoundCloud" });
       }
 
       return res.status(200).json({
