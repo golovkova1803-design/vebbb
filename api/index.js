@@ -408,7 +408,11 @@ module.exports = async function handler(req, res) {
         if (proto === "hls") return 3;
         return 4;
       };
-      const ordered = [...transcodings].sort((a, b) => score(a) - score(b));
+      const playable = transcodings.filter((t) => {
+        const proto = (t.format?.protocol || "").toLowerCase();
+        return proto === "progressive" || proto === "hls";
+      });
+      const ordered = [...playable].sort((a, b) => score(a) - score(b));
 
       const errors = [];
       const resolvedList = [];

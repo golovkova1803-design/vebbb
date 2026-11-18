@@ -795,10 +795,9 @@
       function attachAndPlayStream(url, protocol, sessionId) {
         return new Promise((resolve, reject) => {
           if (sessionId !== playSessionId) return reject(new Error("superseded"));
+          if (!url || !/^https?:\/\//i.test(url)) return reject(new Error("Invalid stream URL"));
           destroyHls();
           audioEl.pause();
-          audioEl.removeAttribute("src");
-          audioEl.load();
 
           if (protocol === "hls" && window.Hls && Hls.isSupported()) {
             let settled = false;
