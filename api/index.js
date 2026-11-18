@@ -54,7 +54,7 @@ async function getClientId(forceRefresh = false) {
   throw new Error("Failed to extract SoundCloud client_id from web bundles");
 }
 
-async function requestV2(url, params = {}, retryOnAuth = true) {
+async function requestV2(url, params = {}, oauthToken = null, retryOnAuth = true) {
   let clientId = await getClientId();
   const target = new URL(url);
   for (const [k, v] of Object.entries(params)) {
@@ -64,16 +64,17 @@ async function requestV2(url, params = {}, retryOnAuth = true) {
   }
   target.searchParams.set("client_id", clientId);
 
-  let resp = await fetch(target.toString(), {
-    headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
-  });
+  const headers = { "User-Agent": USER_AGENT, Accept: "application/json" };
+  if (oauthToken) {
+    headers.Authorization = `OAuth ${oauthToken}`;
+  }
 
-  if ((resp.status === 401 || resp.status === 403) && retryOnAuth) {
+  let resp = await fetch(target.toString(), { headers });
+
+  if ((resp.status === 401 || resp.status === 403) && retryOnAuth && !oauthToken) {
     clientId = await getClientId(true);
     target.searchParams.set("client_id", clientId);
-    resp = await fetch(target.toString(), {
-      headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
-    });
+    resp = await fetch(target.toString(), { headers });
   }
 
   if (!resp.ok) {
@@ -116,6 +117,77 @@ function normalizeTrack(raw) {
   };
 }
 
+function normalizeUser(raw) {
+  if (!raw || typeof raw !== "object" || !raw.id) return null;
+  return {
+    id: raw.id,
+    username: raw.username || raw.permalink || "Unknown",
+    permalink: raw.permalink || "",
+    permalink_url: raw.permalink_url || "",
+    avatar_url: raw.avatar_url || "",
+    followers_count: raw.followers_count || 0,
+    track_count: raw.track_count || 0,
+    playlist_count: raw.playlist_count || 0,
+    city: raw.city || "",
+  };
+}
+
+async function hydrateTracks(rawTracks = [], oauthToken = null) {
+  const ready = [];
+  const missingIds = [];
+
+  for (const t of rawTracks) {
+    if (t && t.media?.transcodings?.length) {
+      const norm = normalizeTrack(t);
+      if (norm) ready.push(norm);
+    } else if (t && t.id) {
+      missingIds.push(t.id);
+    }
+  }
+
+  if (missingIds.length > 0) {
+    const chunkSize = 50;
+    for (let i = 0; i < missingIds.length; i += chunkSize) {
+      const chunk = missingIds.slice(i, i + chunkSize);
+      try {
+        const fetched = await requestV2(
+          `${API_V2_BASE}/tracks`,
+          { ids: chunk.join(",") },
+          oauthToken
+        );
+        if (Array.isArray(fetched)) {
+          for (const item of fetched) {
+            const norm = normalizeTrack(item);
+            if (norm) ready.push(norm);
+          }
+        }
+      } catch {
+        // Ignore partial chunk failures
+      }
+    }
+  }
+
+  const byId = new Map(ready.map((t) => [t.id, t]));
+  return rawTracks.map((t) => byId.get(t?.id)).filter(Boolean);
+}
+
+function normalizePlaylistMeta(raw) {
+  if (!raw || typeof raw !== "object" || !raw.id) return null;
+  const user = raw.user || {};
+  return {
+    id: raw.id,
+    title: raw.title || "Untitled Playlist",
+    artwork_url: raw.artwork_url || raw.tracks?.[0]?.artwork_url || user.avatar_url || "",
+    track_count: raw.track_count || (raw.tracks ? raw.tracks.length : 0),
+    permalink_url: raw.permalink_url || "",
+    user: {
+      id: user.id,
+      username: user.username || "Unknown",
+      permalink: user.permalink || "",
+    },
+  };
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -132,6 +204,8 @@ module.exports = async function handler(req, res) {
       ? `/${routeParam.replace(/^\/+/, "")}`
       : parsedUrl.pathname.replace(/^\/api/, "") || "/";
 
+    const oauthToken = (req.headers["x-sc-oauth"] || "").toString().trim() || null;
+
     if (route === "/health") {
       const clientId = await getClientId();
       return res.status(200).json({ status: "ok", client_id_cached: Boolean(clientId) });
@@ -142,41 +216,124 @@ module.exports = async function handler(req, res) {
       const limit = Math.min(50, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 20)));
       if (!q) return res.status(400).json({ detail: "Query parameter q is required" });
 
-      const data = await requestV2(`${API_V2_BASE}/search/tracks`, { q, limit, offset: 0 });
+      const data = await requestV2(`${API_V2_BASE}/search/tracks`, { q, limit, offset: 0 }, oauthToken);
       const collection = (data.collection || []).map(normalizeTrack).filter(Boolean);
       return res.status(200).json({ collection });
     }
 
-    if (route === "/user/likes") {
+    if (route === "/users/search") {
+      const q = (parsedUrl.searchParams.get("q") || "").trim().replace(/^@/, "");
+      const limit = Math.min(30, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 15)));
+      if (!q) return res.status(400).json({ detail: "Query parameter q is required" });
+
+      const data = await requestV2(`${API_V2_BASE}/search/users`, { q, limit, offset: 0 }, oauthToken);
+      const collection = (data.collection || []).map(normalizeUser).filter(Boolean);
+      return res.status(200).json({ collection });
+    }
+
+    if (route === "/playlists/search") {
+      const q = (parsedUrl.searchParams.get("q") || "").trim();
+      const limit = Math.min(30, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 15)));
+      if (!q) return res.status(400).json({ detail: "Query parameter q is required" });
+
+      const data = await requestV2(
+        `${API_V2_BASE}/search/playlists_without_albums`,
+        { q, limit, offset: 0 },
+        oauthToken
+      );
+      const collection = (data.collection || []).map(normalizePlaylistMeta).filter(Boolean);
+      return res.status(200).json({ collection });
+    }
+
+    if (route === "/user/profile" || route === "/user/likes") {
       const rawUsername = (parsedUrl.searchParams.get("username") || "").trim().replace(/^@/, "");
+      const userIdParam = parsedUrl.searchParams.get("user_id");
       const limit = Math.min(100, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 40)));
-      if (!rawUsername) return res.status(400).json({ detail: "username is required" });
 
-      const profileUrl =
-        rawUsername.startsWith("http://") || rawUsername.startsWith("https://")
-          ? rawUsername
-          : `https://soundcloud.com/${rawUsername}`;
+      let userData;
+      if (userIdParam) {
+        userData = await requestV2(`${API_V2_BASE}/users/${encodeURIComponent(userIdParam)}`, {}, oauthToken);
+      } else {
+        if (!rawUsername) return res.status(400).json({ detail: "username is required" });
+        const profileUrl =
+          rawUsername.startsWith("http://") || rawUsername.startsWith("https://")
+            ? rawUsername
+            : `https://soundcloud.com/${rawUsername}`;
+        userData = await requestV2(`${API_V2_BASE}/resolve`, { url: profileUrl }, oauthToken);
+      }
 
-      const userData = await requestV2(`${API_V2_BASE}/resolve`, { url: profileUrl });
       if (!userData?.id || userData.kind !== "user") {
         return res.status(404).json({ detail: "SoundCloud user profile not found" });
       }
 
-      const likesData = await requestV2(`${API_V2_BASE}/users/${userData.id}/likes`, {
-        limit,
-        offset: 0,
-      });
-      const collection = (likesData.collection || [])
+      const [likesRes, playlistsRes] = await Promise.all([
+        requestV2(`${API_V2_BASE}/users/${userData.id}/likes`, { limit, offset: 0 }, oauthToken).catch(
+          () => ({ collection: [] })
+        ),
+        requestV2(`${API_V2_BASE}/users/${userData.id}/playlists`, { limit: 30, offset: 0 }, oauthToken).catch(
+          () => ({ collection: [] })
+        ),
+      ]);
+
+      const likes = (likesRes.collection || [])
         .map((entry) => normalizeTrack(entry?.track))
         .filter(Boolean);
+      const playlists = (playlistsRes.collection || []).map(normalizePlaylistMeta).filter(Boolean);
 
       return res.status(200).json({
-        user: {
-          id: userData.id,
-          username: userData.username,
-          permalink: userData.permalink,
-        },
-        collection,
+        user: normalizeUser(userData),
+        collection: likes,
+        playlists,
+      });
+    }
+
+    if (route === "/me") {
+      if (!oauthToken) {
+        return res.status(401).json({ detail: "OAuth token required" });
+      }
+      const me = await requestV2(`${API_V2_BASE}/me`, {}, oauthToken);
+      const [likesRes, playlistsRes] = await Promise.all([
+        requestV2(`${API_V2_BASE}/users/${me.id}/likes`, { limit: 50, offset: 0 }, oauthToken).catch(
+          () => ({ collection: [] })
+        ),
+        requestV2(`${API_V2_BASE}/users/${me.id}/playlists`, { limit: 40, offset: 0 }, oauthToken).catch(
+          () => ({ collection: [] })
+        ),
+      ]);
+
+      const likes = (likesRes.collection || [])
+        .map((entry) => normalizeTrack(entry?.track))
+        .filter(Boolean);
+      const playlists = (playlistsRes.collection || []).map(normalizePlaylistMeta).filter(Boolean);
+
+      return res.status(200).json({
+        user: normalizeUser(me),
+        collection: likes,
+        playlists,
+      });
+    }
+
+    if (route === "/playlist") {
+      const playlistId = parsedUrl.searchParams.get("id");
+      const playlistUrl = (parsedUrl.searchParams.get("url") || "").trim();
+
+      let plData;
+      if (playlistId) {
+        plData = await requestV2(`${API_V2_BASE}/playlists/${encodeURIComponent(playlistId)}`, {}, oauthToken);
+      } else if (playlistUrl) {
+        plData = await requestV2(`${API_V2_BASE}/resolve`, { url: playlistUrl }, oauthToken);
+      } else {
+        return res.status(400).json({ detail: "Playlist id or url is required" });
+      }
+
+      if (!plData?.id || !Array.isArray(plData.tracks)) {
+        return res.status(404).json({ detail: "Playlist not found" });
+      }
+
+      const tracks = await hydrateTracks(plData.tracks, oauthToken);
+      return res.status(200).json({
+        playlist: normalizePlaylistMeta(plData),
+        tracks,
       });
     }
 
@@ -185,10 +342,11 @@ module.exports = async function handler(req, res) {
       const limit = Math.min(50, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 25)));
       if (!trackId) return res.status(400).json({ detail: "track_id is required" });
 
-      const data = await requestV2(`${API_V2_BASE}/tracks/${encodeURIComponent(trackId)}/related`, {
-        limit,
-        offset: 0,
-      });
+      const data = await requestV2(
+        `${API_V2_BASE}/tracks/${encodeURIComponent(trackId)}/related`,
+        { limit, offset: 0 },
+        oauthToken
+      );
       const collection = (data.collection || []).map(normalizeTrack).filter(Boolean);
       return res.status(200).json({ collection });
     }
@@ -197,7 +355,7 @@ module.exports = async function handler(req, res) {
       const trackId = parsedUrl.searchParams.get("track_id");
       if (!trackId) return res.status(400).json({ detail: "track_id is required" });
 
-      const trackData = await requestV2(`${API_V2_BASE}/tracks/${encodeURIComponent(trackId)}`);
+      const trackData = await requestV2(`${API_V2_BASE}/tracks/${encodeURIComponent(trackId)}`, {}, oauthToken);
       const transcodings = trackData.media?.transcodings || [];
       if (!transcodings.length) {
         return res.status(404).json({ detail: "No playable transcodings available" });
@@ -222,7 +380,7 @@ module.exports = async function handler(req, res) {
         params.track_authorization = trackData.track_authorization;
       }
 
-      const resolved = await requestV2(selected.url, params);
+      const resolved = await requestV2(selected.url, params, oauthToken);
       if (!resolved?.url) {
         return res.status(502).json({ detail: "SoundCloud did not return a stream URL" });
       }

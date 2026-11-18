@@ -51,11 +51,10 @@
       -webkit-backdrop-filter: blur(24px);
     }
     .glass-surface {
-      background: rgba(13, 13, 13, 0.78);
+      background: rgba(13, 13, 13, 0.82);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
     }
-    /* Custom thin range inputs */
     input[type="range"].volume-slider {
       -webkit-appearance: none;
       appearance: none;
@@ -86,7 +85,6 @@
       background: #e5e5e5;
       border: 1px solid #050505;
     }
-    /* Minimalist scrollbar */
     ::-webkit-scrollbar {
       width: 4px;
       height: 4px;
@@ -108,9 +106,9 @@
   <!-- Ambient subtle radial vignette -->
   <div class="pointer-events-none fixed inset-0 z-0" style="background: radial-gradient(circle at 50% 42%, rgba(212, 175, 55, 0.04) 0%, rgba(5, 5, 5, 0) 58%);"></div>
 
-  <!-- Top Navigation & Seed / Search Bar -->
-  <header class="relative z-30 w-full max-w-6xl mx-auto px-5 pt-5 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3">
-    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+  <!-- Top Navigation & Search + Account -->
+  <header class="relative z-30 w-full max-w-6xl mx-auto px-5 pt-5 pb-2 flex flex-col md:flex-row items-center justify-between gap-3">
+    <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
       <div class="flex items-center gap-2.5">
         <span id="status-dot" class="w-2 h-2 rounded-full bg-white/30 transition-colors duration-300"></span>
         <span class="text-xs font-medium tracking-[0.22em] uppercase text-silver">MY WAVE</span>
@@ -120,54 +118,73 @@
       </div>
     </div>
 
-    <!-- Search & Username Seed Input -->
-    <div class="relative w-full sm:w-[440px]">
-      <form id="search-form" class="flex items-center glass border border-white/10 rounded-full px-3.5 py-1.5 focus-within:border-gold/50 transition-colors duration-200">
-        <svg class="w-4 h-4 text-white/45 shrink-0 mr-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <path d="m21 21-4.3-4.3"></path>
-        </svg>
-        <input
-          id="search-input"
-          type="text"
-          autocomplete="off"
-          placeholder="Search track or @username for likes..."
-          class="w-full bg-transparent text-xs text-silver placeholder-white/35 focus:outline-none"
-        />
-        <button
-          type="submit"
-          id="search-submit-btn"
-          class="ml-2 text-[11px] font-mono uppercase tracking-wider text-white/60 hover:text-gold transition-colors shrink-0"
-        >
-          Go
-        </button>
-      </form>
-
-      <!-- Search Results Dropdown -->
-      <div
-        id="search-results-panel"
-        class="hidden absolute left-0 right-0 mt-2 bg-surface/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-80 overflow-y-auto"
-      >
-        <div class="px-3.5 py-2 border-b border-white/10 flex items-center justify-between">
-          <span id="search-results-header" class="font-mono text-[11px] text-white/50 uppercase tracking-wider">Results</span>
-          <button id="close-search-btn" type="button" class="text-white/40 hover:text-silver transition-colors">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 6 6 18"></path>
-              <path d="m6 6 12 12"></path>
-            </svg>
+    <div class="flex items-center gap-2.5 w-full md:w-auto">
+      <!-- Search Bar -->
+      <div class="relative flex-1 md:w-[400px]">
+        <form id="search-form" class="flex items-center glass border border-white/10 rounded-full px-3.5 py-1.5 focus-within:border-gold/50 transition-colors duration-200">
+          <svg class="w-4 h-4 text-white/45 shrink-0 mr-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input
+            id="search-input"
+            type="text"
+            autocomplete="off"
+            placeholder="Search tracks, users, playlists or paste URL..."
+            class="w-full bg-transparent text-xs text-silver placeholder-white/35 focus:outline-none"
+          />
+          <button
+            type="submit"
+            id="search-submit-btn"
+            class="ml-2 text-[11px] font-mono uppercase tracking-wider text-white/60 hover:text-gold transition-colors shrink-0"
+          >
+            Go
           </button>
+        </form>
+
+        <!-- Search Results Dropdown with Tabs -->
+        <div
+          id="search-results-panel"
+          class="hidden absolute left-0 right-0 mt-2 bg-surface/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
+        >
+          <div class="px-3 py-2 border-b border-white/10 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1">
+              <button data-search-tab="tracks" type="button" class="search-tab-btn px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider border border-gold/60 text-gold bg-gold/10 transition-colors">Tracks</button>
+              <button data-search-tab="users" type="button" class="search-tab-btn px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Users</button>
+              <button data-search-tab="playlists" type="button" class="search-tab-btn px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Playlists</button>
+            </div>
+            <button id="close-search-btn" type="button" class="text-white/40 hover:text-silver transition-colors p-1">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div id="search-results-list" class="divide-y divide-white/[0.06] max-h-80 overflow-y-auto"></div>
         </div>
-        <div id="search-results-list" class="divide-y divide-white/[0.06]"></div>
       </div>
+
+      <!-- Account / Sign In Button -->
+      <button
+        id="btn-account-open"
+        type="button"
+        class="glass border border-white/10 hover:border-gold/50 rounded-full px-3 py-1.5 flex items-center gap-2 transition-colors shrink-0"
+      >
+        <img id="header-user-avatar" src="" alt="" class="hidden w-4 h-4 rounded-full object-cover border border-white/20" />
+        <svg id="header-user-icon" class="w-3.5 h-3.5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span id="header-user-label" class="font-mono text-[11px] text-silver max-w-[100px] truncate">Sign In</span>
+      </button>
     </div>
   </header>
 
   <!-- Main Centerpiece: Orb + Vibe Pills -->
   <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pb-36 pt-4">
-    <!-- Now Playing Subtle Header -->
     <div class="text-center mb-3 max-w-md px-4 min-h-[44px] flex flex-col items-center justify-center">
       <p id="center-track-title" class="text-sm font-medium text-silver tracking-tight truncate max-w-full">
-        Select a track or @username to start My Wave
+        Click the Wave Orb or Sign In to start
       </p>
       <p id="center-track-meta" class="font-mono text-[11px] text-white/45 mt-0.5 truncate max-w-full">
         IDLE · READY
@@ -182,8 +199,7 @@
         aria-label="Toggle Play or Pause"
         class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-300 active:scale-[0.98]"
       >
-        <canvas id="wave-orb-canvas" class="block w-[260px] h-[260px] sm:w-[320px] sm:h-[320px]"></canvas>
-        <!-- Subtle Play/Pause center hint on hover -->
+        <canvas id="wave-orb-canvas" class="block w-[250px] h-[250px] sm:w-[310px] sm:h-[310px]"></canvas>
         <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <div class="w-11 h-11 rounded-full glass border border-white/15 flex items-center justify-center text-silver">
             <svg id="orb-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -208,7 +224,7 @@
       <button data-filter="andegraund" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Андеграунд</button>
     </div>
 
-    <!-- Subtle Seed / Toast Feedback -->
+    <!-- Subtle Toast Feedback -->
     <p id="engine-toast" class="mt-4 font-mono text-[11px] text-gold/85 h-4 opacity-0 transition-opacity duration-300 text-center"></p>
   </main>
 
@@ -255,41 +271,23 @@
           </div>
         </div>
 
-        <!-- Center: Transport + Like/Dislike -->
-        <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-          <!-- Dislike (Skip Learning) -->
-          <button
-            id="btn-dislike"
-            type="button"
-            title="Dislike & Blacklist"
-            class="p-2 rounded-full text-white/45 hover:text-silver hover:bg-white/[0.05] transition-colors"
-          >
+        <!-- Center: Transport + Like/Dislike/Add to Playlist -->
+        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+          <button id="btn-dislike" type="button" title="Dislike & Blacklist" class="p-2 rounded-full text-white/45 hover:text-silver hover:bg-white/[0.05] transition-colors">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 14V2"></path>
               <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"></path>
             </svg>
           </button>
 
-          <!-- Previous -->
-          <button
-            id="btn-prev"
-            type="button"
-            title="Previous Track"
-            class="p-2 rounded-full text-white/60 hover:text-silver hover:bg-white/[0.05] transition-colors"
-          >
+          <button id="btn-prev" type="button" title="Previous Track" class="p-2 rounded-full text-white/60 hover:text-silver hover:bg-white/[0.05] transition-colors">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="19 20 9 12 19 4 19 20"></polygon>
               <line x1="5" x2="5" y1="19" y2="5"></line>
             </svg>
           </button>
 
-          <!-- Play / Pause -->
-          <button
-            id="btn-play-pause"
-            type="button"
-            title="Play / Pause"
-            class="w-9 h-9 rounded-full border border-white/15 bg-white/[0.06] hover:border-gold/60 text-silver flex items-center justify-center transition-all"
-          >
+          <button id="btn-play-pause" type="button" title="Play / Pause" class="w-9 h-9 rounded-full border border-white/15 bg-white/[0.06] hover:border-gold/60 text-silver flex items-center justify-center transition-all">
             <svg id="dock-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="6 3 20 12 6 21 6 3"></polygon>
             </svg>
@@ -299,33 +297,35 @@
             </svg>
           </button>
 
-          <!-- Next -->
-          <button
-            id="btn-next"
-            type="button"
-            title="Next Track"
-            class="p-2 rounded-full text-white/60 hover:text-silver hover:bg-white/[0.05] transition-colors"
-          >
+          <button id="btn-next" type="button" title="Next Track" class="p-2 rounded-full text-white/60 hover:text-silver hover:bg-white/[0.05] transition-colors">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="5 4 15 12 5 20 5 4"></polygon>
               <line x1="19" x2="19" y1="5" y2="19"></line>
             </svg>
           </button>
 
-          <!-- Like (Add to Seeds) -->
-          <button
-            id="btn-like"
-            type="button"
-            title="Like & Add to Wave Seeds"
-            class="p-2 rounded-full text-white/45 hover:text-gold hover:bg-white/[0.05] transition-colors"
-          >
+          <button id="btn-like" type="button" title="Like & Add to Wave Seeds" class="p-2 rounded-full text-white/45 hover:text-gold hover:bg-white/[0.05] transition-colors">
             <svg id="icon-like" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
             </svg>
           </button>
+
+          <!-- Add Current Track to Playlist -->
+          <div class="relative">
+            <button id="btn-add-to-playlist" type="button" title="Add to Playlist" class="p-2 rounded-full text-white/45 hover:text-silver hover:bg-white/[0.05] transition-colors">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14"></path>
+                <path d="M5 12h14"></path>
+              </svg>
+            </button>
+            <div id="add-playlist-popover" class="hidden absolute bottom-12 right-0 w-56 bg-surface/95 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl p-2 z-50">
+              <div class="px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-white/40 border-b border-white/10 mb-1">Add to Playlist</div>
+              <div id="add-playlist-options" class="max-h-44 overflow-y-auto space-y-0.5"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- Right: Volume + Queue Toggle -->
+        <!-- Right: Volume + Drawer Toggle -->
         <div class="hidden md:flex items-center gap-3 shrink-0">
           <button id="btn-mute" type="button" class="text-white/50 hover:text-silver transition-colors">
             <svg id="icon-vol-on" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -341,12 +341,7 @@
           <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.85" class="volume-slider w-20" />
         </div>
 
-        <button
-          id="btn-queue-toggle"
-          type="button"
-          title="Wave Queue & Engine State"
-          class="p-2 rounded-full border border-white/10 text-white/60 hover:text-silver hover:border-white/25 transition-colors shrink-0"
-        >
+        <button id="btn-queue-toggle" type="button" title="Wave Buffer & Playlists" class="p-2 rounded-full border border-white/10 text-white/60 hover:text-silver hover:border-white/25 transition-colors shrink-0">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="8" x2="21" y1="6" y2="6"></line>
             <line x1="8" x2="21" y1="12" y2="12"></line>
@@ -360,15 +355,15 @@
     </div>
   </footer>
 
-  <!-- Queue & Wave Engine Drawer -->
+  <!-- Right Slide-Over Drawer: Wave Buffer & Playlists -->
   <aside
     id="queue-drawer"
-    class="fixed top-0 right-0 h-full w-full sm:w-96 bg-surface/95 backdrop-blur-2xl border-l border-white/10 z-50 transform translate-x-full transition-transform duration-300 flex flex-col"
+    class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-surface/95 backdrop-blur-2xl border-l border-white/10 z-50 transform translate-x-full transition-transform duration-300 flex flex-col"
   >
-    <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
-      <div>
-        <h2 class="text-xs font-medium uppercase tracking-[0.2em] text-silver">Wave Buffer</h2>
-        <p id="drawer-seed-info" class="font-mono text-[11px] text-white/45 mt-0.5 truncate max-w-[260px]">SEED: NONE</p>
+    <div class="px-5 py-3.5 border-b border-white/10 flex items-center justify-between">
+      <div class="flex items-center gap-1.5">
+        <button data-drawer-tab="wave" type="button" class="drawer-tab-btn px-3 py-1 rounded-full font-mono text-[11px] uppercase tracking-wider border border-gold/60 text-gold bg-gold/10 transition-colors">Wave</button>
+        <button data-drawer-tab="playlists" type="button" class="drawer-tab-btn px-3 py-1 rounded-full font-mono text-[11px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Playlists</button>
       </div>
       <button id="btn-queue-close" type="button" class="p-1.5 text-white/45 hover:text-silver transition-colors">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -378,65 +373,137 @@
       </button>
     </div>
 
-    <!-- Engine Stats Grid -->
-    <div class="grid grid-cols-3 gap-px bg-white/10 border-b border-white/10">
-      <div class="bg-surface px-3 py-2.5 text-center">
-        <div id="stat-seeds" class="font-mono text-sm text-gold">0</div>
-        <div class="font-mono text-[10px] text-white/40 uppercase">Seeds</div>
+    <!-- Drawer Tab 1: Wave Buffer -->
+    <div id="drawer-panel-wave" class="flex-1 flex flex-col min-h-0">
+      <div class="px-5 py-2.5 border-b border-white/10">
+        <p id="drawer-seed-info" class="font-mono text-[11px] text-white/50 truncate">SEED: NONE</p>
       </div>
-      <div class="bg-surface px-3 py-2.5 text-center">
-        <div id="stat-history" class="font-mono text-sm text-silver">0</div>
-        <div class="font-mono text-[10px] text-white/40 uppercase">Played</div>
+      <div class="grid grid-cols-3 gap-px bg-white/10 border-b border-white/10">
+        <div class="bg-surface px-3 py-2.5 text-center">
+          <div id="stat-seeds" class="font-mono text-sm text-gold">0</div>
+          <div class="font-mono text-[10px] text-white/40 uppercase">Seeds</div>
+        </div>
+        <div class="bg-surface px-3 py-2.5 text-center">
+          <div id="stat-history" class="font-mono text-sm text-silver">0</div>
+          <div class="font-mono text-[10px] text-white/40 uppercase">Played</div>
+        </div>
+        <div class="bg-surface px-3 py-2.5 text-center">
+          <div id="stat-blacklist" class="font-mono text-sm text-white/60">0</div>
+          <div class="font-mono text-[10px] text-white/40 uppercase">Blocked</div>
+        </div>
       </div>
-      <div class="bg-surface px-3 py-2.5 text-center">
-        <div id="stat-blacklist" class="font-mono text-sm text-white/60">0</div>
-        <div class="font-mono text-[10px] text-white/40 uppercase">Blocked</div>
-      </div>
-    </div>
 
-    <!-- Remote Backend Connection (for Vercel/static host + PC Python backend) -->
-    <div class="px-4 py-3 border-b border-white/10 bg-obsidian/40">
-      <div class="flex items-center justify-between mb-1.5">
-        <span class="font-mono text-[10px] uppercase tracking-wider text-white/45">Backend API URL</span>
-        <span id="backend-health-badge" class="font-mono text-[10px] text-white/40">SAME-ORIGIN</span>
-      </div>
-      <form id="backend-url-form" class="flex items-center gap-1.5">
-        <input
-          id="backend-url-input"
-          type="url"
-          placeholder="https://xxxx.trycloudflare.com"
-          class="flex-1 bg-obsidian border border-white/10 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-silver placeholder-white/25 focus:outline-none focus:border-gold/50"
-        />
-        <button
-          type="submit"
-          class="px-2.5 py-1.5 rounded-lg glass border border-white/10 hover:border-gold/50 font-mono text-[10px] uppercase text-silver transition-colors shrink-0"
-        >
-          Link
+      <div id="queue-list" class="flex-1 overflow-y-auto divide-y divide-white/[0.06] px-2 py-2"></div>
+
+      <div class="p-4 border-t border-white/10 flex items-center justify-between gap-2">
+        <button id="btn-refresh-buffer" type="button" class="flex-1 py-2 rounded-lg glass border border-white/10 hover:border-gold/50 text-xs text-silver transition-colors">
+          Regenerate Wave
         </button>
-      </form>
+        <button id="btn-reset-engine" type="button" class="px-3 py-2 rounded-lg glass border border-white/10 hover:border-white/30 font-mono text-[11px] text-white/50 hover:text-silver transition-colors">
+          Reset
+        </button>
+      </div>
     </div>
 
-    <!-- Upcoming Queue List -->
-    <div id="queue-list" class="flex-1 overflow-y-auto divide-y divide-white/[0.06] px-2 py-2"></div>
+    <!-- Drawer Tab 2: Playlists -->
+    <div id="drawer-panel-playlists" class="hidden flex-1 flex flex-col min-h-0">
+      <div class="p-3.5 border-b border-white/10 space-y-2">
+        <form id="create-playlist-form" class="flex items-center gap-1.5">
+          <input
+            id="new-playlist-name"
+            type="text"
+            placeholder="New playlist name..."
+            class="flex-1 bg-obsidian border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-silver placeholder-white/30 focus:outline-none focus:border-gold/50"
+          />
+          <button type="submit" class="px-3 py-1.5 rounded-lg glass border border-white/10 hover:border-gold/50 font-mono text-[10px] uppercase text-silver transition-colors shrink-0">
+            Create
+          </button>
+        </form>
+        <form id="import-playlist-form" class="flex items-center gap-1.5">
+          <input
+            id="import-playlist-url"
+            type="text"
+            placeholder="Import SoundCloud playlist URL..."
+            class="flex-1 bg-obsidian border border-white/10 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-silver placeholder-white/30 focus:outline-none focus:border-gold/50"
+          />
+          <button type="submit" class="px-3 py-1.5 rounded-lg glass border border-white/10 hover:border-gold/50 font-mono text-[10px] uppercase text-gold transition-colors shrink-0">
+            Import
+          </button>
+        </form>
+      </div>
 
-    <!-- Drawer Footer Actions -->
-    <div class="p-4 border-t border-white/10 flex items-center justify-between gap-2">
-      <button
-        id="btn-refresh-buffer"
-        type="button"
-        class="flex-1 py-2 rounded-lg glass border border-white/10 hover:border-gold/50 text-xs text-silver transition-colors"
-      >
-        Regenerate Wave
-      </button>
-      <button
-        id="btn-reset-engine"
-        type="button"
-        class="px-3 py-2 rounded-lg glass border border-white/10 hover:border-white/30 font-mono text-[11px] text-white/50 hover:text-silver transition-colors"
-      >
-        Reset
-      </button>
+      <div id="playlists-container" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
     </div>
   </aside>
+
+  <!-- Account / Sign In Modal -->
+  <div id="account-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="w-full max-w-md bg-surface border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+        <h3 class="text-xs font-medium uppercase tracking-[0.2em] text-silver">SoundCloud Account</h3>
+        <button id="btn-account-close" type="button" class="text-white/45 hover:text-silver transition-colors">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <!-- Active User Card -->
+        <div id="account-active-card" class="hidden p-3.5 rounded-xl glass border border-gold/30 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <img id="modal-user-avatar" src="" alt="" class="w-10 h-10 rounded-full object-cover border border-white/15 shrink-0" />
+            <div class="min-w-0">
+              <div id="modal-user-name" class="text-sm font-medium text-silver truncate"></div>
+              <div id="modal-user-meta" class="font-mono text-[10px] text-gold/85 truncate"></div>
+            </div>
+          </div>
+          <button id="btn-account-logout" type="button" class="px-2.5 py-1 rounded-lg border border-white/15 font-mono text-[10px] uppercase text-white/60 hover:text-silver hover:border-white/30 transition-colors shrink-0">
+            Sign Out
+          </button>
+        </div>
+
+        <!-- Method 1: Quick Profile Login -->
+        <form id="login-username-form" class="space-y-2">
+          <label class="block font-mono text-[10px] uppercase tracking-wider text-white/50">Quick Sign In by Username or Profile URL</label>
+          <div class="flex items-center gap-2">
+            <input
+              id="login-username-input"
+              type="text"
+              placeholder="@username or soundcloud.com/..."
+              class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 text-xs text-silver placeholder-white/30 focus:outline-none focus:border-gold/50"
+            />
+            <button type="submit" class="px-4 py-2 rounded-xl bg-white/[0.06] border border-white/15 hover:border-gold/60 text-xs text-silver transition-colors shrink-0">
+              Connect
+            </button>
+          </div>
+          <p class="text-[11px] text-white/40">Loads your public likes as My Wave seeds and imports your playlists.</p>
+        </form>
+
+        <div class="border-t border-white/10 pt-4">
+          <!-- Method 2: OAuth Token for Private Data -->
+          <form id="login-oauth-form" class="space-y-2">
+            <label class="block font-mono text-[10px] uppercase tracking-wider text-white/50">Full Account via OAuth Token (Optional)</label>
+            <div class="flex items-center gap-2">
+              <input
+                id="login-oauth-input"
+                type="password"
+                placeholder="Paste oauth_token from soundcloud.com..."
+                class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 font-mono text-[11px] text-silver placeholder-white/30 focus:outline-none focus:border-gold/50"
+              />
+              <button type="submit" class="px-4 py-2 rounded-xl bg-gold/15 border border-gold/40 hover:border-gold text-xs text-gold transition-colors shrink-0">
+                Auth
+              </button>
+            </div>
+            <p class="text-[11px] text-white/40 leading-relaxed">
+              For private likes &amp; playlists: open soundcloud.com, press F12 &rarr; Application &rarr; Cookies &rarr; copy <span class="font-mono text-white/60">oauth_token</span>.
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Hidden HTML5 Audio Element -->
   <audio id="audio-element" crossorigin="anonymous" preload="auto"></audio>
@@ -446,33 +513,24 @@
       "use strict";
 
       // =========================================================================
-      // API BASE RESOLUTION (SUPPORTS SAME-ORIGIN OR REMOTE TUNNEL)
+      // API HELPERS (SAME-ORIGIN VERCEL + OPTIONAL OAUTH HEADER)
       // =========================================================================
-      const API_BASE_KEY = "my_wave_api_base";
+      const ACCOUNT_KEY = "my_wave_account_v1";
+      const PLAYLISTS_KEY = "my_wave_playlists_v1";
+      const ENGINE_KEY = "my_wave_engine_v1";
 
-      function normalizeApiBase(raw) {
-        return String(raw || "").trim().replace(/\/+$/, "");
-      }
-
-      function getInitialApiBase() {
-        const params = new URLSearchParams(window.location.search);
-        const fromQuery = params.get("api");
-        if (fromQuery) {
-          const clean = normalizeApiBase(fromQuery);
-          localStorage.setItem(API_BASE_KEY, clean);
-          return clean;
-        }
-        return normalizeApiBase(localStorage.getItem(API_BASE_KEY) || "");
-      }
-
-      let apiBase = getInitialApiBase();
-
-      function apiUrl(path) {
-        return `${apiBase}${path}`;
-      }
+      let accountState = { user: null, oauthToken: "" };
+      try {
+        const savedAcc = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || "null");
+        if (savedAcc) accountState = savedAcc;
+      } catch {}
 
       function apiFetch(path, options = {}) {
-        return fetch(apiUrl(path), options);
+        const headers = new Headers(options.headers || {});
+        if (accountState.oauthToken) {
+          headers.set("X-SC-OAuth", accountState.oauthToken);
+        }
+        return fetch(path, { ...options, headers });
       }
 
       // =========================================================================
@@ -499,10 +557,8 @@
       }
 
       // =========================================================================
-      // WAVE ENGINE (CLIENT-SIDE RECOMMENDATION & PERSISTENCE)
+      // WAVE ENGINE
       // =========================================================================
-      const STORAGE_KEY = "my_wave_engine_v1";
-
       const VIBE_KEYWORDS = {
         bodroe: ["drum", "dnb", "house", "techno", "electro", "dance", "edm", "trap", "hyperpop", "fast", "upbeat", "energy", "rave", "breakbeat", "garage"],
         spokoynoe: ["ambient", "chill", "lofi", "lo-fi", "acoustic", "piano", "downtempo", "sleep", "calm", "meditation", "jazz", "drone", "soft", "instrumental"],
@@ -533,7 +589,7 @@
 
         loadState() {
           try {
-            const raw = localStorage.getItem(STORAGE_KEY);
+            const raw = localStorage.getItem(ENGINE_KEY);
             if (!raw) return;
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed.likedSeeds)) this.likedSeeds = parsed.likedSeeds;
@@ -548,27 +604,28 @@
             if (parsed.activeFilters) {
               this.activeFilters = { ...this.activeFilters, ...parsed.activeFilters };
             }
-          } catch (err) {
-            console.warn("Failed to restore WaveEngine state:", err);
-          }
+            if (this.likedSeeds.length > 0) {
+              this.lastSuccessfulSeed = this.likedSeeds[0];
+            }
+          } catch {}
         }
 
         saveState() {
           try {
-            const payload = {
-              likedSeeds: this.likedSeeds.slice(-150),
-              history: this.history.slice(-500),
-              recentCompleted: this.recentCompleted.slice(-50),
-              blacklist: {
-                tracks: this.blacklist.tracks.slice(-500),
-                artists: this.blacklist.artists.slice(-300),
-              },
-              activeFilters: this.activeFilters,
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-          } catch (err) {
-            console.warn("Failed to persist WaveEngine state:", err);
-          }
+            localStorage.setItem(
+              ENGINE_KEY,
+              JSON.stringify({
+                likedSeeds: this.likedSeeds.slice(-150),
+                history: this.history.slice(-500),
+                recentCompleted: this.recentCompleted.slice(-50),
+                blacklist: {
+                  tracks: this.blacklist.tracks.slice(-500),
+                  artists: this.blacklist.artists.slice(-300),
+                },
+                activeFilters: this.activeFilters,
+              })
+            );
+          } catch {}
         }
 
         resetState() {
@@ -577,7 +634,8 @@
           this.recentCompleted = [];
           this.blacklist = { tracks: [], artists: [] };
           this.queue = [];
-          localStorage.removeItem(STORAGE_KEY);
+          this.lastSuccessfulSeed = null;
+          localStorage.removeItem(ENGINE_KEY);
         }
 
         isLiked(trackId) {
@@ -659,12 +717,9 @@
         }
 
         selectSeed(playedRatio = 0) {
-          const candidates = [];
-
           if (this.activeFilters.lyubimoe && this.likedSeeds.length > 0) {
             return this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)];
           }
-
           const roll = Math.random();
           if (roll < 0.60 && this.currentTrack && playedRatio > 0.5 && !this.isBlacklisted(this.currentTrack)) {
             return this.currentTrack;
@@ -675,17 +730,16 @@
           if (this.recentCompleted.length > 0) {
             return this.recentCompleted[Math.floor(Math.random() * this.recentCompleted.length)];
           }
-
           if (this.lastSuccessfulSeed && !this.isBlacklisted(this.lastSuccessfulSeed)) {
-            candidates.push(this.lastSuccessfulSeed);
+            return this.lastSuccessfulSeed;
           }
           if (this.currentTrack && !this.isBlacklisted(this.currentTrack)) {
-            candidates.push(this.currentTrack);
+            return this.currentTrack;
           }
           if (this.likedSeeds.length > 0) {
-            candidates.push(this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)]);
+            return this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)];
           }
-          return candidates[0] || null;
+          return null;
         }
 
         matchesFilters(track, strict = true) {
@@ -697,12 +751,8 @@
 
           if (!strict) return true;
 
-          if (this.activeFilters.andegraund && (track.playback_count || 0) > 50000) {
-            return false;
-          }
-          if (this.activeFilters.neznakomoe && (track.playback_count || 0) > 150000) {
-            return false;
-          }
+          if (this.activeFilters.andegraund && (track.playback_count || 0) > 50000) return false;
+          if (this.activeFilters.neznakomoe && (track.playback_count || 0) > 150000) return false;
 
           const vibeText = `${track.genre || ""} ${track.tag_list || ""} ${track.title || ""}`.toLowerCase();
           const activeVibes = ["bodroe", "spokoynoe", "tyomnoe"].filter((k) => this.activeFilters[k]);
@@ -752,6 +802,63 @@
       }
 
       // =========================================================================
+      // PLAYLIST STORE (CUSTOM + IMPORTED SOUNDCLOUD PLAYLISTS)
+      // =========================================================================
+      let playlists = [];
+      let expandedPlaylistId = null;
+
+      function loadPlaylists() {
+        try {
+          const raw = JSON.parse(localStorage.getItem(PLAYLISTS_KEY) || "[]");
+          if (Array.isArray(raw)) playlists = raw;
+        } catch {}
+      }
+
+      function savePlaylists() {
+        try {
+          localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists));
+        } catch {}
+      }
+
+      function createCustomPlaylist(name) {
+        const clean = name.trim();
+        if (!clean) return null;
+        const pl = {
+          id: `local_${Date.now()}`,
+          title: clean,
+          source: "custom",
+          tracks: [],
+        };
+        playlists.unshift(pl);
+        expandedPlaylistId = pl.id;
+        savePlaylists();
+        return pl;
+      }
+
+      function upsertSoundCloudPlaylist(meta, tracks) {
+        const plId = `sc_${meta.id}`;
+        const existingIdx = playlists.findIndex((p) => p.id === plId);
+        const entry = {
+          id: plId,
+          scId: meta.id,
+          title: meta.title,
+          author: meta.user?.username || "SoundCloud",
+          artwork_url: meta.artwork_url || tracks[0]?.artwork_url || "",
+          source: "soundcloud",
+          tracks,
+        };
+        if (existingIdx >= 0) {
+          playlists[existingIdx] = entry;
+        } else {
+          playlists.unshift(entry);
+        }
+        savePlaylists();
+        return entry;
+      }
+
+      loadPlaylists();
+
+      // =========================================================================
       // AUDIO ENGINE & WEB AUDIO API ANALYSER
       // =========================================================================
       const audioEl = document.getElementById("audio-element");
@@ -763,9 +870,7 @@
 
       function initWebAudio() {
         if (audioCtx) {
-          if (audioCtx.state === "suspended") {
-            audioCtx.resume().catch(() => {});
-          }
+          if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
           return;
         }
         try {
@@ -778,9 +883,7 @@
           sourceNode.connect(analyser);
           analyser.connect(audioCtx.destination);
           freqData = new Uint8Array(analyser.frequencyBinCount);
-        } catch (err) {
-          console.warn("Web Audio API init fallback:", err);
-        }
+        } catch {}
       }
 
       async function resolveStreamForTrack(track) {
@@ -830,7 +933,6 @@
           for (let i = 6; i < 28; i++) mSum += freqData[i] || 0;
           targetBass = bSum / (6 * 255);
           targetMid = mSum / (22 * 255);
-
           if (targetBass === 0 && targetMid === 0) {
             targetBass = 0.14 + Math.sin(orbPhase * 2.2) * 0.06;
             targetMid = 0.12 + Math.cos(orbPhase * 3.1) * 0.05;
@@ -845,7 +947,6 @@
         orbPhase += isPlaying ? 0.018 + smoothMid * 0.03 : 0.008;
 
         ctx.clearRect(0, 0, w, h);
-
         const baseRadius = Math.min(w, h) * 0.28 + smoothBass * 18;
 
         const aura = ctx.createRadialGradient(cx, cy, baseRadius * 0.3, cx, cy, baseRadius * 1.75);
@@ -857,8 +958,7 @@
         ctx.arc(cx, cy, baseRadius * 1.75, 0, Math.PI * 2);
         ctx.fill();
 
-        const ringCount = 3;
-        for (let r = 0; r < ringCount; r++) {
+        for (let r = 0; r < 3; r++) {
           const points = 96;
           const ringOffset = r * 0.9;
           const amp = (4 + smoothBass * 16 + smoothMid * 10) * (1 - r * 0.2);
@@ -876,13 +976,10 @@
           }
           ctx.closePath();
 
-          if (r === 0) {
-            ctx.strokeStyle = `rgba(212, 175, 55, ${0.42 + smoothBass * 0.45})`;
-            ctx.lineWidth = 1.4;
-          } else {
-            ctx.strokeStyle = `rgba(229, 229, 229, ${0.22 - r * 0.05 + smoothMid * 0.25})`;
-            ctx.lineWidth = 0.9;
-          }
+          ctx.strokeStyle = r === 0
+            ? `rgba(212, 175, 55, ${0.42 + smoothBass * 0.45})`
+            : `rgba(229, 229, 229, ${0.22 - r * 0.05 + smoothMid * 0.25})`;
+          ctx.lineWidth = r === 0 ? 1.4 : 0.9;
           ctx.stroke();
         }
 
@@ -913,11 +1010,12 @@
       requestAnimationFrame(renderOrb);
 
       // =========================================================================
-      // UI CONTROLLER & PLAYER LOGIC
+      // UI CONTROLLER
       // =========================================================================
       const engine = new WaveEngine();
       let preloadTriggeredForId = null;
       let toastTimer = null;
+      let activeSearchTab = "tracks";
 
       const els = {
         statusDot: document.getElementById("status-dot"),
@@ -925,9 +1023,24 @@
         searchForm: document.getElementById("search-form"),
         searchInput: document.getElementById("search-input"),
         searchResultsPanel: document.getElementById("search-results-panel"),
-        searchResultsHeader: document.getElementById("search-results-header"),
         searchResultsList: document.getElementById("search-results-list"),
+        searchTabBtns: document.querySelectorAll(".search-tab-btn"),
         closeSearchBtn: document.getElementById("close-search-btn"),
+        btnAccountOpen: document.getElementById("btn-account-open"),
+        headerUserAvatar: document.getElementById("header-user-avatar"),
+        headerUserIcon: document.getElementById("header-user-icon"),
+        headerUserLabel: document.getElementById("header-user-label"),
+        accountModal: document.getElementById("account-modal"),
+        btnAccountClose: document.getElementById("btn-account-close"),
+        accountActiveCard: document.getElementById("account-active-card"),
+        modalUserAvatar: document.getElementById("modal-user-avatar"),
+        modalUserName: document.getElementById("modal-user-name"),
+        modalUserMeta: document.getElementById("modal-user-meta"),
+        btnAccountLogout: document.getElementById("btn-account-logout"),
+        loginUsernameForm: document.getElementById("login-username-form"),
+        loginUsernameInput: document.getElementById("login-username-input"),
+        loginOauthForm: document.getElementById("login-oauth-form"),
+        loginOauthInput: document.getElementById("login-oauth-input"),
         centerTitle: document.getElementById("center-track-title"),
         centerMeta: document.getElementById("center-track-meta"),
         orbToggleBtn: document.getElementById("orb-toggle-btn"),
@@ -953,6 +1066,9 @@
         btnNext: document.getElementById("btn-next"),
         btnLike: document.getElementById("btn-like"),
         iconLike: document.getElementById("icon-like"),
+        btnAddToPlaylist: document.getElementById("btn-add-to-playlist"),
+        addPlaylistPopover: document.getElementById("add-playlist-popover"),
+        addPlaylistOptions: document.getElementById("add-playlist-options"),
         btnMute: document.getElementById("btn-mute"),
         iconVolOn: document.getElementById("icon-vol-on"),
         iconVolOff: document.getElementById("icon-vol-off"),
@@ -960,6 +1076,9 @@
         btnQueueToggle: document.getElementById("btn-queue-toggle"),
         queueDrawer: document.getElementById("queue-drawer"),
         btnQueueClose: document.getElementById("btn-queue-close"),
+        drawerTabBtns: document.querySelectorAll(".drawer-tab-btn"),
+        drawerPanelWave: document.getElementById("drawer-panel-wave"),
+        drawerPanelPlaylists: document.getElementById("drawer-panel-playlists"),
         drawerSeedInfo: document.getElementById("drawer-seed-info"),
         statSeeds: document.getElementById("stat-seeds"),
         statHistory: document.getElementById("stat-history"),
@@ -967,51 +1086,18 @@
         queueList: document.getElementById("queue-list"),
         btnRefreshBuffer: document.getElementById("btn-refresh-buffer"),
         btnResetEngine: document.getElementById("btn-reset-engine"),
-        backendUrlForm: document.getElementById("backend-url-form"),
-        backendUrlInput: document.getElementById("backend-url-input"),
-        backendHealthBadge: document.getElementById("backend-health-badge"),
+        createPlaylistForm: document.getElementById("create-playlist-form"),
+        newPlaylistName: document.getElementById("new-playlist-name"),
+        importPlaylistForm: document.getElementById("import-playlist-form"),
+        importPlaylistUrl: document.getElementById("import-playlist-url"),
+        playlistsContainer: document.getElementById("playlists-container"),
       };
-
-      els.backendUrlInput.value = apiBase;
-
-      async function checkBackendHealth() {
-        els.backendHealthBadge.textContent = "CHECKING...";
-        els.backendHealthBadge.className = "font-mono text-[10px] text-white/45";
-        try {
-          const res = await apiFetch("/api/health");
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
-          if (data.status === "ok") {
-            els.backendHealthBadge.textContent = data.client_id_cached ? "ONLINE" : "NO CLIENT_ID";
-            els.backendHealthBadge.className = "font-mono text-[10px] text-gold";
-            return true;
-          }
-        } catch {
-          els.backendHealthBadge.textContent = "OFFLINE";
-          els.backendHealthBadge.className = "font-mono text-[10px] text-white/40";
-        }
-        return false;
-      }
-
-      els.backendUrlForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        apiBase = normalizeApiBase(els.backendUrlInput.value);
-        if (apiBase) {
-          localStorage.setItem(API_BASE_KEY, apiBase);
-        } else {
-          localStorage.removeItem(API_BASE_KEY);
-        }
-        const ok = await checkBackendHealth();
-        showToast(ok ? "Backend connected" : "Backend unreachable — check URL");
-      });
 
       function showToast(msg) {
         els.engineToast.textContent = msg;
         els.engineToast.classList.remove("opacity-0");
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-          els.engineToast.classList.add("opacity-0");
-        }, 2800);
+        toastTimer = setTimeout(() => els.engineToast.classList.add("opacity-0"), 3000);
       }
 
       function updatePlayStateIcons(playing) {
@@ -1023,10 +1109,30 @@
         els.statusDot.classList.toggle("bg-white/30", !playing);
       }
 
+      function renderAccountUI() {
+        const u = accountState.user;
+        if (u) {
+          els.headerUserLabel.textContent = u.username || u.permalink;
+          if (u.avatar_url) {
+            els.headerUserAvatar.src = u.avatar_url;
+            els.headerUserAvatar.classList.remove("hidden");
+            els.headerUserIcon.classList.add("hidden");
+            els.modalUserAvatar.src = u.avatar_url;
+          }
+          els.accountActiveCard.classList.remove("hidden");
+          els.modalUserName.textContent = u.username;
+          els.modalUserMeta.textContent = accountState.oauthToken ? "OAUTH CONNECTED" : `@${u.permalink}`;
+        } else {
+          els.headerUserLabel.textContent = "Sign In";
+          els.headerUserAvatar.classList.add("hidden");
+          els.headerUserIcon.classList.remove("hidden");
+          els.accountActiveCard.classList.add("hidden");
+        }
+      }
+
       function renderFilterPills() {
         els.vibePills.forEach((btn) => {
-          const key = btn.dataset.filter;
-          const active = Boolean(engine.activeFilters[key]);
+          const active = Boolean(engine.activeFilters[btn.dataset.filter]);
           btn.classList.toggle("border-gold/70", active);
           btn.classList.toggle("text-gold", active);
           btn.classList.toggle("bg-gold/10", active);
@@ -1045,7 +1151,7 @@
         els.drawerSeedInfo.textContent = `SEED: ${seedTitle}`;
 
         if (engine.queue.length === 0) {
-          els.queueList.innerHTML = `<div class="px-4 py-8 text-center font-mono text-xs text-white/35">Buffer empty. Search or play a track to generate My Wave.</div>`;
+          els.queueList.innerHTML = `<div class="px-4 py-8 text-center font-mono text-xs text-white/35">Buffer empty. Search or sign in to start My Wave.</div>`;
           return;
         }
 
@@ -1071,11 +1177,113 @@
 
         els.queueList.querySelectorAll("[data-queue-idx]").forEach((btn) => {
           btn.addEventListener("click", () => {
-            const idx = Number(btn.dataset.queueIdx);
-            const picked = engine.queue.splice(idx, 1)[0];
-            if (picked) {
-              playTrack(picked, true);
+            const picked = engine.queue.splice(Number(btn.dataset.queueIdx), 1)[0];
+            if (picked) playTrack(picked, true);
+          });
+        });
+      }
+
+      function renderPlaylists() {
+        if (!playlists.length) {
+          els.playlistsContainer.innerHTML = `<div class="py-10 text-center font-mono text-xs text-white/35">No playlists yet. Create one above or import from SoundCloud.</div>`;
+          return;
+        }
+
+        els.playlistsContainer.innerHTML = playlists
+          .map((pl) => {
+            const isExpanded = expandedPlaylistId === pl.id;
+            const tracksHtml = isExpanded
+              ? pl.tracks.length
+                ? `<div class="mt-2 pt-2 border-t border-white/10 space-y-1 max-h-60 overflow-y-auto">
+                    ${pl.tracks
+                      .map(
+                        (t, idx) => `
+                      <div class="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.04] group">
+                        <button data-pl-play="${pl.id}" data-track-idx="${idx}" class="flex-1 text-left min-w-0">
+                          <div class="text-xs text-silver truncate group-hover:text-gold">${escapeHtml(t.title)}</div>
+                          <div class="text-[10px] text-white/45 truncate">${escapeHtml(t.user?.username)}</div>
+                        </button>
+                        <button data-pl-rm="${pl.id}" data-track-idx="${idx}" title="Remove" class="text-white/30 hover:text-silver p-1">
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                        </button>
+                      </div>`
+                      )
+                      .join("")}
+                  </div>`
+                : `<div class="mt-2 pt-2 border-t border-white/10 font-mono text-[10px] text-white/35">Empty playlist. Click + in the dock while playing to add tracks.</div>`
+              : "";
+
+            return `
+              <div class="glass border border-white/10 rounded-xl p-3">
+                <div class="flex items-center justify-between gap-2">
+                  <button data-pl-toggle="${pl.id}" type="button" class="text-left min-w-0 flex-1">
+                    <div class="text-xs font-medium text-silver truncate">${escapeHtml(pl.title)}</div>
+                    <div class="font-mono text-[10px] text-white/40">${pl.tracks.length} tracks · ${pl.source === "soundcloud" ? escapeHtml(pl.author || "SC") : "CUSTOM"}</div>
+                  </button>
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button data-pl-wave="${pl.id}" type="button" title="Start My Wave from Playlist" class="px-2 py-1 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase transition-colors">
+                      Wave
+                    </button>
+                    <button data-pl-del="${pl.id}" type="button" title="Delete Playlist" class="p-1 text-white/35 hover:text-silver">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M8 6V4h8v2m-1 0v14H9V6h6z"/></svg>
+                    </button>
+                  </div>
+                </div>
+                ${tracksHtml}
+              </div>
+            `;
+          })
+          .join("");
+
+        els.playlistsContainer.querySelectorAll("[data-pl-toggle]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = btn.dataset.plToggle;
+            expandedPlaylistId = expandedPlaylistId === id ? null : id;
+            renderPlaylists();
+          });
+        });
+
+        els.playlistsContainer.querySelectorAll("[data-pl-del]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            playlists = playlists.filter((p) => p.id !== btn.dataset.plDel);
+            savePlaylists();
+            renderPlaylists();
+          });
+        });
+
+        els.playlistsContainer.querySelectorAll("[data-pl-wave]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const pl = playlists.find((p) => p.id === btn.dataset.plWave);
+            if (!pl || !pl.tracks.length) {
+              showToast("Add tracks to this playlist first");
+              return;
             }
+            engine.addLikedSeedsBatch(pl.tracks);
+            engine.queue = [...pl.tracks.slice(1, 6)];
+            engine.lastSuccessfulSeed = pl.tracks[0];
+            await playTrack(pl.tracks[0], true);
+            showToast(`Started Wave from "${pl.title}"`);
+          });
+        });
+
+        els.playlistsContainer.querySelectorAll("[data-pl-play]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const pl = playlists.find((p) => p.id === btn.dataset.plPlay);
+            const idx = Number(btn.dataset.trackIdx);
+            if (!pl || !pl.tracks[idx]) return;
+            engine.queue = pl.tracks.slice(idx + 1, idx + 8);
+            await playTrack(pl.tracks[idx], true);
+          });
+        });
+
+        els.playlistsContainer.querySelectorAll("[data-pl-rm]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const pl = playlists.find((p) => p.id === btn.dataset.plRm);
+            const idx = Number(btn.dataset.trackIdx);
+            if (!pl) return;
+            pl.tracks.splice(idx, 1);
+            savePlaylists();
+            renderPlaylists();
           });
         });
       }
@@ -1141,8 +1349,7 @@
           }
 
           engine.ensureBuffer(0, track).then(renderStatsAndQueue);
-        } catch (err) {
-          console.error("Playback failed:", err);
+        } catch {
           showToast("Stream unavailable — skipping to next");
           await playNext(false);
         }
@@ -1157,9 +1364,7 @@
         } else if (cur) {
           const dur = audioEl.duration || (cur.duration || 0) / 1000;
           const ratio = dur > 0 ? audioEl.currentTime / dur : 0;
-          if (ratio >= 0.75) {
-            engine.markCompleted(cur);
-          }
+          if (ratio >= 0.75) engine.markCompleted(cur);
           await engine.ensureBuffer(ratio);
         } else {
           await engine.ensureBuffer(0);
@@ -1169,16 +1374,98 @@
         if (nextTrack) {
           await playTrack(nextTrack, true);
         } else {
-          showToast("No more tracks in buffer — search a track or @username");
+          showToast("Buffer empty — search a track or @username");
           renderStatsAndQueue();
         }
       }
 
       // =========================================================================
+      // ACCOUNT & PROFILE LOADING
+      // =========================================================================
+      async function loadUserProfile(usernameOrUrl) {
+        showToast("Loading SoundCloud profile...");
+        const res = await apiFetch(`/api/user/profile?username=${encodeURIComponent(usernameOrUrl)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        await applyProfileData(data, "");
+      }
+
+      async function loadMeWithOAuth(token) {
+        showToast("Authenticating SoundCloud account...");
+        const res = await fetch("/api/me", { headers: { "X-SC-OAuth": token } });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        await applyProfileData(data, token);
+      }
+
+      async function applyProfileData(data, oauthToken) {
+        accountState = { user: data.user, oauthToken: oauthToken || "" };
+        localStorage.setItem(ACCOUNT_KEY, JSON.stringify(accountState));
+        renderAccountUI();
+
+        const likes = data.collection || [];
+        const added = engine.addLikedSeedsBatch(likes);
+
+        // Import user's public/private playlists metadata + hydrate first few or on demand
+        const userPlaylists = data.playlists || [];
+        for (const plMeta of userPlaylists.slice(0, 6)) {
+          try {
+            const plRes = await apiFetch(`/api/playlist?id=${encodeURIComponent(plMeta.id)}`);
+            if (plRes.ok) {
+              const plFull = await plRes.json();
+              upsertSoundCloudPlaylist(plFull.playlist, plFull.tracks || []);
+            }
+          } catch {}
+        }
+
+        renderPlaylists();
+        await engine.ensureBuffer(0, engine.lastSuccessfulSeed || likes[0]);
+        renderStatsAndQueue();
+        showToast(`Connected ${data.user.username}: +${added} seeds, ${userPlaylists.length} playlists`);
+      }
+
+      els.btnAccountOpen.addEventListener("click", () => els.accountModal.classList.remove("hidden"));
+      els.btnAccountClose.addEventListener("click", () => els.accountModal.classList.add("hidden"));
+      els.accountModal.addEventListener("click", (e) => {
+        if (e.target === els.accountModal) els.accountModal.classList.add("hidden");
+      });
+
+      els.btnAccountLogout.addEventListener("click", () => {
+        accountState = { user: null, oauthToken: "" };
+        localStorage.removeItem(ACCOUNT_KEY);
+        renderAccountUI();
+        showToast("Signed out");
+      });
+
+      els.loginUsernameForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const val = els.loginUsernameInput.value.trim();
+        if (!val) return;
+        try {
+          await loadUserProfile(val);
+          els.accountModal.classList.add("hidden");
+        } catch {
+          showToast("Profile not found");
+        }
+      });
+
+      els.loginOauthForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const token = els.loginOauthInput.value.trim();
+        if (!token) return;
+        try {
+          await loadMeWithOAuth(token);
+          els.loginOauthInput.value = "";
+          els.accountModal.classList.add("hidden");
+        } catch {
+          showToast("Invalid or expired OAuth token");
+        }
+      });
+
+      // =========================================================================
       // AUDIO EVENTS & PRELOADING
       // =========================================================================
       audioEl.volume = Number(els.volumeSlider.value);
-
       audioEl.addEventListener("play", () => updatePlayStateIcons(true));
       audioEl.addEventListener("pause", () => updatePlayStateIcons(false));
 
@@ -1191,8 +1478,7 @@
         els.timeCurrent.textContent = formatTime(current);
         if (duration > 0) {
           els.timeTotal.textContent = formatTime(duration);
-          const pct = Math.min(100, (current / duration) * 100);
-          els.timelineProgress.style.width = `${pct}%`;
+          els.timelineProgress.style.width = `${Math.min(100, (current / duration) * 100)}%`;
 
           const remaining = duration - current;
           if (remaining <= 10 && remaining > 0) {
@@ -1209,33 +1495,28 @@
       });
 
       audioEl.addEventListener("ended", () => {
-        if (engine.currentTrack) {
-          engine.markCompleted(engine.currentTrack);
-        }
+        if (engine.currentTrack) engine.markCompleted(engine.currentTrack);
         playNext(false);
       });
 
       // =========================================================================
-      // CONTROLS & INTERACTIONS
+      // TRANSPORT, VIBE PILLS, PLAYLIST POPOVER & DRAWER
       // =========================================================================
-      function togglePlayPause() {
+      async function togglePlayPause() {
         initWebAudio();
         if (!engine.currentTrack) {
           if (engine.queue.length > 0) {
-            playTrack(engine.queue.shift(), false);
+            await playTrack(engine.queue.shift(), false);
           } else if (engine.likedSeeds.length > 0) {
             const seed = engine.likedSeeds[Math.floor(Math.random() * engine.likedSeeds.length)];
-            playTrack(seed, false);
+            await playTrack(seed, false);
           } else {
-            showToast("Search a track or @username first");
+            showToast("Search a track or Sign In to start My Wave");
           }
           return;
         }
-        if (audioEl.paused) {
-          audioEl.play().catch(() => {});
-        } else {
-          audioEl.pause();
-        }
+        if (audioEl.paused) audioEl.play().catch(() => {});
+        else audioEl.pause();
       }
 
       els.orbToggleBtn.addEventListener("click", togglePlayPause);
@@ -1248,9 +1529,7 @@
           return;
         }
         const prev = engine.playStack.pop();
-        if (prev) {
-          playTrack(prev, false);
-        }
+        if (prev) playTrack(prev, false);
       });
 
       els.btnLike.addEventListener("click", () => {
@@ -1267,13 +1546,57 @@
         showToast("Track & artist blacklisted — regenerating wave");
         await engine.ensureBuffer(0, engine.lastSuccessfulSeed);
         const next = engine.queue.shift();
-        if (next) {
-          await playTrack(next, false);
-        } else {
-          renderStatsAndQueue();
+        if (next) await playTrack(next, false);
+        else renderStatsAndQueue();
+      });
+
+      // Add current track to playlist popover
+      els.btnAddToPlaylist.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!engine.currentTrack) {
+          showToast("Play a track first");
+          return;
+        }
+        const customPls = playlists.filter((p) => p.source === "custom");
+        if (!customPls.length) {
+          const created = createCustomPlaylist("My Favorites");
+          created.tracks.push(engine.currentTrack);
+          savePlaylists();
+          renderPlaylists();
+          showToast('Created "My Favorites" and added track');
+          return;
+        }
+        els.addPlaylistOptions.innerHTML = customPls
+          .map(
+            (p) => `<button data-pick-pl="${p.id}" type="button" class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-silver hover:bg-white/[0.06] hover:text-gold truncate transition-colors">${escapeHtml(p.title)}</button>`
+          )
+          .join("");
+        els.addPlaylistPopover.classList.toggle("hidden");
+
+        els.addPlaylistOptions.querySelectorAll("[data-pick-pl]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const pl = playlists.find((p) => p.id === btn.dataset.pickPl);
+            if (pl && !pl.tracks.some((t) => t.id === engine.currentTrack.id)) {
+              pl.tracks.push(engine.currentTrack);
+              savePlaylists();
+              renderPlaylists();
+              showToast(`Added to "${pl.title}"`);
+            }
+            els.addPlaylistPopover.classList.add("hidden");
+          });
+        });
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!els.addPlaylistPopover.contains(e.target) && e.target !== els.btnAddToPlaylist) {
+          els.addPlaylistPopover.classList.add("hidden");
+        }
+        if (!els.searchForm.contains(e.target) && !els.searchResultsPanel.contains(e.target)) {
+          els.searchResultsPanel.classList.add("hidden");
         }
       });
 
+      // Timeline & Volume
       els.timelineTrack.addEventListener("mousemove", (e) => {
         const rect = els.timelineTrack.getBoundingClientRect();
         const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -1312,6 +1635,7 @@
         els.iconVolOff.classList.toggle("hidden", !audioEl.muted);
       });
 
+      // Vibe pills
       els.vibePills.forEach((btn) => {
         btn.addEventListener("click", async () => {
           engine.toggleFilter(btn.dataset.filter);
@@ -1323,12 +1647,28 @@
         });
       });
 
+      // Drawer & Tabs
       els.btnQueueToggle.addEventListener("click", () => {
         els.queueDrawer.classList.remove("translate-x-full");
         renderStatsAndQueue();
+        renderPlaylists();
       });
-      els.btnQueueClose.addEventListener("click", () => {
-        els.queueDrawer.classList.add("translate-x-full");
+      els.btnQueueClose.addEventListener("click", () => els.queueDrawer.classList.add("translate-x-full"));
+
+      els.drawerTabBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const tab = btn.dataset.drawerTab;
+          els.drawerTabBtns.forEach((b) => {
+            const active = b.dataset.drawerTab === tab;
+            b.classList.toggle("border-gold/60", active);
+            b.classList.toggle("text-gold", active);
+            b.classList.toggle("bg-gold/10", active);
+            b.classList.toggle("border-transparent", !active);
+            b.classList.toggle("text-white/50", !active);
+          });
+          els.drawerPanelWave.classList.toggle("hidden", tab !== "wave");
+          els.drawerPanelPlaylists.classList.toggle("hidden", tab !== "playlists");
+        });
       });
 
       els.btnRefreshBuffer.addEventListener("click", async () => {
@@ -1345,57 +1685,121 @@
         showToast("Wave engine memory cleared");
       });
 
-      els.closeSearchBtn.addEventListener("click", () => {
-        els.searchResultsPanel.classList.add("hidden");
-      });
-
-      document.addEventListener("click", (e) => {
-        if (!els.searchForm.contains(e.target) && !els.searchResultsPanel.contains(e.target)) {
-          els.searchResultsPanel.classList.add("hidden");
+      els.createPlaylistForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const pl = createCustomPlaylist(els.newPlaylistName.value);
+        if (pl) {
+          els.newPlaylistName.value = "";
+          renderPlaylists();
+          showToast(`Created "${pl.title}"`);
         }
       });
 
-      els.searchForm.addEventListener("submit", async (e) => {
+      els.importPlaylistForm.addEventListener("submit", async (e) => {
         e.preventDefault();
+        const url = els.importPlaylistUrl.value.trim();
+        if (!url) return;
+        showToast("Importing playlist...");
+        try {
+          const res = await apiFetch(`/api/playlist?url=${encodeURIComponent(url)}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          const entry = upsertSoundCloudPlaylist(data.playlist, data.tracks || []);
+          expandedPlaylistId = entry.id;
+          els.importPlaylistUrl.value = "";
+          renderPlaylists();
+          showToast(`Imported "${entry.title}" (${entry.tracks.length} tracks)`);
+        } catch {
+          showToast("Failed to import playlist URL");
+        }
+      });
+
+      // =========================================================================
+      // MULTI-TAB SEARCH (TRACKS / USERS / PLAYLISTS)
+      // =========================================================================
+      els.closeSearchBtn.addEventListener("click", () => els.searchResultsPanel.classList.add("hidden"));
+
+      els.searchTabBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          activeSearchTab = btn.dataset.searchTab;
+          els.searchTabBtns.forEach((b) => {
+            const active = b.dataset.searchTab === activeSearchTab;
+            b.classList.toggle("border-gold/60", active);
+            b.classList.toggle("text-gold", active);
+            b.classList.toggle("bg-gold/10", active);
+            b.classList.toggle("border-transparent", !active);
+            b.classList.toggle("text-white/50", !active);
+          });
+          if (els.searchInput.value.trim()) runSearch();
+        });
+      });
+
+      els.searchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        runSearch();
+      });
+
+      async function runSearch() {
         const query = els.searchInput.value.trim();
         if (!query) return;
 
         els.searchResultsPanel.classList.remove("hidden");
-        els.searchResultsList.innerHTML = `<div class="px-4 py-6 text-center font-mono text-xs text-white/40">Loading...</div>`;
+        els.searchResultsList.innerHTML = `<div class="px-4 py-6 text-center font-mono text-xs text-white/40">Searching...</div>`;
 
         try {
-          if (query.startsWith("@") || query.includes("soundcloud.com/")) {
-            els.searchResultsHeader.textContent = "User Likes Seeds";
-            const res = await apiFetch(`/api/user/likes?username=${encodeURIComponent(query)}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          // Direct SoundCloud playlist URL
+          if (query.includes("soundcloud.com/") && query.includes("/sets/")) {
+            const res = await apiFetch(`/api/playlist?url=${encodeURIComponent(query)}`);
+            if (!res.ok) throw new Error();
             const data = await res.json();
-            const tracks = data.collection || [];
-            const added = engine.addLikedSeedsBatch(tracks);
-            renderStatsAndQueue();
-            showToast(`Loaded ${added} liked seeds from ${data.user?.username || query}`);
-            renderSearchResults(tracks, true);
-          } else {
-            els.searchResultsHeader.textContent = "Search Results";
-            const res = await apiFetch(`/api/search?q=${encodeURIComponent(query)}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            renderSearchResults(data.collection || [], false);
+            const entry = upsertSoundCloudPlaylist(data.playlist, data.tracks || []);
+            renderPlaylists();
+            els.searchResultsPanel.classList.add("hidden");
+            if (entry.tracks.length) {
+              engine.addLikedSeedsBatch(entry.tracks);
+              engine.queue = entry.tracks.slice(1, 7);
+              await playTrack(entry.tracks[0], true);
+            }
+            showToast(`Loaded playlist "${entry.title}"`);
+            return;
           }
-        } catch (err) {
-          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">Backend offline or SoundCloud lookup failed.</div>`;
-        }
-      });
 
-      function renderSearchResults(tracks, isLikes) {
+          // Direct @username lookup
+          if (query.startsWith("@") || (query.includes("soundcloud.com/") && !query.includes("/sets/"))) {
+            await loadUserProfile(query);
+            els.searchResultsPanel.classList.add("hidden");
+            return;
+          }
+
+          if (activeSearchTab === "users") {
+            const res = await apiFetch(`/api/users/search?q=${encodeURIComponent(query)}`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            renderUserResults(data.collection || []);
+          } else if (activeSearchTab === "playlists") {
+            const res = await apiFetch(`/api/playlists/search?q=${encodeURIComponent(query)}`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            renderPlaylistResults(data.collection || []);
+          } else {
+            const res = await apiFetch(`/api/search?q=${encodeURIComponent(query)}`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            renderTrackResults(data.collection || []);
+          }
+        } catch {
+          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">Nothing found or SoundCloud error.</div>`;
+        }
+      }
+
+      function renderTrackResults(tracks) {
         if (!tracks.length) {
-          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">Nothing found.</div>`;
+          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">No tracks found.</div>`;
           return;
         }
-
         els.searchResultsList.innerHTML = tracks
           .map((t, i) => {
             const art = getHighResArtwork(t.artwork_url);
-            const dur = formatTime((t.duration || 0) / 1000);
             return `
               <button data-res-idx="${i}" type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.04] transition-colors">
                 <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">
@@ -1405,7 +1809,7 @@
                   <div class="text-xs text-silver truncate">${escapeHtml(t.title)}</div>
                   <div class="text-[11px] text-white/45 truncate">${escapeHtml(t.user?.username)}</div>
                 </div>
-                <span class="font-mono text-[10px] text-white/35">${dur}</span>
+                <span class="font-mono text-[10px] text-white/35">${formatTime((t.duration || 0) / 1000)}</span>
               </button>
             `;
           })
@@ -1417,9 +1821,6 @@
             if (track) {
               engine.queue = [];
               engine.lastSuccessfulSeed = track;
-              if (isLikes && !engine.isLiked(track.id)) {
-                engine.toggleLike(track);
-              }
               els.searchResultsPanel.classList.add("hidden");
               playTrack(track, true);
             }
@@ -1427,16 +1828,97 @@
         });
       }
 
+      function renderUserResults(users) {
+        if (!users.length) {
+          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">No users found.</div>`;
+          return;
+        }
+        els.searchResultsList.innerHTML = users
+          .map(
+            (u, i) => `
+            <button data-user-idx="${i}" type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.04] transition-colors">
+              <div class="w-9 h-9 rounded-full bg-obsidian border border-white/10 overflow-hidden shrink-0">
+                ${u.avatar_url ? `<img src="${escapeHtml(u.avatar_url)}" alt="" class="w-full h-full object-cover" />` : ""}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="text-xs text-silver truncate">${escapeHtml(u.username)}</div>
+                <div class="font-mono text-[10px] text-white/45 truncate">@${escapeHtml(u.permalink)} · ${u.followers_count} followers</div>
+              </div>
+              <span class="font-mono text-[10px] text-gold uppercase">Load</span>
+            </button>`
+          )
+          .join("");
+
+        els.searchResultsList.querySelectorAll("[data-user-idx]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const u = users[Number(btn.dataset.userIdx)];
+            if (!u) return;
+            els.searchResultsPanel.classList.add("hidden");
+            await loadUserProfile(u.permalink);
+          });
+        });
+      }
+
+      function renderPlaylistResults(pls) {
+        if (!pls.length) {
+          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">No playlists found.</div>`;
+          return;
+        }
+        els.searchResultsList.innerHTML = pls
+          .map(
+            (p, i) => `
+            <button data-pl-idx="${i}" type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.04] transition-colors">
+              <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">
+                ${p.artwork_url ? `<img src="${escapeHtml(p.artwork_url)}" alt="" class="w-full h-full object-cover" />` : ""}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="text-xs text-silver truncate">${escapeHtml(p.title)}</div>
+                <div class="font-mono text-[10px] text-white/45 truncate">${escapeHtml(p.user?.username)} · ${p.track_count} tracks</div>
+              </div>
+              <span class="font-mono text-[10px] text-gold uppercase">Import</span>
+            </button>`
+          )
+          .join("");
+
+        els.searchResultsList.querySelectorAll("[data-pl-idx]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const p = pls[Number(btn.dataset.plIdx)];
+            if (!p) return;
+            els.searchResultsPanel.classList.add("hidden");
+            showToast("Loading playlist...");
+            try {
+              const res = await apiFetch(`/api/playlist?id=${encodeURIComponent(p.id)}`);
+              if (!res.ok) throw new Error();
+              const data = await res.json();
+              const entry = upsertSoundCloudPlaylist(data.playlist, data.tracks || []);
+              expandedPlaylistId = entry.id;
+              renderPlaylists();
+              if (entry.tracks.length) {
+                engine.addLikedSeedsBatch(entry.tracks);
+                engine.queue = entry.tracks.slice(1, 7);
+                await playTrack(entry.tracks[0], true);
+              }
+              showToast(`Imported & playing "${entry.title}"`);
+            } catch {
+              showToast("Failed to load playlist");
+            }
+          });
+        });
+      }
+
       document.addEventListener("keydown", (e) => {
-        if (e.code === "Space" && document.activeElement !== els.searchInput && document.activeElement !== els.backendUrlInput) {
+        const tag = document.activeElement?.tagName;
+        if (e.code === "Space" && tag !== "INPUT" && tag !== "TEXTAREA") {
           e.preventDefault();
           togglePlayPause();
         }
       });
 
+      // Init
+      renderAccountUI();
       renderFilterPills();
       renderStatsAndQueue();
-      checkBackendHealth();
+      renderPlaylists();
     })();
   </script>
 </body>
