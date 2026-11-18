@@ -188,6 +188,21 @@ function normalizePlaylistMeta(raw) {
   };
 }
 
+async function resolveTranscoding(transcoding, trackAuthorization, oauthToken) {
+  if (!transcoding?.url) return null;
+  const params = {};
+  if (trackAuthorization) {
+    params.track_authorization = trackAuthorization;
+  }
+  const resolved = await requestV2(transcoding.url, params, oauthToken);
+  if (!resolved?.url) return null;
+  return {
+    url: resolved.url,
+    protocol: transcoding.format?.protocol || "hls",
+    mime_type: transcoding.format?.mime_type || "audio/mpeg",
+  };
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -250,16 +265,33 @@ module.exports = async function handler(req, res) {
       const userIdParam = parsedUrl.searchParams.get("user_id");
       const limit = Math.min(100, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 40)));
 
-      let userData;
+      let userData = null;
       if (userIdParam) {
         userData = await requestV2(`${API_V2_BASE}/users/${encodeURIComponent(userIdParam)}`, {}, oauthToken);
       } else {
         if (!rawUsername) return res.status(400).json({ detail: "username is required" });
         const profileUrl =
           rawUsername.startsWith("http://") || rawUsername.startsWith("https://")
-            ? rawUsername
+            ? rawUsername.split("?")[0].replace(/\/+$/, "")
             : `https://soundcloud.com/${rawUsername}`;
-        userData = await requestV2(`${API_V2_BASE}/resolve`, { url: profileUrl }, oauthToken);
+
+        try {
+          userData = await requestV2(`${API_V2_BASE}/resolve`, { url: profileUrl }, oauthToken);
+        } catch {
+          userData = null;
+        }
+
+        // Fallback to user search if /resolve failed (e.g. display name instead of permalink)
+        if (!userData?.id || userData.kind !== "user") {
+          const searchRes = await requestV2(
+            `${API_V2_BASE}/search/users`,
+            { q: rawUsername, limit: 1 },
+            oauthToken
+          ).catch(() => ({ collection: [] }));
+          if (searchRes.collection?.length) {
+            userData = searchRes.collection[0];
+          }
+        }
       }
 
       if (!userData?.id || userData.kind !== "user") {
@@ -270,7 +302,7 @@ module.exports = async function handler(req, res) {
         requestV2(`${API_V2_BASE}/users/${userData.id}/likes`, { limit, offset: 0 }, oauthToken).catch(
           () => ({ collection: [] })
         ),
-        requestV2(`${API_V2_BASE}/users/${userData.id}/playlists`, { limit: 30, offset: 0 }, oauthToken).catch(
+        requestV2(`${API_V2_BASE}/users/${userData.id}/playlists`, { limit: 25, offset: 0 }, oauthToken).catch(
           () => ({ collection: [] })
         ),
       ]);
@@ -296,7 +328,7 @@ module.exports = async function handler(req, res) {
         requestV2(`${API_V2_BASE}/users/${me.id}/likes`, { limit: 50, offset: 0 }, oauthToken).catch(
           () => ({ collection: [] })
         ),
-        requestV2(`${API_V2_BASE}/users/${me.id}/playlists`, { limit: 40, offset: 0 }, oauthToken).catch(
+        requestV2(`${API_V2_BASE}/users/${me.id}/playlists`, { limit: 30, offset: 0 }, oauthToken).catch(
           () => ({ collection: [] })
         ),
       ]);
@@ -315,7 +347,7 @@ module.exports = async function handler(req, res) {
 
     if (route === "/playlist") {
       const playlistId = parsedUrl.searchParams.get("id");
-      const playlistUrl = (parsedUrl.searchParams.get("url") || "").trim();
+      const playlistUrl = (parsedUrl.searchParams.get("url") || "").trim().split("?")[0];
 
       let plData;
       if (playlistId) {
@@ -361,34 +393,37 @@ module.exports = async function handler(req, res) {
         return res.status(404).json({ detail: "No playable transcodings available" });
       }
 
-      let selected =
+      const progressive =
         transcodings.find(
           (t) => t.format?.protocol === "progressive" && (t.format?.mime_type || "").includes("mpeg")
-        ) ||
-        transcodings.find((t) => t.format?.protocol === "progressive") ||
+        ) || transcodings.find((t) => t.format?.protocol === "progressive");
+
+      const hls =
         transcodings.find(
           (t) => t.format?.protocol === "hls" && (t.format?.mime_type || "").includes("mpeg")
-        ) ||
-        transcodings[0];
+        ) || transcodings.find((t) => t.format?.protocol === "hls");
 
-      if (!selected?.url) {
-        return res.status(502).json({ detail: "Invalid transcoding URL" });
-      }
+      const primaryTranscoding = progressive || hls || transcodings[0];
+      const fallbackTranscoding =
+        primaryTranscoding === progressive && hls ? hls : primaryTranscoding === hls && progressive ? progressive : null;
 
-      const params = {};
-      if (trackData.track_authorization) {
-        params.track_authorization = trackData.track_authorization;
-      }
+      const [primary, fallback] = await Promise.all([
+        resolveTranscoding(primaryTranscoding, trackData.track_authorization, oauthToken),
+        fallbackTranscoding
+          ? resolveTranscoding(fallbackTranscoding, trackData.track_authorization, oauthToken).catch(() => null)
+          : Promise.resolve(null),
+      ]);
 
-      const resolved = await requestV2(selected.url, params, oauthToken);
-      if (!resolved?.url) {
+      if (!primary?.url) {
         return res.status(502).json({ detail: "SoundCloud did not return a stream URL" });
       }
 
       return res.status(200).json({
-        url: resolved.url,
-        protocol: selected.format?.protocol || "hls",
-        mime_type: selected.format?.mime_type || "audio/mpeg",
+        url: primary.url,
+        protocol: primary.protocol,
+        mime_type: primary.mime_type,
+        fallback_url: fallback?.url || null,
+        fallback_protocol: fallback?.protocol || null,
         duration: trackData.duration || 0,
       });
     }

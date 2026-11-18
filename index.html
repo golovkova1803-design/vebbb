@@ -29,9 +29,7 @@
     };
   </script>
   <style>
-    :root {
-      color-scheme: dark;
-    }
+    :root { color-scheme: dark; }
     * {
       box-sizing: border-box;
       -webkit-font-smoothing: antialiased;
@@ -45,20 +43,19 @@
       font-family: 'Inter', system-ui, sans-serif;
       overflow-x: hidden;
     }
+    /* Lightweight GPU-friendly surfaces */
     .glass {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      background: rgba(20, 20, 20, 0.72);
     }
     .glass-surface {
-      background: rgba(13, 13, 13, 0.82);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      background: rgba(13, 13, 13, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     input[type="range"].volume-slider {
       -webkit-appearance: none;
       appearance: none;
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.14);
       height: 3px;
       border-radius: 999px;
       outline: none;
@@ -72,11 +69,6 @@
       border-radius: 50%;
       background: #e5e5e5;
       border: 1px solid #050505;
-      transition: transform 0.15s ease, background-color 0.15s ease;
-    }
-    input[type="range"].volume-slider:hover::-webkit-slider-thumb {
-      transform: scale(1.25);
-      background: #d4af37;
     }
     input[type="range"].volume-slider::-moz-range-thumb {
       width: 10px;
@@ -85,25 +77,14 @@
       background: #e5e5e5;
       border: 1px solid #050505;
     }
-    ::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.14);
-      border-radius: 999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(212, 175, 55, 0.45);
-    }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.45); }
   </style>
 </head>
 <body class="min-h-screen bg-obsidian text-silver selection:bg-gold/20 selection:text-gold flex flex-col justify-between relative">
 
-  <!-- Ambient subtle radial vignette -->
   <div class="pointer-events-none fixed inset-0 z-0" style="background: radial-gradient(circle at 50% 42%, rgba(212, 175, 55, 0.04) 0%, rgba(5, 5, 5, 0) 58%);"></div>
 
   <!-- Top Navigation & Search + Account -->
@@ -113,15 +94,14 @@
         <span id="status-dot" class="w-2 h-2 rounded-full bg-white/30 transition-colors duration-300"></span>
         <span class="text-xs font-medium tracking-[0.22em] uppercase text-silver">MY WAVE</span>
       </div>
-      <div class="font-mono text-[11px] text-white/40 border border-white/10 rounded-full px-2.5 py-0.5 glass">
+      <div class="font-mono text-[11px] text-white/45 border border-white/10 rounded-full px-2.5 py-0.5 glass">
         <span id="seed-stats-label">SEEDS 0 · QUEUE 0</span>
       </div>
     </div>
 
     <div class="flex items-center gap-2.5 w-full md:w-auto">
-      <!-- Search Bar -->
       <div class="relative flex-1 md:w-[400px]">
-        <form id="search-form" class="flex items-center glass border border-white/10 rounded-full px-3.5 py-1.5 focus-within:border-gold/50 transition-colors duration-200">
+        <form id="search-form" class="flex items-center glass border border-white/10 rounded-full px-3.5 py-1.5 focus-within:border-gold/50 transition-colors duration-150">
           <svg class="w-4 h-4 text-white/45 shrink-0 mr-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <path d="m21 21-4.3-4.3"></path>
@@ -133,20 +113,12 @@
             placeholder="Search tracks, users, playlists or paste URL..."
             class="w-full bg-transparent text-xs text-silver placeholder-white/35 focus:outline-none"
           />
-          <button
-            type="submit"
-            id="search-submit-btn"
-            class="ml-2 text-[11px] font-mono uppercase tracking-wider text-white/60 hover:text-gold transition-colors shrink-0"
-          >
+          <button type="submit" id="search-submit-btn" class="ml-2 text-[11px] font-mono uppercase tracking-wider text-white/60 hover:text-gold transition-colors shrink-0">
             Go
           </button>
         </form>
 
-        <!-- Search Results Dropdown with Tabs -->
-        <div
-          id="search-results-panel"
-          class="hidden absolute left-0 right-0 mt-2 bg-surface/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
-        >
+        <div id="search-results-panel" class="hidden absolute left-0 right-0 mt-2 bg-surface border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
           <div class="px-3 py-2 border-b border-white/10 flex items-center justify-between gap-2">
             <div class="flex items-center gap-1">
               <button data-search-tab="tracks" type="button" class="search-tab-btn px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider border border-gold/60 text-gold bg-gold/10 transition-colors">Tracks</button>
@@ -164,12 +136,7 @@
         </div>
       </div>
 
-      <!-- Account / Sign In Button -->
-      <button
-        id="btn-account-open"
-        type="button"
-        class="glass border border-white/10 hover:border-gold/50 rounded-full px-3 py-1.5 flex items-center gap-2 transition-colors shrink-0"
-      >
+      <button id="btn-account-open" type="button" class="glass border border-white/10 hover:border-gold/50 rounded-full px-3 py-1.5 flex items-center gap-2 transition-colors shrink-0">
         <img id="header-user-avatar" src="" alt="" class="hidden w-4 h-4 rounded-full object-cover border border-white/20" />
         <svg id="header-user-icon" class="w-3.5 h-3.5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
@@ -191,16 +158,10 @@
       </p>
     </div>
 
-    <!-- Energy Sphere Canvas -->
-    <div class="relative flex items-center justify-center my-1">
-      <button
-        id="orb-toggle-btn"
-        type="button"
-        aria-label="Toggle Play or Pause"
-        class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-300 active:scale-[0.98]"
-      >
-        <canvas id="wave-orb-canvas" class="block w-[250px] h-[250px] sm:w-[310px] sm:h-[310px]"></canvas>
-        <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+    <div class="relative flex items-center justify-center my-1" style="contain: layout paint;">
+      <button id="orb-toggle-btn" type="button" aria-label="Toggle Play or Pause" class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-200 active:scale-[0.98]">
+        <canvas id="wave-orb-canvas" class="block w-[240px] h-[240px] sm:w-[300px] sm:h-[300px]"></canvas>
+        <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
           <div class="w-11 h-11 rounded-full glass border border-white/15 flex items-center justify-center text-silver">
             <svg id="orb-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="6 3 20 12 6 21 6 3"></polygon>
@@ -214,43 +175,30 @@
       </button>
     </div>
 
-    <!-- Interactive Vibe & Discovery Pills -->
     <div id="vibe-pills-container" class="mt-5 flex flex-wrap items-center justify-center gap-2 max-w-xl">
-      <button data-filter="bodroe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Бодрое</button>
-      <button data-filter="spokoynoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Спокойное</button>
-      <button data-filter="tyomnoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Тёмное</button>
-      <button data-filter="lyubimoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Любимое</button>
-      <button data-filter="neznakomoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Незнакомое</button>
-      <button data-filter="andegraund" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Андеграунд</button>
+      <button data-filter="bodroe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-colors duration-150">Бодрое</button>
+      <button data-filter="spokoynoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-colors duration-150">Спокойное</button>
+      <button data-filter="tyomnoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-colors duration-150">Тёмное</button>
+      <button data-filter="lyubimoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-colors duration-150">Любимое</button>
+      <button data-filter="neznakomoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-colors duration-150">Незнакомое</button>
+      <button data-filter="andegraund" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-colors duration-150">Андеграунд</button>
     </div>
 
-    <!-- Subtle Toast Feedback -->
-    <p id="engine-toast" class="mt-4 font-mono text-[11px] text-gold/85 h-4 opacity-0 transition-opacity duration-300 text-center"></p>
+    <p id="engine-toast" class="mt-4 font-mono text-[11px] text-gold/85 h-4 opacity-0 transition-opacity duration-200 text-center"></p>
   </main>
 
   <!-- Floating Frosted Bottom Dock -->
   <footer class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-5xl z-40">
     <div class="glass-surface border border-white/10 rounded-2xl px-4 py-3 shadow-2xl">
-      <!-- Scrubbing Timeline with Hover Preview -->
       <div class="relative mb-2.5 group">
-        <div
-          id="timeline-hover-tooltip"
-          class="pointer-events-none hidden absolute -top-7 -translate-x-1/2 bg-surface border border-white/15 rounded px-1.5 py-0.5 font-mono text-[10px] text-silver shadow-lg"
-        >
-          00:00
-        </div>
-        <div
-          id="timeline-track"
-          class="relative w-full h-1.5 bg-white/10 rounded-full cursor-pointer overflow-hidden group-hover:h-2 transition-all duration-150"
-        >
+        <div id="timeline-hover-tooltip" class="pointer-events-none hidden absolute -top-7 -translate-x-1/2 bg-surface border border-white/15 rounded px-1.5 py-0.5 font-mono text-[10px] text-silver shadow-lg">00:00</div>
+        <div id="timeline-track" class="relative w-full h-1.5 bg-white/10 rounded-full cursor-pointer overflow-hidden group-hover:h-2 transition-all duration-150">
           <div id="timeline-hover-bar" class="absolute inset-y-0 left-0 bg-white/20 pointer-events-none w-0"></div>
-          <div id="timeline-progress" class="absolute inset-y-0 left-0 bg-gradient-to-r from-silver to-gold rounded-full w-0 transition-[width] duration-75"></div>
+          <div id="timeline-progress" class="absolute inset-0 bg-gradient-to-r from-silver to-gold rounded-full origin-left" style="transform: scaleX(0); will-change: transform;"></div>
         </div>
       </div>
 
-      <!-- Dock Controls Row -->
       <div class="flex items-center justify-between gap-3">
-        <!-- Left: Artwork + Track Info -->
         <div class="flex items-center gap-3 min-w-0 flex-1">
           <div class="w-11 h-11 rounded-lg bg-surface border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
             <img id="dock-artwork" src="" alt="" class="hidden w-full h-full object-cover" />
@@ -271,7 +219,6 @@
           </div>
         </div>
 
-        <!-- Center: Transport + Like/Dislike/Add to Playlist -->
         <div class="flex items-center gap-1 sm:gap-2 shrink-0">
           <button id="btn-dislike" type="button" title="Dislike & Blacklist" class="p-2 rounded-full text-white/45 hover:text-silver hover:bg-white/[0.05] transition-colors">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -287,7 +234,7 @@
             </svg>
           </button>
 
-          <button id="btn-play-pause" type="button" title="Play / Pause" class="w-9 h-9 rounded-full border border-white/15 bg-white/[0.06] hover:border-gold/60 text-silver flex items-center justify-center transition-all">
+          <button id="btn-play-pause" type="button" title="Play / Pause" class="w-9 h-9 rounded-full border border-white/15 bg-white/[0.06] hover:border-gold/60 text-silver flex items-center justify-center transition-colors">
             <svg id="dock-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="6 3 20 12 6 21 6 3"></polygon>
             </svg>
@@ -310,7 +257,6 @@
             </svg>
           </button>
 
-          <!-- Add Current Track to Playlist -->
           <div class="relative">
             <button id="btn-add-to-playlist" type="button" title="Add to Playlist" class="p-2 rounded-full text-white/45 hover:text-silver hover:bg-white/[0.05] transition-colors">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -318,14 +264,13 @@
                 <path d="M5 12h14"></path>
               </svg>
             </button>
-            <div id="add-playlist-popover" class="hidden absolute bottom-12 right-0 w-56 bg-surface/95 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl p-2 z-50">
+            <div id="add-playlist-popover" class="hidden absolute bottom-12 right-0 w-56 bg-surface border border-white/10 rounded-xl shadow-2xl p-2 z-50">
               <div class="px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-white/40 border-b border-white/10 mb-1">Add to Playlist</div>
               <div id="add-playlist-options" class="max-h-44 overflow-y-auto space-y-0.5"></div>
             </div>
           </div>
         </div>
 
-        <!-- Right: Volume + Drawer Toggle -->
         <div class="hidden md:flex items-center gap-3 shrink-0">
           <button id="btn-mute" type="button" class="text-white/50 hover:text-silver transition-colors">
             <svg id="icon-vol-on" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -358,7 +303,8 @@
   <!-- Right Slide-Over Drawer: Wave Buffer & Playlists -->
   <aside
     id="queue-drawer"
-    class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-surface/95 backdrop-blur-2xl border-l border-white/10 z-50 transform translate-x-full transition-transform duration-300 flex flex-col"
+    class="fixed top-0 right-0 h-full w-full sm:w-[400px] glass-surface border-l border-white/10 z-50 transform translate-x-full transition-transform duration-200 flex flex-col"
+    style="will-change: transform;"
   >
     <div class="px-5 py-3.5 border-b border-white/10 flex items-center justify-between">
       <div class="flex items-center gap-1.5">
@@ -373,7 +319,7 @@
       </button>
     </div>
 
-    <!-- Drawer Tab 1: Wave Buffer -->
+    <!-- Tab 1: Wave Buffer -->
     <div id="drawer-panel-wave" class="flex-1 flex flex-col min-h-0">
       <div class="px-5 py-2.5 border-b border-white/10">
         <p id="drawer-seed-info" class="font-mono text-[11px] text-white/50 truncate">SEED: NONE</p>
@@ -405,30 +351,16 @@
       </div>
     </div>
 
-    <!-- Drawer Tab 2: Playlists -->
+    <!-- Tab 2: Playlists -->
     <div id="drawer-panel-playlists" class="hidden flex-1 flex flex-col min-h-0">
       <div class="p-3.5 border-b border-white/10 space-y-2">
         <form id="create-playlist-form" class="flex items-center gap-1.5">
-          <input
-            id="new-playlist-name"
-            type="text"
-            placeholder="New playlist name..."
-            class="flex-1 bg-obsidian border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-silver placeholder-white/30 focus:outline-none focus:border-gold/50"
-          />
-          <button type="submit" class="px-3 py-1.5 rounded-lg glass border border-white/10 hover:border-gold/50 font-mono text-[10px] uppercase text-silver transition-colors shrink-0">
-            Create
-          </button>
+          <input id="new-playlist-name" type="text" placeholder="New playlist name..." class="flex-1 bg-obsidian border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-silver placeholder-white/30 focus:outline-none focus:border-gold/50" />
+          <button type="submit" class="px-3 py-1.5 rounded-lg glass border border-white/10 hover:border-gold/50 font-mono text-[10px] uppercase text-silver transition-colors shrink-0">Create</button>
         </form>
         <form id="import-playlist-form" class="flex items-center gap-1.5">
-          <input
-            id="import-playlist-url"
-            type="text"
-            placeholder="Import SoundCloud playlist URL..."
-            class="flex-1 bg-obsidian border border-white/10 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-silver placeholder-white/30 focus:outline-none focus:border-gold/50"
-          />
-          <button type="submit" class="px-3 py-1.5 rounded-lg glass border border-white/10 hover:border-gold/50 font-mono text-[10px] uppercase text-gold transition-colors shrink-0">
-            Import
-          </button>
+          <input id="import-playlist-url" type="text" placeholder="Import SoundCloud playlist URL..." class="flex-1 bg-obsidian border border-white/10 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-silver placeholder-white/30 focus:outline-none focus:border-gold/50" />
+          <button type="submit" class="px-3 py-1.5 rounded-lg glass border border-white/10 hover:border-gold/50 font-mono text-[10px] uppercase text-gold transition-colors shrink-0">Import</button>
         </form>
       </div>
 
@@ -437,7 +369,7 @@
   </aside>
 
   <!-- Account / Sign In Modal -->
-  <div id="account-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+  <div id="account-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
     <div class="w-full max-w-md bg-surface border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
       <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
         <h3 class="text-xs font-medium uppercase tracking-[0.2em] text-silver">SoundCloud Account</h3>
@@ -450,7 +382,6 @@
       </div>
 
       <div class="p-5 space-y-4">
-        <!-- Active User Card -->
         <div id="account-active-card" class="hidden p-3.5 rounded-xl glass border border-gold/30 flex items-center justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0">
             <img id="modal-user-avatar" src="" alt="" class="w-10 h-10 rounded-full object-cover border border-white/15 shrink-0" />
@@ -459,42 +390,24 @@
               <div id="modal-user-meta" class="font-mono text-[10px] text-gold/85 truncate"></div>
             </div>
           </div>
-          <button id="btn-account-logout" type="button" class="px-2.5 py-1 rounded-lg border border-white/15 font-mono text-[10px] uppercase text-white/60 hover:text-silver hover:border-white/30 transition-colors shrink-0">
-            Sign Out
-          </button>
+          <button id="btn-account-logout" type="button" class="px-2.5 py-1 rounded-lg border border-white/15 font-mono text-[10px] uppercase text-white/60 hover:text-silver hover:border-white/30 transition-colors shrink-0">Sign Out</button>
         </div>
 
-        <!-- Method 1: Quick Profile Login -->
         <form id="login-username-form" class="space-y-2">
           <label class="block font-mono text-[10px] uppercase tracking-wider text-white/50">Quick Sign In by Username or Profile URL</label>
           <div class="flex items-center gap-2">
-            <input
-              id="login-username-input"
-              type="text"
-              placeholder="@username or soundcloud.com/..."
-              class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 text-xs text-silver placeholder-white/30 focus:outline-none focus:border-gold/50"
-            />
-            <button type="submit" class="px-4 py-2 rounded-xl bg-white/[0.06] border border-white/15 hover:border-gold/60 text-xs text-silver transition-colors shrink-0">
-              Connect
-            </button>
+            <input id="login-username-input" type="text" placeholder="@username or soundcloud.com/..." class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 text-xs text-silver placeholder-white/30 focus:outline-none focus:border-gold/50" />
+            <button type="submit" class="px-4 py-2 rounded-xl bg-white/[0.06] border border-white/15 hover:border-gold/60 text-xs text-silver transition-colors shrink-0">Connect</button>
           </div>
           <p class="text-[11px] text-white/40">Loads your public likes as My Wave seeds and imports your playlists.</p>
         </form>
 
         <div class="border-t border-white/10 pt-4">
-          <!-- Method 2: OAuth Token for Private Data -->
           <form id="login-oauth-form" class="space-y-2">
             <label class="block font-mono text-[10px] uppercase tracking-wider text-white/50">Full Account via OAuth Token (Optional)</label>
             <div class="flex items-center gap-2">
-              <input
-                id="login-oauth-input"
-                type="password"
-                placeholder="Paste oauth_token from soundcloud.com..."
-                class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 font-mono text-[11px] text-silver placeholder-white/30 focus:outline-none focus:border-gold/50"
-              />
-              <button type="submit" class="px-4 py-2 rounded-xl bg-gold/15 border border-gold/40 hover:border-gold text-xs text-gold transition-colors shrink-0">
-                Auth
-              </button>
+              <input id="login-oauth-input" type="password" placeholder="Paste oauth_token from soundcloud.com..." class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 font-mono text-[11px] text-silver placeholder-white/30 focus:outline-none focus:border-gold/50" />
+              <button type="submit" class="px-4 py-2 rounded-xl bg-gold/15 border border-gold/40 hover:border-gold text-xs text-gold transition-colors shrink-0">Auth</button>
             </div>
             <p class="text-[11px] text-white/40 leading-relaxed">
               For private likes &amp; playlists: open soundcloud.com, press F12 &rarr; Application &rarr; Cookies &rarr; copy <span class="font-mono text-white/60">oauth_token</span>.
@@ -505,16 +418,13 @@
     </div>
   </div>
 
-  <!-- Hidden HTML5 Audio Element -->
-  <audio id="audio-element" crossorigin="anonymous" preload="auto"></audio>
+  <!-- Audio Element (no forced crossorigin so progressive MP3 never fails CDN CORS) -->
+  <audio id="audio-element" preload="auto"></audio>
 
   <script>
     (() => {
       "use strict";
 
-      // =========================================================================
-      // API HELPERS (SAME-ORIGIN VERCEL + OPTIONAL OAUTH HEADER)
-      // =========================================================================
       const ACCOUNT_KEY = "my_wave_account_v1";
       const PLAYLISTS_KEY = "my_wave_playlists_v1";
       const ENGINE_KEY = "my_wave_engine_v1";
@@ -533,9 +443,6 @@
         return fetch(path, { ...options, headers });
       }
 
-      // =========================================================================
-      // UTILITIES
-      // =========================================================================
       function formatTime(seconds) {
         if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
         const mins = Math.floor(seconds / 60);
@@ -767,9 +674,7 @@
         }
 
         async ensureBuffer(playedRatio = 0, forceSeed = null) {
-          if (this.isFetching) return;
-          if (this.queue.length >= 3) return;
-
+          if (this.isFetching || this.queue.length >= 3) return;
           const seed = forceSeed || this.selectSeed(playedRatio);
           if (!seed) return;
 
@@ -793,16 +698,15 @@
             const needed = Math.max(0, 6 - this.queue.length);
             this.queue.push(...filtered.slice(0, needed));
             this.lastSuccessfulSeed = seed;
-          } catch (err) {
-            console.warn("WaveEngine buffer fetch failed:", err);
-          } finally {
+          } catch {}
+          finally {
             this.isFetching = false;
           }
         }
       }
 
       // =========================================================================
-      // PLAYLIST STORE (CUSTOM + IMPORTED SOUNDCLOUD PLAYLISTS)
+      // PLAYLIST STORE (WITH LAZY HYDRATION)
       // =========================================================================
       let playlists = [];
       let expandedPlaylistId = null;
@@ -823,68 +727,54 @@
       function createCustomPlaylist(name) {
         const clean = name.trim();
         if (!clean) return null;
-        const pl = {
-          id: `local_${Date.now()}`,
-          title: clean,
-          source: "custom",
-          tracks: [],
-        };
+        const pl = { id: `local_${Date.now()}`, title: clean, source: "custom", tracks: [] };
         playlists.unshift(pl);
         expandedPlaylistId = pl.id;
         savePlaylists();
         return pl;
       }
 
-      function upsertSoundCloudPlaylist(meta, tracks) {
+      function upsertSoundCloudPlaylist(meta, tracks = null) {
         const plId = `sc_${meta.id}`;
         const existingIdx = playlists.findIndex((p) => p.id === plId);
+        const existingTracks = existingIdx >= 0 ? playlists[existingIdx].tracks : [];
         const entry = {
           id: plId,
           scId: meta.id,
           title: meta.title,
           author: meta.user?.username || "SoundCloud",
-          artwork_url: meta.artwork_url || tracks[0]?.artwork_url || "",
+          artwork_url: meta.artwork_url || (tracks && tracks[0]?.artwork_url) || "",
+          track_count: meta.track_count || (tracks ? tracks.length : existingTracks.length),
           source: "soundcloud",
-          tracks,
+          tracks: tracks !== null ? tracks : existingTracks,
         };
-        if (existingIdx >= 0) {
-          playlists[existingIdx] = entry;
-        } else {
-          playlists.unshift(entry);
-        }
+        if (existingIdx >= 0) playlists[existingIdx] = entry;
+        else playlists.unshift(entry);
         savePlaylists();
         return entry;
+      }
+
+      async function ensurePlaylistTracks(pl) {
+        if (pl.tracks && pl.tracks.length > 0) return pl.tracks;
+        if (pl.source !== "soundcloud" || !pl.scId) return [];
+        const res = await apiFetch(`/api/playlist?id=${encodeURIComponent(pl.scId)}`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        pl.tracks = data.tracks || [];
+        pl.track_count = pl.tracks.length;
+        savePlaylists();
+        return pl.tracks;
       }
 
       loadPlaylists();
 
       // =========================================================================
-      // AUDIO ENGINE & WEB AUDIO API ANALYSER
+      // AUDIO ENGINE (RELIABLE PLAYBACK + FALLBACK STREAM)
       // =========================================================================
       const audioEl = document.getElementById("audio-element");
       let hlsInstance = null;
-      let audioCtx = null;
-      let analyser = null;
-      let sourceNode = null;
-      let freqData = null;
-
-      function initWebAudio() {
-        if (audioCtx) {
-          if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
-          return;
-        }
-        try {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          audioCtx = new AudioContextClass();
-          analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 256;
-          analyser.smoothingTimeConstant = 0.82;
-          sourceNode = audioCtx.createMediaElementSource(audioEl);
-          sourceNode.connect(analyser);
-          analyser.connect(audioCtx.destination);
-          freqData = new Uint8Array(analyser.frequencyBinCount);
-        } catch {}
-      }
+      let playSessionId = 0;
+      let consecutivePlayErrors = 0;
 
       async function resolveStreamForTrack(track) {
         if (track._resolvedStream) return track._resolvedStream;
@@ -895,73 +785,130 @@
         return data;
       }
 
+      function destroyHls() {
+        if (hlsInstance) {
+          try { hlsInstance.destroy(); } catch {}
+          hlsInstance = null;
+        }
+      }
+
+      function attachAndPlayStream(url, protocol, sessionId) {
+        return new Promise((resolve, reject) => {
+          if (sessionId !== playSessionId) return reject(new Error("superseded"));
+          destroyHls();
+          audioEl.pause();
+          audioEl.removeAttribute("src");
+          audioEl.load();
+
+          if (protocol === "hls" && window.Hls && Hls.isSupported()) {
+            let settled = false;
+            hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: false });
+            hlsInstance.loadSource(url);
+            hlsInstance.attachMedia(audioEl);
+
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+              if (sessionId !== playSessionId) return;
+              audioEl.play().then(() => {
+                if (!settled) { settled = true; resolve(); }
+              }).catch((err) => {
+                if (!settled) { settled = true; reject(err); }
+              });
+            });
+
+            hlsInstance.on(Hls.Events.ERROR, (_, data) => {
+              if (data?.fatal && !settled) {
+                settled = true;
+                destroyHls();
+                reject(new Error(`HLS fatal: ${data.type}`));
+              }
+            });
+          } else {
+            let settled = false;
+            const cleanup = () => {
+              audioEl.removeEventListener("canplay", onCanPlay);
+              audioEl.removeEventListener("error", onError);
+            };
+            const onCanPlay = () => {
+              if (sessionId !== playSessionId) { cleanup(); return; }
+              audioEl.play().then(() => {
+                if (!settled) { settled = true; cleanup(); resolve(); }
+              }).catch((err) => {
+                if (!settled) { settled = true; cleanup(); reject(err); }
+              });
+            };
+            const onError = () => {
+              if (!settled) {
+                settled = true;
+                cleanup();
+                reject(new Error("Audio element load error"));
+              }
+            };
+            audioEl.addEventListener("canplay", onCanPlay, { once: true });
+            audioEl.addEventListener("error", onError, { once: true });
+            audioEl.src = url;
+            audioEl.load();
+          }
+        });
+      }
+
       // =========================================================================
-      // REACTIVE ENERGY SPHERE CANVAS
+      // OPTIMIZED CANVAS ORB (LOW CPU / GPU OVERHEAD)
       // =========================================================================
       const canvas = document.getElementById("wave-orb-canvas");
       const ctx = canvas.getContext("2d");
       let orbPhase = 0;
       let smoothBass = 0;
       let smoothMid = 0;
+      let lastIdleFrame = 0;
 
       function resizeOrbCanvas() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
         const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
       window.addEventListener("resize", resizeOrbCanvas);
       resizeOrbCanvas();
 
-      function renderOrb() {
+      function renderOrb(now) {
+        requestAnimationFrame(renderOrb);
+        const isPlaying = !audioEl.paused && !audioEl.ended;
+
+        // Throttle idle animation to ~20fps to save CPU/GPU
+        if (!isPlaying && now - lastIdleFrame < 48) return;
+        lastIdleFrame = now;
+
         const w = canvas.clientWidth;
         const h = canvas.clientHeight;
+        if (!w || !h) return;
         const cx = w / 2;
         const cy = h / 2;
 
-        let targetBass = 0;
-        let targetMid = 0;
-        const isPlaying = !audioEl.paused && !audioEl.ended;
-
-        if (isPlaying && analyser && freqData) {
-          analyser.getByteFrequencyData(freqData);
-          let bSum = 0;
-          for (let i = 0; i < 6; i++) bSum += freqData[i] || 0;
-          let mSum = 0;
-          for (let i = 6; i < 28; i++) mSum += freqData[i] || 0;
-          targetBass = bSum / (6 * 255);
-          targetMid = mSum / (22 * 255);
-          if (targetBass === 0 && targetMid === 0) {
-            targetBass = 0.14 + Math.sin(orbPhase * 2.2) * 0.06;
-            targetMid = 0.12 + Math.cos(orbPhase * 3.1) * 0.05;
-          }
-        } else if (isPlaying) {
-          targetBass = 0.14 + Math.sin(orbPhase * 2.2) * 0.06;
-          targetMid = 0.12 + Math.cos(orbPhase * 3.1) * 0.05;
-        }
+        const targetBass = isPlaying ? 0.22 + Math.sin(orbPhase * 2.1) * 0.12 + Math.sin(orbPhase * 4.3) * 0.06 : 0.04;
+        const targetMid = isPlaying ? 0.16 + Math.cos(orbPhase * 3.0) * 0.08 : 0.03;
 
         smoothBass += (targetBass - smoothBass) * 0.16;
         smoothMid += (targetMid - smoothMid) * 0.14;
-        orbPhase += isPlaying ? 0.018 + smoothMid * 0.03 : 0.008;
+        orbPhase += isPlaying ? 0.024 : 0.012;
 
         ctx.clearRect(0, 0, w, h);
-        const baseRadius = Math.min(w, h) * 0.28 + smoothBass * 18;
+        const baseRadius = Math.min(w, h) * 0.28 + smoothBass * 16;
 
-        const aura = ctx.createRadialGradient(cx, cy, baseRadius * 0.3, cx, cy, baseRadius * 1.75);
-        aura.addColorStop(0, `rgba(212, 175, 55, ${0.12 + smoothBass * 0.22})`);
-        aura.addColorStop(0.55, `rgba(229, 229, 229, ${0.04 + smoothMid * 0.08})`);
+        const aura = ctx.createRadialGradient(cx, cy, baseRadius * 0.3, cx, cy, baseRadius * 1.7);
+        aura.addColorStop(0, `rgba(212, 175, 55, ${0.12 + smoothBass * 0.2})`);
+        aura.addColorStop(0.6, `rgba(229, 229, 229, ${0.04 + smoothMid * 0.06})`);
         aura.addColorStop(1, "rgba(5, 5, 5, 0)");
         ctx.fillStyle = aura;
         ctx.beginPath();
-        ctx.arc(cx, cy, baseRadius * 1.75, 0, Math.PI * 2);
+        ctx.arc(cx, cy, baseRadius * 1.7, 0, Math.PI * 2);
         ctx.fill();
 
+        const points = 64;
         for (let r = 0; r < 3; r++) {
-          const points = 96;
           const ringOffset = r * 0.9;
-          const amp = (4 + smoothBass * 16 + smoothMid * 10) * (1 - r * 0.2);
+          const amp = (4 + smoothBass * 14 + smoothMid * 9) * (1 - r * 0.2);
 
           ctx.beginPath();
           for (let i = 0; i <= points; i++) {
@@ -977,20 +924,13 @@
           ctx.closePath();
 
           ctx.strokeStyle = r === 0
-            ? `rgba(212, 175, 55, ${0.42 + smoothBass * 0.45})`
-            : `rgba(229, 229, 229, ${0.22 - r * 0.05 + smoothMid * 0.25})`;
+            ? `rgba(212, 175, 55, ${0.42 + smoothBass * 0.4})`
+            : `rgba(229, 229, 229, ${0.22 - r * 0.05 + smoothMid * 0.2})`;
           ctx.lineWidth = r === 0 ? 1.4 : 0.9;
           ctx.stroke();
         }
 
-        const coreGrad = ctx.createRadialGradient(
-          cx - baseRadius * 0.25,
-          cy - baseRadius * 0.25,
-          baseRadius * 0.1,
-          cx,
-          cy,
-          baseRadius * 0.92
-        );
+        const coreGrad = ctx.createRadialGradient(cx - baseRadius * 0.25, cy - baseRadius * 0.25, baseRadius * 0.1, cx, cy, baseRadius * 0.92);
         coreGrad.addColorStop(0, "rgba(229, 229, 229, 0.14)");
         coreGrad.addColorStop(0.55, "rgba(18, 18, 18, 0.92)");
         coreGrad.addColorStop(1, "rgba(5, 5, 5, 0.98)");
@@ -1000,11 +940,9 @@
         ctx.arc(cx, cy, baseRadius * 0.92, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.strokeStyle = `rgba(229, 229, 229, ${0.14 + smoothMid * 0.2})`;
+        ctx.strokeStyle = `rgba(229, 229, 229, ${0.14 + smoothMid * 0.18})`;
         ctx.lineWidth = 1;
         ctx.stroke();
-
-        requestAnimationFrame(renderOrb);
       }
 
       requestAnimationFrame(renderOrb);
@@ -1016,6 +954,7 @@
       let preloadTriggeredForId = null;
       let toastTimer = null;
       let activeSearchTab = "tracks";
+      let lastRenderedTimeStr = "";
 
       const els = {
         statusDot: document.getElementById("status-dot"),
@@ -1163,7 +1102,7 @@
               <button data-queue-idx="${idx}" class="w-full text-left flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors group">
                 <span class="font-mono text-[10px] text-white/30 w-4 text-right">${idx + 1}</span>
                 <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">
-                  ${art ? `<img src="${escapeHtml(art)}" alt="" class="w-full h-full object-cover" />` : ""}
+                  ${art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : ""}
                 </div>
                 <div class="min-w-0 flex-1">
                   <div class="text-xs text-silver truncate group-hover:text-gold transition-colors">${escapeHtml(t.title)}</div>
@@ -1192,6 +1131,7 @@
         els.playlistsContainer.innerHTML = playlists
           .map((pl) => {
             const isExpanded = expandedPlaylistId === pl.id;
+            const count = pl.tracks?.length ? pl.tracks.length : pl.track_count || 0;
             const tracksHtml = isExpanded
               ? pl.tracks.length
                 ? `<div class="mt-2 pt-2 border-t border-white/10 space-y-1 max-h-60 overflow-y-auto">
@@ -1210,7 +1150,7 @@
                       )
                       .join("")}
                   </div>`
-                : `<div class="mt-2 pt-2 border-t border-white/10 font-mono text-[10px] text-white/35">Empty playlist. Click + in the dock while playing to add tracks.</div>`
+                : `<div class="mt-2 pt-2 border-t border-white/10 font-mono text-[10px] text-white/35">Empty playlist.</div>`
               : "";
 
             return `
@@ -1218,12 +1158,10 @@
                 <div class="flex items-center justify-between gap-2">
                   <button data-pl-toggle="${pl.id}" type="button" class="text-left min-w-0 flex-1">
                     <div class="text-xs font-medium text-silver truncate">${escapeHtml(pl.title)}</div>
-                    <div class="font-mono text-[10px] text-white/40">${pl.tracks.length} tracks · ${pl.source === "soundcloud" ? escapeHtml(pl.author || "SC") : "CUSTOM"}</div>
+                    <div class="font-mono text-[10px] text-white/40">${count} tracks · ${pl.source === "soundcloud" ? escapeHtml(pl.author || "SC") : "CUSTOM"}</div>
                   </button>
                   <div class="flex items-center gap-1 shrink-0">
-                    <button data-pl-wave="${pl.id}" type="button" title="Start My Wave from Playlist" class="px-2 py-1 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase transition-colors">
-                      Wave
-                    </button>
+                    <button data-pl-wave="${pl.id}" type="button" title="Start My Wave from Playlist" class="px-2 py-1 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase transition-colors">Wave</button>
                     <button data-pl-del="${pl.id}" type="button" title="Delete Playlist" class="p-1 text-white/35 hover:text-silver">
                       <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M8 6V4h8v2m-1 0v14H9V6h6z"/></svg>
                     </button>
@@ -1236,9 +1174,19 @@
           .join("");
 
         els.playlistsContainer.querySelectorAll("[data-pl-toggle]").forEach((btn) => {
-          btn.addEventListener("click", () => {
+          btn.addEventListener("click", async () => {
             const id = btn.dataset.plToggle;
-            expandedPlaylistId = expandedPlaylistId === id ? null : id;
+            if (expandedPlaylistId === id) {
+              expandedPlaylistId = null;
+              renderPlaylists();
+              return;
+            }
+            expandedPlaylistId = id;
+            const pl = playlists.find((p) => p.id === id);
+            if (pl && pl.source === "soundcloud" && (!pl.tracks || !pl.tracks.length)) {
+              showToast("Loading playlist tracks...");
+              await ensurePlaylistTracks(pl);
+            }
             renderPlaylists();
           });
         });
@@ -1254,14 +1202,17 @@
         els.playlistsContainer.querySelectorAll("[data-pl-wave]").forEach((btn) => {
           btn.addEventListener("click", async () => {
             const pl = playlists.find((p) => p.id === btn.dataset.plWave);
-            if (!pl || !pl.tracks.length) {
+            if (!pl) return;
+            showToast("Starting Wave from playlist...");
+            const tracks = await ensurePlaylistTracks(pl);
+            if (!tracks.length) {
               showToast("Add tracks to this playlist first");
               return;
             }
-            engine.addLikedSeedsBatch(pl.tracks);
-            engine.queue = [...pl.tracks.slice(1, 6)];
-            engine.lastSuccessfulSeed = pl.tracks[0];
-            await playTrack(pl.tracks[0], true);
+            engine.addLikedSeedsBatch(tracks);
+            engine.queue = [...tracks.slice(1, 6)];
+            engine.lastSuccessfulSeed = tracks[0];
+            await playTrack(tracks[0], true);
             showToast(`Started Wave from "${pl.title}"`);
           });
         });
@@ -1306,7 +1257,8 @@
         els.centerMeta.textContent = `${track.user?.username || "Unknown"} · ${track.genre || "WAVE"}`;
         els.timeTotal.textContent = formatTime((track.duration || 0) / 1000);
         els.timeCurrent.textContent = "00:00";
-        els.timelineProgress.style.width = "0%";
+        lastRenderedTimeStr = "00:00";
+        els.timelineProgress.style.transform = "scaleX(0)";
 
         const liked = engine.isLiked(track.id);
         els.iconLike.setAttribute("fill", liked ? "#d4af37" : "none");
@@ -1316,7 +1268,7 @@
 
       async function playTrack(track, pushPrev = true) {
         if (!track) return;
-        initWebAudio();
+        const sessionId = ++playSessionId;
 
         if (pushPrev && engine.currentTrack && engine.currentTrack.id !== track.id) {
           engine.playStack.push(engine.currentTrack);
@@ -1331,27 +1283,37 @@
 
         try {
           const stream = await resolveStreamForTrack(track);
-          if (hlsInstance) {
-            hlsInstance.destroy();
-            hlsInstance = null;
+          if (sessionId !== playSessionId) return;
+
+          try {
+            await attachAndPlayStream(stream.url, stream.protocol, sessionId);
+          } catch (primaryErr) {
+            if (sessionId !== playSessionId) return;
+            if (stream.fallback_url) {
+              await attachAndPlayStream(stream.fallback_url, stream.fallback_protocol, sessionId);
+            } else {
+              throw primaryErr;
+            }
           }
 
-          if (stream.protocol === "hls" && window.Hls && Hls.isSupported()) {
-            hlsInstance = new Hls({ enableWorker: true });
-            hlsInstance.loadSource(stream.url);
-            hlsInstance.attachMedia(audioEl);
-            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-              audioEl.play().catch(() => {});
-            });
-          } else {
-            audioEl.src = stream.url;
-            await audioEl.play();
-          }
-
+          consecutivePlayErrors = 0;
           engine.ensureBuffer(0, track).then(renderStatsAndQueue);
-        } catch {
-          showToast("Stream unavailable — skipping to next");
-          await playNext(false);
+        } catch (err) {
+          if (sessionId !== playSessionId) return;
+          if (err?.name === "NotAllowedError") {
+            showToast("Click Play on the orb to start audio");
+            updatePlayStateIcons(false);
+            return;
+          }
+          consecutivePlayErrors += 1;
+          if (consecutivePlayErrors <= 2 && engine.queue.length > 0) {
+            showToast("Track unavailable — trying next...");
+            await playNext(false);
+          } else {
+            consecutivePlayErrors = 0;
+            showToast("Playback blocked by browser or unavailable track");
+            updatePlayStateIcons(false);
+          }
         }
       }
 
@@ -1406,20 +1368,16 @@
         const likes = data.collection || [];
         const added = engine.addLikedSeedsBatch(likes);
 
-        // Import user's public/private playlists metadata + hydrate first few or on demand
+        // Save playlist metadata immediately (tracks load lazily on expand/Wave)
         const userPlaylists = data.playlists || [];
-        for (const plMeta of userPlaylists.slice(0, 6)) {
-          try {
-            const plRes = await apiFetch(`/api/playlist?id=${encodeURIComponent(plMeta.id)}`);
-            if (plRes.ok) {
-              const plFull = await plRes.json();
-              upsertSoundCloudPlaylist(plFull.playlist, plFull.tracks || []);
-            }
-          } catch {}
+        for (const plMeta of userPlaylists) {
+          upsertSoundCloudPlaylist(plMeta, null);
         }
 
         renderPlaylists();
-        await engine.ensureBuffer(0, engine.lastSuccessfulSeed || likes[0]);
+        if (engine.lastSuccessfulSeed || likes[0]) {
+          await engine.ensureBuffer(0, engine.lastSuccessfulSeed || likes[0]);
+        }
         renderStatsAndQueue();
         showToast(`Connected ${data.user.username}: +${added} seeds, ${userPlaylists.length} playlists`);
       }
@@ -1445,7 +1403,7 @@
           await loadUserProfile(val);
           els.accountModal.classList.add("hidden");
         } catch {
-          showToast("Profile not found");
+          showToast("User not found — try Users search tab");
         }
       });
 
@@ -1475,15 +1433,20 @@
           ? audioEl.duration
           : (engine.currentTrack?.duration || 0) / 1000;
 
-        els.timeCurrent.textContent = formatTime(current);
+        const timeStr = formatTime(current);
+        if (timeStr !== lastRenderedTimeStr) {
+          lastRenderedTimeStr = timeStr;
+          els.timeCurrent.textContent = timeStr;
+        }
+
         if (duration > 0) {
-          els.timeTotal.textContent = formatTime(duration);
-          els.timelineProgress.style.width = `${Math.min(100, (current / duration) * 100)}%`;
+          const ratio = Math.min(1, Math.max(0, current / duration));
+          els.timelineProgress.style.transform = `scaleX(${ratio})`;
 
           const remaining = duration - current;
           if (remaining <= 10 && remaining > 0) {
             if (engine.queue.length < 3 && !engine.isFetching) {
-              engine.ensureBuffer(current / duration).then(renderStatsAndQueue);
+              engine.ensureBuffer(ratio).then(renderStatsAndQueue);
             }
             const next = engine.queue[0];
             if (next && preloadTriggeredForId !== next.id) {
@@ -1503,7 +1466,6 @@
       // TRANSPORT, VIBE PILLS, PLAYLIST POPOVER & DRAWER
       // =========================================================================
       async function togglePlayPause() {
-        initWebAudio();
         if (!engine.currentTrack) {
           if (engine.queue.length > 0) {
             await playTrack(engine.queue.shift(), false);
@@ -1521,7 +1483,7 @@
 
       els.orbToggleBtn.addEventListener("click", togglePlayPause);
       els.btnPlayPause.addEventListener("click", togglePlayPause);
-      els.btnNext.addEventListener("click", () => playNext(true));
+      els.btnNext.addEventListener("click", () => { consecutivePlayErrors = 0; playNext(true); });
 
       els.btnPrev.addEventListener("click", () => {
         if (audioEl.currentTime > 4) {
@@ -1550,7 +1512,6 @@
         else renderStatsAndQueue();
       });
 
-      // Add current track to playlist popover
       els.btnAddToPlaylist.addEventListener("click", (e) => {
         e.stopPropagation();
         if (!engine.currentTrack) {
@@ -1567,9 +1528,7 @@
           return;
         }
         els.addPlaylistOptions.innerHTML = customPls
-          .map(
-            (p) => `<button data-pick-pl="${p.id}" type="button" class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-silver hover:bg-white/[0.06] hover:text-gold truncate transition-colors">${escapeHtml(p.title)}</button>`
-          )
+          .map((p) => `<button data-pick-pl="${p.id}" type="button" class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-silver hover:bg-white/[0.06] hover:text-gold truncate transition-colors">${escapeHtml(p.title)}</button>`)
           .join("");
         els.addPlaylistPopover.classList.toggle("hidden");
 
@@ -1596,7 +1555,6 @@
         }
       });
 
-      // Timeline & Volume
       els.timelineTrack.addEventListener("mousemove", (e) => {
         const rect = els.timelineTrack.getBoundingClientRect();
         const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -1635,7 +1593,6 @@
         els.iconVolOff.classList.toggle("hidden", !audioEl.muted);
       });
 
-      // Vibe pills
       els.vibePills.forEach((btn) => {
         btn.addEventListener("click", async () => {
           engine.toggleFilter(btn.dataset.filter);
@@ -1647,7 +1604,6 @@
         });
       });
 
-      // Drawer & Tabs
       els.btnQueueToggle.addEventListener("click", () => {
         els.queueDrawer.classList.remove("translate-x-full");
         renderStatsAndQueue();
@@ -1702,7 +1658,7 @@
         showToast("Importing playlist...");
         try {
           const res = await apiFetch(`/api/playlist?url=${encodeURIComponent(url)}`);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) throw new Error();
           const data = await res.json();
           const entry = upsertSoundCloudPlaylist(data.playlist, data.tracks || []);
           expandedPlaylistId = entry.id;
@@ -1715,7 +1671,7 @@
       });
 
       // =========================================================================
-      // MULTI-TAB SEARCH (TRACKS / USERS / PLAYLISTS)
+      // MULTI-TAB SEARCH
       // =========================================================================
       els.closeSearchBtn.addEventListener("click", () => els.searchResultsPanel.classList.add("hidden"));
 
@@ -1747,7 +1703,6 @@
         els.searchResultsList.innerHTML = `<div class="px-4 py-6 text-center font-mono text-xs text-white/40">Searching...</div>`;
 
         try {
-          // Direct SoundCloud playlist URL
           if (query.includes("soundcloud.com/") && query.includes("/sets/")) {
             const res = await apiFetch(`/api/playlist?url=${encodeURIComponent(query)}`);
             if (!res.ok) throw new Error();
@@ -1764,7 +1719,6 @@
             return;
           }
 
-          // Direct @username lookup
           if (query.startsWith("@") || (query.includes("soundcloud.com/") && !query.includes("/sets/"))) {
             await loadUserProfile(query);
             els.searchResultsPanel.classList.add("hidden");
@@ -1803,7 +1757,7 @@
             return `
               <button data-res-idx="${i}" type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.04] transition-colors">
                 <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">
-                  ${art ? `<img src="${escapeHtml(art)}" alt="" class="w-full h-full object-cover" />` : ""}
+                  ${art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : ""}
                 </div>
                 <div class="min-w-0 flex-1">
                   <div class="text-xs text-silver truncate">${escapeHtml(t.title)}</div>
@@ -1819,6 +1773,7 @@
           btn.addEventListener("click", () => {
             const track = tracks[Number(btn.dataset.resIdx)];
             if (track) {
+              consecutivePlayErrors = 0;
               engine.queue = [];
               engine.lastSuccessfulSeed = track;
               els.searchResultsPanel.classList.add("hidden");
@@ -1838,7 +1793,7 @@
             (u, i) => `
             <button data-user-idx="${i}" type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.04] transition-colors">
               <div class="w-9 h-9 rounded-full bg-obsidian border border-white/10 overflow-hidden shrink-0">
-                ${u.avatar_url ? `<img src="${escapeHtml(u.avatar_url)}" alt="" class="w-full h-full object-cover" />` : ""}
+                ${u.avatar_url ? `<img src="${escapeHtml(u.avatar_url)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : ""}
               </div>
               <div class="min-w-0 flex-1">
                 <div class="text-xs text-silver truncate">${escapeHtml(u.username)}</div>
@@ -1869,7 +1824,7 @@
             (p, i) => `
             <button data-pl-idx="${i}" type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.04] transition-colors">
               <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">
-                ${p.artwork_url ? `<img src="${escapeHtml(p.artwork_url)}" alt="" class="w-full h-full object-cover" />` : ""}
+                ${p.artwork_url ? `<img src="${escapeHtml(p.artwork_url)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : ""}
               </div>
               <div class="min-w-0 flex-1">
                 <div class="text-xs text-silver truncate">${escapeHtml(p.title)}</div>
@@ -1914,7 +1869,6 @@
         }
       });
 
-      // Init
       renderAccountUI();
       renderFilterPills();
       renderStatsAndQueue();
