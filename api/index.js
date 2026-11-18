@@ -398,42 +398,40 @@ module.exports = async function handler(req, res) {
         return res.status(404).json({ detail: "No playable transcodings available" });
       }
 
-      const progressive =
-        transcodings.find(
-          (t) => t.format?.protocol === "progressive" && (t.format?.mime_type || "").includes("mpeg")
-        ) || transcodings.find((t) => t.format?.protocol === "progressive");
-
-      const hls =
-        transcodings.find(
-          (t) => t.format?.protocol === "hls" && (t.format?.mime_type || "").includes("mpeg")
-        ) || transcodings.find((t) => t.format?.protocol === "hls");
-
-      const primaryTranscoding = progressive || hls || transcodings[0];
-      const fallbackTranscoding =
-        primaryTranscoding === progressive && hls ? hls : primaryTranscoding === hls && progressive ? progressive : null;
+      // Sort transcodings: progressive mpeg -> hls mpeg -> other hls -> anything else
+      const score = (t) => {
+        const proto = t.format?.protocol || "";
+        const mime = t.format?.mime_type || "";
+        if (proto === "progressive" && mime.includes("mpeg")) return 0;
+        if (proto === "progressive") return 1;
+        if (proto === "hls" && mime.includes("mpeg")) return 2;
+        if (proto === "hls") return 3;
+        return 4;
+      };
+      const ordered = [...transcodings].sort((a, b) => score(a) - score(b));
 
       const errors = [];
-      const [primaryRes, fallbackRes] = await Promise.all([
-        resolveTranscoding(primaryTranscoding, trackData.track_authorization, oauthToken).catch((e) => {
-          errors.push(`primary:${e.status || e.message}`);
-          return null;
-        }),
-        fallbackTranscoding
-          ? resolveTranscoding(fallbackTranscoding, trackData.track_authorization, oauthToken).catch((e) => {
-              errors.push(`fallback:${e.status || e.message}`);
-              return null;
-            })
-          : Promise.resolve(null),
-      ]);
+      const resolvedList = [];
+      for (const t of ordered) {
+        try {
+          const r = await resolveTranscoding(t, trackData.track_authorization, oauthToken);
+          if (r?.url) {
+            resolvedList.push(r);
+            if (resolvedList.length >= 2) break;
+          }
+        } catch (e) {
+          errors.push(`${t.format?.protocol || "?"}:${t.format?.mime_type || "?"}->${e.status || e.message}`);
+        }
+      }
 
-      const primary = primaryRes?.url ? primaryRes : fallbackRes;
-      const fallback = primaryRes?.url && fallbackRes?.url ? fallbackRes : null;
+      const primary = resolvedList[0];
+      const fallback = resolvedList[1] || null;
 
       if (!primary?.url) {
         return res.status(502).json({
           detail: "No working stream URL returned by SoundCloud",
           errors,
-          transcodings_count: transcodings.length,
+          formats: ordered.map((t) => t.format),
         });
       }
 
