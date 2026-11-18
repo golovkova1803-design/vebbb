@@ -1,325 +1,1371 @@
-import asyncio
-import logging
-import re
-from contextlib import asynccontextmanager
-from pathlib import Path
-from typing import Any, Optional
-
-import httpx
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("my-wave-server")
-
-SOUNDCLOUD_HOME = "https://soundcloud.com/"
-API_V2_BASE = "https://api-v2.soundcloud.com"
-USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
-)
-
-BASE_DIR = Path(__file__).resolve().parent
-INDEX_HTML_PATH = BASE_DIR / "index.html"
-
-
-class SoundCloudClientManager:
-    def __init__(self) -> None:
-        self._client_id: Optional[str] = None
-        self._lock = asyncio.Lock()
-        self.http = httpx.AsyncClient(
-            timeout=httpx.Timeout(15.0, connect=8.0),
-            headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
-            follow_redirects=True,
-        )
-
-    async def close(self) -> None:
-        await self.http.aclose()
-
-    async def get_client_id(self, force_refresh: bool = False) -> str:
-        if self._client_id and not force_refresh:
-            return self._client_id
-
-        async with self._lock:
-            if self._client_id and not force_refresh:
-                return self._client_id
-
-            logger.info("Scraping SoundCloud public client_id from web bundles...")
-            try:
-                resp = await self.http.get(
-                    SOUNDCLOUD_HOME,
-                    headers={"User-Agent": USER_AGENT, "Accept": "text/html"},
-                )
-                resp.raise_for_status()
-            except httpx.HTTPError as exc:
-                logger.error("Failed to fetch SoundCloud homepage: %s", exc)
-                raise HTTPException(status_code=502, detail="Unable to reach SoundCloud") from exc
-
-            script_urls = re.findall(
-                r'<script[^>]+src="(https://a-v2\.sndcdn\.com/assets/[^"]+\.js)"',
-                resp.text,
-            )
-            if not script_urls:
-                script_urls = re.findall(
-                    r'(https://a-v2\.sndcdn\.com/assets/[^"\s>]+\.js)',
-                    resp.text,
-                )
-
-            # Client ID usually lives in one of the last asset bundles
-            for script_url in reversed(script_urls):
-                try:
-                    js_resp = await self.http.get(
-                        script_url,
-                        headers={"User-Agent": USER_AGENT, "Accept": "*/*"},
-                    )
-                    if js_resp.status_code != 200:
-                        continue
-                    match = re.search(r'client_id\s*:\s*"([a-zA-Z0-9]{32})"', js_resp.text)
-                    if not match:
-                        match = re.search(r'client_id=([a-zA-Z0-9]{32})', js_resp.text)
-                    if match:
-                        self._client_id = match.group(1)
-                        logger.info("Cached SoundCloud client_id: %s...", self._client_id[:8])
-                        return self._client_id
-                except httpx.HTTPError:
-                    continue
-
-            raise HTTPException(
-                status_code=502,
-                detail="Failed to extract SoundCloud client_id from web bundles",
-            )
-
-    async def request_v2(
-        self,
-        url: str,
-        params: Optional[dict[str, Any]] = None,
-        retry_on_auth: bool = True,
-    ) -> dict[str, Any]:
-        client_id = await self.get_client_id()
-        merged_params = dict(params or {})
-        merged_params["client_id"] = client_id
-
-        try:
-            resp = await self.http.get(url, params=merged_params)
-        except httpx.HTTPError as exc:
-            logger.error("SoundCloud API request error for %s: %s", url, exc)
-            raise HTTPException(status_code=502, detail=f"SoundCloud upstream error: {exc}") from exc
-
-        if resp.status_code in (401, 403) and retry_on_auth:
-            logger.warning("Received %s from SoundCloud; refreshing client_id...", resp.status_code)
-            client_id = await self.get_client_id(force_refresh=True)
-            merged_params["client_id"] = client_id
-            resp = await self.http.get(url, params=merged_params)
-
-        if resp.status_code == 404:
-            raise HTTPException(status_code=404, detail="SoundCloud resource not found")
-
-        if resp.status_code >= 400:
-            logger.error("SoundCloud API %s returned %s: %s", url, resp.status_code, resp.text[:300])
-            raise HTTPException(
-                status_code=resp.status_code,
-                detail=f"SoundCloud API error ({resp.status_code})",
-            )
-
-        return resp.json()
-
-
-sc_manager = SoundCloudClientManager()
-
-
-def normalize_track(raw: dict[str, Any]) -> Optional[dict[str, Any]]:
-    if not isinstance(raw, dict) or not raw.get("id"):
-        return None
-    transcodings = (raw.get("media") or {}).get("transcodings") or []
-    if not transcodings:
-        return None
-
-    user = raw.get("user") or {}
-    artwork = raw.get("artwork_url") or user.get("avatar_url") or ""
-
-    return {
-        "id": raw["id"],
-        "title": raw.get("title") or "Untitled",
-        "duration": raw.get("duration") or 0,
-        "artwork_url": artwork,
-        "playback_count": raw.get("playback_count") or 0,
-        "likes_count": raw.get("likes_count") or 0,
-        "genre": raw.get("genre") or "",
-        "tag_list": raw.get("tag_list") or "",
-        "permalink_url": raw.get("permalink_url") or "",
-        "track_authorization": raw.get("track_authorization") or "",
-        "user": {
-            "id": user.get("id"),
-            "username": user.get("username") or "Unknown Artist",
-            "permalink": user.get("permalink") or "",
-            "avatar_url": user.get("avatar_url") or "",
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MY WAVE — SoundCloud Discovery Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#050505',
+            surface: '#0d0d0d',
+            silver: '#e5e5e5',
+            gold: '#d4af37',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
         },
-        "media": {
-            "transcodings": transcodings,
-        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
     }
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #050505;
+      color: #e5e5e5;
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+    .glass-surface {
+      background: rgba(13, 13, 13, 0.78);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+    /* Custom thin range inputs */
+    input[type="range"].volume-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255, 255, 255, 0.12);
+      height: 3px;
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"].volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #e5e5e5;
+      border: 1px solid #050505;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    input[type="range"].volume-slider:hover::-webkit-slider-thumb {
+      transform: scale(1.25);
+      background: #d4af37;
+    }
+    input[type="range"].volume-slider::-moz-range-thumb {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #e5e5e5;
+      border: 1px solid #050505;
+    }
+    /* Minimalist scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(212, 175, 55, 0.45);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-obsidian text-silver selection:bg-gold/20 selection:text-gold flex flex-col justify-between relative">
 
+  <!-- Ambient subtle radial vignette -->
+  <div class="pointer-events-none fixed inset-0 z-0" style="background: radial-gradient(circle at 50% 42%, rgba(212, 175, 55, 0.04) 0%, rgba(5, 5, 5, 0) 58%);"></div>
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    try:
-        await sc_manager.get_client_id()
-    except Exception as exc:
-        logger.warning("Startup client_id pre-fetch failed (will retry on demand): %s", exc)
-    yield
-    await sc_manager.close()
+  <!-- Top Navigation & Seed / Search Bar -->
+  <header class="relative z-30 w-full max-w-6xl mx-auto px-5 pt-5 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+      <div class="flex items-center gap-2.5">
+        <span id="status-dot" class="w-2 h-2 rounded-full bg-white/30 transition-colors duration-300"></span>
+        <span class="text-xs font-medium tracking-[0.22em] uppercase text-silver">MY WAVE</span>
+      </div>
+      <div class="font-mono text-[11px] text-white/40 border border-white/10 rounded-full px-2.5 py-0.5 glass">
+        <span id="seed-stats-label">SEEDS 0 · QUEUE 0</span>
+      </div>
+    </div>
 
+    <!-- Search & Username Seed Input -->
+    <div class="relative w-full sm:w-[440px]">
+      <form id="search-form" class="flex items-center glass border border-white/10 rounded-full px-3.5 py-1.5 focus-within:border-gold/50 transition-colors duration-200">
+        <svg class="w-4 h-4 text-white/45 shrink-0 mr-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input
+          id="search-input"
+          type="text"
+          autocomplete="off"
+          placeholder="Search track or @username for likes..."
+          class="w-full bg-transparent text-xs text-silver placeholder-white/35 focus:outline-none"
+        />
+        <button
+          type="submit"
+          id="search-submit-btn"
+          class="ml-2 text-[11px] font-mono uppercase tracking-wider text-white/60 hover:text-gold transition-colors shrink-0"
+        >
+          Go
+        </button>
+      </form>
 
-app = FastAPI(title="My Wave — SoundCloud API v2 Proxy", lifespan=lifespan)
+      <!-- Search Results Dropdown -->
+      <div
+        id="search-results-panel"
+        class="hidden absolute left-0 right-0 mt-2 bg-surface/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-80 overflow-y-auto"
+      >
+        <div class="px-3.5 py-2 border-b border-white/10 flex items-center justify-between">
+          <span id="search-results-header" class="font-mono text-[11px] text-white/50 uppercase tracking-wider">Results</span>
+          <button id="close-search-btn" type="button" class="text-white/40 hover:text-silver transition-colors">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div id="search-results-list" class="divide-y divide-white/[0.06]"></div>
+      </div>
+    </div>
+  </header>
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+  <!-- Main Centerpiece: Orb + Vibe Pills -->
+  <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pb-36 pt-4">
+    <!-- Now Playing Subtle Header -->
+    <div class="text-center mb-3 max-w-md px-4 min-h-[44px] flex flex-col items-center justify-center">
+      <p id="center-track-title" class="text-sm font-medium text-silver tracking-tight truncate max-w-full">
+        Select a track or @username to start My Wave
+      </p>
+      <p id="center-track-meta" class="font-mono text-[11px] text-white/45 mt-0.5 truncate max-w-full">
+        IDLE · READY
+      </p>
+    </div>
 
+    <!-- Energy Sphere Canvas -->
+    <div class="relative flex items-center justify-center my-1">
+      <button
+        id="orb-toggle-btn"
+        type="button"
+        aria-label="Toggle Play or Pause"
+        class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-300 active:scale-[0.98]"
+      >
+        <canvas id="wave-orb-canvas" class="block w-[260px] h-[260px] sm:w-[320px] sm:h-[320px]"></canvas>
+        <!-- Subtle Play/Pause center hint on hover -->
+        <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div class="w-11 h-11 rounded-full glass border border-white/15 flex items-center justify-center text-silver">
+            <svg id="orb-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="6 3 20 12 6 21 6 3"></polygon>
+            </svg>
+            <svg id="orb-icon-pause" class="hidden w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="10" x2="10" y1="4" y2="20"></line>
+              <line x1="14" x2="14" y1="4" y2="20"></line>
+            </svg>
+          </div>
+        </div>
+      </button>
+    </div>
 
-@app.get("/")
-async def serve_index():
-    if not INDEX_HTML_PATH.exists():
-        raise HTTPException(status_code=404, detail="index.html not found")
-    return FileResponse(INDEX_HTML_PATH, media_type="text/html")
+    <!-- Interactive Vibe & Discovery Pills -->
+    <div id="vibe-pills-container" class="mt-5 flex flex-wrap items-center justify-center gap-2 max-w-xl">
+      <button data-filter="bodroe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Бодрое</button>
+      <button data-filter="spokoynoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Спокойное</button>
+      <button data-filter="tyomnoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Тёмное</button>
+      <button data-filter="lyubimoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Любимое</button>
+      <button data-filter="neznakomoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Незнакомое</button>
+      <button data-filter="andegraund" type="button" class="vibe-pill glass border border-white/10 rounded-full px-3.5 py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 transition-all duration-200">Андеграунд</button>
+    </div>
 
+    <!-- Subtle Seed / Toast Feedback -->
+    <p id="engine-toast" class="mt-4 font-mono text-[11px] text-gold/85 h-4 opacity-0 transition-opacity duration-300 text-center"></p>
+  </main>
 
-@app.get("/api/health")
-async def health_check():
-    client_id = await sc_manager.get_client_id()
-    return {"status": "ok", "client_id_cached": bool(client_id)}
+  <!-- Floating Frosted Bottom Dock -->
+  <footer class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-5xl z-40">
+    <div class="glass-surface border border-white/10 rounded-2xl px-4 py-3 shadow-2xl">
+      <!-- Scrubbing Timeline with Hover Preview -->
+      <div class="relative mb-2.5 group">
+        <div
+          id="timeline-hover-tooltip"
+          class="pointer-events-none hidden absolute -top-7 -translate-x-1/2 bg-surface border border-white/15 rounded px-1.5 py-0.5 font-mono text-[10px] text-silver shadow-lg"
+        >
+          00:00
+        </div>
+        <div
+          id="timeline-track"
+          class="relative w-full h-1.5 bg-white/10 rounded-full cursor-pointer overflow-hidden group-hover:h-2 transition-all duration-150"
+        >
+          <div id="timeline-hover-bar" class="absolute inset-y-0 left-0 bg-white/20 pointer-events-none w-0"></div>
+          <div id="timeline-progress" class="absolute inset-y-0 left-0 bg-gradient-to-r from-silver to-gold rounded-full w-0 transition-[width] duration-75"></div>
+        </div>
+      </div>
 
+      <!-- Dock Controls Row -->
+      <div class="flex items-center justify-between gap-3">
+        <!-- Left: Artwork + Track Info -->
+        <div class="flex items-center gap-3 min-w-0 flex-1">
+          <div class="w-11 h-11 rounded-lg bg-surface border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+            <img id="dock-artwork" src="" alt="" class="hidden w-full h-full object-cover" />
+            <svg id="dock-artwork-fallback" class="w-5 h-5 text-white/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13"></path>
+              <circle cx="6" cy="18" r="3"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <div id="dock-title" class="text-xs sm:text-sm font-medium text-silver truncate">No track loaded</div>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span id="dock-artist" class="text-[11px] text-white/50 truncate">—</span>
+              <span class="font-mono text-[10px] text-white/35 shrink-0">
+                <span id="time-current">00:00</span> / <span id="time-total">00:00</span>
+              </span>
+            </div>
+          </div>
+        </div>
 
-@app.get("/api/search")
-async def search_tracks(q: str = Query(..., min_length=1), limit: int = Query(20, ge=1, le=50)):
-    data = await sc_manager.request_v2(
-        f"{API_V2_BASE}/search/tracks",
-        params={"q": q, "limit": limit, "offset": 0},
-    )
-    tracks = []
-    for item in data.get("collection", []):
-        norm = normalize_track(item)
-        if norm:
-            tracks.append(norm)
-    return JSONResponse({"collection": tracks})
+        <!-- Center: Transport + Like/Dislike -->
+        <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          <!-- Dislike (Skip Learning) -->
+          <button
+            id="btn-dislike"
+            type="button"
+            title="Dislike & Blacklist"
+            class="p-2 rounded-full text-white/45 hover:text-silver hover:bg-white/[0.05] transition-colors"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 14V2"></path>
+              <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"></path>
+            </svg>
+          </button>
 
+          <!-- Previous -->
+          <button
+            id="btn-prev"
+            type="button"
+            title="Previous Track"
+            class="p-2 rounded-full text-white/60 hover:text-silver hover:bg-white/[0.05] transition-colors"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="19 20 9 12 19 4 19 20"></polygon>
+              <line x1="5" x2="5" y1="19" y2="5"></line>
+            </svg>
+          </button>
 
-@app.get("/api/user/likes")
-async def get_user_likes(username: str = Query(..., min_length=1), limit: int = Query(40, ge=1, le=100)):
-    clean_username = username.strip().lstrip("@")
-    if clean_username.startswith("http://") or clean_username.startswith("https://"):
-        profile_url = clean_username
-    else:
-        profile_url = f"https://soundcloud.com/{clean_username}"
+          <!-- Play / Pause -->
+          <button
+            id="btn-play-pause"
+            type="button"
+            title="Play / Pause"
+            class="w-9 h-9 rounded-full border border-white/15 bg-white/[0.06] hover:border-gold/60 text-silver flex items-center justify-center transition-all"
+          >
+            <svg id="dock-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="6 3 20 12 6 21 6 3"></polygon>
+            </svg>
+            <svg id="dock-icon-pause" class="hidden w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="10" x2="10" y1="4" y2="20"></line>
+              <line x1="14" x2="14" y1="4" y2="20"></line>
+            </svg>
+          </button>
 
-    user_data = await sc_manager.request_v2(
-        f"{API_V2_BASE}/resolve",
-        params={"url": profile_url},
-    )
-    user_id = user_data.get("id")
-    if not user_id or user_data.get("kind") != "user":
-        raise HTTPException(status_code=404, detail="SoundCloud user profile not found")
+          <!-- Next -->
+          <button
+            id="btn-next"
+            type="button"
+            title="Next Track"
+            class="p-2 rounded-full text-white/60 hover:text-silver hover:bg-white/[0.05] transition-colors"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 4 15 12 5 20 5 4"></polygon>
+              <line x1="19" x2="19" y1="5" y2="19"></line>
+            </svg>
+          </button>
 
-    likes_data = await sc_manager.request_v2(
-        f"{API_V2_BASE}/users/{user_id}/likes",
-        params={"limit": limit, "offset": 0},
-    )
+          <!-- Like (Add to Seeds) -->
+          <button
+            id="btn-like"
+            type="button"
+            title="Like & Add to Wave Seeds"
+            class="p-2 rounded-full text-white/45 hover:text-gold hover:bg-white/[0.05] transition-colors"
+          >
+            <svg id="icon-like" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+            </svg>
+          </button>
+        </div>
 
-    tracks = []
-    for entry in likes_data.get("collection", []):
-        raw_track = entry.get("track")
-        if raw_track:
-            norm = normalize_track(raw_track)
-            if norm:
-                tracks.append(norm)
+        <!-- Right: Volume + Queue Toggle -->
+        <div class="hidden md:flex items-center gap-3 shrink-0">
+          <button id="btn-mute" type="button" class="text-white/50 hover:text-silver transition-colors">
+            <svg id="icon-vol-on" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <svg id="icon-vol-off" class="hidden w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="22" x2="16" y1="9" y2="15"></line>
+              <line x1="16" x2="22" y1="9" y2="15"></line>
+            </svg>
+          </button>
+          <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.85" class="volume-slider w-20" />
+        </div>
 
-    return JSONResponse(
-        {
-            "user": {
-                "id": user_id,
-                "username": user_data.get("username"),
-                "permalink": user_data.get("permalink"),
-            },
-            "collection": tracks,
+        <button
+          id="btn-queue-toggle"
+          type="button"
+          title="Wave Queue & Engine State"
+          class="p-2 rounded-full border border-white/10 text-white/60 hover:text-silver hover:border-white/25 transition-colors shrink-0"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" x2="21" y1="6" y2="6"></line>
+            <line x1="8" x2="21" y1="12" y2="12"></line>
+            <line x1="8" x2="21" y1="18" y2="18"></line>
+            <line x1="3" x2="3.01" y1="6" y2="6"></line>
+            <line x1="3" x2="3.01" y1="12" y2="12"></line>
+            <line x1="3" x2="3.01" y1="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Queue & Wave Engine Drawer -->
+  <aside
+    id="queue-drawer"
+    class="fixed top-0 right-0 h-full w-full sm:w-96 bg-surface/95 backdrop-blur-2xl border-l border-white/10 z-50 transform translate-x-full transition-transform duration-300 flex flex-col"
+  >
+    <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+      <div>
+        <h2 class="text-xs font-medium uppercase tracking-[0.2em] text-silver">Wave Buffer</h2>
+        <p id="drawer-seed-info" class="font-mono text-[11px] text-white/45 mt-0.5">SEED: NONE</p>
+      </div>
+      <button id="btn-queue-close" type="button" class="p-1.5 text-white/45 hover:text-silver transition-colors">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Engine Stats Grid -->
+    <div class="grid grid-cols-3 gap-px bg-white/10 border-b border-white/10">
+      <div class="bg-surface px-3 py-2.5 text-center">
+        <div id="stat-seeds" class="font-mono text-sm text-gold">0</div>
+        <div class="font-mono text-[10px] text-white/40 uppercase">Seeds</div>
+      </div>
+      <div class="bg-surface px-3 py-2.5 text-center">
+        <div id="stat-history" class="font-mono text-sm text-silver">0</div>
+        <div class="font-mono text-[10px] text-white/40 uppercase">Played</div>
+      </div>
+      <div class="bg-surface px-3 py-2.5 text-center">
+        <div id="stat-blacklist" class="font-mono text-sm text-white/60">0</div>
+        <div class="font-mono text-[10px] text-white/40 uppercase">Blocked</div>
+      </div>
+    </div>
+
+    <!-- Upcoming Queue List -->
+    <div id="queue-list" class="flex-1 overflow-y-auto divide-y divide-white/[0.06] px-2 py-2"></div>
+
+    <!-- Drawer Footer Actions -->
+    <div class="p-4 border-t border-white/10 flex items-center justify-between gap-2">
+      <button
+        id="btn-refresh-buffer"
+        type="button"
+        class="flex-1 py-2 rounded-lg glass border border-white/10 hover:border-gold/50 text-xs text-silver transition-colors"
+      >
+        Regenerate Wave
+      </button>
+      <button
+        id="btn-reset-engine"
+        type="button"
+        class="px-3 py-2 rounded-lg glass border border-white/10 hover:border-white/30 font-mono text-[11px] text-white/50 hover:text-silver transition-colors"
+      >
+        Reset
+      </button>
+    </div>
+  </aside>
+
+  <!-- Hidden HTML5 Audio Element -->
+  <audio id="audio-element" crossorigin="anonymous" preload="auto"></audio>
+
+  <script>
+    (() => {
+      "use strict";
+
+      // =========================================================================
+      // UTILITIES
+      // =========================================================================
+      function formatTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      }
+
+      function getHighResArtwork(url) {
+        if (!url) return "";
+        return url.replace("-large.jpg", "-t500x500.jpg").replace("-large.png", "-t500x500.png");
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      // =========================================================================
+      // WAVE ENGINE (CLIENT-SIDE RECOMMENDATION & PERSISTENCE)
+      // =========================================================================
+      const STORAGE_KEY = "my_wave_engine_v1";
+
+      const VIBE_KEYWORDS = {
+        bodroe: ["drum", "dnb", "house", "techno", "electro", "dance", "edm", "trap", "hyperpop", "fast", "upbeat", "energy", "rave", "breakbeat", "garage"],
+        spokoynoe: ["ambient", "chill", "lofi", "lo-fi", "acoustic", "piano", "downtempo", "sleep", "calm", "meditation", "jazz", "drone", "soft", "instrumental"],
+        tyomnoe: ["dark", "phonk", "witch", "industrial", "goth", "minimal", "deep", "shadow", "noir", "acid", "doom", "hard", "wave", "night"],
+      };
+
+      class WaveEngine {
+        constructor() {
+          this.likedSeeds = [];
+          this.history = [];
+          this.recentCompleted = [];
+          this.blacklist = { tracks: [], artists: [] };
+          this.activeFilters = {
+            bodroe: false,
+            spokoynoe: false,
+            tyomnoe: false,
+            lyubimoe: false,
+            neznakomoe: false,
+            andegraund: false,
+          };
+          this.queue = [];
+          this.playStack = [];
+          this.currentTrack = null;
+          this.lastSuccessfulSeed = null;
+          this.isFetching = false;
+          this.loadState();
         }
-    )
 
-
-@app.get("/api/wave/related")
-async def get_related_tracks(track_id: int = Query(...), limit: int = Query(25, ge=1, le=50)):
-    data = await sc_manager.request_v2(
-        f"{API_V2_BASE}/tracks/{track_id}/related",
-        params={"limit": limit, "offset": 0},
-    )
-    tracks = []
-    for item in data.get("collection", []):
-        norm = normalize_track(item)
-        if norm:
-            tracks.append(norm)
-    return JSONResponse({"collection": tracks})
-
-
-@app.get("/api/stream")
-async def resolve_stream(track_id: int = Query(...)):
-    track_data = await sc_manager.request_v2(f"{API_V2_BASE}/tracks/{track_id}")
-    transcodings = (track_data.get("media") or {}).get("transcodings") or []
-    if not transcodings:
-        raise HTTPException(status_code=404, detail="No playable transcodings available for this track")
-
-    # Prefer progressive MP3, fall back to HLS
-    selected = None
-    for t in transcodings:
-        fmt = t.get("format") or {}
-        if fmt.get("protocol") == "progressive" and "mpeg" in (fmt.get("mime_type") or ""):
-            selected = t
-            break
-
-    if not selected:
-        for t in transcodings:
-            if (t.get("format") or {}).get("protocol") == "progressive":
-                selected = t
-                break
-
-    if not selected:
-        for t in transcodings:
-            fmt = t.get("format") or {}
-            if fmt.get("protocol") == "hls" and "mpeg" in (fmt.get("mime_type") or ""):
-                selected = t
-                break
-
-    if not selected:
-        selected = transcodings[0]
-
-    transcoding_url = selected.get("url")
-    if not transcoding_url:
-        raise HTTPException(status_code=502, detail="Invalid transcoding URL")
-
-    params: dict[str, Any] = {}
-    if track_data.get("track_authorization"):
-        params["track_authorization"] = track_data["track_authorization"]
-
-    resolved = await sc_manager.request_v2(transcoding_url, params=params)
-    stream_url = resolved.get("url")
-    if not stream_url:
-        raise HTTPException(status_code=502, detail="SoundCloud did not return a stream URL")
-
-    fmt = selected.get("format") or {}
-    return JSONResponse(
-        {
-            "url": stream_url,
-            "protocol": fmt.get("protocol", "hls"),
-            "mime_type": fmt.get("mime_type", "audio/mpeg"),
-            "duration": track_data.get("duration", 0),
+        loadState() {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed.likedSeeds)) this.likedSeeds = parsed.likedSeeds;
+            if (Array.isArray(parsed.history)) this.history = parsed.history;
+            if (Array.isArray(parsed.recentCompleted)) this.recentCompleted = parsed.recentCompleted;
+            if (parsed.blacklist) {
+              this.blacklist = {
+                tracks: Array.isArray(parsed.blacklist.tracks) ? parsed.blacklist.tracks : [],
+                artists: Array.isArray(parsed.blacklist.artists) ? parsed.blacklist.artists : [],
+              };
+            }
+            if (parsed.activeFilters) {
+              this.activeFilters = { ...this.activeFilters, ...parsed.activeFilters };
+            }
+          } catch (err) {
+            console.warn("Failed to restore WaveEngine state:", err);
+          }
         }
-    )
 
+        saveState() {
+          try {
+            const payload = {
+              likedSeeds: this.likedSeeds.slice(-150),
+              history: this.history.slice(-500),
+              recentCompleted: this.recentCompleted.slice(-50),
+              blacklist: {
+                tracks: this.blacklist.tracks.slice(-500),
+                artists: this.blacklist.artists.slice(-300),
+              },
+              activeFilters: this.activeFilters,
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+          } catch (err) {
+            console.warn("Failed to persist WaveEngine state:", err);
+          }
+        }
 
-if __name__ == "__main__":
-    import uvicorn
+        resetState() {
+          this.likedSeeds = [];
+          this.history = [];
+          this.recentCompleted = [];
+          this.blacklist = { tracks: [], artists: [] };
+          this.queue = [];
+          localStorage.removeItem(STORAGE_KEY);
+        }
 
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=False)
+        isLiked(trackId) {
+          return this.likedSeeds.some((t) => t.id === trackId);
+        }
+
+        toggleLike(track) {
+          if (!track) return false;
+          const idx = this.likedSeeds.findIndex((t) => t.id === track.id);
+          let added = false;
+          if (idx >= 0) {
+            this.likedSeeds.splice(idx, 1);
+          } else {
+            this.likedSeeds.push(track);
+            this.lastSuccessfulSeed = track;
+            added = true;
+          }
+          this.saveState();
+          return added;
+        }
+
+        addLikedSeedsBatch(tracks) {
+          let count = 0;
+          for (const t of tracks) {
+            if (!this.isBlacklisted(t) && !this.isLiked(t.id)) {
+              this.likedSeeds.push(t);
+              count++;
+            }
+          }
+          if (this.likedSeeds.length > 0 && !this.lastSuccessfulSeed) {
+            this.lastSuccessfulSeed = this.likedSeeds[0];
+          }
+          this.saveState();
+          return count;
+        }
+
+        isBlacklisted(track) {
+          if (!track) return true;
+          if (this.blacklist.tracks.includes(track.id)) return true;
+          const artistId = track.user?.id;
+          if (artistId && this.blacklist.artists.includes(artistId)) return true;
+          return false;
+        }
+
+        markPlayed(track) {
+          if (!track) return;
+          if (!this.history.includes(track.id)) {
+            this.history.push(track.id);
+          }
+          this.saveState();
+        }
+
+        markCompleted(track) {
+          if (!track) return;
+          this.lastSuccessfulSeed = track;
+          if (!this.recentCompleted.some((t) => t.id === track.id)) {
+            this.recentCompleted.push(track);
+            if (this.recentCompleted.length > 30) this.recentCompleted.shift();
+          }
+          this.saveState();
+        }
+
+        blacklistAndFlush(track) {
+          if (!track) return;
+          if (!this.blacklist.tracks.includes(track.id)) {
+            this.blacklist.tracks.push(track.id);
+          }
+          if (track.user?.id && !this.blacklist.artists.includes(track.user.id)) {
+            this.blacklist.artists.push(track.user.id);
+          }
+          this.queue = [];
+          this.saveState();
+        }
+
+        toggleFilter(key) {
+          if (!(key in this.activeFilters)) return;
+          this.activeFilters[key] = !this.activeFilters[key];
+          this.saveState();
+        }
+
+        selectSeed(playedRatio = 0) {
+          const candidates = [];
+
+          if (this.activeFilters.lyubimoe && this.likedSeeds.length > 0) {
+            const pick = this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)];
+            return pick;
+          }
+
+          const roll = Math.random();
+          if (roll < 0.60 && this.currentTrack && playedRatio > 0.5 && !this.isBlacklisted(this.currentTrack)) {
+            return this.currentTrack;
+          }
+          if (roll < 0.85 && this.likedSeeds.length > 0) {
+            return this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)];
+          }
+          if (this.recentCompleted.length > 0) {
+            return this.recentCompleted[Math.floor(Math.random() * this.recentCompleted.length)];
+          }
+
+          if (this.lastSuccessfulSeed && !this.isBlacklisted(this.lastSuccessfulSeed)) {
+            candidates.push(this.lastSuccessfulSeed);
+          }
+          if (this.currentTrack && !this.isBlacklisted(this.currentTrack)) {
+            candidates.push(this.currentTrack);
+          }
+          if (this.likedSeeds.length > 0) {
+            candidates.push(this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)]);
+          }
+          return candidates[0] || null;
+        }
+
+        matchesFilters(track, strict = true) {
+          if (!track || track.duration < 60000) return false;
+          if (this.isBlacklisted(track)) return false;
+          if (this.history.includes(track.id)) return false;
+          if (this.queue.some((q) => q.id === track.id)) return false;
+          if (this.currentTrack && this.currentTrack.id === track.id) return false;
+
+          if (!strict) return true;
+
+          if (this.activeFilters.andegraund && (track.playback_count || 0) > 50000) {
+            return false;
+          }
+          if (this.activeFilters.neznakomoe && (track.playback_count || 0) > 150000) {
+            return false;
+          }
+
+          const vibeText = `${track.genre || ""} ${track.tag_list || ""} ${track.title || ""}`.toLowerCase();
+          const activeVibes = ["bodroe", "spokoynoe", "tyomnoe"].filter((k) => this.activeFilters[k]);
+          if (activeVibes.length > 0) {
+            const matched = activeVibes.some((vibeKey) =>
+              VIBE_KEYWORDS[vibeKey].some((kw) => vibeText.includes(kw))
+            );
+            if (!matched) return false;
+          }
+
+          return true;
+        }
+
+        async ensureBuffer(playedRatio = 0, forceSeed = null) {
+          if (this.isFetching) return;
+          if (this.queue.length >= 3) return;
+
+          const seed = forceSeed || this.selectSeed(playedRatio);
+          if (!seed) return;
+
+          this.isFetching = true;
+          try {
+            const res = await fetch(`/api/wave/related?track_id=${encodeURIComponent(seed.id)}&limit=25`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const pool = Array.isArray(data.collection) ? data.collection : [];
+
+            let filtered = pool.filter((t) => this.matchesFilters(t, true));
+            if (filtered.length < 2) {
+              // Relax vibe keyword/playcount filter if strict filter yields too few tracks
+              filtered = pool.filter((t) => this.matchesFilters(t, false));
+            }
+
+            // Shuffle slightly for discovery variety
+            for (let i = filtered.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+            }
+
+            const needed = Math.max(0, 6 - this.queue.length);
+            this.queue.push(...filtered.slice(0, needed));
+            this.lastSuccessfulSeed = seed;
+          } catch (err) {
+            console.warn("WaveEngine buffer fetch failed:", err);
+          } finally {
+            this.isFetching = false;
+          }
+        }
+      }
+
+      // =========================================================================
+      // AUDIO ENGINE & WEB AUDIO API ANALYSER
+      // =========================================================================
+      const audioEl = document.getElementById("audio-element");
+      let hlsInstance = null;
+      let audioCtx = null;
+      let analyser = null;
+      let sourceNode = null;
+      let freqData = null;
+
+      function initWebAudio() {
+        if (audioCtx) {
+          if (audioCtx.state === "suspended") {
+            audioCtx.resume().catch(() => {});
+          }
+          return;
+        }
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContextClass();
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.82;
+          sourceNode = audioCtx.createMediaElementSource(audioEl);
+          sourceNode.connect(analyser);
+          analyser.connect(audioCtx.destination);
+          freqData = new Uint8Array(analyser.frequencyBinCount);
+        } catch (err) {
+          console.warn("Web Audio API init fallback:", err);
+        }
+      }
+
+      async function resolveStreamForTrack(track) {
+        if (track._resolvedStream) return track._resolvedStream;
+        const res = await fetch(`/api/stream?track_id=${encodeURIComponent(track.id)}`);
+        if (!res.ok) throw new Error(`Stream resolve error ${res.status}`);
+        const data = await res.json();
+        track._resolvedStream = data;
+        return data;
+      }
+
+      // =========================================================================
+      // REACTIVE ENERGY SPHERE CANVAS
+      // =========================================================================
+      const canvas = document.getElementById("wave-orb-canvas");
+      const ctx = canvas.getContext("2d");
+      let orbPhase = 0;
+      let smoothBass = 0;
+      let smoothMid = 0;
+
+      function resizeOrbCanvas() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      window.addEventListener("resize", resizeOrbCanvas);
+      resizeOrbCanvas();
+
+      function renderOrb() {
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        const cx = w / 2;
+        const cy = h / 2;
+
+        let targetBass = 0;
+        let targetMid = 0;
+        const isPlaying = !audioEl.paused && !audioEl.ended;
+
+        if (isPlaying && analyser && freqData) {
+          analyser.getByteFrequencyData(freqData);
+          // Sub-bass: bins 0..5, Mid: bins 6..28
+          let bSum = 0;
+          for (let i = 0; i < 6; i++) bSum += freqData[i] || 0;
+          let mSum = 0;
+          for (let i = 6; i < 28; i++) mSum += freqData[i] || 0;
+          targetBass = bSum / (6 * 255);
+          targetMid = mSum / (22 * 255);
+
+          // Fallback gentle pulse if stream is CORS-muted in analyser
+          if (targetBass === 0 && targetMid === 0) {
+            targetBass = 0.14 + Math.sin(orbPhase * 2.2) * 0.06;
+            targetMid = 0.12 + Math.cos(orbPhase * 3.1) * 0.05;
+          }
+        } else if (isPlaying) {
+          targetBass = 0.14 + Math.sin(orbPhase * 2.2) * 0.06;
+          targetMid = 0.12 + Math.cos(orbPhase * 3.1) * 0.05;
+        }
+
+        smoothBass += (targetBass - smoothBass) * 0.16;
+        smoothMid += (targetMid - smoothMid) * 0.14;
+        orbPhase += isPlaying ? 0.018 + smoothMid * 0.03 : 0.008;
+
+        ctx.clearRect(0, 0, w, h);
+
+        const baseRadius = Math.min(w, h) * 0.28 + smoothBass * 18;
+
+        // Outer ambient gold/silver aura
+        const aura = ctx.createRadialGradient(cx, cy, baseRadius * 0.3, cx, cy, baseRadius * 1.75);
+        aura.addColorStop(0, `rgba(212, 175, 55, ${0.12 + smoothBass * 0.22})`);
+        aura.addColorStop(0.55, `rgba(229, 229, 229, ${0.04 + smoothMid * 0.08})`);
+        aura.addColorStop(1, "rgba(5, 5, 5, 0)");
+        ctx.fillStyle = aura;
+        ctx.beginPath();
+        ctx.arc(cx, cy, baseRadius * 1.75, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Harmonic energy rings
+        const ringCount = 3;
+        for (let r = 0; r < ringCount; r++) {
+          const points = 96;
+          const ringOffset = r * 0.9;
+          const amp = (4 + smoothBass * 16 + smoothMid * 10) * (1 - r * 0.2);
+
+          ctx.beginPath();
+          for (let i = 0; i <= points; i++) {
+            const angle = (i / points) * Math.PI * 2;
+            const wave1 = Math.sin(angle * 3 + orbPhase * 1.6 + ringOffset) * amp * 0.55;
+            const wave2 = Math.cos(angle * 5 - orbPhase * 2.1 + ringOffset) * amp * 0.45;
+            const radius = baseRadius + r * 7 + wave1 + wave2;
+            const x = cx + Math.cos(angle) * radius;
+            const y = cy + Math.sin(angle) * radius;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+
+          if (r === 0) {
+            ctx.strokeStyle = `rgba(212, 175, 55, ${0.42 + smoothBass * 0.45})`;
+            ctx.lineWidth = 1.4;
+          } else {
+            ctx.strokeStyle = `rgba(229, 229, 229, ${0.22 - r * 0.05 + smoothMid * 0.25})`;
+            ctx.lineWidth = 0.9;
+          }
+          ctx.stroke();
+        }
+
+        // Core obsidian sphere with subtle silver rim
+        const coreGrad = ctx.createRadialGradient(
+          cx - baseRadius * 0.25,
+          cy - baseRadius * 0.25,
+          baseRadius * 0.1,
+          cx,
+          cy,
+          baseRadius * 0.92
+        );
+        coreGrad.addColorStop(0, "rgba(229, 229, 229, 0.14)");
+        coreGrad.addColorStop(0.55, "rgba(18, 18, 18, 0.92)");
+        coreGrad.addColorStop(1, "rgba(5, 5, 5, 0.98)");
+
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, baseRadius * 0.92, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = `rgba(229, 229, 229, ${0.14 + smoothMid * 0.2})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        requestAnimationFrame(renderOrb);
+      }
+
+      requestAnimationFrame(renderOrb);
+
+      // =========================================================================
+      // UI CONTROLLER & PLAYER LOGIC
+      // =========================================================================
+      const engine = new WaveEngine();
+      let preloadTriggeredForId = null;
+      let toastTimer = null;
+
+      const els = {
+        statusDot: document.getElementById("status-dot"),
+        seedStatsLabel: document.getElementById("seed-stats-label"),
+        searchForm: document.getElementById("search-form"),
+        searchInput: document.getElementById("search-input"),
+        searchResultsPanel: document.getElementById("search-results-panel"),
+        searchResultsHeader: document.getElementById("search-results-header"),
+        searchResultsList: document.getElementById("search-results-list"),
+        closeSearchBtn: document.getElementById("close-search-btn"),
+        centerTitle: document.getElementById("center-track-title"),
+        centerMeta: document.getElementById("center-track-meta"),
+        orbToggleBtn: document.getElementById("orb-toggle-btn"),
+        orbIconPlay: document.getElementById("orb-icon-play"),
+        orbIconPause: document.getElementById("orb-icon-pause"),
+        vibePills: document.querySelectorAll(".vibe-pill"),
+        engineToast: document.getElementById("engine-toast"),
+        timelineTrack: document.getElementById("timeline-track"),
+        timelineProgress: document.getElementById("timeline-progress"),
+        timelineHoverBar: document.getElementById("timeline-hover-bar"),
+        timelineTooltip: document.getElementById("timeline-hover-tooltip"),
+        dockArtwork: document.getElementById("dock-artwork"),
+        dockArtworkFallback: document.getElementById("dock-artwork-fallback"),
+        dockTitle: document.getElementById("dock-title"),
+        dockArtist: document.getElementById("dock-artist"),
+        timeCurrent: document.getElementById("time-current"),
+        timeTotal: document.getElementById("time-total"),
+        btnDislike: document.getElementById("btn-dislike"),
+        btnPrev: document.getElementById("btn-prev"),
+        btnPlayPause: document.getElementById("btn-play-pause"),
+        dockIconPlay: document.getElementById("dock-icon-play"),
+        dockIconPause: document.getElementById("dock-icon-pause"),
+        btnNext: document.getElementById("btn-next"),
+        btnLike: document.getElementById("btn-like"),
+        iconLike: document.getElementById("icon-like"),
+        btnMute: document.getElementById("btn-mute"),
+        iconVolOn: document.getElementById("icon-vol-on"),
+        iconVolOff: document.getElementById("icon-vol-off"),
+        volumeSlider: document.getElementById("volume-slider"),
+        btnQueueToggle: document.getElementById("btn-queue-toggle"),
+        queueDrawer: document.getElementById("queue-drawer"),
+        btnQueueClose: document.getElementById("btn-queue-close"),
+        drawerSeedInfo: document.getElementById("drawer-seed-info"),
+        statSeeds: document.getElementById("stat-seeds"),
+        statHistory: document.getElementById("stat-history"),
+        statBlacklist: document.getElementById("stat-blacklist"),
+        queueList: document.getElementById("queue-list"),
+        btnRefreshBuffer: document.getElementById("btn-refresh-buffer"),
+        btnResetEngine: document.getElementById("btn-reset-engine"),
+      };
+
+      function showToast(msg) {
+        els.engineToast.textContent = msg;
+        els.engineToast.classList.remove("opacity-0");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          els.engineToast.classList.add("opacity-0");
+        }, 2800);
+      }
+
+      function updatePlayStateIcons(playing) {
+        els.orbIconPlay.classList.toggle("hidden", playing);
+        els.orbIconPause.classList.toggle("hidden", !playing);
+        els.dockIconPlay.classList.toggle("hidden", playing);
+        els.dockIconPause.classList.toggle("hidden", !playing);
+        els.statusDot.classList.toggle("bg-gold", playing);
+        els.statusDot.classList.toggle("bg-white/30", !playing);
+      }
+
+      function renderFilterPills() {
+        els.vibePills.forEach((btn) => {
+          const key = btn.dataset.filter;
+          const active = Boolean(engine.activeFilters[key]);
+          btn.classList.toggle("border-gold/70", active);
+          btn.classList.toggle("text-gold", active);
+          btn.classList.toggle("bg-gold/10", active);
+          btn.classList.toggle("border-white/10", !active);
+          btn.classList.toggle("text-white/65", !active);
+        });
+      }
+
+      function renderStatsAndQueue() {
+        els.seedStatsLabel.textContent = `SEEDS ${engine.likedSeeds.length} · QUEUE ${engine.queue.length}`;
+        els.statSeeds.textContent = String(engine.likedSeeds.length);
+        els.statHistory.textContent = String(engine.history.length);
+        els.statBlacklist.textContent = String(engine.blacklist.tracks.length);
+
+        const seedTitle = engine.lastSuccessfulSeed?.title || "NONE";
+        els.drawerSeedInfo.textContent = `SEED: ${seedTitle}`;
+
+        if (engine.queue.length === 0) {
+          els.queueList.innerHTML = `<div class="px-4 py-8 text-center font-mono text-xs text-white/35">Buffer empty. Search or play a track to generate My Wave.</div>`;
+          return;
+        }
+
+        els.queueList.innerHTML = engine.queue
+          .map((t, idx) => {
+            const art = getHighResArtwork(t.artwork_url);
+            const dur = formatTime((t.duration || 0) / 1000);
+            return `
+              <button data-queue-idx="${idx}" class="w-full text-left flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors group">
+                <span class="font-mono text-[10px] text-white/30 w-4 text-right">${idx + 1}</span>
+                <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">
+                  ${art ? `<img src="${escapeHtml(art)}" alt="" class="w-full h-full object-cover" />` : ""}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs text-silver truncate group-hover:text-gold transition-colors">${escapeHtml(t.title)}</div>
+                  <div class="text-[11px] text-white/45 truncate">${escapeHtml(t.user?.username)}</div>
+                </div>
+                <span class="font-mono text-[10px] text-white/35">${dur}</span>
+              </button>
+            `;
+          })
+          .join("");
+
+        els.queueList.querySelectorAll("[data-queue-idx]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const idx = Number(btn.dataset.queueIdx);
+            const picked = engine.queue.splice(idx, 1)[0];
+            if (picked) {
+              playTrack(picked, true);
+            }
+          });
+        });
+      }
+
+      function updateTrackUI(track) {
+        if (!track) return;
+        const art = getHighResArtwork(track.artwork_url);
+        if (art) {
+          els.dockArtwork.src = art;
+          els.dockArtwork.classList.remove("hidden");
+          els.dockArtworkFallback.classList.add("hidden");
+        } else {
+          els.dockArtwork.classList.add("hidden");
+          els.dockArtworkFallback.classList.remove("hidden");
+        }
+
+        els.dockTitle.textContent = track.title;
+        els.dockArtist.textContent = track.user?.username || "Unknown";
+        els.centerTitle.textContent = track.title;
+        els.centerMeta.textContent = `${track.user?.username || "Unknown"} · ${track.genre || "WAVE"}`;
+        els.timeTotal.textContent = formatTime((track.duration || 0) / 1000);
+        els.timeCurrent.textContent = "00:00";
+        els.timelineProgress.style.width = "0%";
+
+        const liked = engine.isLiked(track.id);
+        els.iconLike.setAttribute("fill", liked ? "#d4af37" : "none");
+        els.btnLike.classList.toggle("text-gold", liked);
+        els.btnLike.classList.toggle("text-white/45", !liked);
+      }
+
+      async function playTrack(track, pushPrev = true) {
+        if (!track) return;
+        initWebAudio();
+
+        if (pushPrev && engine.currentTrack && engine.currentTrack.id !== track.id) {
+          engine.playStack.push(engine.currentTrack);
+          if (engine.playStack.length > 30) engine.playStack.shift();
+        }
+
+        engine.currentTrack = track;
+        engine.markPlayed(track);
+        preloadTriggeredForId = null;
+        updateTrackUI(track);
+        renderStatsAndQueue();
+
+        try {
+          const stream = await resolveStreamForTrack(track);
+          if (hlsInstance) {
+            hlsInstance.destroy();
+            hlsInstance = null;
+          }
+
+          if (stream.protocol === "hls" && window.Hls && Hls.isSupported()) {
+            hlsInstance = new Hls({ enableWorker: true });
+            hlsInstance.loadSource(stream.url);
+            hlsInstance.attachMedia(audioEl);
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+              audioEl.play().catch(() => {});
+            });
+          } else {
+            audioEl.src = stream.url;
+            await audioEl.play();
+          }
+
+          // Top up buffer asynchronously
+          engine.ensureBuffer(0, track).then(renderStatsAndQueue);
+        } catch (err) {
+          console.error("Playback failed:", err);
+          showToast("Stream unavailable — skipping to next");
+          await playNext(false);
+        }
+      }
+
+      async function playNext(checkSkipLearning = true) {
+        const cur = engine.currentTrack;
+        if (checkSkipLearning && cur && audioEl.currentTime > 0 && audioEl.currentTime < 15) {
+          engine.blacklistAndFlush(cur);
+          showToast("Skipped early — blacklisted & regenerating wave");
+          await engine.ensureBuffer(0, engine.lastSuccessfulSeed);
+        } else if (cur) {
+          const dur = audioEl.duration || (cur.duration || 0) / 1000;
+          const ratio = dur > 0 ? audioEl.currentTime / dur : 0;
+          if (ratio >= 0.75) {
+            engine.markCompleted(cur);
+          }
+          await engine.ensureBuffer(ratio);
+        } else {
+          await engine.ensureBuffer(0);
+        }
+
+        const nextTrack = engine.queue.shift();
+        if (nextTrack) {
+          await playTrack(nextTrack, true);
+        } else {
+          showToast("No more tracks in buffer — search a track or @username");
+          renderStatsAndQueue();
+        }
+      }
+
+      // =========================================================================
+      // AUDIO EVENTS & PRELOADING
+      // =========================================================================
+      audioEl.volume = Number(els.volumeSlider.value);
+
+      audioEl.addEventListener("play", () => updatePlayStateIcons(true));
+      audioEl.addEventListener("pause", () => updatePlayStateIcons(false));
+
+      audioEl.addEventListener("timeupdate", () => {
+        const current = audioEl.currentTime || 0;
+        const duration = Number.isFinite(audioEl.duration) && audioEl.duration > 0
+          ? audioEl.duration
+          : (engine.currentTrack?.duration || 0) / 1000;
+
+        els.timeCurrent.textContent = formatTime(current);
+        if (duration > 0) {
+          els.timeTotal.textContent = formatTime(duration);
+          const pct = Math.min(100, (current / duration) * 100);
+          els.timelineProgress.style.width = `${pct}%`;
+
+          // Preload next track stream URL 10s before end
+          const remaining = duration - current;
+          if (remaining <= 10 && remaining > 0) {
+            if (engine.queue.length < 3 && !engine.isFetching) {
+              engine.ensureBuffer(current / duration).then(renderStatsAndQueue);
+            }
+            const next = engine.queue[0];
+            if (next && preloadTriggeredForId !== next.id) {
+              preloadTriggeredForId = next.id;
+              resolveStreamForTrack(next).catch(() => {});
+            }
+          }
+        }
+      });
+
+      audioEl.addEventListener("ended", () => {
+        if (engine.currentTrack) {
+          engine.markCompleted(engine.currentTrack);
+        }
+        playNext(false);
+      });
+
+      // =========================================================================
+      // CONTROLS & INTERACTIONS
+      // =========================================================================
+      function togglePlayPause() {
+        initWebAudio();
+        if (!engine.currentTrack) {
+          if (engine.queue.length > 0) {
+            playTrack(engine.queue.shift(), false);
+          } else if (engine.likedSeeds.length > 0) {
+            const seed = engine.likedSeeds[Math.floor(Math.random() * engine.likedSeeds.length)];
+            playTrack(seed, false);
+          } else {
+            showToast("Search a track or @username first");
+          }
+          return;
+        }
+        if (audioEl.paused) {
+          audioEl.play().catch(() => {});
+        } else {
+          audioEl.pause();
+        }
+      }
+
+      els.orbToggleBtn.addEventListener("click", togglePlayPause);
+      els.btnPlayPause.addEventListener("click", togglePlayPause);
+      els.btnNext.addEventListener("click", () => playNext(true));
+
+      els.btnPrev.addEventListener("click", () => {
+        if (audioEl.currentTime > 4) {
+          audioEl.currentTime = 0;
+          return;
+        }
+        const prev = engine.playStack.pop();
+        if (prev) {
+          playTrack(prev, false);
+        }
+      });
+
+      els.btnLike.addEventListener("click", () => {
+        if (!engine.currentTrack) return;
+        const added = engine.toggleLike(engine.currentTrack);
+        updateTrackUI(engine.currentTrack);
+        renderStatsAndQueue();
+        showToast(added ? "Added to Wave Seeds" : "Removed from Wave Seeds");
+      });
+
+      els.btnDislike.addEventListener("click", async () => {
+        if (!engine.currentTrack) return;
+        engine.blacklistAndFlush(engine.currentTrack);
+        showToast("Track & artist blacklisted — regenerating wave");
+        await engine.ensureBuffer(0, engine.lastSuccessfulSeed);
+        const next = engine.queue.shift();
+        if (next) {
+          await playTrack(next, false);
+        } else {
+          renderStatsAndQueue();
+        }
+      });
+
+      // Timeline scrubbing + hover preview
+      els.timelineTrack.addEventListener("mousemove", (e) => {
+        const rect = els.timelineTrack.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const duration = Number.isFinite(audioEl.duration) && audioEl.duration > 0
+          ? audioEl.duration
+          : (engine.currentTrack?.duration || 0) / 1000;
+        els.timelineHoverBar.style.width = `${ratio * 100}%`;
+        els.timelineTooltip.style.left = `${ratio * 100}%`;
+        els.timelineTooltip.textContent = formatTime(ratio * duration);
+        els.timelineTooltip.classList.remove("hidden");
+      });
+
+      els.timelineTrack.addEventListener("mouseleave", () => {
+        els.timelineHoverBar.style.width = "0%";
+        els.timelineTooltip.classList.add("hidden");
+      });
+
+      els.timelineTrack.addEventListener("click", (e) => {
+        const rect = els.timelineTrack.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        if (Number.isFinite(audioEl.duration) && audioEl.duration > 0) {
+          audioEl.currentTime = ratio * audioEl.duration;
+        }
+      });
+
+      // Volume
+      els.volumeSlider.addEventListener("input", () => {
+        audioEl.volume = Number(els.volumeSlider.value);
+        audioEl.muted = audioEl.volume === 0;
+        els.iconVolOn.classList.toggle("hidden", audioEl.muted);
+        els.iconVolOff.classList.toggle("hidden", !audioEl.muted);
+      });
+
+      els.btnMute.addEventListener("click", () => {
+        audioEl.muted = !audioEl.muted;
+        els.iconVolOn.classList.toggle("hidden", audioEl.muted);
+        els.iconVolOff.classList.toggle("hidden", !audioEl.muted);
+      });
+
+      // Vibe pills
+      els.vibePills.forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          engine.toggleFilter(btn.dataset.filter);
+          renderFilterPills();
+          engine.queue = [];
+          showToast("Updating wave filters...");
+          await engine.ensureBuffer(0, engine.currentTrack || engine.lastSuccessfulSeed);
+          renderStatsAndQueue();
+        });
+      });
+
+      // Queue Drawer
+      els.btnQueueToggle.addEventListener("click", () => {
+        els.queueDrawer.classList.remove("translate-x-full");
+        renderStatsAndQueue();
+      });
+      els.btnQueueClose.addEventListener("click", () => {
+        els.queueDrawer.classList.add("translate-x-full");
+      });
+
+      els.btnRefreshBuffer.addEventListener("click", async () => {
+        engine.queue = [];
+        await engine.ensureBuffer(0, engine.currentTrack || engine.lastSuccessfulSeed);
+        renderStatsAndQueue();
+        showToast("Wave buffer regenerated");
+      });
+
+      els.btnResetEngine.addEventListener("click", () => {
+        engine.resetState();
+        renderFilterPills();
+        renderStatsAndQueue();
+        showToast("Wave engine memory cleared");
+      });
+
+      // Search & Username Likes Seed Loader
+      els.closeSearchBtn.addEventListener("click", () => {
+        els.searchResultsPanel.classList.add("hidden");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!els.searchForm.contains(e.target) && !els.searchResultsPanel.contains(e.target)) {
+          els.searchResultsPanel.classList.add("hidden");
+        }
+      });
+
+      els.searchForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const query = els.searchInput.value.trim();
+        if (!query) return;
+
+        els.searchResultsPanel.classList.remove("hidden");
+        els.searchResultsList.innerHTML = `<div class="px-4 py-6 text-center font-mono text-xs text-white/40">Loading...</div>`;
+
+        try {
+          if (query.startsWith("@") || query.includes("soundcloud.com/")) {
+            els.searchResultsHeader.textContent = "User Likes Seeds";
+            const res = await fetch(`/api/user/likes?username=${encodeURIComponent(query)}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const tracks = data.collection || [];
+            const added = engine.addLikedSeedsBatch(tracks);
+            renderStatsAndQueue();
+            showToast(`Loaded ${added} liked seeds from ${data.user?.username || query}`);
+            renderSearchResults(tracks, true);
+          } else {
+            els.searchResultsHeader.textContent = "Search Results";
+            const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            renderSearchResults(data.collection || [], false);
+          }
+        } catch (err) {
+          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">No results or SoundCloud lookup failed.</div>`;
+        }
+      });
+
+      function renderSearchResults(tracks, isLikes) {
+        if (!tracks.length) {
+          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">Nothing found.</div>`;
+          return;
+        }
+
+        els.searchResultsList.innerHTML = tracks
+          .map((t, i) => {
+            const art = getHighResArtwork(t.artwork_url);
+            const dur = formatTime((t.duration || 0) / 1000);
+            return `
+              <button data-res-idx="${i}" type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.04] transition-colors">
+                <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">
+                  ${art ? `<img src="${escapeHtml(art)}" alt="" class="w-full h-full object-cover" />` : ""}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs text-silver truncate">${escapeHtml(t.title)}</div>
+                  <div class="text-[11px] text-white/45 truncate">${escapeHtml(t.user?.username)}</div>
+                </div>
+                <span class="font-mono text-[10px] text-white/35">${dur}</span>
+              </button>
+            `;
+          })
+          .join("");
+
+        els.searchResultsList.querySelectorAll("[data-res-idx]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const track = tracks[Number(btn.dataset.resIdx)];
+            if (track) {
+              engine.queue = [];
+              engine.lastSuccessfulSeed = track;
+              if (isLikes && !engine.isLiked(track.id)) {
+                engine.toggleLike(track);
+              }
+              els.searchResultsPanel.classList.add("hidden");
+              playTrack(track, true);
+            }
+          });
+        });
+      }
+
+      // Keyboard shortcut: Space to Play/Pause when not typing
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space" && document.activeElement !== els.searchInput) {
+          e.preventDefault();
+          togglePlayPause();
+        }
+      });
+
+      // Initial render
+      renderFilterPills();
+      renderStatsAndQueue();
+    })();
+  </script>
+</body>
+</html>
