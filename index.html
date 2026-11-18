@@ -368,7 +368,7 @@
     <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
       <div>
         <h2 class="text-xs font-medium uppercase tracking-[0.2em] text-silver">Wave Buffer</h2>
-        <p id="drawer-seed-info" class="font-mono text-[11px] text-white/45 mt-0.5">SEED: NONE</p>
+        <p id="drawer-seed-info" class="font-mono text-[11px] text-white/45 mt-0.5 truncate max-w-[260px]">SEED: NONE</p>
       </div>
       <button id="btn-queue-close" type="button" class="p-1.5 text-white/45 hover:text-silver transition-colors">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -392,6 +392,28 @@
         <div id="stat-blacklist" class="font-mono text-sm text-white/60">0</div>
         <div class="font-mono text-[10px] text-white/40 uppercase">Blocked</div>
       </div>
+    </div>
+
+    <!-- Remote Backend Connection (for Vercel/static host + PC Python backend) -->
+    <div class="px-4 py-3 border-b border-white/10 bg-obsidian/40">
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="font-mono text-[10px] uppercase tracking-wider text-white/45">Backend API URL</span>
+        <span id="backend-health-badge" class="font-mono text-[10px] text-white/40">SAME-ORIGIN</span>
+      </div>
+      <form id="backend-url-form" class="flex items-center gap-1.5">
+        <input
+          id="backend-url-input"
+          type="url"
+          placeholder="https://xxxx.trycloudflare.com"
+          class="flex-1 bg-obsidian border border-white/10 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-silver placeholder-white/25 focus:outline-none focus:border-gold/50"
+        />
+        <button
+          type="submit"
+          class="px-2.5 py-1.5 rounded-lg glass border border-white/10 hover:border-gold/50 font-mono text-[10px] uppercase text-silver transition-colors shrink-0"
+        >
+          Link
+        </button>
+      </form>
     </div>
 
     <!-- Upcoming Queue List -->
@@ -422,6 +444,38 @@
   <script>
     (() => {
       "use strict";
+
+      // =========================================================================
+      // API BASE RESOLUTION (SUPPORTS SAME-ORIGIN OR REMOTE TUNNEL)
+      // =========================================================================
+      const API_BASE_KEY = "my_wave_api_base";
+
+      function normalizeApiBase(raw) {
+        return String(raw || "").trim().replace(/\/+$/, "");
+      }
+
+      function getInitialApiBase() {
+        const params = new URLSearchParams(window.location.search);
+        const fromQuery = params.get("api");
+        if (fromQuery) {
+          const clean = normalizeApiBase(fromQuery);
+          localStorage.setItem(API_BASE_KEY, clean);
+          return clean;
+        }
+        return normalizeApiBase(localStorage.getItem(API_BASE_KEY) || "");
+      }
+
+      let apiBase = getInitialApiBase();
+
+      function apiUrl(path) {
+        return `${apiBase}${path}`;
+      }
+
+      function apiFetch(path, options = {}) {
+        const headers = new Headers(options.headers || {});
+        headers.set("ngrok-skip-browser-warning", "true");
+        return fetch(apiUrl(path), { ...options, headers });
+      }
 
       // =========================================================================
       // UTILITIES
@@ -610,8 +664,7 @@
           const candidates = [];
 
           if (this.activeFilters.lyubimoe && this.likedSeeds.length > 0) {
-            const pick = this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)];
-            return pick;
+            return this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)];
           }
 
           const roll = Math.random();
@@ -674,18 +727,16 @@
 
           this.isFetching = true;
           try {
-            const res = await fetch(`/api/wave/related?track_id=${encodeURIComponent(seed.id)}&limit=25`);
+            const res = await apiFetch(`/api/wave/related?track_id=${encodeURIComponent(seed.id)}&limit=25`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             const pool = Array.isArray(data.collection) ? data.collection : [];
 
             let filtered = pool.filter((t) => this.matchesFilters(t, true));
             if (filtered.length < 2) {
-              // Relax vibe keyword/playcount filter if strict filter yields too few tracks
               filtered = pool.filter((t) => this.matchesFilters(t, false));
             }
 
-            // Shuffle slightly for discovery variety
             for (let i = filtered.length - 1; i > 0; i--) {
               const j = Math.floor(Math.random() * (i + 1));
               [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
@@ -736,7 +787,7 @@
 
       async function resolveStreamForTrack(track) {
         if (track._resolvedStream) return track._resolvedStream;
-        const res = await fetch(`/api/stream?track_id=${encodeURIComponent(track.id)}`);
+        const res = await apiFetch(`/api/stream?track_id=${encodeURIComponent(track.id)}`);
         if (!res.ok) throw new Error(`Stream resolve error ${res.status}`);
         const data = await res.json();
         track._resolvedStream = data;
@@ -775,7 +826,6 @@
 
         if (isPlaying && analyser && freqData) {
           analyser.getByteFrequencyData(freqData);
-          // Sub-bass: bins 0..5, Mid: bins 6..28
           let bSum = 0;
           for (let i = 0; i < 6; i++) bSum += freqData[i] || 0;
           let mSum = 0;
@@ -783,7 +833,6 @@
           targetBass = bSum / (6 * 255);
           targetMid = mSum / (22 * 255);
 
-          // Fallback gentle pulse if stream is CORS-muted in analyser
           if (targetBass === 0 && targetMid === 0) {
             targetBass = 0.14 + Math.sin(orbPhase * 2.2) * 0.06;
             targetMid = 0.12 + Math.cos(orbPhase * 3.1) * 0.05;
@@ -801,7 +850,6 @@
 
         const baseRadius = Math.min(w, h) * 0.28 + smoothBass * 18;
 
-        // Outer ambient gold/silver aura
         const aura = ctx.createRadialGradient(cx, cy, baseRadius * 0.3, cx, cy, baseRadius * 1.75);
         aura.addColorStop(0, `rgba(212, 175, 55, ${0.12 + smoothBass * 0.22})`);
         aura.addColorStop(0.55, `rgba(229, 229, 229, ${0.04 + smoothMid * 0.08})`);
@@ -811,7 +859,6 @@
         ctx.arc(cx, cy, baseRadius * 1.75, 0, Math.PI * 2);
         ctx.fill();
 
-        // Harmonic energy rings
         const ringCount = 3;
         for (let r = 0; r < ringCount; r++) {
           const points = 96;
@@ -841,7 +888,6 @@
           ctx.stroke();
         }
 
-        // Core obsidian sphere with subtle silver rim
         const coreGrad = ctx.createRadialGradient(
           cx - baseRadius * 0.25,
           cy - baseRadius * 0.25,
@@ -923,7 +969,43 @@
         queueList: document.getElementById("queue-list"),
         btnRefreshBuffer: document.getElementById("btn-refresh-buffer"),
         btnResetEngine: document.getElementById("btn-reset-engine"),
+        backendUrlForm: document.getElementById("backend-url-form"),
+        backendUrlInput: document.getElementById("backend-url-input"),
+        backendHealthBadge: document.getElementById("backend-health-badge"),
       };
+
+      els.backendUrlInput.value = apiBase;
+
+      async function checkBackendHealth() {
+        els.backendHealthBadge.textContent = "CHECKING...";
+        els.backendHealthBadge.className = "font-mono text-[10px] text-white/45";
+        try {
+          const res = await apiFetch("/api/health");
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data.status === "ok") {
+            els.backendHealthBadge.textContent = data.client_id_cached ? "ONLINE" : "NO CLIENT_ID";
+            els.backendHealthBadge.className = "font-mono text-[10px] text-gold";
+            return true;
+          }
+        } catch {
+          els.backendHealthBadge.textContent = "OFFLINE";
+          els.backendHealthBadge.className = "font-mono text-[10px] text-white/40";
+        }
+        return false;
+      }
+
+      els.backendUrlForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        apiBase = normalizeApiBase(els.backendUrlInput.value);
+        if (apiBase) {
+          localStorage.setItem(API_BASE_KEY, apiBase);
+        } else {
+          localStorage.removeItem(API_BASE_KEY);
+        }
+        const ok = await checkBackendHealth();
+        showToast(ok ? "Backend connected" : "Backend unreachable — check URL");
+      });
 
       function showToast(msg) {
         els.engineToast.textContent = msg;
@@ -1060,7 +1142,6 @@
             await audioEl.play();
           }
 
-          // Top up buffer asynchronously
           engine.ensureBuffer(0, track).then(renderStatsAndQueue);
         } catch (err) {
           console.error("Playback failed:", err);
@@ -1115,7 +1196,6 @@
           const pct = Math.min(100, (current / duration) * 100);
           els.timelineProgress.style.width = `${pct}%`;
 
-          // Preload next track stream URL 10s before end
           const remaining = duration - current;
           if (remaining <= 10 && remaining > 0) {
             if (engine.queue.length < 3 && !engine.isFetching) {
@@ -1196,7 +1276,6 @@
         }
       });
 
-      // Timeline scrubbing + hover preview
       els.timelineTrack.addEventListener("mousemove", (e) => {
         const rect = els.timelineTrack.getBoundingClientRect();
         const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -1222,7 +1301,6 @@
         }
       });
 
-      // Volume
       els.volumeSlider.addEventListener("input", () => {
         audioEl.volume = Number(els.volumeSlider.value);
         audioEl.muted = audioEl.volume === 0;
@@ -1236,7 +1314,6 @@
         els.iconVolOff.classList.toggle("hidden", !audioEl.muted);
       });
 
-      // Vibe pills
       els.vibePills.forEach((btn) => {
         btn.addEventListener("click", async () => {
           engine.toggleFilter(btn.dataset.filter);
@@ -1248,7 +1325,6 @@
         });
       });
 
-      // Queue Drawer
       els.btnQueueToggle.addEventListener("click", () => {
         els.queueDrawer.classList.remove("translate-x-full");
         renderStatsAndQueue();
@@ -1271,7 +1347,6 @@
         showToast("Wave engine memory cleared");
       });
 
-      // Search & Username Likes Seed Loader
       els.closeSearchBtn.addEventListener("click", () => {
         els.searchResultsPanel.classList.add("hidden");
       });
@@ -1293,7 +1368,7 @@
         try {
           if (query.startsWith("@") || query.includes("soundcloud.com/")) {
             els.searchResultsHeader.textContent = "User Likes Seeds";
-            const res = await fetch(`/api/user/likes?username=${encodeURIComponent(query)}`);
+            const res = await apiFetch(`/api/user/likes?username=${encodeURIComponent(query)}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             const tracks = data.collection || [];
@@ -1303,13 +1378,13 @@
             renderSearchResults(tracks, true);
           } else {
             els.searchResultsHeader.textContent = "Search Results";
-            const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            const res = await apiFetch(`/api/search?q=${encodeURIComponent(query)}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             renderSearchResults(data.collection || [], false);
           }
         } catch (err) {
-          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">No results or SoundCloud lookup failed.</div>`;
+          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">Backend offline or SoundCloud lookup failed.</div>`;
         }
       });
 
@@ -1354,17 +1429,16 @@
         });
       }
 
-      // Keyboard shortcut: Space to Play/Pause when not typing
       document.addEventListener("keydown", (e) => {
-        if (e.code === "Space" && document.activeElement !== els.searchInput) {
+        if (e.code === "Space" && document.activeElement !== els.searchInput && document.activeElement !== els.backendUrlInput) {
           e.preventDefault();
           togglePlayPause();
         }
       });
 
-      // Initial render
       renderFilterPills();
       renderStatsAndQueue();
+      checkBackendHealth();
     })();
   </script>
 </body>
