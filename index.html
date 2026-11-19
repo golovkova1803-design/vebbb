@@ -133,9 +133,91 @@
     .cb.on { color: rgb(var(--acc)); }
     @media (prefers-reduced-motion: reduce) { #orb-art { animation: none; } }
       .ambient-aura { display: none; }
-    #orb-art, #orb-hole { display: none !important; }
     .focus-mode #home-tabs { display: none; }
-    #orb-art { box-shadow: none; will-change: transform; }
+    #btn-exit-focus { display: none; }
+    .focus-mode #btn-exit-focus { display: flex; }
+    /* Vinyl disc with grooves + album art in center of Wave Orb */
+    #orb-vinyl {
+      position: absolute;
+      left: 23.5%;
+      top: 23.5%;
+      width: 53%;
+      height: 53%;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .45s ease, transform .35s ease;
+      background:
+        repeating-radial-gradient(
+          circle at 50% 50%,
+          rgba(255, 255, 255, 0.035) 0px,
+          rgba(255, 255, 255, 0.035) 1px,
+          rgba(8, 8, 10, 0.96) 2px,
+          rgba(8, 8, 10, 0.96) 4px
+        );
+      box-shadow:
+        inset 0 0 0 1.5px rgba(255, 255, 255, 0.14),
+        0 10px 28px rgba(0, 0, 0, 0.65);
+    }
+    #orb-vinyl.on { opacity: 1; }
+    #orb-art {
+      position: absolute;
+      left: 27.5%;
+      top: 27.5%;
+      width: 45%;
+      height: 45%;
+      border-radius: 50%;
+      object-fit: cover;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .45s ease;
+      animation: spin 18s linear infinite;
+      animation-play-state: paused;
+      will-change: transform;
+      border: 1.5px solid rgba(255, 255, 255, 0.16);
+    }
+    #orb-art.on { opacity: 1; }
+    .is-playing #orb-art { animation-play-state: running; }
+    #orb-sheen {
+      position: absolute;
+      left: 23.5%;
+      top: 23.5%;
+      width: 53%;
+      height: 53%;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .45s ease;
+      background: conic-gradient(
+        from 35deg,
+        transparent 0deg,
+        rgba(255, 255, 255, 0.11) 25deg,
+        transparent 55deg,
+        transparent 180deg,
+        rgba(255, 255, 255, 0.09) 205deg,
+        transparent 240deg
+      );
+    }
+    #orb-sheen.on { opacity: 1; }
+    #orb-hole {
+      position: absolute;
+      left: 46.8%;
+      top: 46.8%;
+      width: 6.4%;
+      height: 6.4%;
+      border-radius: 50%;
+      background: #050505;
+      border: 1.5px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .45s ease;
+    }
+    #orb-hole.on { opacity: 1; }
+    .track-row-active {
+      background: rgba(var(--acc), 0.11) !important;
+      border-color: rgba(var(--acc), 0.42) !important;
+    }
   </style>
 </head>
 <body class="h-[100dvh] bg-obsidian text-silver selection:bg-gold/20 selection:text-gold flex flex-col relative">
@@ -213,6 +295,9 @@
     </div>
   </header>
 
+  <button id="btn-exit-focus" type="button" title="Exit Full-Screen (Esc)" class="fixed top-4 right-4 z-50 w-10 h-10 rounded-full glass border border-white/15 text-silver items-center justify-center active:scale-95">
+    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
   <nav id="home-tabs" class="shrink-0 relative z-20 flex justify-center px-4 pb-1">
     <div class="inline-flex p-1 rounded-full bg-white/[0.05] border border-white/10 font-mono text-[11px] uppercase tracking-wider">
       <button data-home="wave" type="button" class="px-4 py-1.5 rounded-full transition-colors">Моя волна</button>
@@ -223,11 +308,16 @@
   <!-- Player stage -->
   <main class="relative z-10 flex-1 min-h-0 overflow-y-auto px-4">
     <div id="home-wave" class="min-h-full flex flex-col items-center justify-center py-2 gap-2">
-      <div id="ctx-badge" class="font-mono text-[10px] uppercase tracking-[0.22em] text-white/40">Now playing · My Wave</div>
+      <div class="flex items-center gap-2">
+        <button id="ctx-badge" type="button" class="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45 hover:text-silver transition-colors">Now playing · My Wave</button>
+        <button id="btn-switch-wave" type="button" class="hidden font-mono text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-gold/45 text-gold hover:bg-gold/10 transition-colors">Включить Мою волну</button>
+      </div>
       <div id="orb-stage" class="relative flex items-center justify-center select-none" style="touch-action: pan-y; contain: layout paint;">
         <button id="orb-toggle-btn" type="button" aria-label="Toggle Play or Pause" class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-200 active:scale-[0.98]">
           <canvas id="wave-orb-canvas" class="block orb-size"></canvas>
+          <div id="orb-vinyl"></div>
           <img id="orb-art" alt="" />
+          <div id="orb-sheen"></div>
           <div id="orb-hole"></div>
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
             <div class="w-11 h-11 rounded-full glass border border-white/15 flex items-center justify-center text-silver shadow-lg">
@@ -255,11 +345,58 @@
       <p id="engine-toast" class="font-mono text-[11px] h-4 opacity-0 transition-opacity duration-200 text-center px-2" style="color: rgb(var(--acc));"></p>
     </div>
     <div id="home-playlists" class="hidden max-w-3xl mx-auto py-3">
-      <div class="flex items-center justify-between mb-3 px-1">
-        <h2 class="font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">Твои плейлисты</h2>
-        <button id="home-new-pl" type="button" class="px-3 py-1.5 rounded-lg border border-white/15 hover:border-gold/50 hover:text-gold font-mono text-[10px] uppercase text-white/60">+ Новый</button>
+      <!-- Grid view of all playlists (including Liked Tracks) -->
+      <div id="home-pl-overview">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 px-1">
+          <h2 class="font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">Медиатека и плейлисты</h2>
+          <div class="flex items-center gap-2">
+            <button id="home-import-pl" type="button" class="px-3 py-1.5 rounded-lg border border-white/15 hover:border-gold/50 hover:text-gold font-mono text-[10px] uppercase text-white/60 transition-colors">Импорт URL</button>
+            <button id="home-new-pl" type="button" class="px-3 py-1.5 rounded-lg border border-gold/45 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase transition-colors">+ Новый плейлист</button>
+          </div>
+        </div>
+        <div id="home-pl-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
       </div>
-      <div id="home-pl-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+
+      <!-- Full Playlist Detail View -->
+      <div id="home-pl-detail" class="hidden space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <button id="pl-detail-back" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass border border-white/10 hover:border-white/25 font-mono text-[11px] text-silver transition-colors">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+            Все плейлисты
+          </button>
+          <span id="pl-detail-active-pill" class="hidden font-mono text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-gold/50 text-gold bg-gold/10">Сейчас играет</span>
+        </div>
+
+        <div class="glass border border-white/10 rounded-2xl p-4 flex flex-col sm:flex-row items-center sm:items-end gap-4">
+          <div id="pl-detail-cover" class="w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-obsidian border border-white/10 shrink-0 flex items-center justify-center"></div>
+          <div class="flex-1 min-w-0 text-center sm:text-left">
+            <div id="pl-detail-badge" class="font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">PLAYLIST</div>
+            <h2 id="pl-detail-title" class="text-lg sm:text-xl font-semibold text-silver truncate mt-0.5">Playlist</h2>
+            <p id="pl-detail-meta" class="font-mono text-[11px] text-white/45 mt-1">0 треков</p>
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-3">
+              <button id="pl-detail-play" type="button" class="px-4 py-2 rounded-full bg-silver text-obsidian font-mono text-[11px] font-medium uppercase tracking-wider flex items-center gap-1.5 shadow active:scale-95 transition-transform">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+                Слушать
+              </button>
+              <button id="pl-detail-shuffle" type="button" class="px-3.5 py-2 rounded-full glass border border-white/15 hover:border-white/35 font-mono text-[11px] uppercase text-silver transition-colors">
+                Shuffle
+              </button>
+              <button id="pl-detail-wave" type="button" class="px-3.5 py-2 rounded-full glass border border-gold/45 text-gold hover:bg-gold/10 font-mono text-[11px] uppercase transition-colors">
+                Волна по плейлисту
+              </button>
+              <button id="pl-detail-delete" type="button" class="hidden px-3 py-2 rounded-full glass border border-white/10 hover:border-white/30 font-mono text-[10px] uppercase text-white/45 hover:text-silver transition-colors">
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input id="pl-detail-filter" type="text" placeholder="Фильтр треков внутри плейлиста..." class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-silver placeholder-white/35 focus:outline-none focus:border-gold/50" />
+        </div>
+
+        <div id="pl-detail-tracks" class="space-y-1.5 pb-4"></div>
+      </div>
     </div>
     <div id="home-recent" class="hidden max-w-3xl mx-auto py-3 space-y-5">
       <section>
@@ -1309,6 +1446,7 @@
                     <div class="font-mono text-[10px] text-white/40">${count} tracks · ${pl.source === "soundcloud" ? escapeHtml(pl.author || "SC") : "CUSTOM"}</div>
                   </button>
                   <div class="flex items-center gap-1.5 shrink-0">
+                    <button data-pl-open="${pl.id}" type="button" title="Открыть плейлист" class="px-2.5 py-1 rounded-lg border border-white/15 text-silver hover:border-white/35 font-mono text-[10px] uppercase transition-colors">Open</button>
                     <button data-pl-wave="${pl.id}" type="button" title="Start My Wave from Playlist" class="px-2.5 py-1 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase transition-colors">Wave</button>
                     <button data-pl-del="${pl.id}" type="button" title="Delete Playlist" class="p-1.5 text-white/35 hover:text-silver">
                       <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M8 6V4h8v2m-1 0v14H9V6h6z"/></svg>
@@ -1339,6 +1477,13 @@
           });
         });
 
+        els.playlistsContainer.querySelectorAll("[data-pl-open]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            els.queueDrawer.classList.add("translate-x-full");
+            openPlaylistDetail(btn.dataset.plOpen);
+          });
+        });
+
         els.playlistsContainer.querySelectorAll("[data-pl-del]").forEach((btn) => {
           btn.addEventListener("click", () => {
             playlists = playlists.filter((p) => p.id !== btn.dataset.plDel);
@@ -1357,12 +1502,7 @@
               showToast("Add tracks to this playlist first");
               return;
             }
-            recordSet(pl);
-            engine.addLikedSeedsBatch(tracks);
-            engine.queue = [...tracks.slice(1, 6)];
-            engine.lastSuccessfulSeed = tracks[0];
-            await playTrack(tracks[0], true);
-            showToast(`Started Wave from "${pl.title}"`);
+            await playSet(pl, "wave", 0);
           });
         });
 
@@ -1371,9 +1511,7 @@
             const pl = playlists.find((p) => p.id === btn.dataset.plPlay);
             const idx = Number(btn.dataset.trackIdx);
             if (!pl || !pl.tracks[idx]) return;
-            recordSet(pl);
-            engine.queue = shuffleOn ? shuffled(pl.tracks.filter((_, i) => i !== idx)).slice(0, 12) : pl.tracks.slice(idx + 1, idx + 8);
-            await playTrack(pl.tracks[idx], true);
+            await playSet(pl, "play", idx);
           });
         });
 
@@ -1416,20 +1554,38 @@
         els.btnLike.classList.toggle("text-white/45", !liked);
       }
 
+      let playbackMode = "wave"; // "wave" | "playlist"
+      let activePlaylistId = null;
+      let activePlaylistTitle = "";
+      let activePlaylistOrder = []; // current ordered track list for playlist playback
+      let viewingPlaylistId = null;
+
+      function syncPlaylistQueueFromTrack(track) {
+        if (playbackMode !== "playlist" || !activePlaylistOrder.length) return;
+        const idx = activePlaylistOrder.findIndex((t) => t.id === track?.id);
+        if (idx >= 0) {
+          engine.queue = activePlaylistOrder.slice(idx + 1);
+        }
+      }
+
       async function playTrack(track, pushPrev = true) {
         if (!track) return;
         const sessionId = ++playSessionId;
 
         if (pushPrev && engine.currentTrack && engine.currentTrack.id !== track.id) {
           engine.playStack.push(engine.currentTrack);
-          if (engine.playStack.length > 30) engine.playStack.shift();
+          if (engine.playStack.length > 50) engine.playStack.shift();
         }
 
         engine.currentTrack = track;
         engine.markPlayed(track);
         preloadTriggeredForId = null;
+        if (playbackMode === "playlist") {
+          syncPlaylistQueueFromTrack(track);
+        }
         updateTrackUI(track);
         renderStatsAndQueue();
+        if (typeof refreshPlaylistViews === "function") refreshPlaylistViews();
 
         try {
           const stream = await resolveStreamForTrack(track);
@@ -1447,21 +1603,23 @@
           }
 
           consecutivePlayErrors = 0;
-          engine.ensureBuffer(0, track).then(renderStatsAndQueue);
+          if (playbackMode === "wave") {
+            engine.ensureBuffer(0, track).then(renderStatsAndQueue);
+          }
         } catch (err) {
           if (sessionId !== playSessionId) return;
           if (err?.name === "NotAllowedError") {
-            showToast("Click Play on the orb to start audio");
+            showToast("Нажмите Play для запуска звука");
             updatePlayStateIcons(false);
             return;
           }
           consecutivePlayErrors += 1;
           if (consecutivePlayErrors <= 2 && engine.queue.length > 0) {
-            showToast("Track unavailable — trying next...");
+            showToast("Трек недоступен — переключаю...");
             await playNext(false);
           } else {
             consecutivePlayErrors = 0;
-            showToast("Playback blocked by browser or unavailable track");
+            showToast("Трек недоступен в SoundCloud");
             updatePlayStateIcons(false);
           }
         }
@@ -1469,6 +1627,23 @@
 
       async function playNext(checkSkipLearning = true) {
         const cur = engine.currentTrack;
+
+        // STRICT PLAYLIST MODE: advance sequentially through activePlaylistOrder and loop at the end
+        if (playbackMode === "playlist" && activePlaylistOrder.length > 0) {
+          let nextTrack = engine.queue.shift();
+          if (!nextTrack) {
+            activePlaylistOrder = shuffleOn ? shuffled(activePlaylistOrder) : activePlaylistOrder;
+            nextTrack = activePlaylistOrder[0];
+            engine.queue = activePlaylistOrder.slice(1);
+            showToast(`Плейлист «${activePlaylistTitle}» сначала`);
+          }
+          if (nextTrack) {
+            await playTrack(nextTrack, true);
+          }
+          return;
+        }
+
+        // WAVE MODE
         if (checkSkipLearning && cur && audioEl.currentTime > 0 && audioEl.currentTime < 15) {
           engine.blacklistAndFlush(cur, false);
           showUndo("Skipped early — track blocked", cur);
@@ -1490,7 +1665,7 @@
         if (nextTrack) {
           await playTrack(nextTrack, true);
         } else {
-          showToast("Buffer empty — search a track or @username");
+          showToast("Очередь пуста — выберите трек или плейлист");
           renderStatsAndQueue();
         }
       }
@@ -1599,7 +1774,7 @@
 
           const remaining = duration - current;
           if (remaining <= 10 && remaining > 0) {
-            if (engine.queue.length < 3 && !engine.isFetching) {
+            if (playbackMode === "wave" && engine.queue.length < 3 && !engine.isFetching) {
               engine.ensureBuffer(ratio).then(renderStatsAndQueue);
             }
             const next = engine.queue[0];
@@ -1644,6 +1819,16 @@
         if (audioEl.currentTime > 4) {
           audioEl.currentTime = 0;
           return;
+        }
+        if (playbackMode === "playlist" && activePlaylistOrder.length > 0 && engine.currentTrack) {
+          const idx = activePlaylistOrder.findIndex((t) => t.id === engine.currentTrack.id);
+          if (idx > 0) {
+            playTrack(activePlaylistOrder[idx - 1], false);
+            return;
+          } else if (idx === 0) {
+            playTrack(activePlaylistOrder[activePlaylistOrder.length - 1], false);
+            return;
+          }
         }
         const prev = engine.playStack.pop();
         if (prev) playTrack(prev, false);
@@ -1936,8 +2121,8 @@
             const track = tracks[Number(btn.dataset.resIdx)];
             if (track) {
               consecutivePlayErrors = 0;
+              switchToWaveMode(track);
               engine.queue = [];
-              engine.lastSuccessfulSeed = track;
               els.searchResultsPanel.classList.add("hidden");
               playTrack(track, true);
             }
@@ -2011,10 +2196,8 @@
               expandedPlaylistId = entry.id;
               renderPlaylists();
               if (entry.tracks.length) {
-                engine.addLikedSeedsBatch(entry.tracks);
-                recordSet(entry);
-                engine.queue = entry.tracks.slice(1, 7);
-                await playTrack(entry.tracks[0], true);
+                openPlaylistDetail(entry.id);
+                await playSet(entry, "play", 0);
               }
               showToast(`Imported & playing "${entry.title}"`);
             } catch {
@@ -2045,25 +2228,46 @@
         if ("mediaSession" in navigator) navigator.mediaSession.playbackState = p ? "playing" : "paused";
       };
 
+      function updateContextHeader() {
+        const badge = $("ctx-badge");
+        const swBtn = $("btn-switch-wave");
+        if (playbackMode === "playlist" && activePlaylistTitle) {
+          badge.textContent = `Плейлист · ${activePlaylistTitle}`;
+          swBtn?.classList.remove("hidden");
+        } else {
+          badge.textContent = "Сейчас играет · Моя волна";
+          swBtn?.classList.add("hidden");
+        }
+      }
+
       function onTrackChanged(track) {
         if (!track) return;
         const art = getHighResArtwork(track.artwork_url || track.user?.avatar_url);
-        const oa = $("orb-art"), bg = $("bg-art");
+        const oa = $("orb-art"), ov = $("orb-vinyl"), os = $("orb-sheen"), oh = $("orb-hole"), bg = $("bg-art");
         if (art) {
+          oa.src = art;
+          oa.classList.add("on");
+          ov?.classList.add("on");
+          os?.classList.add("on");
+          oh?.classList.add("on");
           const ca = $("center-art"); ca.src = art; ca.classList.remove("hidden");
           drawBg(art);
           extractAccent(art);
         } else {
-          oa.classList.remove("on"); bg.classList.remove("on"); $("center-art").classList.add("hidden");
+          oa.classList.remove("on");
+          ov?.classList.remove("on");
+          os?.classList.remove("on");
+          oh?.classList.remove("on");
+          bg.classList.remove("on");
+          $("center-art").classList.add("hidden");
           ACC_T = [212, 175, 55]; document.documentElement.style.setProperty("--acc", "212,175,55");
         }
         document.title = `${track.title} — MY WAVE`;
         recordTrack(track);
-        if (srcLabel && !srcIds.has(track.id)) srcLabel = "";
-        $("ctx-badge").textContent = srcLabel ? `Playing from · ${srcLabel}` : "Now playing · My Wave";
+        updateContextHeader();
         if ("mediaSession" in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata({
-            title: track.title, artist: track.user?.username || "", album: "MY WAVE",
+            title: track.title, artist: track.user?.username || "", album: playbackMode === "playlist" ? activePlaylistTitle : "MY WAVE",
             artwork: art ? [{ src: art, sizes: "500x500", type: "image/jpeg" }] : [],
           });
         }
@@ -2084,6 +2288,7 @@
       function extractAccent(url) {
         const img = new Image();
         img.crossOrigin = "anonymous";
+        const sep = url.includes("?") ? "&" : "?";
         img.onload = () => {
           try {
             const c = document.createElement("canvas"); c.width = c.height = 12;
@@ -2101,7 +2306,7 @@
             document.documentElement.style.setProperty("--acc", ACC_T.join(","));
           } catch {}
         };
-        img.src = url;
+        img.src = `${url}${sep}_cors=1`;
       }
 
       if ("mediaSession" in navigator) {
@@ -2141,8 +2346,24 @@
       // Shuffle / repeat / speed
       $("btn-shuffle").addEventListener("click", () => {
         shuffleOn = !shuffleOn; $("btn-shuffle").classList.toggle("on", shuffleOn);
-        if (shuffleOn) { engine.queue = shuffled(engine.queue); renderStatsAndQueue(); }
-        showToast(shuffleOn ? "Shuffle on" : "Shuffle off");
+        if (playbackMode === "playlist" && activePlaylistId) {
+          const pl = findPlaylistById(activePlaylistId);
+          if (pl && pl.tracks?.length) {
+            const cur = engine.currentTrack;
+            if (shuffleOn) {
+              const rest = shuffled(pl.tracks.filter((t) => t.id !== cur?.id));
+              activePlaylistOrder = cur ? [cur, ...rest] : rest;
+            } else {
+              activePlaylistOrder = pl.tracks.slice();
+            }
+            syncPlaylistQueueFromTrack(cur);
+            renderStatsAndQueue();
+          }
+        } else if (shuffleOn) {
+          engine.queue = shuffled(engine.queue);
+          renderStatsAndQueue();
+        }
+        showToast(shuffleOn ? "Shuffle включён" : "Shuffle выключен");
       });
       $("btn-repeat").addEventListener("click", () => {
         repeatOne = !repeatOne; audioEl.loop = repeatOne;
@@ -2287,16 +2508,82 @@
         saveRecent();
       }
 
-      async function playSet(pl, mode) {
-        showToast("Loading...");
-        const tracks = await ensurePlaylistTracks(pl);
-        if (!tracks.length) { showToast("Playlist is empty"); return; }
-        const list = mode === "shuffle" ? shuffled(tracks) : tracks.slice();
-        if (mode === "wave") { engine.addLikedSeedsBatch(tracks); engine.queue = list.slice(1, 6); engine.lastSuccessfulSeed = list[0]; srcLabel = ""; srcIds = new Set(); }
-        else { engine.queue = list.slice(1, 25); srcLabel = pl.title; srcIds = new Set(tracks.map((t) => t.id)); }
+      function getVirtualLikedPlaylist() {
+        return {
+          id: "__liked__",
+          title: "Мне нравится",
+          author: accountState.user?.username || "Моя коллекция",
+          source: "liked",
+          artwork_url: engine.likedSeeds[0]?.artwork_url || "",
+          track_count: engine.likedSeeds.length,
+          tracks: engine.likedSeeds,
+        };
+      }
+
+      function findPlaylistById(id) {
+        if (id === "__liked__") return getVirtualLikedPlaylist();
+        return playlists.find((p) => p.id === id) || null;
+      }
+
+      function switchToWaveMode(seedTrack = null) {
+        playbackMode = "wave";
+        activePlaylistId = null;
+        activePlaylistTitle = "";
+        activePlaylistOrder = [];
+        srcLabel = "";
+        srcIds = new Set();
+        updateContextHeader();
+        if (seedTrack) {
+          engine.lastSuccessfulSeed = seedTrack;
+        }
+      }
+
+      async function playSet(pl, mode = "play", startIndex = 0) {
+        if (!pl) return;
+        showToast("Загрузка плейлиста...");
+        const tracks = pl.id === "__liked__" ? pl.tracks : await ensurePlaylistTracks(pl);
+        if (!tracks || !tracks.length) {
+          showToast("В этом плейлисте пока нет треков");
+          return;
+        }
+
+        if (mode === "wave") {
+          switchToWaveMode(tracks[startIndex] || tracks[0]);
+          engine.addLikedSeedsBatch(tracks);
+          const list = shuffled(tracks);
+          engine.queue = list.slice(1, 7);
+          recordSet(pl);
+          setHome("wave");
+          await playTrack(list[0], true);
+          showToast(`Моя волна по плейлисту «${pl.title}»`);
+          return;
+        }
+
+        playbackMode = "playlist";
+        activePlaylistId = pl.id;
+        activePlaylistTitle = pl.title;
+
+        let ordered;
+        if (mode === "shuffle") {
+          shuffleOn = true;
+          $("btn-shuffle").classList.add("on");
+          const first = tracks[startIndex] || tracks[Math.floor(Math.random() * tracks.length)];
+          const rest = shuffled(tracks.filter((t) => t.id !== first.id));
+          ordered = [first, ...rest];
+        } else {
+          ordered = tracks.slice();
+        }
+
+        const startTrack = mode === "shuffle" ? ordered[0] : (ordered[startIndex] || ordered[0]);
+        const actualIdx = ordered.findIndex((t) => t.id === startTrack.id);
+        activePlaylistOrder = ordered;
+        engine.queue = ordered.slice(actualIdx + 1);
+        srcLabel = pl.title;
+        srcIds = new Set(ordered.map((t) => t.id));
+        updateContextHeader();
         recordSet(pl);
-        setHome("wave");
-        await playTrack(list[0], true);
+        await playTrack(startTrack, true);
+        showToast(`Играет плейлист «${pl.title}»`);
       }
 
       function setHome(t) {
@@ -2306,39 +2593,232 @@
           const on = b.dataset.home === t;
           b.classList.toggle("bg-white/10", on); b.classList.toggle("text-silver", on); b.classList.toggle("text-white/50", !on);
         });
-        if (t === "playlists") renderHomePlaylists();
+        if (t === "playlists") {
+          if (viewingPlaylistId) renderPlaylistDetail();
+          else renderHomePlaylists();
+        }
         if (t === "recent") renderRecent();
         if (t === "wave") setTimeout(resizeOrbCanvas, 30);
       }
-      document.querySelectorAll("[data-home]").forEach((b) => b.addEventListener("click", () => setHome(b.dataset.home)));
+      document.querySelectorAll("[data-home]").forEach((b) => b.addEventListener("click", () => {
+        if (b.dataset.home === "playlists") viewingPlaylistId = null;
+        setHome(b.dataset.home);
+      }));
 
-      function setCover(pl, n) {
+      $("ctx-badge").addEventListener("click", () => {
+        if (playbackMode === "playlist" && activePlaylistId) {
+          openPlaylistDetail(activePlaylistId);
+        }
+      });
+
+      $("btn-switch-wave").addEventListener("click", async () => {
+        switchToWaveMode(engine.currentTrack || engine.lastSuccessfulSeed);
+        engine.queue = [];
+        await engine.ensureBuffer(0, engine.currentTrack || engine.lastSuccessfulSeed);
+        renderStatsAndQueue();
+        refreshPlaylistViews();
+        showToast("Включена бесконечная Моя волна");
+      });
+
+      $("btn-exit-focus").addEventListener("click", toggleFocus);
+
+      function setCover(pl) {
         const art = smallArt(pl.artwork_url || pl.art || pl.tracks?.[0]?.artwork_url);
-        return art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : `<span class="font-mono text-2xl text-white/20">${escapeHtml((pl.title || "?")[0].toUpperCase())}</span>`;
+        return art
+          ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />`
+          : `<span class="font-mono text-2xl text-white/25">${escapeHtml((pl.title || "?")[0].toUpperCase())}</span>`;
       }
+
       function renderHomePlaylists() {
+        $("home-pl-overview").classList.remove("hidden");
+        $("home-pl-detail").classList.add("hidden");
         const g = $("home-pl-grid");
-        if (!playlists.length) { g.innerHTML = `<div class="col-span-full py-10 text-center font-mono text-xs text-white/40">Плейлистов пока нет. Создай свой или импортируй из SoundCloud через поиск.</div>`; return; }
-        g.innerHTML = playlists.map((pl) => {
+        const allCards = [getVirtualLikedPlaylist(), ...playlists];
+
+        g.innerHTML = allCards.map((pl) => {
           const n = pl.tracks?.length || pl.track_count || 0;
-          return `<div data-hp="${escapeHtml(pl.id)}" class="group rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/25 p-2.5 cursor-pointer transition-colors">
+          const isCurrentPl = playbackMode === "playlist" && activePlaylistId === pl.id;
+          const badge = pl.id === "__liked__" ? "FAVORITES" : (pl.source === "soundcloud" ? escapeHtml(pl.author || "SC") : "CUSTOM");
+          return `<div data-hp="${escapeHtml(pl.id)}" class="group rounded-2xl bg-white/[0.04] border ${isCurrentPl ? "border-gold/60 pill-glow" : "border-white/10 hover:border-white/25"} p-2.5 cursor-pointer transition-all">
             <div class="relative aspect-square rounded-xl overflow-hidden bg-obsidian mb-2 flex items-center justify-center">${setCover(pl)}
-              <div class="absolute right-2 bottom-2 w-9 h-9 rounded-full bg-silver text-obsidian flex items-center justify-center shadow-lg md:opacity-0 md:group-hover:opacity-100 transition-opacity"><svg class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></div>
+              <button data-hp-play type="button" title="Слушать плейлист" class="absolute right-2 bottom-2 w-10 h-10 rounded-full bg-silver text-obsidian flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform">
+                <svg class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+              </button>
+              ${isCurrentPl ? `<span class="absolute left-2 top-2 px-2 py-0.5 rounded-full bg-black/75 border border-gold/50 font-mono text-[9px] uppercase text-gold">Playing</span>` : ""}
             </div>
-            <div class="text-xs text-silver truncate">${escapeHtml(pl.title)}</div>
-            <div class="font-mono text-[10px] text-white/40">${n} tracks</div>
+            <div class="text-xs font-medium text-silver truncate">${escapeHtml(pl.title)}</div>
+            <div class="font-mono text-[10px] text-white/40 truncate">${n} треков · ${badge}</div>
             <div class="flex gap-1.5 mt-2">
-              <button data-hp-shuffle type="button" class="flex-1 py-1.5 rounded-lg border border-white/10 hover:border-white/30 font-mono text-[10px] text-white/60 uppercase">Shuffle</button>
-              <button data-hp-wave type="button" class="flex-1 py-1.5 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase">Wave</button>
-            </div></div>`;
+              <button data-hp-open type="button" class="flex-1 py-1.5 rounded-lg border border-white/10 hover:border-white/30 font-mono text-[10px] text-silver uppercase transition-colors">Открыть</button>
+              <button data-hp-wave type="button" class="flex-1 py-1.5 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase transition-colors">Волна</button>
+            </div>
+          </div>`;
         }).join("");
       }
+
+      async function openPlaylistDetail(plId) {
+        const pl = findPlaylistById(plId);
+        if (!pl) return;
+        viewingPlaylistId = pl.id;
+        if (homeTab !== "playlists") setHome("playlists");
+        $("home-pl-overview").classList.add("hidden");
+        $("home-pl-detail").classList.remove("hidden");
+
+        if (pl.source === "soundcloud" && (!pl.tracks || !pl.tracks.length)) {
+          $("pl-detail-tracks").innerHTML = `<div class="py-10 text-center font-mono text-xs text-white/40">Загрузка треков плейлиста...</div>`;
+          await ensurePlaylistTracks(pl);
+        }
+        renderPlaylistDetail();
+      }
+
+      function renderPlaylistDetail() {
+        const pl = findPlaylistById(viewingPlaylistId);
+        if (!pl) {
+          viewingPlaylistId = null;
+          renderHomePlaylists();
+          return;
+        }
+        $("home-pl-overview").classList.add("hidden");
+        $("home-pl-detail").classList.remove("hidden");
+
+        const tracks = pl.tracks || [];
+        const isCurrentPl = playbackMode === "playlist" && activePlaylistId === pl.id;
+        $("pl-detail-active-pill").classList.toggle("hidden", !isCurrentPl);
+        $("pl-detail-cover").innerHTML = setCover(pl);
+        $("pl-detail-badge").textContent = pl.id === "__liked__" ? "FAVORITES COLLECTION" : (pl.source === "soundcloud" ? `SOUNDCLOUD · ${pl.author || "SET"}` : "CUSTOM PLAYLIST");
+        $("pl-detail-title").textContent = pl.title;
+
+        const totalSec = tracks.reduce((acc, t) => acc + ((t.duration || 0) / 1000), 0);
+        const totalMin = Math.round(totalSec / 60);
+        $("pl-detail-meta").textContent = `${tracks.length} треков · ~${totalMin} мин`;
+        $("pl-detail-delete").classList.toggle("hidden", pl.id === "__liked__");
+
+        const q = ($("pl-detail-filter").value || "").trim().toLowerCase();
+        const filtered = tracks
+          .map((t, idx) => ({ t, idx }))
+          .filter(({ t }) => !q || `${t.title || ""} ${t.user?.username || ""}`.toLowerCase().includes(q));
+
+        if (!filtered.length) {
+          $("pl-detail-tracks").innerHTML = `<div class="py-10 text-center font-mono text-xs text-white/35">${tracks.length ? "Ничего не найдено по фильтру" : "Плейлист пуст — добавляйте треки кнопкой + в плеере"}</div>`;
+          return;
+        }
+
+        $("pl-detail-tracks").innerHTML = filtered.map(({ t, idx }) => {
+          const isCur = engine.currentTrack?.id === t.id;
+          const art = smallArt(t.artwork_url);
+          const liked = engine.isLiked(t.id);
+          return `<div data-pld-idx="${idx}" class="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/25 cursor-pointer transition-colors ${isCur ? "track-row-active" : ""}">
+            <span class="font-mono text-[11px] ${isCur ? "text-gold font-semibold" : "text-white/35"} w-5 text-right shrink-0">${isCur ? "▶" : idx + 1}</span>
+            <div class="w-10 h-10 rounded-lg overflow-hidden bg-obsidian border border-white/10 shrink-0 flex items-center justify-center">
+              ${art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : ""}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="text-xs sm:text-sm font-medium ${isCur ? "text-gold" : "text-silver"} truncate">${escapeHtml(t.title)}</div>
+              <div class="text-[11px] text-white/45 truncate">${escapeHtml(t.user?.username)}</div>
+            </div>
+            <button data-pld-next="${idx}" type="button" title="Включить следующим" class="px-2 py-1 rounded-lg border border-white/10 hover:border-gold/50 hover:text-gold font-mono text-[10px] text-white/50 shrink-0">+ Next</button>
+            <button data-pld-like="${idx}" type="button" title="Like" class="p-1.5 ${liked ? "text-gold" : "text-white/35 hover:text-silver"} shrink-0">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="${liked ? "currentColor" : "none"}" stroke="currentColor" stroke-width="1.6"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+            ${pl.id !== "__liked__" ? `<button data-pld-rm="${idx}" type="button" title="Удалить из плейлиста" class="p-1.5 text-white/30 hover:text-silver shrink-0"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>` : ""}
+            <span class="font-mono text-[10px] text-white/35 w-10 text-right shrink-0">${formatTime((t.duration || 0) / 1000)}</span>
+          </div>`;
+        }).join("");
+      }
+
+      function refreshPlaylistViews() {
+        if (homeTab === "playlists") {
+          if (viewingPlaylistId) renderPlaylistDetail();
+          else renderHomePlaylists();
+        }
+      }
+
+      $("pl-detail-back").addEventListener("click", () => {
+        viewingPlaylistId = null;
+        renderHomePlaylists();
+      });
+      $("pl-detail-filter").addEventListener("input", renderPlaylistDetail);
+      $("pl-detail-play").addEventListener("click", () => {
+        const pl = findPlaylistById(viewingPlaylistId);
+        if (pl) playSet(pl, "play", 0);
+      });
+      $("pl-detail-shuffle").addEventListener("click", () => {
+        const pl = findPlaylistById(viewingPlaylistId);
+        if (pl) playSet(pl, "shuffle", 0);
+      });
+      $("pl-detail-wave").addEventListener("click", () => {
+        const pl = findPlaylistById(viewingPlaylistId);
+        if (pl) playSet(pl, "wave", 0);
+      });
+      $("pl-detail-delete").addEventListener("click", () => {
+        if (!viewingPlaylistId || viewingPlaylistId === "__liked__") return;
+        playlists = playlists.filter((p) => p.id !== viewingPlaylistId);
+        savePlaylists();
+        viewingPlaylistId = null;
+        renderPlaylists();
+        showToast("Плейлист удалён");
+      });
+
+      $("pl-detail-tracks").addEventListener("click", async (e) => {
+        const pl = findPlaylistById(viewingPlaylistId);
+        if (!pl || !pl.tracks) return;
+
+        const nextBtn = e.target.closest("[data-pld-next]");
+        if (nextBtn) {
+          e.stopPropagation();
+          const t = pl.tracks[Number(nextBtn.dataset.pldNext)];
+          if (t) {
+            engine.queue.unshift(t);
+            renderStatsAndQueue();
+            showToast("Добавлено следующим в очередь");
+          }
+          return;
+        }
+
+        const likeBtn = e.target.closest("[data-pld-like]");
+        if (likeBtn) {
+          e.stopPropagation();
+          const t = pl.tracks[Number(likeBtn.dataset.pldLike)];
+          if (t) {
+            engine.toggleLike(t);
+            if (engine.currentTrack?.id === t.id) updateTrackUI(t);
+            renderStatsAndQueue();
+            renderPlaylistDetail();
+          }
+          return;
+        }
+
+        const rmBtn = e.target.closest("[data-pld-rm]");
+        if (rmBtn) {
+          e.stopPropagation();
+          const idx = Number(rmBtn.dataset.pldRm);
+          pl.tracks.splice(idx, 1);
+          savePlaylists();
+          renderPlaylists();
+          renderPlaylistDetail();
+          return;
+        }
+
+        const row = e.target.closest("[data-pld-idx]");
+        if (row) {
+          const idx = Number(row.dataset.pldIdx);
+          await playSet(pl, "play", idx);
+        }
+      });
+
       $("home-pl-grid").addEventListener("click", (e) => {
         const c = e.target.closest("[data-hp]"); if (!c) return;
-        const pl = playlists.find((p) => p.id === c.dataset.hp); if (!pl) return;
-        playSet(pl, e.target.closest("[data-hp-shuffle]") ? "shuffle" : e.target.closest("[data-hp-wave]") ? "wave" : "play");
+        const pl = findPlaylistById(c.dataset.hp); if (!pl) return;
+        if (e.target.closest("[data-hp-play]")) {
+          playSet(pl, "play", 0);
+        } else if (e.target.closest("[data-hp-wave]")) {
+          playSet(pl, "wave", 0);
+        } else {
+          openPlaylistDetail(pl.id);
+        }
       });
-      $("home-new-pl").addEventListener("click", () => { openDrawer(); document.querySelector('[data-drawer-tab="playlists"]')?.click(); });
+      $("home-new-pl").addEventListener("click", () => { openDrawer(); document.querySelector('[data-drawer-tab="playlists"]')?.click(); setTimeout(() => els.newPlaylistName.focus(), 120); });
+      $("home-import-pl").addEventListener("click", () => { openDrawer(); document.querySelector('[data-drawer-tab="playlists"]')?.click(); setTimeout(() => els.importPlaylistUrl.focus(), 120); });
 
       function renderRecent() {
         $("recent-sets").innerHTML = recent.sets.length ? recent.sets.map((x) => `<div data-rs="${escapeHtml(x.id)}" class="w-32 shrink-0 cursor-pointer group">
@@ -2366,7 +2846,7 @@
         setHome("wave"); playTrack(t, true);
       });
       const _rpl = renderPlaylists;
-      renderPlaylists = function () { _rpl(); if (homeTab === "playlists") renderHomePlaylists(); };
+      renderPlaylists = function () { _rpl(); refreshPlaylistViews(); };
       document.addEventListener("keydown", (e) => {
         const tag = document.activeElement?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || e.ctrlKey || e.metaKey || e.altKey) return;
