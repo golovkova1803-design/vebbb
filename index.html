@@ -114,17 +114,16 @@
     body { overflow: hidden; }
     #bg-art, #bg-art-b {
       position: fixed;
-      inset: -8%;
-      width: 116%;
-      height: 116%;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       z-index: 0;
       pointer-events: none;
       opacity: 0;
-      transition: opacity .85s ease;
-      filter: blur(42px) saturate(1.35);
-      transform: translateZ(0);
+      transition: opacity .75s ease;
+      /* Zero CSS filter! Browser bilinear upscaling of a 16x16 pre-smoothed canvas is 100% free on GPU */
     }
-    #bg-art.on, #bg-art-b.on { opacity: .62; }
+    #bg-art.on, #bg-art-b.on { opacity: .58; }
     .bg-veil {
       position: fixed;
       inset: 0;
@@ -157,7 +156,7 @@
     .is-playing #orb-vinyl { animation-play-state: running; }
     #orb-vinyl #orb-art, #orb-vinyl #orb-art-b { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; object-fit: cover; animation: none; will-change: auto; box-shadow: none; opacity: 0; transition: opacity .7s ease; }
     #orb-vinyl #orb-art.on, #orb-vinyl #orb-art-b.on { opacity: 1; }
-    #orb-grooves { position: absolute; inset: 0; background: repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0 2.5px, rgba(0,0,0,.16) 2.5px 3.5px); }
+    #orb-grooves { position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 0 6px rgba(0,0,0,.22), inset 0 0 0 18px rgba(255,255,255,.03), inset 0 0 0 32px rgba(0,0,0,.18); }
     #orb-sheen { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 20deg, transparent 0 8%, rgba(255,255,255,.17) 12%, transparent 18% 58%, rgba(255,255,255,.1) 64%, transparent 70%); }
     #orb-stage #orb-hole { display: block; position: absolute; left: 46.5%; top: 46.5%; width: 7%; height: 7%; border-radius: 50%; background: #050505; border: 0; box-shadow: 0 0 0 2px rgba(255,255,255,.08); }
     .tl-bar::after { content: ""; position: absolute; inset: 0; opacity: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); transform: translateX(-100%); }
@@ -172,7 +171,7 @@
 </head>
 <body class="h-[100dvh] bg-obsidian text-silver selection:bg-gold/20 selection:text-gold flex flex-col relative">
 
-  <canvas id="bg-art" width="48" height="48"></canvas><canvas id="bg-art-b" width="48" height="48"></canvas><div class="bg-veil"></div>
+  <canvas id="bg-art" width="16" height="16"></canvas><canvas id="bg-art-b" width="16" height="16"></canvas><div class="bg-veil"></div>
   <!-- Subtle GPU-composited ambient backdrop -->
   <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden">
     <div
@@ -538,7 +537,7 @@
       const ENGINE_KEY = "my_wave_engine_v1";
       let repeatOne = false, shuffleOn = false, sleepEOT = false, isScrubbing = false, lastSearchTracks = [];
       let ACC = [212, 175, 55], ACC_T = [212, 175, 55];
-      let aCtx = null, analyser = null, aSrc = null, aStream = null, freqData = new Uint8Array(512), flat = 0, kick = 0, bassAvg = 0.2;
+      let aCtx = null, analyser = null, aSrc = null, aStream = null, freqData = new Uint8Array(128), flat = 0, kick = 0, bassAvg = 0.2;
       let playbackMode = "wave", activePlaylistId = null, xfadeSec = 4, pendingResumeAt = 0, fade = null, standby = null, suppressPause = false, userVol = 0.85;
       try { const xv = localStorage.getItem("my_wave_xfade_v1"); if (xv !== null && !isNaN(Number(xv))) xfadeSec = Number(xv); } catch {}
 
@@ -1284,7 +1283,7 @@
       window.addEventListener("resize", resizeOrbCanvas);
       resizeOrbCanvas();
 
-      const SPEC_N = 72, spec = new Float32Array(SPEC_N);
+      const SPEC_N = 48, spec = new Float32Array(SPEC_N);
       let lastKickAt = 0, lastBeatIdx = -1; const ripples = [];
       function avgBins(a, b) { let t = 0; for (let k = a; k < b; k++) t += freqData[k]; return t / ((b - a) * 255); }
       function guessBpm(t) {
@@ -1334,8 +1333,9 @@
 
       function renderOrb(now) {
         requestAnimationFrame(renderOrb);
+        if (document.hidden || homeTab !== "wave") return;
         const isPlaying = !audioEl.paused && !audioEl.ended;
-        if (now - lastIdleFrame < (isPlaying ? 33 : 66)) return;
+        if (now - lastIdleFrame < (isPlaying ? 33 : 90)) return;
         const dt = Math.min(100, now - lastIdleFrame), dtScale = dt / 16.7;
         lastIdleFrame = now;
         for (let k = 0; k < 3; k++) ACC[k] += (ACC_T[k] - ACC[k]) * 0.06;
@@ -1352,7 +1352,7 @@
           if (tot > 0) flat = 0; else flat++;
           real = flat < 45;
           if (real) {
-            bass = avgBins(1, 6); mid = avgBins(6, 40); high = avgBins(40, 160);
+            bass = avgBins(1, 6); mid = avgBins(6, 40); high = avgBins(32, 96);
             bassAvg += (bass - bassAvg) * 0.04 * dtScale;
             hit = bass > 0.32 && bass > bassAvg * 1.22 && now - lastKickAt > 170;
           }
@@ -1374,7 +1374,7 @@
         for (let k = 0; k < SPEC_N; k++) {
           const m = k < SPEC_N / 2 ? k : SPEC_N - 1 - k, t = m / (SPEC_N / 2 - 1);
           let v;
-          if (real) v = freqData[1 + Math.floor(Math.pow(t, 1.7) * 140)] / 255;
+          if (real) v = freqData[1 + Math.floor(Math.pow(t, 1.6) * 90)] / 255;
           else v = isPlaying ? (bass * (1 - t) + high * t) * (0.55 + 0.45 * Math.sin(k * 0.9 + orbPhase * 3.2)) : 0.04;
           spec[k] += (v - spec[k]) * (v > spec[k] ? 0.6 : 0.18);
         }
@@ -1396,38 +1396,26 @@
           ctx.beginPath(); ctx.arc(cx, cy, R * (1.08 + rp.t * 0.85), 0, Math.PI * 2); ctx.stroke();
         }
 
-        // multi-layered rhythmic spectrum waves around the vinyl
+        // multi-layered rhythmic spectrum waves around the vinyl (fast, zero-overdraw)
         const waveAmp1 = R * (0.36 + smoothBass * 0.26);
-        const waveAmp2 = R * (0.28 + smoothMid * 0.22);
-        const waveAmp3 = R * (0.20 + smoothBass * 0.16);
-        specRing(cx, cy, R * 1.10, waveAmp1, orbPhase * 0.14, 0, acc(0.18 + smoothBass * 0.18), 8, acc(0.04 + smoothBass * 0.05));
-        specRing(cx, cy, R * 1.10, waveAmp1, orbPhase * 0.14, 0, acc(0.92), 1.9);
-        specRing(cx, cy, R * 1.06, waveAmp2, -orbPhase * 0.22, 12, `rgba(229, 229, 229, ${0.32 + smoothMid * 0.35})`, 1.3);
-        specRing(cx, cy, R * 1.16, waveAmp3, orbPhase * 0.31, 24, acc(0.38 + smoothMid * 0.3), 1.1);
+        const waveAmp2 = R * (0.26 + smoothMid * 0.20);
+        specRing(cx, cy, R * 1.09, waveAmp1, orbPhase * 0.14, 0, acc(0.20 + smoothBass * 0.20), 6);
+        specRing(cx, cy, R * 1.09, waveAmp1, orbPhase * 0.14, 0, acc(0.92), 1.8);
+        specRing(cx, cy, R * 1.05, waveAmp2, -orbPhase * 0.22, 10, `rgba(229, 229, 229, ${0.34 + smoothMid * 0.32})`, 1.2);
 
-        // orbiting dots
-        for (let k = 0; k < Math.min(10, particles.length); k++) {
-          const pt = particles[k]; pt.angle += pt.speed * (isPlaying ? 1.8 : 0.6) * dtScale;
-          const r = R * 1.62 + (pt.distOffset % 24) + smoothBass * 8;
+        // orbiting dots (8 lightweight particles)
+        for (let k = 0; k < 8; k++) {
+          const pt = particles[k]; pt.angle += pt.speed * (isPlaying ? 1.7 : 0.5) * dtScale;
+          const r = R * 1.58 + (pt.distOffset % 22) + smoothBass * 7;
           ctx.fillStyle = pt.isGold ? acc(isPlaying ? 0.7 : 0.25) : `rgba(229, 229, 229, ${isPlaying ? 0.45 : 0.18})`;
           ctx.beginPath(); ctx.arc(cx + Math.cos(pt.angle) * r, cy + Math.sin(pt.angle) * r, pt.size, 0, Math.PI * 2); ctx.fill();
         }
 
-        // glass core
-        const g = ctx.createRadialGradient(cx - R * 0.38, cy - R * 0.42, R * 0.05, cx, cy, R);
-        g.addColorStop(0, "rgba(70, 72, 82, 1)"); g.addColorStop(0.5, "rgba(17, 17, 21, 1)"); g.addColorStop(1, "rgba(4, 4, 6, 1)");
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
-        const rim = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R);
-        rim.addColorStop(0, acc(0)); rim.addColorStop(1, acc(0.14 + smoothBass * 0.4));
-        ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
-        const sp = ctx.createRadialGradient(cx - R * 0.34, cy - R * 0.4, 0, cx - R * 0.34, cy - R * 0.4, R * 0.46);
-        sp.addColorStop(0, "rgba(255, 255, 255, 0.28)"); sp.addColorStop(1, "rgba(255, 255, 255, 0)");
-        ctx.fillStyle = sp; ctx.beginPath(); ctx.arc(cx - R * 0.34, cy - R * 0.4, R * 0.46, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = `rgba(255, 255, 255, ${0.14 + smoothBass * 0.2})`; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
-        ctx.strokeStyle = acc(0.12 + smoothBass * 0.3); ctx.lineWidth = 7;
-        ctx.beginPath(); ctx.arc(cx, cy, R * 1.02, 0, Math.PI * 2); ctx.stroke();
-        ctx.strokeStyle = acc(0.35 + smoothBass * 0.6); ctx.lineWidth = 1.6;
+        // lightweight dark base + glowing rim around the vinyl
+        ctx.fillStyle = "#08080b";
+        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = acc(0.32 + smoothBass * 0.55);
+        ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(cx, cy, R * 1.005, 0, Math.PI * 2); ctx.stroke();
       }
 
@@ -2452,7 +2440,12 @@
           try {
             bgSide ^= 1;
             const on = $(bgSide ? "bg-art-b" : "bg-art"), off = $(bgSide ? "bg-art" : "bg-art-b"), m = Math.min(im.width, im.height);
-            on.getContext("2d").drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, 48, 48);
+            const bctx = on.getContext("2d");
+            bctx.imageSmoothingEnabled = true;
+            // Multi-pass downscale 64 -> 8 -> 16 creates a silky Gaussian-like blur once on track load (0 per-frame GPU cost)
+            bctx.clearRect(0, 0, 16, 16);
+            bctx.drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, 8, 8);
+            bctx.drawImage(on, 0, 0, 8, 8, 0, 0, 16, 16);
             on.classList.add("on"); off.classList.remove("on");
           } catch {}
         };
@@ -2755,7 +2748,7 @@
           const AC = window.AudioContext || window.webkitAudioContext, cap = audioEl.captureStream || audioEl.mozCaptureStream;
           if (!AC || !cap) return;
           if (!aCtx) {
-            aCtx = new AC(); analyser = aCtx.createAnalyser(); analyser.fftSize = 1024; analyser.smoothingTimeConstant = 0.55;
+            aCtx = new AC(); analyser = aCtx.createAnalyser(); analyser.fftSize = 256; analyser.smoothingTimeConstant = 0.55;
             freqData = new Uint8Array(analyser.frequencyBinCount);
           }
           if (aCtx.state === "suspended") aCtx.resume().catch(() => {});
