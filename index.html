@@ -133,14 +133,32 @@
     .cb.on { color: rgb(var(--acc)); }
     @media (prefers-reduced-motion: reduce) { #orb-art { animation: none; } }
       .ambient-aura { display: none; }
-    #orb-art, #orb-hole { display: none !important; }
     .focus-mode #home-tabs { display: none; }
-    #orb-art { box-shadow: none; will-change: transform; }
+    #bg-art-b { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .8s ease; }
+    #bg-art-b.on { opacity: .45; }
+    #orb-vinyl-stage { position: absolute; left: 25.3%; top: 25.3%; width: 49.4%; height: 49.4%; pointer-events: none; }
+    #orb-vinyl { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: #0d0d10; animation: spin 14s linear infinite; animation-play-state: paused; will-change: transform; box-shadow: inset 0 0 0 2px rgba(255,255,255,.06); }
+    .is-playing #orb-vinyl { animation-play-state: running; }
+    #orb-vinyl #orb-art, #orb-vinyl #orb-art-b { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; object-fit: cover; animation: none; will-change: auto; box-shadow: none; opacity: 0; transition: opacity .7s ease; }
+    #orb-vinyl #orb-art.on, #orb-vinyl #orb-art-b.on { opacity: 1; }
+    #orb-grooves { position: absolute; inset: 0; background: repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0 2.5px, rgba(0,0,0,.16) 2.5px 3.5px); }
+    #orb-sheen { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 20deg, transparent 0 8%, rgba(255,255,255,.17) 12%, transparent 18% 58%, rgba(255,255,255,.1) 64%, transparent 70%); }
+    #orb-stage #orb-hole { display: block; position: absolute; left: 46.5%; top: 46.5%; width: 7%; height: 7%; border-radius: 50%; background: #050505; border: 0; box-shadow: 0 0 0 2px rgba(255,255,255,.08); }
+    #orb-arm { transform-box: view-box; transform-origin: 86px 14px; transform: rotate(-40deg); transition: transform .7s cubic-bezier(.4,0,.2,1); }
+    .is-playing #orb-arm { transform: rotate(0deg); }
+    .tl-bar::after { content: ""; position: absolute; inset: 0; opacity: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); transform: translateX(-100%); }
+    #timeline-track.loading .tl-bar::after { opacity: 1; animation: shimmer 1.1s linear infinite; }
+    @keyframes shimmer { to { transform: translateX(100%); } }
+    #timeline-thumb { box-shadow: 0 0 0 3px rgba(var(--acc), .25), 0 0 10px rgba(var(--acc), .7); }
+    .pill-loading { animation: pillpulse .9s ease-in-out infinite; }
+    @keyframes pillpulse { 50% { opacity: .45; } }
+    .act-row .cb { width: 2.25rem; height: 2.25rem; }
+    @media (prefers-reduced-motion: reduce) { #orb-vinyl, .pill-loading, #timeline-track.loading .tl-bar::after { animation: none; } }
   </style>
 </head>
 <body class="h-[100dvh] bg-obsidian text-silver selection:bg-gold/20 selection:text-gold flex flex-col relative">
 
-  <canvas id="bg-art" width="24" height="24"></canvas><div class="bg-veil"></div>
+  <canvas id="bg-art" width="24" height="24"></canvas><canvas id="bg-art-b" width="24" height="24"></canvas><div class="bg-veil"></div>
   <!-- Subtle GPU-composited ambient backdrop -->
   <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden">
     <div
@@ -227,8 +245,8 @@
       <div id="orb-stage" class="relative flex items-center justify-center select-none" style="touch-action: pan-y; contain: layout paint;">
         <button id="orb-toggle-btn" type="button" aria-label="Toggle Play or Pause" class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-200 active:scale-[0.98]">
           <canvas id="wave-orb-canvas" class="block orb-size"></canvas>
-          <img id="orb-art" alt="" />
-          <div id="orb-hole"></div>
+          <div id="orb-vinyl-stage"><div id="orb-vinyl"><img id="orb-art" alt="" /><img id="orb-art-b" alt="" /><div id="orb-grooves"></div></div><div id="orb-sheen"></div><div id="orb-hole"></div></div>
+          <svg class="pointer-events-none absolute inset-0 w-full h-full" viewBox="0 0 100 100" aria-hidden="true"><g id="orb-arm"><line x1="86" y1="14" x2="62" y2="40" stroke="rgba(229,229,229,.55)" stroke-width="1.1" stroke-linecap="round"/><circle cx="86" cy="14" r="3.2" fill="#15151a" stroke="rgba(255,255,255,.25)" stroke-width=".6"/><circle cx="62" cy="40" r="1.5" fill="rgb(var(--acc))"/></g></svg>
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
             <div class="w-11 h-11 rounded-full glass border border-white/15 flex items-center justify-center text-silver shadow-lg">
               <svg id="orb-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
@@ -255,10 +273,11 @@
       <p id="engine-toast" class="font-mono text-[11px] h-4 opacity-0 transition-opacity duration-200 text-center px-2" style="color: rgb(var(--acc));"></p>
     </div>
     <div id="home-playlists" class="hidden max-w-3xl mx-auto py-3">
-      <div class="flex items-center justify-between mb-3 px-1">
-        <h2 class="font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">Твои плейлисты</h2>
+      <div id="home-pl-head" class="flex items-center justify-between mb-3 px-1">
+        <h2 id="home-pl-title" class="font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">Твои плейлисты</h2>
         <button id="home-new-pl" type="button" class="px-3 py-1.5 rounded-lg border border-white/15 hover:border-gold/50 hover:text-gold font-mono text-[10px] uppercase text-white/60">+ Новый</button>
       </div>
+      <div id="home-pl-detail" class="hidden"></div>
       <div id="home-pl-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
     </div>
     <div id="home-recent" class="hidden max-w-3xl mx-auto py-3 space-y-5">
@@ -283,7 +302,7 @@
         <span id="time-current" class="font-mono text-[10px] text-white/45 w-9 text-right">00:00</span>
         <div id="timeline-track" class="relative flex-1 h-5 flex items-center cursor-pointer group">
           <div id="timeline-hover-tooltip" class="pointer-events-none hidden absolute -top-6 -translate-x-1/2 bg-surface border border-white/15 rounded px-1.5 py-0.5 font-mono text-[10px] text-silver shadow-lg">00:00</div>
-          <div class="relative w-full h-1.5 group-hover:h-2 bg-white/10 rounded-full overflow-hidden transition-all duration-150">
+          <div class="tl-bar relative w-full h-1.5 bg-white/10 rounded-full overflow-hidden transition-transform duration-150 group-hover:scale-y-150">
             <div id="timeline-hover-bar" class="absolute inset-y-0 left-0 bg-white/20 pointer-events-none w-0"></div>
             <div id="timeline-progress" class="absolute inset-0 rounded-full origin-left" style="background: linear-gradient(to right, #e5e5e5, rgb(var(--acc))); transform: scaleX(0); will-change: transform;"></div>
           </div>
@@ -315,7 +334,7 @@
             <button id="btn-next" type="button" title="Next (N)" class="cb !w-11 !h-11 !text-white/80"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" x2="19" y1="5" y2="19"></line></svg></button>
             <button id="btn-repeat" type="button" title="Repeat track (R)" class="cb"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg><span id="repeat-one-badge" class="hidden absolute top-1 right-1 text-[8px] leading-none">1</span></button>
           </div>
-          <div class="flex items-center justify-center gap-0.5 mt-0.5">
+          <div class="act-row flex items-center justify-center gap-0.5 mt-0.5">
             <button id="btn-dislike" type="button" title="Dislike & Block" class="cb"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"></path><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"></path></svg></button>
             <button id="btn-like" type="button" title="Like (L)" class="cb hover:!text-gold">
               <svg id="icon-like" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
@@ -338,6 +357,7 @@
                 <button data-sleep="0" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-white/[0.06] text-white/50">Off</button>
               </div>
             </div>
+            <button id="btn-xfade" type="button" title="Crossfade" class="cb">4s</button>
             <button id="btn-focus" type="button" title="Full-screen player (F)" class="cb"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
             <button id="btn-queue-toggle-mobile" type="button" title="Queue" class="cb md:!hidden"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"></line><line x1="8" x2="21" y1="12" y2="12"></line><line x1="8" x2="21" y1="18" y2="18"></line><line x1="3" x2="3.01" y1="6" y2="6"></line><line x1="3" x2="3.01" y1="12" y2="12"></line><line x1="3" x2="3.01" y1="18" y2="18"></line></svg></button>
           </div>
@@ -493,7 +513,8 @@
       <div class="pt-2 text-white/40">Orb: double-tap = like, swipe = prev / next</div>
     </div>
   </div>
-  <audio id="audio-element" preload="auto"></audio>
+  <audio id="audio-a" preload="auto"></audio>
+  <audio id="audio-b" preload="auto"></audio>
 
   <script>
     (() => {
@@ -505,6 +526,8 @@
       let repeatOne = false, shuffleOn = false, sleepEOT = false, isScrubbing = false, lastSearchTracks = [];
       let ACC = [212, 175, 55], ACC_T = [212, 175, 55];
       let aCtx = null, analyser = null, aSrc = null, aStream = null, freqData = new Uint8Array(512), flat = 0, kick = 0, bassAvg = 0.2;
+      let playbackMode = "wave", activePlaylistId = null, xfadeSec = 4, pendingResumeAt = 0, fade = null, standby = null, suppressPause = false, userVol = 0.85;
+      try { const xv = localStorage.getItem("my_wave_xfade_v1"); if (xv !== null && !isNaN(Number(xv))) xfadeSec = Number(xv); } catch {}
 
       let accountState = { user: null, oauthToken: "" };
       try {
@@ -548,6 +571,14 @@
         spokoynoe: ["ambient", "chill", "lofi", "lo-fi", "acoustic", "piano", "downtempo", "sleep", "calm", "meditation", "jazz", "drone", "soft", "instrumental"],
         tyomnoe: ["dark", "phonk", "witch", "industrial", "goth", "minimal", "deep", "shadow", "noir", "acid", "doom", "hard", "wave", "night"],
       };
+
+      const MOOD_QUERIES = {
+        bodroe: ["dnb", "house", "techno", "hyperpop", "electro"],
+        spokoynoe: ["ambient", "lofi", "downtempo", "chill"],
+        tyomnoe: ["phonk", "darkwave", "industrial", "dark techno"],
+      };
+      const SLOW_RE = /ambient|drone|sleep|meditation|downtempo|lo-?fi|calm/;
+      const HARD_RE = /hardcore|hardstyle|gabber|rave|industrial|hard techno|metal/;
 
       class WaveEngine {
         constructor() {
@@ -696,7 +727,8 @@
           if (withArtist && aid && !this.blacklist.artists.includes(aid)) this.blacklist.artists.push(aid);
           this.blocked = this.blocked.filter((b) => b.id !== track.id);
           this.blocked.push({ id: track.id, title: track.title, artist: track.user?.username || "", artistId: aid || null, withArtist: Boolean(withArtist && aid) });
-          this.queue = [];
+          if (playbackMode === "playlist") this.queue = this.queue.filter((t) => !this.isBlacklisted(t));
+          else this.queue = [];
           this.saveState();
         }
 
@@ -710,7 +742,16 @@
 
         toggleFilter(key) {
           if (!(key in this.activeFilters)) return;
-          this.activeFilters[key] = !this.activeFilters[key];
+          const on = !this.activeFilters[key];
+          const MOODS = ["bodroe", "spokoynoe", "tyomnoe"];
+          if (on) {
+            if (MOODS.includes(key)) MOODS.forEach((k) => (this.activeFilters[k] = false));
+            if (key === "neznakomoe") this.activeFilters.lyubimoe = false;
+            if (key === "lyubimoe") this.activeFilters.neznakomoe = false;
+            if (key === "korotkoe") this.activeFilters.sety = false;
+            if (key === "sety") this.activeFilters.korotkoe = false;
+          }
+          this.activeFilters[key] = on;
           this.saveState();
         }
 
@@ -740,67 +781,150 @@
           return null;
         }
 
-        matchesFilters(track, strict = true) {
-          if (!track || track.duration < 60000) return false;
-          if (this.isBlacklisted(track)) return false;
-          if (this.history.includes(track.id)) return false;
-          if (this.queue.some((q) => q.id === track.id)) return false;
-          if (this.currentTrack && this.currentTrack.id === track.id) return false;
+        moodOf(t) {
+          const tx = `${t.genre || ""} ${t.tag_list || ""} ${t.title || ""}`.toLowerCase();
+          const bpm = Number(t.bpm) || 0;
+          const has = (k) => VIBE_KEYWORDS[k].some((kw) => tx.includes(kw));
+          return { tx, bpm, bodroe: has("bodroe") || bpm >= 122, spokoynoe: has("spokoynoe") || (bpm > 0 && bpm <= 105), tyomnoe: has("tyomnoe") };
+        }
 
-          if (!strict) return true;
+        buildCtx(pool, relPool) {
+          const liked = new Set(this.likedSeeds.map((t) => t.id));
+          const likedArtists = new Set(this.likedSeeds.map((t) => t.user?.id).filter(Boolean));
+          const recentArtists = [this.currentTrack, ...this.playStack.slice(-3), ...this.queue].filter(Boolean).map((t) => t.user?.id);
+          const recentIds = new Set([this.currentTrack?.id, ...this.playStack.slice(-8).map((t) => t.id)]);
+          let cap = 40000;
+          const plays = pool.map((t) => t.playback_count || 0).sort((a, b) => a - b);
+          if (plays.length && plays.filter((x) => x < 40000).length < 3) cap = (plays[Math.floor(plays.length * 0.25)] || 40000) + 1;
+          return { liked, likedArtists, recentArtists, recentIds, undergroundCap: cap, relIds: new Set((relPool || []).map((t) => t.id)) };
+        }
 
-          if (this.activeFilters.andegraund && (track.playback_count || 0) > 50000) return false;
-          if (this.activeFilters.neznakomoe && (track.playback_count || 0) > 150000) return false;
-          if (this.activeFilters.korotkoe && track.duration > 240000) return false;
-          if (this.activeFilters.sety && track.duration < 1200000) return false;
-          if (this.activeFilters.svezhee) {
-            const ts = Date.parse(track.created_at || track.release_date || "");
-            if (ts && Date.now() - ts > 60 * 864e5) return false;
-          }
-
-          const vibeText = `${track.genre || ""} ${track.tag_list || ""} ${track.title || ""}`.toLowerCase();
-          const activeVibes = ["bodroe", "spokoynoe", "tyomnoe"].filter((k) => this.activeFilters[k]);
-          if (activeVibes.length > 0) {
-            const matched = activeVibes.some((vibeKey) =>
-              VIBE_KEYWORDS[vibeKey].some((kw) => vibeText.includes(kw))
-            );
-            if (!matched) return false;
-          }
-
+        // level 0 = strict, 1 = relaxed (no popularity/mood excludes), 2 = also allow replays
+        hardOk(t, ctx, level = 0) {
+          const f = this.activeFilters;
+          if (!t || !t.id || this.isBlacklisted(t)) return false;
+          if (this.queue.some((q) => q.id === t.id) || this.currentTrack?.id === t.id) return false;
+          if (level < 2 && !f.lyubimoe && this.history.includes(t.id)) return false;
+          if (f.lyubimoe && ctx.recentIds.has(t.id)) return false;
+          const d = t.duration || 0;
+          if (f.sety) { if (d < 900000) return false; }
+          else if (f.korotkoe) { if (d < 45000 || d > 210000) return false; }
+          else if (d < 60000) return false;
+          if (level >= 1) return true;
+          const plays = t.playback_count || 0;
+          if (f.neznakomoe && (ctx.liked.has(t.id) || ctx.likedArtists.has(t.user?.id) || plays > 150000)) return false;
+          if (f.andegraund && plays >= ctx.undergroundCap) return false;
+          const m = this.moodOf(t);
+          if (f.bodroe && (SLOW_RE.test(m.tx) || (m.bpm > 0 && m.bpm <= 95))) return false;
+          if (f.spokoynoe && HARD_RE.test(m.tx)) return false;
           return true;
         }
 
+        scoreTrack(t, seed, ctx) {
+          const f = this.activeFilters, m = this.moodOf(t);
+          const mood = ["bodroe", "spokoynoe", "tyomnoe"].find((k) => f[k]);
+          let sc = mood ? (m[mood] ? 40 : 0) : 20;
+          if (!ctx.recentArtists.includes(t.user?.id)) sc += 20;
+          if (seed) {
+            const ds = seed.duration || 240000, dt = t.duration || ds;
+            sc += 10 * (Math.min(ds, dt) / Math.max(ds, dt));
+            if (t.genre && seed.genre && t.genre.toLowerCase() === seed.genre.toLowerCase()) sc += 8;
+            const tg = (x) => (x.tag_list || "").toLowerCase().replace(/"/g, "").split(/\s+/).filter(Boolean);
+            const st = new Set(tg(seed));
+            sc += Math.min(7, tg(t).filter((x) => st.has(x)).length * 2.5);
+          }
+          if (ctx.relIds.has(t.id)) sc += 5;
+          if (f.lyubimoe && ctx.liked.has(t.id)) sc += 10;
+          if (f.svezhee) {
+            const ts = Date.parse(t.created_at || t.release_date || "");
+            if (ts) { const age = (Date.now() - ts) / 864e5; if (age <= 90) sc += 25 * (1 - age / 90); }
+            else if (t.id > 1700000000) sc += 8;
+          }
+          return Math.max(0, Math.min(100, sc + Math.random() * 6));
+        }
+
+        rank(list, seed, ctx) {
+          return list.map((t) => ({ t, sc: this.scoreTrack(t, seed, ctx) })).sort((a, b) => b.sc - a.sc);
+        }
+
+        pick(list, seed, ctx, n) {
+          let out = this.rank(list, seed, ctx);
+          const mood = ["bodroe", "spokoynoe", "tyomnoe"].find((k) => this.activeFilters[k]);
+          if (mood) {
+            const matched = out.filter((x) => this.moodOf(x.t)[mood]);
+            out = matched.length >= n ? matched : [...matched, ...out.filter((x) => !matched.includes(x))];
+          }
+          const seen = new Set(), res = [];
+          for (const x of out) { const a = x.t.user?.id; if (seen.has(a)) continue; seen.add(a); res.push(x.t); if (res.length >= n) break; }
+          for (const x of out) { if (res.length >= n) break; if (!res.includes(x.t)) res.push(x.t); }
+          return res;
+        }
+
+        favPool() {
+          const m = new Map();
+          [...this.likedSeeds, ...playlists.flatMap((p) => p.tracks || [])].forEach((t) => { if (t && t.id) m.set(t.id, t); });
+          return [...m.values()];
+        }
+
+        async searchPool(seed) {
+          const f = this.activeFilters;
+          const mood = ["bodroe", "spokoynoe", "tyomnoe"].find((k) => f[k]);
+          const shuf = (a) => [...a].sort(() => Math.random() - 0.5);
+          const extra = [];
+          if (f.sety) extra.push(shuf(["dj set", "mix", "live set"])[0]);
+          if (f.andegraund) extra.push("underground");
+          const qs = [];
+          if (mood) {
+            const [w1, w2] = shuf(MOOD_QUERIES[mood]);
+            qs.push([w1, ...extra, seed?.genre || ""].join(" ").trim());
+            if (w2) qs.push([w2, ...extra].join(" ").trim());
+          } else qs.push([...extra, seed?.genre || seed?.user?.username || ""].join(" ").trim());
+          const results = await Promise.all(qs.filter(Boolean).map(async (q) => {
+            try {
+              const res = await apiFetch(`/api/search?q=${encodeURIComponent(q)}`);
+              if (!res.ok) return [];
+              const d = await res.json();
+              return Array.isArray(d.collection) ? d.collection : [];
+            } catch { return []; }
+          }));
+          return results.flat();
+        }
+
+        abortFetch() { this.fetchGen = (this.fetchGen || 0) + 1; this.isFetching = false; }
+
         async ensureBuffer(playedRatio = 0, forceSeed = null) {
+          if (playbackMode === "playlist") return;
           if (this.isFetching || this.queue.length >= 3) return;
           const seed = forceSeed || this.selectSeed(playedRatio);
           if (!seed) return;
-
+          const gen = this.fetchGen || 0;
           this.isFetching = true;
           try {
-            const res = await apiFetch(`/api/wave/related?track_id=${encodeURIComponent(seed.id)}&limit=25`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            const pool = Array.isArray(data.collection) ? data.collection : [];
-
-            let filtered = pool.filter((t) => this.matchesFilters(t, true));
-            if (filtered.length < 2) {
-              filtered = pool.filter((t) => this.matchesFilters(t, false));
-            }
-
-            for (let i = filtered.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
-            }
-
-            const recentArtists = new Set([this.currentTrack, ...this.playStack.slice(-3)].filter(Boolean).map((t) => t.user?.id));
-            filtered.sort((a, b) => (recentArtists.has(a.user?.id) ? 1 : 0) - (recentArtists.has(b.user?.id) ? 1 : 0));
+            const f = this.activeFilters, anyPill = Object.values(f).some(Boolean);
+            const relP = apiFetch(`/api/wave/related?track_id=${encodeURIComponent(seed.id)}&limit=30`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+            const srcP = anyPill ? Promise.race([this.searchPool(seed), new Promise((r) => setTimeout(() => r([]), 2200))]) : Promise.resolve([]);
+            const [rel, srch] = await Promise.all([relP, srcP]);
+            if ((this.fetchGen || 0) !== gen) return;
+            const relPool = Array.isArray(rel?.collection) ? rel.collection : [];
+            const merged = new Map();
+            [...relPool, ...srch].forEach((t) => { if (t && t.id && !merged.has(t.id)) merged.set(t.id, t); });
+            const pool = [...merged.values()];
+            const ctx = this.buildCtx(pool, relPool);
             const needed = Math.max(0, 6 - this.queue.length);
-            this.queue.push(...filtered.slice(0, needed));
+            let cands = [];
+            for (const lvl of [0, 1, 2]) { cands = pool.filter((t) => this.hardOk(t, ctx, lvl)); if (cands.length >= Math.min(needed, 3)) break; }
+            let picks;
+            if (f.lyubimoe) {
+              const fav = this.favPool().filter((t) => this.hardOk(t, ctx, 1));
+              const nFav = Math.round(needed * 0.7);
+              picks = this.pick(fav, seed, ctx, nFav);
+              const rest = cands.filter((t) => !picks.some((p) => p.id === t.id));
+              picks.push(...this.pick(rest, seed, ctx, needed - picks.length));
+            } else picks = this.pick(cands, seed, ctx, needed);
+            this.queue.push(...picks);
             this.lastSuccessfulSeed = seed;
           } catch {}
-          finally {
-            this.isFetching = false;
-          }
+          finally { if ((this.fetchGen || 0) === gen) this.isFetching = false; }
         }
       }
 
@@ -870,83 +994,184 @@
       // =========================================================================
       // AUDIO ENGINE
       // =========================================================================
-      const audioEl = document.getElementById("audio-element");
-      let hlsInstance = null;
+      const deckA = document.getElementById("audio-a"), deckB = document.getElementById("audio-b");
+      const decks = [deckA, deckB];
+      let audioEl = deckA;
+      const deckHls = new Map();
+      const STREAM_TTL = 25 * 60 * 1000;
       let playSessionId = 0;
       let consecutivePlayErrors = 0;
 
+      // Events from both decks, but only the active one drives the UI
+      function deckListen(type, fn, opts) {
+        decks.forEach((d) => d.addEventListener(type, (e) => { if (d === audioEl) fn(e); }, opts));
+      }
+      const otherDeck = (d) => (d === deckA ? deckB : deckA);
+      const setTlLoading = (on) => document.getElementById("timeline-track")?.classList.toggle("loading", on);
+
       async function resolveStreamForTrack(track) {
-        if (track._resolvedStream) return track._resolvedStream;
-        const res = await apiFetch(`/api/stream?track_id=${encodeURIComponent(track.id)}`);
-        if (!res.ok) throw new Error(`Stream resolve error ${res.status}`);
-        const data = await res.json();
-        track._resolvedStream = data;
-        return data;
+        if (track._resolvedStream && Date.now() - (track._resolvedAt || 0) < STREAM_TTL) return track._resolvedStream;
+        if (track._resolving) return track._resolving;
+        track._resolving = (async () => {
+          const res = await apiFetch(`/api/stream?track_id=${encodeURIComponent(track.id)}`);
+          if (!res.ok) throw new Error(`Stream resolve error ${res.status}`);
+          const data = await res.json();
+          track._resolvedStream = data;
+          track._resolvedAt = Date.now();
+          return data;
+        })().finally(() => { track._resolving = null; });
+        return track._resolving;
       }
 
-      function destroyHls() {
-        if (hlsInstance) {
-          try { hlsInstance.destroy(); } catch {}
-          hlsInstance = null;
+      function destroyDeckHls(deck) {
+        const h = deckHls.get(deck);
+        if (h) { try { h.destroy(); } catch {} deckHls.delete(deck); }
+      }
+
+      function stopDeck(d) {
+        try { d.pause(); } catch {}
+        destroyDeckHls(d);
+        try { d.removeAttribute("src"); d.load(); } catch {}
+        d.volume = userVol;
+        d.loop = false;
+      }
+
+      function attachToDeck(deck, url, protocol, o = {}) {
+        const { play = true, sessionId = null, startAt = 0, standby: isSb = false, alive = () => true } = o;
+        return new Promise((resolve, reject) => {
+          if (!url || !/^https?:\/\//i.test(url)) return reject(new Error("Invalid stream URL"));
+          const ok = () => (sessionId === null ? alive() : sessionId === playSessionId);
+          if (!ok()) return reject(new Error("superseded"));
+          destroyDeckHls(deck);
+          try { deck.pause(); } catch {}
+          deck.preload = "auto";
+          let settled = false;
+          const done = (fn, v) => { if (!settled) { settled = true; fn(v); } };
+          const whenReady = () => {
+            if (deck.readyState >= 3) return done(resolve);
+            deck.addEventListener("canplay", () => done(resolve), { once: true });
+            setTimeout(() => done(reject, new Error("standby timeout")), 8000);
+          };
+          if (protocol === "hls" && window.Hls && Hls.isSupported()) {
+            const hls = new Hls({ enableWorker: true, lowLatencyMode: false, maxBufferLength: isSb ? 10 : 30, startPosition: startAt > 0 ? startAt : -1 });
+            deckHls.set(deck, hls);
+            hls.loadSource(url);
+            hls.attachMedia(deck);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              if (!ok()) return done(reject, new Error("superseded"));
+              if (!play) return whenReady();
+              deck.play().then(() => done(resolve), (err) => done(reject, err));
+            });
+            hls.on(Hls.Events.ERROR, (_, data) => {
+              if (data?.fatal) { destroyDeckHls(deck); done(reject, new Error(`HLS fatal: ${data.type}`)); }
+            });
+          } else {
+            const cleanup = () => { deck.removeEventListener("canplay", onCanPlay); deck.removeEventListener("error", onError); };
+            const onCanPlay = () => {
+              cleanup();
+              if (!ok()) return done(reject, new Error("superseded"));
+              if (startAt > 0) { try { deck.currentTime = startAt; } catch {} }
+              if (!play) return done(resolve);
+              deck.play().then(() => done(resolve), (err) => done(reject, err));
+            };
+            const onError = () => { cleanup(); done(reject, new Error("Audio element load error")); };
+            deck.addEventListener("canplay", onCanPlay, { once: true });
+            deck.addEventListener("error", onError, { once: true });
+            deck.src = url;
+            deck.load();
+          }
+        });
+      }
+
+      async function attachWithFallback(deck, stream, o) {
+        try { await attachToDeck(deck, stream.url, stream.protocol, o); }
+        catch (e) {
+          if (o.sessionId != null && o.sessionId !== playSessionId) throw e;
+          if (o.alive && !o.alive()) throw e;
+          if (stream.fallback_url) await attachToDeck(deck, stream.fallback_url, stream.fallback_protocol, o);
+          else throw e;
         }
       }
 
-      function attachAndPlayStream(url, protocol, sessionId) {
-        return new Promise((resolve, reject) => {
-          if (sessionId !== playSessionId) return reject(new Error("superseded"));
-          if (!url || !/^https?:\/\//i.test(url)) return reject(new Error("Invalid stream URL"));
-          destroyHls();
-          audioEl.pause();
+      // ---- standby deck: pre-resolve + pre-buffer queue[0] ----
+      function clearStandby() {
+        if (standby) { const d = standby.deck; standby = null; if (d !== audioEl) stopDeck(d); }
+      }
+      async function prepareStandby() {
+        if (fade || !engine.currentTrack) return;
+        engine.queue.slice(0, 2).forEach((t) => resolveStreamForTrack(t).catch(() => {}));
+        const next = engine.queue[0];
+        if (!next) { clearStandby(); return; }
+        if (standby && standby.trackId === next.id) return;
+        if (audioEl.readyState < 2 && audioEl.paused) return;
+        clearStandby();
+        const deck = otherDeck(audioEl);
+        const token = { deck, trackId: next.id, ok: false };
+        standby = token;
+        try {
+          const st = await resolveStreamForTrack(next);
+          if (standby !== token) return;
+          deck.volume = 0;
+          await attachWithFallback(deck, st, { play: false, standby: true, alive: () => standby === token });
+          if (standby === token) token.ok = true;
+        } catch {
+          if (standby === token) { standby = null; if (deck !== audioEl) stopDeck(deck); }
+        }
+      }
+      let sbTimer = null;
+      function scheduleStandby() { clearTimeout(sbTimer); sbTimer = setTimeout(prepareStandby, 200); }
 
-          if (protocol === "hls" && window.Hls && Hls.isSupported()) {
-            let settled = false;
-            hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: false });
-            hlsInstance.loadSource(url);
-            hlsInstance.attachMedia(audioEl);
+      // ---- equal-power crossfade ----
+      function startFade(out, inn, sec) {
+        const f = (fade = { out, inn, t0: performance.now(), dur: sec * 1000, raf: 0, to: 0 });
+        const tick = (now) => {
+          if (fade !== f) return;
+          const p = Math.min(1, (now - f.t0) / f.dur);
+          inn.volume = userVol * Math.sin((p * Math.PI) / 2);
+          out.volume = userVol * Math.cos((p * Math.PI) / 2);
+          if (p >= 1) { fade = null; stopDeck(out); inn.volume = userVol; return; }
+          schedule();
+        };
+        const schedule = () => {
+          if (document.hidden) f.to = setTimeout(() => tick(performance.now()), 100);
+          else f.raf = requestAnimationFrame(tick);
+        };
+        schedule();
+      }
+      function cancelFade() {
+        if (!fade) return;
+        const { out, inn, raf, to } = fade;
+        cancelAnimationFrame(raf); clearTimeout(to);
+        fade = null;
+        stopDeck(out);
+        inn.volume = userVol;
+      }
 
-            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-              if (sessionId !== playSessionId) return;
-              audioEl.play().then(() => {
-                if (!settled) { settled = true; resolve(); }
-              }).catch((err) => {
-                if (!settled) { settled = true; reject(err); }
-              });
-            });
+      function swapToStandby(fadeSec) {
+        const sb = standby, inn = sb.deck, out = audioEl;
+        standby = null;
+        const outPlaying = !out.paused && out.currentTime > 0;
+        audioEl = inn;
+        aStream = null;
+        inn.loop = repeatOne;
+        applyRate();
+        inn.muted = out.muted;
+        const withFade = fadeSec > 0 && outPlaying;
+        inn.volume = withFade ? 0 : userVol;
+        const pr = inn.play();
+        if (withFade) startFade(out, inn, fadeSec); else stopDeck(out);
+        return Promise.resolve(pr);
+      }
 
-            hlsInstance.on(Hls.Events.ERROR, (_, data) => {
-              if (data?.fatal && !settled) {
-                settled = true;
-                destroyHls();
-                reject(new Error(`HLS fatal: ${data.type}`));
-              }
-            });
-          } else {
-            let settled = false;
-            const cleanup = () => {
-              audioEl.removeEventListener("canplay", onCanPlay);
-              audioEl.removeEventListener("error", onError);
-            };
-            const onCanPlay = () => {
-              if (sessionId !== playSessionId) { cleanup(); return; }
-              audioEl.play().then(() => {
-                if (!settled) { settled = true; cleanup(); resolve(); }
-              }).catch((err) => {
-                if (!settled) { settled = true; cleanup(); reject(err); }
-              });
-            };
-            const onError = () => {
-              if (!settled) {
-                settled = true;
-                cleanup();
-                reject(new Error("Audio element load error"));
-              }
-            };
-            audioEl.addEventListener("canplay", onCanPlay, { once: true });
-            audioEl.addEventListener("error", onError, { once: true });
-            audioEl.src = url;
-            audioEl.load();
-          }
-        });
+      function maybeCrossfade(rem) {
+        if (fade || repeatOne || sleepEOT || !(rem > 0)) return;
+        const thr = xfadeSec > 0 ? xfadeSec : 0.4;
+        if (rem > thr) return;
+        const next = engine.queue[0];
+        if (!next || !standby || !standby.ok || standby.trackId !== next.id) return;
+        if (engine.currentTrack) engine.markCompleted(engine.currentTrack);
+        engine.queue.shift();
+        playTrack(next, true, { fadeSec: xfadeSec > 0 ? Math.min(xfadeSec, rem) : 0.25 });
       }
 
       // =========================================================================
@@ -1092,6 +1317,10 @@
         ctx.fillStyle = sp; ctx.beginPath(); ctx.arc(cx - R * 0.34, cy - R * 0.4, R * 0.46, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = `rgba(255, 255, 255, ${0.14 + smoothBass * 0.2})`; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = acc(0.12 + smoothBass * 0.3); ctx.lineWidth = 7;
+        ctx.beginPath(); ctx.arc(cx, cy, R * 1.02, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = acc(0.35 + smoothBass * 0.6); ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(cx, cy, R * 1.005, 0, Math.PI * 2); ctx.stroke();
       }
 
       requestAnimationFrame(renderOrb);
@@ -1357,6 +1586,7 @@
               showToast("Add tracks to this playlist first");
               return;
             }
+            setWaveMode();
             recordSet(pl);
             engine.addLikedSeedsBatch(tracks);
             engine.queue = [...tracks.slice(1, 6)];
@@ -1371,9 +1601,7 @@
             const pl = playlists.find((p) => p.id === btn.dataset.plPlay);
             const idx = Number(btn.dataset.trackIdx);
             if (!pl || !pl.tracks[idx]) return;
-            recordSet(pl);
-            engine.queue = shuffleOn ? shuffled(pl.tracks.filter((_, i) => i !== idx)).slice(0, 12) : pl.tracks.slice(idx + 1, idx + 8);
-            await playTrack(pl.tracks[idx], true);
+            await playPlaylist(pl, idx, { shuffle: shuffleOn });
           });
         });
 
@@ -1416,40 +1644,55 @@
         els.btnLike.classList.toggle("text-white/45", !liked);
       }
 
-      async function playTrack(track, pushPrev = true) {
+      async function playTrack(track, pushPrev = true, opts = {}) {
         if (!track) return;
         const sessionId = ++playSessionId;
+        if (fade) cancelFade();
 
         if (pushPrev && engine.currentTrack && engine.currentTrack.id !== track.id) {
           engine.playStack.push(engine.currentTrack);
           if (engine.playStack.length > 30) engine.playStack.shift();
         }
 
+        // Optimistic UI: everything updates in this same frame
         engine.currentTrack = track;
         engine.markPlayed(track);
         preloadTriggeredForId = null;
         updateTrackUI(track);
+        updatePlayStateIcons(true);
+        setTlLoading(true);
+
+        // Fast path: next track is already buffered on the standby deck
+        if (!opts.resumeAt && standby && standby.ok && standby.trackId === track.id && standby.deck.readyState >= 2) {
+          try {
+            await swapToStandby(opts.fadeSec !== undefined ? opts.fadeSec : Math.min(xfadeSec, 2));
+            if (sessionId !== playSessionId) return;
+            consecutivePlayErrors = 0;
+            setTlLoading(false);
+            renderStatsAndQueue();
+            engine.ensureBuffer(0, track).then(renderStatsAndQueue);
+            return;
+          } catch { cancelFade(); }
+        }
+
         renderStatsAndQueue();
+        suppressPause = true;
+        try { audioEl.pause(); } catch {}
+        setTimeout(() => { suppressPause = false; }, 80);
 
         try {
           const stream = await resolveStreamForTrack(track);
           if (sessionId !== playSessionId) return;
-
-          try {
-            await attachAndPlayStream(stream.url, stream.protocol, sessionId);
-          } catch (primaryErr) {
-            if (sessionId !== playSessionId) return;
-            if (stream.fallback_url) {
-              await attachAndPlayStream(stream.fallback_url, stream.fallback_protocol, sessionId);
-            } else {
-              throw primaryErr;
-            }
-          }
-
+          await attachWithFallback(audioEl, stream, { sessionId, startAt: opts.resumeAt || 0 });
+          if (sessionId !== playSessionId) return;
           consecutivePlayErrors = 0;
+          audioEl.loop = repeatOne;
+          applyRate();
+          setTlLoading(false);
           engine.ensureBuffer(0, track).then(renderStatsAndQueue);
         } catch (err) {
           if (sessionId !== playSessionId) return;
+          setTlLoading(false);
           if (err?.name === "NotAllowedError") {
             showToast("Click Play on the orb to start audio");
             updatePlayStateIcons(false);
@@ -1469,7 +1712,7 @@
 
       async function playNext(checkSkipLearning = true) {
         const cur = engine.currentTrack;
-        if (checkSkipLearning && cur && audioEl.currentTime > 0 && audioEl.currentTime < 15) {
+        if (checkSkipLearning && cur && playbackMode !== "playlist" && audioEl.currentTime > 0 && audioEl.currentTime < 15) {
           engine.blacklistAndFlush(cur, false);
           showUndo("Skipped early — track blocked", cur);
           await engine.ensureBuffer(0, engine.lastSuccessfulSeed);
@@ -1489,6 +1732,11 @@
         }
         if (nextTrack) {
           await playTrack(nextTrack, true);
+        } else if (playbackMode === "playlist") {
+          showToast("Playlist finished");
+          audioEl.pause();
+          updatePlayStateIcons(false);
+          renderStatsAndQueue();
         } else {
           showToast("Buffer empty — search a track or @username");
           renderStatsAndQueue();
@@ -1576,11 +1824,12 @@
       // =========================================================================
       // AUDIO EVENTS & PRELOADING
       // =========================================================================
-      audioEl.volume = Number(els.volumeSlider.value);
-      audioEl.addEventListener("play", () => updatePlayStateIcons(true));
-      audioEl.addEventListener("pause", () => updatePlayStateIcons(false));
+      userVol = Number(els.volumeSlider.value);
+      decks.forEach((d) => (d.volume = userVol));
+      deckListen("play", () => updatePlayStateIcons(true));
+      deckListen("pause", () => { if (suppressPause) return; if (fade) cancelFade(); updatePlayStateIcons(false); });
 
-      audioEl.addEventListener("timeupdate", () => {
+      deckListen("timeupdate", () => {
         if (isScrubbing) return;
         const current = audioEl.currentTime || 0;
         const duration = Number.isFinite(audioEl.duration) && audioEl.duration > 0
@@ -1598,6 +1847,7 @@
           els.timelineProgress.style.transform = `scaleX(${ratio})`;
 
           const remaining = duration - current;
+          maybeCrossfade(remaining);
           if (remaining <= 10 && remaining > 0) {
             if (engine.queue.length < 3 && !engine.isFetching) {
               engine.ensureBuffer(ratio).then(renderStatsAndQueue);
@@ -1611,7 +1861,7 @@
         }
       });
 
-      audioEl.addEventListener("ended", () => {
+      deckListen("ended", () => {
         if (engine.currentTrack) engine.markCompleted(engine.currentTrack);
         if (sleepEOT) { sleepEOT = false; document.getElementById("btn-sleep").classList.remove("on"); showToast("Sleep timer: stopped"); return; }
         playNext(false);
@@ -1628,8 +1878,13 @@
             const seed = engine.likedSeeds[Math.floor(Math.random() * engine.likedSeeds.length)];
             await playTrack(seed, false);
           } else {
-            showToast("Search a track or Sign In to start My Wave");
+            await coldStart();
           }
+          return;
+        }
+        if (!audioEl.currentSrc) {
+          const at = pendingResumeAt; pendingResumeAt = 0;
+          await playTrack(engine.currentTrack, false, { resumeAt: at });
           return;
         }
         if (audioEl.paused) audioEl.play().catch(() => {});
@@ -1737,25 +1992,34 @@
       });
 
       els.volumeSlider.addEventListener("input", () => {
-        audioEl.volume = Number(els.volumeSlider.value);
-        audioEl.muted = audioEl.volume === 0;
-        els.iconVolOn.classList.toggle("hidden", audioEl.muted);
-        els.iconVolOff.classList.toggle("hidden", !audioEl.muted);
+        userVol = Number(els.volumeSlider.value);
+        if (!fade) audioEl.volume = userVol;
+        const m = userVol === 0;
+        decks.forEach((d) => (d.muted = m));
+        els.iconVolOn.classList.toggle("hidden", m);
+        els.iconVolOff.classList.toggle("hidden", !m);
       });
 
       els.btnMute.addEventListener("click", () => {
-        audioEl.muted = !audioEl.muted;
-        els.iconVolOn.classList.toggle("hidden", audioEl.muted);
-        els.iconVolOff.classList.toggle("hidden", !audioEl.muted);
+        const m = !audioEl.muted;
+        decks.forEach((d) => (d.muted = m));
+        els.iconVolOn.classList.toggle("hidden", m);
+        els.iconVolOff.classList.toggle("hidden", !m);
       });
 
       els.vibePills.forEach((btn) => {
         btn.addEventListener("click", async () => {
+          if (playbackMode === "playlist") { setWaveMode(); showToast("Switched to My Wave"); }
           engine.toggleFilter(btn.dataset.filter);
           renderFilterPills();
+          btn.classList.add("pill-loading");
+          engine.abortFetch();
           engine.queue = [];
-          showToast("Updating wave filters...");
-          await engine.ensureBuffer(0, engine.currentTrack || engine.lastSuccessfulSeed);
+          clearStandby();
+          try {
+            if (!engine.currentTrack && !engine.lastSuccessfulSeed && engine.likedSeeds.length === 0) await coldStart();
+            else await engine.ensureBuffer(0, engine.currentTrack || engine.lastSuccessfulSeed || engine.likedSeeds[0]);
+          } finally { btn.classList.remove("pill-loading"); }
           renderStatsAndQueue();
         });
       });
@@ -1871,9 +2135,7 @@
             els.searchResultsPanel.classList.add("hidden");
             if (entry.tracks.length) {
               engine.addLikedSeedsBatch(entry.tracks);
-              recordSet(entry);
-                engine.queue = entry.tracks.slice(1, 7);
-              await playTrack(entry.tracks[0], true);
+                await playPlaylist(entry, 0, { shuffle: false });
             }
             showToast(`Loaded playlist "${entry.title}"`);
             return;
@@ -1936,6 +2198,7 @@
             const track = tracks[Number(btn.dataset.resIdx)];
             if (track) {
               consecutivePlayErrors = 0;
+              setWaveMode();
               engine.queue = [];
               engine.lastSuccessfulSeed = track;
               els.searchResultsPanel.classList.add("hidden");
@@ -2012,9 +2275,7 @@
               renderPlaylists();
               if (entry.tracks.length) {
                 engine.addLikedSeedsBatch(entry.tracks);
-                recordSet(entry);
-                engine.queue = entry.tracks.slice(1, 7);
-                await playTrack(entry.tracks[0], true);
+                await playPlaylist(entry, 0, { shuffle: false });
               }
               showToast(`Imported & playing "${entry.title}"`);
             } catch {
@@ -2050,11 +2311,11 @@
         const art = getHighResArtwork(track.artwork_url || track.user?.avatar_url);
         const oa = $("orb-art"), bg = $("bg-art");
         if (art) {
-          const ca = $("center-art"); ca.src = art; ca.classList.remove("hidden");
+          const ca = $("center-art"); ca.src = art; ca.classList.remove("hidden"); setVinyl(art);
           drawBg(art);
           extractAccent(art);
         } else {
-          oa.classList.remove("on"); bg.classList.remove("on"); $("center-art").classList.add("hidden");
+          setVinyl(""); $("bg-art").classList.remove("on"); $("bg-art-b").classList.remove("on"); $("center-art").classList.add("hidden");
           ACC_T = [212, 175, 55]; document.documentElement.style.setProperty("--acc", "212,175,55");
         }
         document.title = `${track.title} — MY WAVE`;
@@ -2069,13 +2330,22 @@
         }
       }
 
+      let vSide = 0, bgSide = 0;
+      function setVinyl(url) {
+        const a = $("orb-art"), b = $("orb-art-b");
+        if (!url) { a.classList.remove("on"); b.classList.remove("on"); return; }
+        const on = vSide === 0 ? b : a, off = vSide === 0 ? a : b;
+        on.onload = () => { on.classList.add("on"); off.classList.remove("on"); vSide ^= 1; };
+        on.src = url;
+      }
       function drawBg(url) {
         const im = new Image();
         im.onload = () => {
           try {
-            const c = $("bg-art"), x = c.getContext("2d"), m = Math.min(im.width, im.height);
-            x.drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, 24, 24);
-            c.classList.add("on");
+            bgSide ^= 1;
+            const on = $(bgSide ? "bg-art-b" : "bg-art"), off = $(bgSide ? "bg-art" : "bg-art-b"), m = Math.min(im.width, im.height);
+            on.getContext("2d").drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, 24, 24);
+            on.classList.add("on"); off.classList.remove("on");
           } catch {}
         };
         im.src = url;
@@ -2106,7 +2376,7 @@
 
       if ("mediaSession" in navigator) {
         const ms = navigator.mediaSession, h = (a, f) => { try { ms.setActionHandler(a, f); } catch {} };
-        h("play", () => audioEl.play().catch(() => {})); h("pause", () => audioEl.pause());
+        h("play", () => (audioEl.currentSrc ? audioEl.play().catch(() => {}) : togglePlayPause())); h("pause", () => audioEl.pause());
         h("previoustrack", () => els.btnPrev.click()); h("nexttrack", () => els.btnNext.click());
         h("seekbackward", () => { audioEl.currentTime = Math.max(0, audioEl.currentTime - 10); });
         h("seekforward", () => { audioEl.currentTime += 10; });
@@ -2114,7 +2384,7 @@
       }
 
       let lastPos = 0;
-      audioEl.addEventListener("timeupdate", () => {
+      deckListen("timeupdate", () => {
         const d = audioEl.duration, c = audioEl.currentTime;
         if (!isScrubbing && d > 0 && isFinite(d)) $("timeline-thumb").style.left = `${Math.min(100, (c / d) * 100)}%`;
         const now = Date.now();
@@ -2133,7 +2403,7 @@
         $("timeline-thumb").style.left = `${ratio * 100}%`;
         els.timeCurrent.textContent = formatTime(ratio * (audioEl.duration || 0));
       };
-      tl.addEventListener("pointerdown", (e) => { if (!(audioEl.duration > 0)) return; isScrubbing = true; tl.setPointerCapture(e.pointerId); paint(ratioAt(e)); });
+      tl.addEventListener("pointerdown", (e) => { cancelFade(); if (!(audioEl.duration > 0)) return; isScrubbing = true; tl.setPointerCapture(e.pointerId); paint(ratioAt(e)); });
       tl.addEventListener("pointermove", (e) => { if (isScrubbing) paint(ratioAt(e)); });
       tl.addEventListener("pointerup", (e) => { if (!isScrubbing) return; isScrubbing = false; audioEl.currentTime = ratioAt(e) * audioEl.duration; });
       tl.addEventListener("pointercancel", () => { isScrubbing = false; });
@@ -2152,7 +2422,7 @@
       const RATES = [0.75, 1, 1.25, 1.5, 2]; let rateIdx = 1;
       $("btn-speed").addEventListener("click", () => {
         rateIdx = (rateIdx + 1) % RATES.length; const r = RATES[rateIdx];
-        audioEl.defaultPlaybackRate = r; audioEl.playbackRate = r; audioEl.preservesPitch = true;
+        decks.forEach((d) => { d.defaultPlaybackRate = r; d.playbackRate = r; d.preservesPitch = true; });
         $("btn-speed").textContent = `${r}×`; $("btn-speed").classList.toggle("on", r !== 1);
       });
 
@@ -2281,6 +2551,7 @@
         recent.tracks = [slim, ...recent.tracks.filter((x) => x.id !== t.id)].slice(0, 24);
         saveRecent();
         if (homeTab === "recent") renderRecent();
+        if (homeTab === "playlists" && openPlId) renderHomePlaylists();
       }
       function recordSet(pl) {
         recent.sets = [{ id: pl.id, title: pl.title, art: pl.artwork_url || pl.tracks?.[0]?.artwork_url || "", n: pl.tracks?.length || pl.track_count || 0 }, ...recent.sets.filter((x) => x.id !== pl.id)].slice(0, 12);
@@ -2288,15 +2559,16 @@
       }
 
       async function playSet(pl, mode) {
-        showToast("Loading...");
-        const tracks = await ensurePlaylistTracks(pl);
-        if (!tracks.length) { showToast("Playlist is empty"); return; }
-        const list = mode === "shuffle" ? shuffled(tracks) : tracks.slice();
-        if (mode === "wave") { engine.addLikedSeedsBatch(tracks); engine.queue = list.slice(1, 6); engine.lastSuccessfulSeed = list[0]; srcLabel = ""; srcIds = new Set(); }
-        else { engine.queue = list.slice(1, 25); srcLabel = pl.title; srcIds = new Set(tracks.map((t) => t.id)); }
-        recordSet(pl);
-        setHome("wave");
-        await playTrack(list[0], true);
+        if (mode === "wave") {
+          showToast("Loading...");
+          const tracks = await ensurePlaylistTracks(pl);
+          if (!tracks.length) { showToast("Playlist is empty"); return; }
+          setWaveMode();
+          const list = tracks.slice();
+          engine.addLikedSeedsBatch(tracks); engine.queue = list.slice(1, 6); engine.lastSuccessfulSeed = list[0];
+          recordSet(pl); setHome("wave");
+          await playTrack(list[0], true);
+        } else await playPlaylist(pl, mode === "shuffle" ? -1 : 0, { shuffle: mode === "shuffle" });
       }
 
       function setHome(t) {
@@ -2316,14 +2588,14 @@
         const art = smallArt(pl.artwork_url || pl.art || pl.tracks?.[0]?.artwork_url);
         return art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : `<span class="font-mono text-2xl text-white/20">${escapeHtml((pl.title || "?")[0].toUpperCase())}</span>`;
       }
-      function renderHomePlaylists() {
+      function renderHomeGrid() {
         const g = $("home-pl-grid");
         if (!playlists.length) { g.innerHTML = `<div class="col-span-full py-10 text-center font-mono text-xs text-white/40">Плейлистов пока нет. Создай свой или импортируй из SoundCloud через поиск.</div>`; return; }
         g.innerHTML = playlists.map((pl) => {
           const n = pl.tracks?.length || pl.track_count || 0;
           return `<div data-hp="${escapeHtml(pl.id)}" class="group rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/25 p-2.5 cursor-pointer transition-colors">
             <div class="relative aspect-square rounded-xl overflow-hidden bg-obsidian mb-2 flex items-center justify-center">${setCover(pl)}
-              <div class="absolute right-2 bottom-2 w-9 h-9 rounded-full bg-silver text-obsidian flex items-center justify-center shadow-lg md:opacity-0 md:group-hover:opacity-100 transition-opacity"><svg class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></div>
+              <div data-hp-play class="absolute right-2 bottom-2 w-9 h-9 rounded-full bg-silver text-obsidian flex items-center justify-center shadow-lg md:opacity-0 md:group-hover:opacity-100 transition-opacity"><svg class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></div>
             </div>
             <div class="text-xs text-silver truncate">${escapeHtml(pl.title)}</div>
             <div class="font-mono text-[10px] text-white/40">${n} tracks</div>
@@ -2333,11 +2605,6 @@
             </div></div>`;
         }).join("");
       }
-      $("home-pl-grid").addEventListener("click", (e) => {
-        const c = e.target.closest("[data-hp]"); if (!c) return;
-        const pl = playlists.find((p) => p.id === c.dataset.hp); if (!pl) return;
-        playSet(pl, e.target.closest("[data-hp-shuffle]") ? "shuffle" : e.target.closest("[data-hp-wave]") ? "wave" : "play");
-      });
       $("home-new-pl").addEventListener("click", () => { openDrawer(); document.querySelector('[data-drawer-tab="playlists"]')?.click(); });
 
       function renderRecent() {
@@ -2391,14 +2658,181 @@
           aSrc = aCtx.createMediaStreamSource(aStream); aSrc.connect(analyser); flat = 0;
         } catch {}
       }
-      audioEl.addEventListener("playing", setupAnalyser);
+      deckListen("playing", setupAnalyser);
       setHome("wave");
+
+
+
+      // =========================================================================
+      // PLAYLIST MODE, DETAIL VIEWER, COLD START, SESSION RESUME, CROSSFADE UI
+      // =========================================================================
+      function slimTrack(t) {
+        return { id: t.id, title: t.title, duration: t.duration, artwork_url: t.artwork_url, genre: t.genre, tag_list: t.tag_list, bpm: t.bpm, playback_count: t.playback_count, created_at: t.created_at, permalink_url: t.permalink_url, user: { id: t.user?.id, username: t.user?.username, avatar_url: t.user?.avatar_url } };
+      }
+      function setWaveMode() {
+        playbackMode = "wave"; activePlaylistId = null; srcLabel = ""; srcIds = new Set();
+        $("ctx-badge").textContent = "Now playing · My Wave";
+      }
+      function applyRate() { const r = RATES[rateIdx]; decks.forEach((d) => { d.defaultPlaybackRate = r; d.playbackRate = r; }); }
+
+      async function playPlaylist(pl, startIdx = 0, o = {}) {
+        showToast("Loading...");
+        const tracks = await ensurePlaylistTracks(pl);
+        if (!tracks.length) { showToast("Playlist is empty"); return; }
+        let first, rest;
+        if (o.shuffle) { first = tracks[startIdx] || tracks[Math.floor(Math.random() * tracks.length)]; rest = shuffled(tracks.filter((t) => t.id !== first.id)); }
+        else { first = tracks[startIdx] || tracks[0]; rest = tracks.slice(tracks.indexOf(first) + 1); }
+        playbackMode = "playlist"; activePlaylistId = pl.id; srcLabel = pl.title; srcIds = new Set(tracks.map((t) => t.id));
+        engine.queue = rest.filter((t) => !engine.isBlacklisted(t));
+        engine.lastSuccessfulSeed = first;
+        recordSet(pl); setHome("wave");
+        await playTrack(first, true);
+      }
+
+      const COLD_QUERIES = ["electronic", "indie electronic", "deep house", "indie dance", "synthwave", "downtempo", "alt pop", "future garage"];
+      async function coldStart() {
+        showToast("Starting your wave...");
+        setWaveMode();
+        const f = engine.activeFilters, mood = ["bodroe", "spokoynoe", "tyomnoe"].find((k) => f[k]);
+        const words = mood ? MOOD_QUERIES[mood] : f.sety ? ["dj set", "mix", "live set"] : f.andegraund ? ["underground electronic"] : COLD_QUERIES;
+        const q = words[Math.floor(Math.random() * words.length)] + (mood && f.sety ? " mix" : "");
+        try {
+          const res = await apiFetch(`/api/search?q=${encodeURIComponent(q)}`);
+          if (!res.ok) throw new Error();
+          const d = await res.json(), pool = Array.isArray(d.collection) ? d.collection : [], ctx = engine.buildCtx(pool, []);
+          let c = [];
+          for (const lvl of [0, 1, 2]) { c = pool.filter((t) => engine.hardOk(t, ctx, lvl)); if (c.length >= 3) break; }
+          if (!c.length) { showToast("Nothing found — try searching"); return; }
+          const picks = engine.pick(c, null, ctx, 7);
+          engine.queue = picks.slice(1); engine.lastSuccessfulSeed = picks[0];
+          await playTrack(picks[0], false);
+        } catch { showToast("Couldn't start the wave — search a track"); }
+      }
+
+      // Playlist detail viewer
+      let openPlId = null;
+      function renderHomePlaylists() {
+        const detail = $("home-pl-detail"), grid = $("home-pl-grid"), head = $("home-pl-head");
+        const pl = openPlId && playlists.find((p) => p.id === openPlId);
+        if (!pl) { openPlId = null; detail.classList.add("hidden"); grid.classList.remove("hidden"); head.classList.remove("hidden"); renderHomeGrid(); return; }
+        grid.classList.add("hidden"); head.classList.add("hidden"); detail.classList.remove("hidden");
+        const tracks = pl.tracks || [];
+        if (!tracks.length && pl.source === "soundcloud") ensurePlaylistTracks(pl).then(() => { if (openPlId === pl.id) renderHomePlaylists(); });
+        const btn = "px-3.5 py-2 rounded-xl font-mono text-[11px] uppercase transition-colors";
+        detail.innerHTML = `<button data-pd-back type="button" class="font-mono text-[11px] uppercase text-white/50 hover:text-gold mb-3">← Плейлисты</button>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-24 h-24 rounded-2xl overflow-hidden bg-obsidian border border-white/10 shrink-0 flex items-center justify-center">${setCover(pl)}</div>
+            <div class="min-w-0">
+              <div class="text-base font-semibold text-silver truncate">${escapeHtml(pl.title)}</div>
+              <div class="font-mono text-[11px] text-white/45 mb-2">${escapeHtml(pl.author || "Мой плейлист")} · ${tracks.length || pl.track_count || 0} tracks</div>
+              <div class="flex flex-wrap gap-2">
+                <button data-pd-play type="button" class="${btn} bg-silver text-obsidian">Play</button>
+                <button data-pd-shuffle type="button" class="${btn} border border-white/15 text-white/70 hover:border-white/35">Shuffle</button>
+                <button data-pd-wave type="button" class="${btn} border border-gold/40 text-gold hover:bg-gold/10">Wave</button>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-1">${tracks.length ? tracks.map((t, i) => {
+            const cur = engine.currentTrack?.id === t.id && activePlaylistId === pl.id;
+            return `<div data-pd-i="${i}" class="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.05] cursor-pointer">
+              <span class="font-mono text-[10px] w-5 text-right ${cur ? "text-gold" : "text-white/30"}">${cur ? "▶" : i + 1}</span>
+              <div class="w-10 h-10 rounded-lg overflow-hidden bg-obsidian shrink-0 flex items-center justify-center">${setCover({ title: t.title, artwork_url: t.artwork_url })}</div>
+              <div class="min-w-0 flex-1"><div class="text-xs truncate ${cur ? "text-gold" : "text-silver"}">${escapeHtml(t.title)}</div><div class="text-[11px] text-white/45 truncate">${escapeHtml(t.user?.username)}</div></div>
+              <span class="font-mono text-[10px] text-white/35">${formatTime((t.duration || 0) / 1000)}</span></div>`;
+          }).join("") : `<div class="py-8 text-center font-mono text-xs text-white/35">Загрузка треков...</div>`}</div>`;
+      }
+      $("home-pl-grid").addEventListener("click", (e) => {
+        const c = e.target.closest("[data-hp]"); if (!c) return;
+        const pl = playlists.find((p) => p.id === c.dataset.hp); if (!pl) return;
+        if (e.target.closest("[data-hp-shuffle]")) return playSet(pl, "shuffle");
+        if (e.target.closest("[data-hp-wave]")) return playSet(pl, "wave");
+        if (e.target.closest("[data-hp-play]")) return playSet(pl, "play");
+        openPlId = pl.id; renderHomePlaylists();
+      });
+      $("home-pl-detail").addEventListener("click", (e) => {
+        const pl = playlists.find((p) => p.id === openPlId); if (!pl) return;
+        if (e.target.closest("[data-pd-back]")) { openPlId = null; renderHomePlaylists(); return; }
+        if (e.target.closest("[data-pd-play]")) return playSet(pl, "play");
+        if (e.target.closest("[data-pd-shuffle]")) return playSet(pl, "shuffle");
+        if (e.target.closest("[data-pd-wave]")) return playSet(pl, "wave");
+        const row = e.target.closest("[data-pd-i]");
+        if (row) playPlaylist(pl, Number(row.dataset.pdI), { shuffle: shuffleOn });
+      });
+
+      // Crossfade button
+      const XF = [0, 3, 4, 6, 10];
+      function xfLabel() { const b = $("btn-xfade"); b.textContent = `${xfadeSec}s`; b.title = xfadeSec === 0 ? "Crossfade: gapless" : `Crossfade: ${xfadeSec}s`; b.classList.toggle("on", xfadeSec > 0); }
+      $("btn-xfade").addEventListener("click", () => {
+        xfadeSec = XF[(XF.indexOf(xfadeSec) + 1) % XF.length];
+        try { localStorage.setItem("my_wave_xfade_v1", String(xfadeSec)); } catch {}
+        xfLabel(); showToast(xfadeSec === 0 ? "Gapless playback" : `Crossfade ${xfadeSec}s`);
+      });
+      xfLabel();
+
+      const _rsq = renderStatsAndQueue;
+      renderStatsAndQueue = function () { _rsq(); scheduleStandby(); };
+      deckListen("playing", () => { setTlLoading(false); scheduleStandby(); });
+      deckListen("waiting", () => setTlLoading(true));
+      deckListen("canplay", () => setTlLoading(false));
+
+      // iOS/Safari: unlock the second deck on the first gesture
+      const silentUrl = (() => {
+        const n = 800, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf), w = (o, t) => [...t].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+        w(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); w(8, "WAVEfmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+        v.setUint32(24, 8000, true); v.setUint32(28, 16000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, n * 2, true);
+        return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+      })();
+      let unlocked = false;
+      const unlock = () => {
+        if (unlocked) return; unlocked = true;
+        decks.forEach((d) => {
+          if (d === audioEl || d.currentSrc || d.getAttribute("src")) return;
+          d.src = silentUrl;
+          const clean = () => { if (d.src === silentUrl) { d.pause(); d.removeAttribute("src"); d.load(); } };
+          d.play().then(clean, clean);
+        });
+      };
+      ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, unlock, { once: true, passive: true }));
+
+      // Session resume
+      const SESSION_KEY = "my_wave_session_v1";
+      let lastSessSave = 0;
+      function saveSession() {
+        if (!engine.currentTrack) return;
+        try { localStorage.setItem(SESSION_KEY, JSON.stringify({ track: slimTrack(engine.currentTrack), time: audioEl.currentTime || pendingResumeAt || 0, mode: playbackMode, plId: activePlaylistId })); } catch {}
+      }
+      deckListen("timeupdate", () => { const n = Date.now(); if (n - lastSessSave > 4000) { lastSessSave = n; saveSession(); } });
+      deckListen("pause", saveSession);
+      window.addEventListener("pagehide", saveSession);
+      document.addEventListener("visibilitychange", () => { if (document.hidden) saveSession(); });
+
+      try {
+        const ss = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+        if (ss && ss.track && ss.track.id) {
+          engine.currentTrack = ss.track;
+          pendingResumeAt = ss.time || 0;
+          if (ss.mode === "playlist") {
+            const pl = playlists.find((p) => p.id === ss.plId);
+            if (pl && pl.tracks?.length) {
+              playbackMode = "playlist"; activePlaylistId = pl.id; srcLabel = pl.title; srcIds = new Set(pl.tracks.map((t) => t.id));
+              const i = pl.tracks.findIndex((t) => t.id === ss.track.id);
+              engine.queue = i >= 0 ? pl.tracks.slice(i + 1) : [];
+            }
+          }
+          updateTrackUI(ss.track);
+          els.timeCurrent.textContent = formatTime(pendingResumeAt);
+          const d = (ss.track.duration || 0) / 1000;
+          if (d > 0) { const r = Math.min(1, pendingResumeAt / d); els.timelineProgress.style.transform = `scaleX(${r})`; $("timeline-thumb").style.left = `${r * 100}%`; }
+          updatePlayStateIcons(false);
+        }
+      } catch {}
 
       // Hotkeys (Space is handled by the original listener below)
       document.addEventListener("keydown", (e) => {
         const tag = document.activeElement?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || e.ctrlKey || e.metaKey || e.altKey) return;
         const k = e.key; let hit = true;
+        if (k === "ArrowRight" || k === "ArrowLeft") cancelFade();
         if (k === "ArrowRight") audioEl.currentTime += e.shiftKey ? 30 : 10;
         else if (k === "ArrowLeft") audioEl.currentTime = Math.max(0, audioEl.currentTime - (e.shiftKey ? 30 : 10));
         else if (k === "ArrowUp" || k === "ArrowDown") {
