@@ -112,9 +112,27 @@
     :root { --acc: 212,175,55; }
     html, body { height: 100%; }
     body { overflow: hidden; }
-    #bg-art { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .8s ease; }
-    #bg-art.on { opacity: .45; }
-    .bg-veil { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(5,5,5,.5), rgba(5,5,5,.92)); }
+    #bg-art, #bg-art-b {
+      position: fixed;
+      inset: -8%;
+      width: 116%;
+      height: 116%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .85s ease;
+      filter: blur(42px) saturate(1.35);
+      transform: translateZ(0);
+    }
+    #bg-art.on, #bg-art-b.on { opacity: .62; }
+    .bg-veil {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 44%, rgba(5,5,5,.32) 0%, rgba(5,5,5,.78) 62%, rgba(5,5,5,.95) 100%);
+    }
     .orb-size { width: clamp(200px, 40dvh, 340px); height: clamp(200px, 40dvh, 340px); }
     .focus-mode .orb-size { width: clamp(240px, 56dvh, 520px); height: clamp(240px, 56dvh, 520px); }
     .focus-mode #top-header, .focus-mode #vibe-pills-container { display: none; }
@@ -134,8 +152,6 @@
     @media (prefers-reduced-motion: reduce) { #orb-art { animation: none; } }
       .ambient-aura { display: none; }
     .focus-mode #home-tabs { display: none; }
-    #bg-art-b { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .8s ease; }
-    #bg-art-b.on { opacity: .45; }
     #orb-vinyl-stage { position: absolute; left: 25.3%; top: 25.3%; width: 49.4%; height: 49.4%; pointer-events: none; }
     #orb-vinyl { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: #0d0d10; animation: spin 14s linear infinite; animation-play-state: paused; will-change: transform; box-shadow: inset 0 0 0 2px rgba(255,255,255,.06); }
     .is-playing #orb-vinyl { animation-play-state: running; }
@@ -144,8 +160,6 @@
     #orb-grooves { position: absolute; inset: 0; background: repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0 2.5px, rgba(0,0,0,.16) 2.5px 3.5px); }
     #orb-sheen { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 20deg, transparent 0 8%, rgba(255,255,255,.17) 12%, transparent 18% 58%, rgba(255,255,255,.1) 64%, transparent 70%); }
     #orb-stage #orb-hole { display: block; position: absolute; left: 46.5%; top: 46.5%; width: 7%; height: 7%; border-radius: 50%; background: #050505; border: 0; box-shadow: 0 0 0 2px rgba(255,255,255,.08); }
-    #orb-arm { transform-box: view-box; transform-origin: 86px 14px; transform: rotate(-40deg); transition: transform .7s cubic-bezier(.4,0,.2,1); }
-    .is-playing #orb-arm { transform: rotate(0deg); }
     .tl-bar::after { content: ""; position: absolute; inset: 0; opacity: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); transform: translateX(-100%); }
     #timeline-track.loading .tl-bar::after { opacity: 1; animation: shimmer 1.1s linear infinite; }
     @keyframes shimmer { to { transform: translateX(100%); } }
@@ -158,7 +172,7 @@
 </head>
 <body class="h-[100dvh] bg-obsidian text-silver selection:bg-gold/20 selection:text-gold flex flex-col relative">
 
-  <canvas id="bg-art" width="24" height="24"></canvas><canvas id="bg-art-b" width="24" height="24"></canvas><div class="bg-veil"></div>
+  <canvas id="bg-art" width="48" height="48"></canvas><canvas id="bg-art-b" width="48" height="48"></canvas><div class="bg-veil"></div>
   <!-- Subtle GPU-composited ambient backdrop -->
   <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden">
     <div
@@ -246,7 +260,6 @@
         <button id="orb-toggle-btn" type="button" aria-label="Toggle Play or Pause" class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-200 active:scale-[0.98]">
           <canvas id="wave-orb-canvas" class="block orb-size"></canvas>
           <div id="orb-vinyl-stage"><div id="orb-vinyl"><img id="orb-art" alt="" /><img id="orb-art-b" alt="" /><div id="orb-grooves"></div></div><div id="orb-sheen"></div><div id="orb-hole"></div></div>
-          <svg class="pointer-events-none absolute inset-0 w-full h-full" viewBox="0 0 100 100" aria-hidden="true"><g id="orb-arm"><line x1="86" y1="14" x2="62" y2="40" stroke="rgba(229,229,229,.55)" stroke-width="1.1" stroke-linecap="round"/><circle cx="86" cy="14" r="3.2" fill="#15151a" stroke="rgba(255,255,255,.25)" stroke-width=".6"/><circle cx="62" cy="40" r="1.5" fill="rgb(var(--acc))"/></g></svg>
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
             <div class="w-11 h-11 rounded-full glass border border-white/15 flex items-center justify-center text-silver shadow-lg">
               <svg id="orb-icon-play" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
@@ -1047,38 +1060,101 @@
           deck.preload = "auto";
           let settled = false;
           const done = (fn, v) => { if (!settled) { settled = true; fn(v); } };
+
+          const ensurePlaying = () => {
+            if (!ok()) return done(reject, new Error("superseded"));
+            if (!play) return done(resolve);
+            const p = deck.play();
+            if (p && typeof p.then === "function") {
+              p.then(() => {
+                if (!ok()) return;
+                // Double-check after a short tick that playback didn't stall in paused state
+                setTimeout(() => {
+                  if (ok() && play && deck === audioEl && deck.paused && !deck.ended) {
+                    deck.play().catch(() => {});
+                  }
+                }, 120);
+                done(resolve);
+              }).catch((err) => {
+                // If play() was called before enough buffer arrived, retry once on canplay
+                const retryOnce = () => {
+                  if (!ok()) return done(reject, new Error("superseded"));
+                  deck.play().then(() => done(resolve), (e2) => done(reject, e2));
+                };
+                if (err?.name === "AbortError") {
+                  deck.addEventListener("canplay", retryOnce, { once: true });
+                } else {
+                  done(reject, err);
+                }
+              });
+            } else {
+              done(resolve);
+            }
+          };
+
           const whenReady = () => {
             if (deck.readyState >= 3) return done(resolve);
-            deck.addEventListener("canplay", () => done(resolve), { once: true });
-            setTimeout(() => done(reject, new Error("standby timeout")), 8000);
+            const onR = () => done(resolve);
+            deck.addEventListener("canplay", onR, { once: true });
+            setTimeout(() => {
+              deck.removeEventListener("canplay", onR);
+              done(reject, new Error("standby timeout"));
+            }, 8000);
           };
+
           if (protocol === "hls" && window.Hls && Hls.isSupported()) {
-            const hls = new Hls({ enableWorker: true, lowLatencyMode: false, maxBufferLength: isSb ? 10 : 30, startPosition: startAt > 0 ? startAt : -1 });
+            const hls = new Hls({
+              enableWorker: true,
+              lowLatencyMode: false,
+              maxBufferLength: isSb ? 12 : 30,
+              startPosition: startAt > 0 ? startAt : -1,
+            });
             deckHls.set(deck, hls);
             hls.loadSource(url);
             hls.attachMedia(deck);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
               if (!ok()) return done(reject, new Error("superseded"));
               if (!play) return whenReady();
-              deck.play().then(() => done(resolve), (err) => done(reject, err));
+              ensurePlaying();
             });
             hls.on(Hls.Events.ERROR, (_, data) => {
-              if (data?.fatal) { destroyDeckHls(deck); done(reject, new Error(`HLS fatal: ${data.type}`)); }
+              if (data?.fatal) {
+                if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                  try { hls.recoverMediaError(); return; } catch {}
+                }
+                destroyDeckHls(deck);
+                done(reject, new Error(`HLS fatal: ${data.type}`));
+              }
             });
           } else {
-            const cleanup = () => { deck.removeEventListener("canplay", onCanPlay); deck.removeEventListener("error", onError); };
+            const cleanup = () => {
+              deck.removeEventListener("loadedmetadata", onMeta);
+              deck.removeEventListener("canplay", onCanPlay);
+              deck.removeEventListener("error", onError);
+            };
+            const onMeta = () => {
+              if (!ok()) { cleanup(); return done(reject, new Error("superseded")); }
+              if (startAt > 0) { try { deck.currentTime = startAt; } catch {} }
+            };
             const onCanPlay = () => {
               cleanup();
               if (!ok()) return done(reject, new Error("superseded"));
-              if (startAt > 0) { try { deck.currentTime = startAt; } catch {} }
               if (!play) return done(resolve);
-              deck.play().then(() => done(resolve), (err) => done(reject, err));
+              ensurePlaying();
             };
-            const onError = () => { cleanup(); done(reject, new Error("Audio element load error")); };
+            const onError = () => {
+              cleanup();
+              done(reject, new Error("Audio element load error"));
+            };
+            deck.addEventListener("loadedmetadata", onMeta, { once: true });
             deck.addEventListener("canplay", onCanPlay, { once: true });
             deck.addEventListener("error", onError, { once: true });
             deck.src = url;
             deck.load();
+            // Trigger play() immediately on progressive stream so browser starts streaming right away
+            if (play && !(startAt > 0)) {
+              ensurePlaying();
+            }
           }
         });
       }
@@ -1119,7 +1195,7 @@
         }
       }
       let sbTimer = null;
-      function scheduleStandby() { clearTimeout(sbTimer); sbTimer = setTimeout(prepareStandby, 200); }
+      function scheduleStandby() { clearTimeout(sbTimer); sbTimer = setTimeout(prepareStandby, 1400); }
 
       // ---- equal-power crossfade ----
       function startFade(out, inn, sec) {
@@ -1147,10 +1223,11 @@
         inn.volume = userVol;
       }
 
-      function swapToStandby(fadeSec) {
+      async function swapToStandby(fadeSec) {
         const sb = standby, inn = sb.deck, out = audioEl;
         standby = null;
         const outPlaying = !out.paused && out.currentTime > 0;
+        suppressPause = true;
         audioEl = inn;
         aStream = null;
         inn.loop = repeatOne;
@@ -1158,9 +1235,13 @@
         inn.muted = out.muted;
         const withFade = fadeSec > 0 && outPlaying;
         inn.volume = withFade ? 0 : userVol;
-        const pr = inn.play();
-        if (withFade) startFade(out, inn, fadeSec); else stopDeck(out);
-        return Promise.resolve(pr);
+        try {
+          if (inn.currentTime > 0.2) { try { inn.currentTime = 0; } catch {} }
+          await inn.play();
+          if (withFade) startFade(out, inn, fadeSec); else stopDeck(out);
+        } finally {
+          setTimeout(() => { suppressPause = false; }, 100);
+        }
       }
 
       function maybeCrossfade(rem) {
@@ -1213,19 +1294,42 @@
         if (/dubstep|trap|phonk/.test(g)) return 140; if (/house|disco|dance|edm/.test(g)) return 124;
         if (/hip|rap/.test(g)) return 92; if (/ambient|chill|lo-?fi/.test(g)) return 78; return 118;
       }
-      function specRing(cx, cy, base, amp, rot, shift, style, lw) {
-        const pts = [];
+      const ringPtsX = new Float32Array(SPEC_N);
+      const ringPtsY = new Float32Array(SPEC_N);
+      function specRing(cx, cy, base, amp, rot, shift, style, lw, fillStyle = null) {
         for (let k = 0; k < SPEC_N; k++) {
-          const a = rot + (k / SPEC_N) * Math.PI * 2, r = base + spec[(k + shift) % SPEC_N] * amp;
-          pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+          const a = rot + (k / SPEC_N) * Math.PI * 2;
+          const s0 = spec[(k + shift) % SPEC_N];
+          const s1 = spec[(k + shift + 1) % SPEC_N];
+          const sPrev = spec[(k + shift + SPEC_N - 1) % SPEC_N];
+          const smoothS = s0 * 0.55 + (s1 + sPrev) * 0.225;
+          const harmonic = Math.sin(a * 4 + orbPhase * 2.2) * 0.14 + Math.cos(a * 6 - orbPhase * 1.7) * 0.1;
+          const r = base + (smoothS + harmonic * smoothBass) * amp;
+          ringPtsX[k] = cx + Math.cos(a) * r;
+          ringPtsY[k] = cy + Math.sin(a) * r;
         }
         ctx.beginPath();
         for (let k = 0; k < SPEC_N; k++) {
-          const p0 = pts[k], p1 = pts[(k + 1) % SPEC_N], mx = (p0[0] + p1[0]) / 2, my = (p0[1] + p1[1]) / 2;
-          if (k === 0) ctx.moveTo(mx, my); else ctx.quadraticCurveTo(p0[0], p0[1], mx, my);
+          const n = (k + 1) % SPEC_N;
+          const mx = (ringPtsX[k] + ringPtsX[n]) * 0.5;
+          const my = (ringPtsY[k] + ringPtsY[n]) * 0.5;
+          if (k === 0) ctx.moveTo(mx, my);
+          else ctx.quadraticCurveTo(ringPtsX[k], ringPtsY[k], mx, my);
         }
-        ctx.quadraticCurveTo(pts[0][0], pts[0][1], (pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2);
-        ctx.closePath(); ctx.strokeStyle = style; ctx.lineWidth = lw; ctx.stroke();
+        ctx.quadraticCurveTo(
+          ringPtsX[0],
+          ringPtsY[0],
+          (ringPtsX[0] + ringPtsX[1]) * 0.5,
+          (ringPtsY[0] + ringPtsY[1]) * 0.5
+        );
+        ctx.closePath();
+        if (fillStyle) {
+          ctx.fillStyle = fillStyle;
+          ctx.fill();
+        }
+        ctx.strokeStyle = style;
+        ctx.lineWidth = lw;
+        ctx.stroke();
       }
 
       function renderOrb(now) {
@@ -1292,10 +1396,14 @@
           ctx.beginPath(); ctx.arc(cx, cy, R * (1.08 + rp.t * 0.85), 0, Math.PI * 2); ctx.stroke();
         }
 
-        // spectrum rings
-        specRing(cx, cy, R * 1.12, R * 0.42, orbPhase * 0.1, 0, acc(0.14), 7);
-        specRing(cx, cy, R * 1.12, R * 0.42, orbPhase * 0.1, 0, acc(0.95), 1.8);
-        specRing(cx, cy, R * 1.05, R * 0.28, -orbPhase * 0.15, 9, "rgba(229, 229, 229, 0.28)", 1);
+        // multi-layered rhythmic spectrum waves around the vinyl
+        const waveAmp1 = R * (0.36 + smoothBass * 0.26);
+        const waveAmp2 = R * (0.28 + smoothMid * 0.22);
+        const waveAmp3 = R * (0.20 + smoothBass * 0.16);
+        specRing(cx, cy, R * 1.10, waveAmp1, orbPhase * 0.14, 0, acc(0.18 + smoothBass * 0.18), 8, acc(0.04 + smoothBass * 0.05));
+        specRing(cx, cy, R * 1.10, waveAmp1, orbPhase * 0.14, 0, acc(0.92), 1.9);
+        specRing(cx, cy, R * 1.06, waveAmp2, -orbPhase * 0.22, 12, `rgba(229, 229, 229, ${0.32 + smoothMid * 0.35})`, 1.3);
+        specRing(cx, cy, R * 1.16, waveAmp3, orbPhase * 0.31, 24, acc(0.38 + smoothMid * 0.3), 1.1);
 
         // orbiting dots
         for (let k = 0; k < Math.min(10, particles.length); k++) {
@@ -2344,7 +2452,7 @@
           try {
             bgSide ^= 1;
             const on = $(bgSide ? "bg-art-b" : "bg-art"), off = $(bgSide ? "bg-art" : "bg-art-b"), m = Math.min(im.width, im.height);
-            on.getContext("2d").drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, 24, 24);
+            on.getContext("2d").drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, 48, 48);
             on.classList.add("on"); off.classList.remove("on");
           } catch {}
         };
