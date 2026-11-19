@@ -133,6 +133,8 @@
     .cb.on { color: rgb(var(--acc)); }
     @media (prefers-reduced-motion: reduce) { #orb-art { animation: none; } }
       .ambient-aura { display: none; }
+    #orb-art, #orb-hole { display: none !important; }
+    .focus-mode #home-tabs { display: none; }
     #orb-art { box-shadow: none; will-change: transform; }
   </style>
 </head>
@@ -211,9 +213,16 @@
     </div>
   </header>
 
+  <nav id="home-tabs" class="shrink-0 relative z-20 flex justify-center px-4 pb-1">
+    <div class="inline-flex p-1 rounded-full bg-white/[0.05] border border-white/10 font-mono text-[11px] uppercase tracking-wider">
+      <button data-home="wave" type="button" class="px-4 py-1.5 rounded-full transition-colors">Моя волна</button>
+      <button data-home="playlists" type="button" class="px-4 py-1.5 rounded-full transition-colors">Плейлисты</button>
+      <button data-home="recent" type="button" class="px-4 py-1.5 rounded-full transition-colors">Недавнее</button>
+    </div>
+  </nav>
   <!-- Player stage -->
   <main class="relative z-10 flex-1 min-h-0 overflow-y-auto px-4">
-    <div class="min-h-full flex flex-col items-center justify-center py-2 gap-2">
+    <div id="home-wave" class="min-h-full flex flex-col items-center justify-center py-2 gap-2">
       <div id="ctx-badge" class="font-mono text-[10px] uppercase tracking-[0.22em] text-white/40">Now playing · My Wave</div>
       <div id="orb-stage" class="relative flex items-center justify-center select-none" style="touch-action: pan-y; contain: layout paint;">
         <button id="orb-toggle-btn" type="button" aria-label="Toggle Play or Pause" class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-200 active:scale-[0.98]">
@@ -228,10 +237,10 @@
           </div>
         </button>
       </div>
-      <div class="text-center max-w-md w-full px-4 min-h-[48px] flex flex-col items-center justify-center">
+      <div class="flex items-center justify-center gap-3 max-w-md w-full px-4 min-h-[48px]"><img id="center-art" alt="" class="hidden w-11 h-11 rounded-lg object-cover shrink-0 border border-white/10" /><div class="min-w-0 text-center">
         <p id="center-track-title" class="text-base sm:text-lg font-semibold text-silver tracking-tight truncate max-w-full">Click the Wave Orb or Sign In to start</p>
         <p id="center-track-meta" class="font-mono text-[11px] text-white/45 mt-0.5 truncate max-w-full">IDLE · READY</p>
-      </div>
+      </div></div>
       <div id="vibe-pills-container" class="flex flex-wrap items-center justify-center gap-2 max-w-xl px-1">
       <button data-filter="bodroe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Бодрое</button>
       <button data-filter="spokoynoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Спокойное</button>
@@ -244,6 +253,26 @@
       <button data-filter="svezhee" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Свежее</button>
       </div>
       <p id="engine-toast" class="font-mono text-[11px] h-4 opacity-0 transition-opacity duration-200 text-center px-2" style="color: rgb(var(--acc));"></p>
+    </div>
+    <div id="home-playlists" class="hidden max-w-3xl mx-auto py-3">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <h2 class="font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">Твои плейлисты</h2>
+        <button id="home-new-pl" type="button" class="px-3 py-1.5 rounded-lg border border-white/15 hover:border-gold/50 hover:text-gold font-mono text-[10px] uppercase text-white/60">+ Новый</button>
+      </div>
+      <div id="home-pl-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+    </div>
+    <div id="home-recent" class="hidden max-w-3xl mx-auto py-3 space-y-5">
+      <section>
+        <h2 class="px-1 mb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">Недавние альбомы</h2>
+        <div id="recent-sets" class="flex gap-3 overflow-x-auto pb-1"></div>
+      </section>
+      <section>
+        <div class="flex items-center justify-between px-1 mb-2">
+          <h2 class="font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">Недавние песни</h2>
+          <button id="recent-more" type="button" class="font-mono text-[10px] uppercase text-white/45 hover:text-gold">Ещё</button>
+        </div>
+        <div id="recent-tracks" class="grid sm:grid-cols-2 gap-2"></div>
+      </section>
     </div>
   </main>
 
@@ -475,6 +504,7 @@
       const ENGINE_KEY = "my_wave_engine_v1";
       let repeatOne = false, shuffleOn = false, sleepEOT = false, isScrubbing = false, lastSearchTracks = [];
       let ACC = [212, 175, 55], ACC_T = [212, 175, 55];
+      let aCtx = null, analyser = null, aSrc = null, aStream = null, freqData = new Uint8Array(512), flat = 0, kick = 0, bassAvg = 0.2;
 
       let accountState = { user: null, oauthToken: "" };
       try {
@@ -948,123 +978,120 @@
       window.addEventListener("resize", resizeOrbCanvas);
       resizeOrbCanvas();
 
+      const SPEC_N = 72, spec = new Float32Array(SPEC_N);
+      let lastKickAt = 0, lastBeatIdx = -1; const ripples = [];
+      function avgBins(a, b) { let t = 0; for (let k = a; k < b; k++) t += freqData[k]; return t / ((b - a) * 255); }
+      function guessBpm(t) {
+        if (t && t.bpm > 50 && t.bpm < 220) return t.bpm;
+        const g = `${t?.genre || ""} ${t?.tag_list || ""}`.toLowerCase();
+        if (/drum|dnb|jungle/.test(g)) return 172; if (/techno|hard/.test(g)) return 134; if (/trance/.test(g)) return 138;
+        if (/dubstep|trap|phonk/.test(g)) return 140; if (/house|disco|dance|edm/.test(g)) return 124;
+        if (/hip|rap/.test(g)) return 92; if (/ambient|chill|lo-?fi/.test(g)) return 78; return 118;
+      }
+      function specRing(cx, cy, base, amp, rot, shift, style, lw) {
+        const pts = [];
+        for (let k = 0; k < SPEC_N; k++) {
+          const a = rot + (k / SPEC_N) * Math.PI * 2, r = base + spec[(k + shift) % SPEC_N] * amp;
+          pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+        }
+        ctx.beginPath();
+        for (let k = 0; k < SPEC_N; k++) {
+          const p0 = pts[k], p1 = pts[(k + 1) % SPEC_N], mx = (p0[0] + p1[0]) / 2, my = (p0[1] + p1[1]) / 2;
+          if (k === 0) ctx.moveTo(mx, my); else ctx.quadraticCurveTo(p0[0], p0[1], mx, my);
+        }
+        ctx.quadraticCurveTo(pts[0][0], pts[0][1], (pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2);
+        ctx.closePath(); ctx.strokeStyle = style; ctx.lineWidth = lw; ctx.stroke();
+      }
+
       function renderOrb(now) {
         requestAnimationFrame(renderOrb);
         const isPlaying = !audioEl.paused && !audioEl.ended;
-
-        // Throttle idle state to ~20fps
         if (now - lastIdleFrame < (isPlaying ? 33 : 66)) return;
-        const dtScale = Math.min(4, (now - lastIdleFrame) / 16.7);
+        const dt = Math.min(100, now - lastIdleFrame), dtScale = dt / 16.7;
         lastIdleFrame = now;
         for (let k = 0; k < 3; k++) ACC[k] += (ACC_T[k] - ACC[k]) * 0.06;
         const ar = Math.round(ACC[0]), ag = Math.round(ACC[1]), ab = Math.round(ACC[2]);
-
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
+        const w = canvas.clientWidth, h = canvas.clientHeight;
         if (!w || !h) return;
-        const cx = w / 2;
-        const cy = h / 2;
+        const cx = w / 2, cy = h / 2;
 
-        const targetBass = isPlaying
-          ? 0.24 + Math.sin(orbPhase * 2.2) * 0.12 + Math.sin(orbPhase * 4.5) * 0.07
-          : 0.04;
-        const targetMid = isPlaying
-          ? 0.18 + Math.cos(orbPhase * 3.1) * 0.09
-          : 0.03;
+        // Levels: real spectrum when the stream allows it, otherwise a beat locked to playback time
+        let bass = 0, mid = 0, high = 0, hit = false, real = false;
+        if (isPlaying && analyser && aCtx && aCtx.state === "running") {
+          analyser.getByteFrequencyData(freqData);
+          let tot = 0; for (let k = 0; k < freqData.length; k += 4) tot += freqData[k];
+          if (tot > 0) flat = 0; else flat++;
+          real = flat < 45;
+          if (real) {
+            bass = avgBins(1, 6); mid = avgBins(6, 40); high = avgBins(40, 160);
+            bassAvg += (bass - bassAvg) * 0.04 * dtScale;
+            hit = bass > 0.32 && bass > bassAvg * 1.22 && now - lastKickAt > 170;
+          }
+        }
+        if (isPlaying && !real) {
+          const bpm = guessBpm(engine.currentTrack), beat = audioEl.currentTime * bpm / 60, ph = beat % 1, bi = Math.floor(beat);
+          if (bi !== lastBeatIdx) { lastBeatIdx = bi; hit = now - lastKickAt > 170; }
+          bass = 0.3 + Math.exp(-ph * 6) * 0.6;
+          mid = 0.28 + 0.18 * Math.sin(orbPhase * 2.3) + Math.exp(-((ph * 2) % 1) * 9) * 0.2;
+          high = 0.2 + Math.exp(-((ph * 2 + 0.5) % 1) * 12) * 0.35;
+        }
+        if (hit) { lastKickAt = now; kick = 1; if (ripples.length < 4) ripples.push({ t: 0 }); }
+        kick *= Math.pow(0.84, dtScale);
+        const pulse = isPlaying ? Math.max(kick, bass * 0.6) : 0.03 + 0.02 * Math.sin(orbPhase * 2);
+        smoothBass += (pulse - smoothBass) * 0.5;
+        smoothMid += ((isPlaying ? mid : 0.03) - smoothMid) * 0.2;
+        orbPhase += (isPlaying ? 0.03 : 0.012) * dtScale;
 
-        smoothBass += (targetBass - smoothBass) * 0.16 * Math.min(2, dtScale);
-        smoothMid += (targetMid - smoothMid) * 0.14 * Math.min(2, dtScale);
-        orbPhase += (isPlaying ? 0.025 : 0.011) * dtScale;
+        for (let k = 0; k < SPEC_N; k++) {
+          const m = k < SPEC_N / 2 ? k : SPEC_N - 1 - k, t = m / (SPEC_N / 2 - 1);
+          let v;
+          if (real) v = freqData[1 + Math.floor(Math.pow(t, 1.7) * 140)] / 255;
+          else v = isPlaying ? (bass * (1 - t) + high * t) * (0.55 + 0.45 * Math.sin(k * 0.9 + orbPhase * 3.2)) : 0.04;
+          spec[k] += (v - spec[k]) * (v > spec[k] ? 0.6 : 0.18);
+        }
 
         ctx.clearRect(0, 0, w, h);
-        const baseRadius = Math.min(w, h) * 0.27 + smoothBass * 16;
+        const R = Math.min(w, h) * 0.25 * (1 + smoothBass * 0.06);
+        const acc = (a) => `rgba(${ar}, ${ag}, ${ab}, ${a})`;
 
-        // 1. Soft radial aura
-        const aura = ctx.createRadialGradient(cx, cy, baseRadius * 0.25, cx, cy, baseRadius * 1.85);
-        aura.addColorStop(0, `rgba(${ar}, ${ag}, ${ab}, ${0.14 + smoothBass * 0.22})`);
-        aura.addColorStop(0.55, `rgba(229, 229, 229, ${0.04 + smoothMid * 0.08})`);
-        aura.addColorStop(1, "rgba(5, 5, 5, 0)");
-        ctx.fillStyle = aura;
-        ctx.beginPath();
-        ctx.arc(cx, cy, baseRadius * 1.85, 0, Math.PI * 2);
-        ctx.fill();
+        // outer glow (outside the sphere only, nothing in the centre)
+        const aura = ctx.createRadialGradient(cx, cy, R * 0.95, cx, cy, R * 2);
+        aura.addColorStop(0, acc(0.1 + smoothBass * 0.25)); aura.addColorStop(1, acc(0));
+        ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(cx, cy, R * 2, 0, Math.PI * 2); ctx.fill();
 
-        // 2. Outer rotating dashed orbital ring
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(orbPhase * 0.25);
-        ctx.setLineDash([3, 8]);
-        ctx.strokeStyle = `rgba(229, 229, 229, ${isPlaying ? 0.2 : 0.1})`;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(0, 0, baseRadius + 26 + smoothMid * 8, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-
-        // 3. Orbiting energy micro-particles
-        const speedMult = isPlaying ? 1.8 : 0.6;
-        for (let i = 0; i < particles.length; i++) {
-          const p = particles[i];
-          p.angle += p.speed * speedMult * dtScale;
-          const r = baseRadius + p.distOffset + smoothBass * 12;
-          const px = cx + Math.cos(p.angle) * r;
-          const py = cy + Math.sin(p.angle) * r;
-          ctx.fillStyle = p.isGold
-            ? `rgba(${ar}, ${ag}, ${ab}, ${isPlaying ? 0.65 : 0.25})`
-            : `rgba(229, 229, 229, ${isPlaying ? 0.45 : 0.18})`;
-          ctx.beginPath();
-          ctx.arc(px, py, p.size, 0, Math.PI * 2);
-          ctx.fill();
+        // beat ripples
+        for (let k = ripples.length - 1; k >= 0; k--) {
+          const rp = ripples[k]; rp.t += dt / 950;
+          if (rp.t >= 1) { ripples.splice(k, 1); continue; }
+          ctx.strokeStyle = acc((1 - rp.t) * 0.5); ctx.lineWidth = 2 * (1 - rp.t) + 0.5;
+          ctx.beginPath(); ctx.arc(cx, cy, R * (1.08 + rp.t * 0.85), 0, Math.PI * 2); ctx.stroke();
         }
 
-        // 4. Harmonic interference rings
-        const points = 64;
-        for (let r = 0; r < 3; r++) {
-          const ringOffset = r * 0.9;
-          const amp = (4 + smoothBass * 15 + smoothMid * 9) * (1 - r * 0.2);
+        // spectrum rings
+        specRing(cx, cy, R * 1.12, R * 0.42, orbPhase * 0.1, 0, acc(0.14), 7);
+        specRing(cx, cy, R * 1.12, R * 0.42, orbPhase * 0.1, 0, acc(0.95), 1.8);
+        specRing(cx, cy, R * 1.05, R * 0.28, -orbPhase * 0.15, 9, "rgba(229, 229, 229, 0.28)", 1);
 
-          ctx.beginPath();
-          for (let i = 0; i <= points; i++) {
-            const angle = (i / points) * Math.PI * 2;
-            const wave1 = Math.sin(angle * 3 + orbPhase * 1.6 + ringOffset) * amp * 0.55;
-            const wave2 = Math.cos(angle * 5 - orbPhase * 2.1 + ringOffset) * amp * 0.45;
-            const radius = baseRadius + r * 7 + wave1 + wave2;
-            const x = cx + Math.cos(angle) * radius;
-            const y = cy + Math.sin(angle) * radius;
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          }
-          ctx.closePath();
-
-          ctx.strokeStyle = r === 0
-            ? `rgba(${ar}, ${ag}, ${ab}, ${0.46 + smoothBass * 0.42})`
-            : `rgba(229, 229, 229, ${0.24 - r * 0.05 + smoothMid * 0.22})`;
-          ctx.lineWidth = r === 0 ? 1.5 : 0.9;
-          ctx.stroke();
+        // orbiting dots
+        for (let k = 0; k < Math.min(10, particles.length); k++) {
+          const pt = particles[k]; pt.angle += pt.speed * (isPlaying ? 1.8 : 0.6) * dtScale;
+          const r = R * 1.62 + (pt.distOffset % 24) + smoothBass * 8;
+          ctx.fillStyle = pt.isGold ? acc(isPlaying ? 0.7 : 0.25) : `rgba(229, 229, 229, ${isPlaying ? 0.45 : 0.18})`;
+          ctx.beginPath(); ctx.arc(cx + Math.cos(pt.angle) * r, cy + Math.sin(pt.angle) * r, pt.size, 0, Math.PI * 2); ctx.fill();
         }
 
-        // 5. Obsidian core sphere with specular glass sheen
-        const coreGrad = ctx.createRadialGradient(
-          cx - baseRadius * 0.28,
-          cy - baseRadius * 0.28,
-          baseRadius * 0.08,
-          cx,
-          cy,
-          baseRadius * 0.92
-        );
-        coreGrad.addColorStop(0, `rgba(229, 229, 229, ${isPlaying ? 0.2 : 0.12})`);
-        coreGrad.addColorStop(0.35, `rgba(${ar}, ${ag}, ${ab}, ${isPlaying ? 0.08 + smoothBass * 0.1 : 0.03})`);
-        coreGrad.addColorStop(0.7, "rgba(14, 14, 14, 0.95)");
-        coreGrad.addColorStop(1, "rgba(5, 5, 5, 0.99)");
-
-        ctx.fillStyle = coreGrad;
-        ctx.beginPath();
-        ctx.arc(cx, cy, baseRadius * 0.92, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = `rgba(229, 229, 229, ${0.16 + smoothMid * 0.2})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
+        // glass core
+        const g = ctx.createRadialGradient(cx - R * 0.38, cy - R * 0.42, R * 0.05, cx, cy, R);
+        g.addColorStop(0, "rgba(70, 72, 82, 1)"); g.addColorStop(0.5, "rgba(17, 17, 21, 1)"); g.addColorStop(1, "rgba(4, 4, 6, 1)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+        const rim = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R);
+        rim.addColorStop(0, acc(0)); rim.addColorStop(1, acc(0.14 + smoothBass * 0.4));
+        ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+        const sp = ctx.createRadialGradient(cx - R * 0.34, cy - R * 0.4, 0, cx - R * 0.34, cy - R * 0.4, R * 0.46);
+        sp.addColorStop(0, "rgba(255, 255, 255, 0.28)"); sp.addColorStop(1, "rgba(255, 255, 255, 0)");
+        ctx.fillStyle = sp; ctx.beginPath(); ctx.arc(cx - R * 0.34, cy - R * 0.4, R * 0.46, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.14 + smoothBass * 0.2})`; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
       }
 
       requestAnimationFrame(renderOrb);
@@ -1330,6 +1357,7 @@
               showToast("Add tracks to this playlist first");
               return;
             }
+            recordSet(pl);
             engine.addLikedSeedsBatch(tracks);
             engine.queue = [...tracks.slice(1, 6)];
             engine.lastSuccessfulSeed = tracks[0];
@@ -1343,6 +1371,7 @@
             const pl = playlists.find((p) => p.id === btn.dataset.plPlay);
             const idx = Number(btn.dataset.trackIdx);
             if (!pl || !pl.tracks[idx]) return;
+            recordSet(pl);
             engine.queue = shuffleOn ? shuffled(pl.tracks.filter((_, i) => i !== idx)).slice(0, 12) : pl.tracks.slice(idx + 1, idx + 8);
             await playTrack(pl.tracks[idx], true);
           });
@@ -1842,7 +1871,8 @@
             els.searchResultsPanel.classList.add("hidden");
             if (entry.tracks.length) {
               engine.addLikedSeedsBatch(entry.tracks);
-              engine.queue = entry.tracks.slice(1, 7);
+              recordSet(entry);
+                engine.queue = entry.tracks.slice(1, 7);
               await playTrack(entry.tracks[0], true);
             }
             showToast(`Loaded playlist "${entry.title}"`);
@@ -1982,6 +2012,7 @@
               renderPlaylists();
               if (entry.tracks.length) {
                 engine.addLikedSeedsBatch(entry.tracks);
+                recordSet(entry);
                 engine.queue = entry.tracks.slice(1, 7);
                 await playTrack(entry.tracks[0], true);
               }
@@ -2019,14 +2050,17 @@
         const art = getHighResArtwork(track.artwork_url || track.user?.avatar_url);
         const oa = $("orb-art"), bg = $("bg-art");
         if (art) {
-          oa.src = art; oa.classList.add("on");
+          const ca = $("center-art"); ca.src = art; ca.classList.remove("hidden");
           drawBg(art);
           extractAccent(art);
         } else {
-          oa.classList.remove("on"); bg.classList.remove("on");
+          oa.classList.remove("on"); bg.classList.remove("on"); $("center-art").classList.add("hidden");
           ACC_T = [212, 175, 55]; document.documentElement.style.setProperty("--acc", "212,175,55");
         }
         document.title = `${track.title} — MY WAVE`;
+        recordTrack(track);
+        if (srcLabel && !srcIds.has(track.id)) srcLabel = "";
+        $("ctx-badge").textContent = srcLabel ? `Playing from · ${srcLabel}` : "Now playing · My Wave";
         if ("mediaSession" in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata({
             title: track.title, artist: track.user?.username || "", album: "MY WAVE",
@@ -2230,6 +2264,135 @@
         } catch { showToast("Invalid backup file"); }
         e.target.value = "";
       });
+
+
+      // =========================================================================
+      // HOME: Wave / Playlists / Recent, analyser, recent history
+      // =========================================================================
+      let homeTab = "wave", srcLabel = "", srcIds = new Set(), recentMore = false;
+      const RECENT_KEY = "my_wave_recent_v1";
+      let recent = { tracks: [], sets: [] };
+      try { const r = JSON.parse(localStorage.getItem(RECENT_KEY) || "{}"); if (Array.isArray(r.tracks)) recent.tracks = r.tracks; if (Array.isArray(r.sets)) recent.sets = r.sets; } catch {}
+      const saveRecent = () => { try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch {} };
+      const smallArt = (u) => { const a = getHighResArtwork(u); return a ? a.replace("t500x500", "t200x200") : ""; };
+
+      function recordTrack(t) {
+        const slim = { id: t.id, title: t.title, duration: t.duration, artwork_url: t.artwork_url, genre: t.genre, tag_list: t.tag_list, bpm: t.bpm, playback_count: t.playback_count, created_at: t.created_at, permalink_url: t.permalink_url, user: { id: t.user?.id, username: t.user?.username, avatar_url: t.user?.avatar_url } };
+        recent.tracks = [slim, ...recent.tracks.filter((x) => x.id !== t.id)].slice(0, 24);
+        saveRecent();
+        if (homeTab === "recent") renderRecent();
+      }
+      function recordSet(pl) {
+        recent.sets = [{ id: pl.id, title: pl.title, art: pl.artwork_url || pl.tracks?.[0]?.artwork_url || "", n: pl.tracks?.length || pl.track_count || 0 }, ...recent.sets.filter((x) => x.id !== pl.id)].slice(0, 12);
+        saveRecent();
+      }
+
+      async function playSet(pl, mode) {
+        showToast("Loading...");
+        const tracks = await ensurePlaylistTracks(pl);
+        if (!tracks.length) { showToast("Playlist is empty"); return; }
+        const list = mode === "shuffle" ? shuffled(tracks) : tracks.slice();
+        if (mode === "wave") { engine.addLikedSeedsBatch(tracks); engine.queue = list.slice(1, 6); engine.lastSuccessfulSeed = list[0]; srcLabel = ""; srcIds = new Set(); }
+        else { engine.queue = list.slice(1, 25); srcLabel = pl.title; srcIds = new Set(tracks.map((t) => t.id)); }
+        recordSet(pl);
+        setHome("wave");
+        await playTrack(list[0], true);
+      }
+
+      function setHome(t) {
+        homeTab = t;
+        ["wave", "playlists", "recent"].forEach((k) => $("home-" + k).classList.toggle("hidden", k !== t));
+        document.querySelectorAll("[data-home]").forEach((b) => {
+          const on = b.dataset.home === t;
+          b.classList.toggle("bg-white/10", on); b.classList.toggle("text-silver", on); b.classList.toggle("text-white/50", !on);
+        });
+        if (t === "playlists") renderHomePlaylists();
+        if (t === "recent") renderRecent();
+        if (t === "wave") setTimeout(resizeOrbCanvas, 30);
+      }
+      document.querySelectorAll("[data-home]").forEach((b) => b.addEventListener("click", () => setHome(b.dataset.home)));
+
+      function setCover(pl, n) {
+        const art = smallArt(pl.artwork_url || pl.art || pl.tracks?.[0]?.artwork_url);
+        return art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : `<span class="font-mono text-2xl text-white/20">${escapeHtml((pl.title || "?")[0].toUpperCase())}</span>`;
+      }
+      function renderHomePlaylists() {
+        const g = $("home-pl-grid");
+        if (!playlists.length) { g.innerHTML = `<div class="col-span-full py-10 text-center font-mono text-xs text-white/40">Плейлистов пока нет. Создай свой или импортируй из SoundCloud через поиск.</div>`; return; }
+        g.innerHTML = playlists.map((pl) => {
+          const n = pl.tracks?.length || pl.track_count || 0;
+          return `<div data-hp="${escapeHtml(pl.id)}" class="group rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/25 p-2.5 cursor-pointer transition-colors">
+            <div class="relative aspect-square rounded-xl overflow-hidden bg-obsidian mb-2 flex items-center justify-center">${setCover(pl)}
+              <div class="absolute right-2 bottom-2 w-9 h-9 rounded-full bg-silver text-obsidian flex items-center justify-center shadow-lg md:opacity-0 md:group-hover:opacity-100 transition-opacity"><svg class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></div>
+            </div>
+            <div class="text-xs text-silver truncate">${escapeHtml(pl.title)}</div>
+            <div class="font-mono text-[10px] text-white/40">${n} tracks</div>
+            <div class="flex gap-1.5 mt-2">
+              <button data-hp-shuffle type="button" class="flex-1 py-1.5 rounded-lg border border-white/10 hover:border-white/30 font-mono text-[10px] text-white/60 uppercase">Shuffle</button>
+              <button data-hp-wave type="button" class="flex-1 py-1.5 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase">Wave</button>
+            </div></div>`;
+        }).join("");
+      }
+      $("home-pl-grid").addEventListener("click", (e) => {
+        const c = e.target.closest("[data-hp]"); if (!c) return;
+        const pl = playlists.find((p) => p.id === c.dataset.hp); if (!pl) return;
+        playSet(pl, e.target.closest("[data-hp-shuffle]") ? "shuffle" : e.target.closest("[data-hp-wave]") ? "wave" : "play");
+      });
+      $("home-new-pl").addEventListener("click", () => { openDrawer(); document.querySelector('[data-drawer-tab="playlists"]')?.click(); });
+
+      function renderRecent() {
+        $("recent-sets").innerHTML = recent.sets.length ? recent.sets.map((x) => `<div data-rs="${escapeHtml(x.id)}" class="w-32 shrink-0 cursor-pointer group">
+            <div class="aspect-square rounded-xl overflow-hidden bg-surface border border-white/10 group-hover:border-white/30 mb-1.5 flex items-center justify-center transition-colors">${setCover(x)}</div>
+            <div class="text-xs text-silver truncate">${escapeHtml(x.title)}</div><div class="font-mono text-[10px] text-white/40">${x.n || 0} tracks</div></div>`).join("")
+          : `<div class="py-6 font-mono text-xs text-white/35">Пока пусто — включи любой плейлист.</div>`;
+        const list = recent.tracks.slice(0, recentMore ? 12 : 4);
+        $("recent-tracks").innerHTML = list.length ? list.map((t, i) => `<div data-rt="${i}" class="flex items-center gap-3 p-2 rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/25 cursor-pointer transition-colors">
+            <div class="w-11 h-11 rounded-lg overflow-hidden bg-obsidian shrink-0 flex items-center justify-center">${setCover({ title: t.title, artwork_url: t.artwork_url })}</div>
+            <div class="min-w-0 flex-1"><div class="text-xs text-silver truncate">${escapeHtml(t.title)}</div><div class="text-[11px] text-white/45 truncate">${escapeHtml(t.user?.username)}</div></div>
+            <span class="font-mono text-[10px] text-white/35">${formatTime((t.duration || 0) / 1000)}</span></div>`).join("")
+          : `<div class="py-6 font-mono text-xs text-white/35 sm:col-span-2">Здесь появятся последние прослушанные песни.</div>`;
+        $("recent-more").textContent = recentMore ? "Меньше" : "Ещё";
+      }
+      $("recent-more").addEventListener("click", () => { recentMore = !recentMore; renderRecent(); });
+      $("recent-sets").addEventListener("click", (e) => {
+        const c = e.target.closest("[data-rs]"); if (!c) return;
+        const pl = playlists.find((p) => p.id === c.dataset.rs);
+        if (pl) playSet(pl, "play"); else showToast("Playlist was removed");
+      });
+      $("recent-tracks").addEventListener("click", (e) => {
+        const c = e.target.closest("[data-rt]"); if (!c) return;
+        const t = recent.tracks[Number(c.dataset.rt)]; if (!t) return;
+        srcLabel = ""; srcIds = new Set(); engine.queue = []; engine.lastSeed = null; engine.lastSuccessfulSeed = t;
+        setHome("wave"); playTrack(t, true);
+      });
+      const _rpl = renderPlaylists;
+      renderPlaylists = function () { _rpl(); if (homeTab === "playlists") renderHomePlaylists(); };
+      document.addEventListener("keydown", (e) => {
+        const tag = document.activeElement?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || e.ctrlKey || e.metaKey || e.altKey) return;
+        const m = { 1: "wave", 2: "playlists", 3: "recent" }[e.key]; if (m) setHome(m);
+      });
+
+      // Real audio spectrum: captureStream() never mutes playback (unlike createMediaElementSource);
+      // if the stream is cross-origin it stays silent and the sphere falls back to the simulated beat.
+      function setupAnalyser() {
+        try {
+          const AC = window.AudioContext || window.webkitAudioContext, cap = audioEl.captureStream || audioEl.mozCaptureStream;
+          if (!AC || !cap) return;
+          if (!aCtx) {
+            aCtx = new AC(); analyser = aCtx.createAnalyser(); analyser.fftSize = 1024; analyser.smoothingTimeConstant = 0.55;
+            freqData = new Uint8Array(analyser.frequencyBinCount);
+          }
+          if (aCtx.state === "suspended") aCtx.resume().catch(() => {});
+          if (aStream && aStream.getAudioTracks().some((t) => t.readyState === "live")) return;
+          aStream = cap.call(audioEl);
+          if (!aStream.getAudioTracks().length) return;
+          try { aSrc && aSrc.disconnect(); } catch {}
+          aSrc = aCtx.createMediaStreamSource(aStream); aSrc.connect(analyser); flat = 0;
+        } catch {}
+      }
+      audioEl.addEventListener("playing", setupAnalyser);
+      setHome("wave");
 
       // Hotkeys (Space is handled by the original listener below)
       document.addEventListener("keydown", (e) => {
