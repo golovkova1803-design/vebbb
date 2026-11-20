@@ -619,12 +619,15 @@
     </div>
   </aside>
 
-  <!-- Account / OAuth Connect Modal -->
-  <div id="account-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-    <div class="w-full max-w-md bg-surface border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-      <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
-        <h3 class="text-xs font-medium uppercase tracking-[0.2em] text-silver">SoundCloud Account</h3>
-        <button id="btn-account-close" type="button" class="p-1 text-white/45 hover:text-silver transition-colors">
+  <!-- Account & Profiles Modal -->
+  <div id="account-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="w-full max-w-lg bg-surface border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between shrink-0">
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-[0.2em] text-silver">Профили и SoundCloud</h3>
+          <p class="text-[11px] text-white/40">Изолированные библиотеки, плейлисты и рекомендации</p>
+        </div>
+        <button id="btn-account-close" type="button" class="p-1.5 text-white/45 hover:text-silver rounded-lg hover:bg-white/[0.06] transition-colors">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"></path>
             <path d="m6 6 12 12"></path>
@@ -632,45 +635,87 @@
         </button>
       </div>
 
-      <div class="p-5 space-y-4">
-        <div id="account-active-card" class="hidden p-3.5 rounded-xl glass border border-gold/30 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3 min-w-0">
-            <img id="modal-user-avatar" src="" alt="" class="w-10 h-10 rounded-full object-cover border border-white/15 shrink-0" />
-            <div class="min-w-0">
-              <div id="modal-user-name" class="text-sm font-medium text-silver truncate"></div>
-              <div id="modal-user-meta" class="font-mono text-[10px] text-gold/85 truncate"></div>
+      <div class="p-5 space-y-5 overflow-y-auto custom-scroll flex-1">
+        <!-- Active Profile Card -->
+        <div class="space-y-1.5">
+          <div class="text-[10px] font-mono uppercase tracking-wider text-white/50">Текущий активный профиль</div>
+          <div id="account-active-card" class="p-3.5 rounded-xl glass border border-gold/40 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="relative shrink-0">
+                <img id="modal-user-avatar" src="" alt="" class="w-10 h-10 rounded-full object-cover border border-white/20 hidden" />
+                <div id="modal-user-avatar-fallback" class="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-silver text-xs font-semibold">G</div>
+                <span id="modal-status-dot" class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-white/40 ring-2 ring-surface"></span>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <div id="modal-user-name" class="text-sm font-semibold text-silver truncate">Гость</div>
+                  <span id="modal-user-badge" class="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-white/10 text-white/60 border border-white/10">Гость</span>
+                </div>
+                <div id="modal-user-meta" class="font-mono text-[11px] text-gold/85 truncate">Локальный сеанс</div>
+              </div>
             </div>
+            <button id="btn-account-logout" type="button" class="hidden px-3 py-1.5 rounded-lg border border-white/15 font-mono text-[10px] uppercase text-white/70 hover:text-silver hover:border-white/35 hover:bg-white/[0.04] transition-colors shrink-0">В Гость</button>
           </div>
-          <button id="btn-account-logout" type="button" class="px-2.5 py-1.5 rounded-lg border border-white/15 font-mono text-[10px] uppercase text-white/60 hover:text-silver hover:border-white/30 transition-colors shrink-0">Sign Out</button>
         </div>
 
-        <form id="login-username-form" class="space-y-3">
-          <div>
-            <label class="block font-mono text-[10px] uppercase tracking-wider text-white/50 mb-1">Quick Connect by Username or Profile URL</label>
-            <div class="flex items-center gap-2">
-              <input id="login-username-input" type="text" placeholder="@username or soundcloud.com/artist" class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 text-xs text-silver placeholder-white/30 focus:outline-none focus:border-gold/50" />
-              <button type="submit" class="px-4 py-2 rounded-xl bg-white/[0.06] border border-white/15 hover:border-gold/60 text-xs text-silver transition-colors shrink-0">Connect</button>
-            </div>
-            <p class="text-[11px] text-white/40 mt-1">Loads public likes as My Wave recommendation seeds and imports playlists.</p>
+        <!-- Saved Profiles List -->
+        <div id="saved-profiles-section" class="space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="text-[10px] font-mono uppercase tracking-wider text-white/50">Сохранённые профили</div>
+            <span id="saved-profiles-count" class="font-mono text-[10px] text-white/40">1</span>
+          </div>
+          <div id="saved-profiles-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+            <!-- Dynamically populated profiles -->
+          </div>
+        </div>
+
+        <!-- Add Profile / Login Forms -->
+        <div class="space-y-3 pt-2 border-t border-white/10">
+          <div class="text-[10px] font-mono uppercase tracking-wider text-white/50">Подключить аккаунт</div>
+          
+          <!-- Tab Buttons -->
+          <div class="flex rounded-xl bg-obsidian/60 p-1 border border-white/10 text-xs">
+            <button id="tab-login-oauth" type="button" class="flex-1 py-1.5 rounded-lg font-medium text-silver bg-white/10 transition-colors">SoundCloud OAuth</button>
+            <button id="tab-login-username" type="button" class="flex-1 py-1.5 rounded-lg font-medium text-white/50 hover:text-silver transition-colors">По имени (@username)</button>
           </div>
 
-          <div class="pt-2 border-t border-white/10">
-            <label class="block font-mono text-[10px] uppercase tracking-wider text-white/50 mb-1">Optional OAuth Token (Header: X-SC-OAuth)</label>
-            <div class="flex items-center gap-2">
-              <input id="login-oauth-input" type="password" placeholder="2-xxxxxx (Optional auth token)" class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 text-xs text-silver placeholder-white/30 focus:outline-none focus:border-gold/50 font-mono" />
-              <button id="btn-save-oauth" type="button" class="px-3.5 py-2 rounded-xl bg-white/[0.06] border border-white/15 hover:border-gold/60 text-xs text-silver transition-colors shrink-0">Save</button>
-            </div>
-            <p class="text-[10px] text-white/35 mt-1">Enables private playlists, full likes library, and prevents rate-limiting.</p>
-          </div>
-
-          <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+          <!-- Form 1: OAuth Login -->
+          <form id="login-oauth-form" class="space-y-2.5">
             <div>
-              <div class="text-xs text-silver">Сброс данных Волны</div>
-              <div class="text-[10px] text-white/35">Очистить историю прослушиваний и кэш семян</div>
+              <label class="block font-mono text-[10px] uppercase tracking-wider text-white/50 mb-1">SoundCloud OAuth токен</label>
+              <div class="flex items-center gap-2">
+                <input id="login-oauth-input" type="password" placeholder="2-xxxxxx-xxxxxx... (Вставьте токен)" class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 text-xs text-silver placeholder-white/30 focus:outline-none focus:border-gold/50 font-mono" />
+                <button id="btn-submit-oauth" type="submit" class="px-4 py-2 rounded-xl bg-gold/15 border border-gold/40 hover:bg-gold/25 text-xs text-gold font-medium transition-colors shrink-0">Войти</button>
+              </div>
+              <p class="text-[11px] text-white/40 mt-1.5 leading-relaxed">
+                Полноценный вход: даёт доступ к приватным плейлистам, полному каталогу лайков и исключает лимиты. Найти токен: на <a href="https://soundcloud.com" target="_blank" rel="noopener noreferrer" class="text-gold/80 hover:underline">soundcloud.com</a> откройте DevTools (F12) → Application → Cookies → <code class="text-gold">oauth_token</code>.
+              </p>
             </div>
-            <button id="btn-reset-engine" type="button" class="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 font-mono text-[10px] uppercase transition-colors shrink-0">Сбросить</button>
+          </form>
+
+          <!-- Form 2: Username Connect -->
+          <form id="login-username-form" class="space-y-2.5 hidden">
+            <div>
+              <label class="block font-mono text-[10px] uppercase tracking-wider text-white/50 mb-1">Имя пользователя или ссылка на профиль</label>
+              <div class="flex items-center gap-2">
+                <input id="login-username-input" type="text" placeholder="@username или soundcloud.com/artist" class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 text-xs text-silver placeholder-white/30 focus:outline-none focus:border-gold/50" />
+                <button type="submit" class="px-4 py-2 rounded-xl bg-white/[0.08] border border-white/20 hover:border-gold/60 text-xs text-silver font-medium transition-colors shrink-0">Подключить</button>
+              </div>
+              <p class="text-[11px] text-white/40 mt-1.5 leading-relaxed">
+                Загружает публичные лайки профиля как семена Волны и импортирует публичные плейлисты в отдельный профиль.
+              </p>
+            </div>
+          </form>
+        </div>
+
+        <!-- Data Reset Section -->
+        <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+          <div>
+            <div class="text-xs text-silver">Сброс данных текущего профиля</div>
+            <div class="text-[10px] text-white/35">Очистить историю прослушиваний и кэш семян Волны</div>
           </div>
-        </form>
+          <button id="btn-reset-engine" type="button" class="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 font-mono text-[10px] uppercase transition-colors shrink-0">Сбросить</button>
+        </div>
       </div>
     </div>
   </div>
@@ -713,15 +758,254 @@
       "use strict";
 
       // =========================================================================
-      // CONSTANTS & PERSISTENCE KEYS
+      // CONSTANTS & SCOPED PERSISTENCE ARCHITECTURE
       // =========================================================================
-      const ACCOUNT_KEY = "my_wave_account_v1";
-      const PLAYLISTS_KEY = "my_wave_playlists_v1";
-      const ENGINE_KEY = "my_wave_engine_v1";
-      const RECENT_KEY = "my_wave_recent_v1";
-      const SESSION_KEY = "my_wave_session_v1";
-      const XFADE_KEY = "my_wave_xfade_v1";
+      const PROFILES_KEY = "rivera_profiles_v2";
+      const ACTIVE_PROFILE_KEY = "rivera_active_profile_v2";
+      const XFADE_KEY = "rivera_xfade_v1";
       const STREAM_TTL = 25 * 60 * 1000;
+
+      // =========================================================================
+      // PROFILE MANAGER (ISOLATED STORAGE & SOUNDCLOUD ACCOUNTS)
+      // =========================================================================
+      const ProfileManager = {
+        getProfiles() {
+          try {
+            const list = JSON.parse(localStorage.getItem(PROFILES_KEY) || "[]");
+            if (Array.isArray(list) && list.length > 0) return list;
+          } catch {}
+          return [{
+            id: "guest",
+            type: "guest",
+            name: "Гость",
+            username: "guest",
+            avatar: "",
+            oauthToken: "",
+            scUserId: null,
+            createdAt: Date.now(),
+            lastActive: Date.now()
+          }];
+        },
+
+        saveProfiles(list) {
+          try {
+            localStorage.setItem(PROFILES_KEY, JSON.stringify(list));
+          } catch (e) {
+            console.warn("Failed to save profiles:", e);
+          }
+        },
+
+        getActiveProfileId() {
+          try {
+            const id = localStorage.getItem(ACTIVE_PROFILE_KEY);
+            if (id) return id;
+          } catch {}
+          return "guest";
+        },
+
+        setActiveProfileId(id) {
+          try {
+            localStorage.setItem(ACTIVE_PROFILE_KEY, id);
+          } catch {}
+        },
+
+        getActiveProfile() {
+          const list = this.getProfiles();
+          const activeId = this.getActiveProfileId();
+          let profile = list.find((p) => p.id === activeId);
+          if (!profile) {
+            profile = list[0] || {
+              id: "guest",
+              type: "guest",
+              name: "Гость",
+              username: "guest",
+              avatar: "",
+              oauthToken: "",
+              scUserId: null,
+            };
+            this.setActiveProfileId(profile.id);
+          }
+          return profile;
+        },
+
+        getStorageKey(namespace, profileId = null) {
+          const id = profileId || this.getActiveProfileId();
+          const safeId = String(id).replace(/[^a-zA-Z0-9_-]/g, "_");
+          return `rivera_v2_${namespace}_${safeId}`;
+        },
+
+        addOrUpdateProfile(profileData) {
+          const list = this.getProfiles();
+          const existingIdx = list.findIndex((p) => p.id === profileData.id);
+          const updated = {
+            ...profileData,
+            lastActive: Date.now()
+          };
+          if (existingIdx >= 0) {
+            list[existingIdx] = { ...list[existingIdx], ...updated };
+          } else {
+            list.push(updated);
+          }
+          this.saveProfiles(list);
+          this.setActiveProfileId(updated.id);
+          return updated;
+        },
+
+        deleteProfile(profileId) {
+          if (profileId === "guest") return false;
+          let list = this.getProfiles();
+          list = list.filter((p) => p.id !== profileId);
+          if (!list.length) {
+            list = [{
+              id: "guest",
+              type: "guest",
+              name: "Гость",
+              username: "guest",
+              avatar: "",
+              oauthToken: "",
+              scUserId: null,
+              createdAt: Date.now(),
+              lastActive: Date.now()
+            }];
+          }
+          this.saveProfiles(list);
+
+          try {
+            localStorage.removeItem(this.getStorageKey("playlists", profileId));
+            localStorage.removeItem(this.getStorageKey("engine", profileId));
+            localStorage.removeItem(this.getStorageKey("recent", profileId));
+            localStorage.removeItem(this.getStorageKey("session", profileId));
+          } catch {}
+
+          if (this.getActiveProfileId() === profileId) {
+            this.switchProfile(list[0].id);
+          }
+          return true;
+        },
+
+        async switchProfile(targetProfileId) {
+          if (targetProfileId === this.getActiveProfileId()) return;
+
+          // 1. Flush active profile state
+          try {
+            if (typeof savePlaylists === "function") savePlaylists();
+            if (typeof engine !== "undefined" && engine && typeof engine.saveState === "function") engine.saveState();
+            if (typeof saveRecent === "function") saveRecent();
+            if (typeof saveSession === "function") saveSession();
+          } catch (e) {
+            console.warn("Flush error before profile switch:", e);
+          }
+
+          // 2. Pause audio if playing
+          try {
+            if (audioEl) audioEl.pause();
+            if (standby && standby.el) standby.el.pause();
+          } catch {}
+
+          // 3. Switch active profile ID
+          this.setActiveProfileId(targetProfileId);
+          const profile = this.getActiveProfile();
+
+          // 4. Reset in-memory state completely
+          playlists = [];
+          openPlId = null;
+          activePlaylistId = null;
+          playbackMode = "wave";
+          currentTrack = null;
+          plTracks = [];
+          if (typeof engine !== "undefined" && engine) {
+            engine.currentTrack = null;
+            engine.queue = [];
+            engine.likedSeeds = [];
+            engine.recentTrackIds.clear();
+            engine.dislikedTrackIds.clear();
+            engine.artistCooldown.clear();
+          }
+          recent = { tracks: [], sets: [] };
+
+          // 5. Load target profile scoped data
+          if (typeof loadPlaylists === "function") loadPlaylists();
+          if (typeof engine !== "undefined" && engine && typeof engine.loadState === "function") engine.loadState();
+          if (typeof loadRecent === "function") loadRecent();
+          if (typeof loadSession === "function") loadSession();
+
+          // 6. Update UI
+          if (typeof renderAccountUI === "function") renderAccountUI();
+          if (typeof renderPlaylists === "function") renderPlaylists();
+          if (typeof renderHomePlaylists === "function") renderHomePlaylists();
+          if (typeof renderStatsAndQueue === "function") renderStatsAndQueue();
+          if (typeof renderRecent === "function") renderRecent();
+          if (typeof updatePlayStateIcons === "function") updatePlayStateIcons(false);
+
+          showToast(`Профиль: ${profile.name || profile.username || "Гость"}`);
+        }
+      };
+
+      // Legacy Migration
+      try {
+        if (!localStorage.getItem(PROFILES_KEY)) {
+          const legacyAcc = JSON.parse(localStorage.getItem("my_wave_account_v1") || "null");
+          let initialProfile;
+          if (legacyAcc && legacyAcc.user && legacyAcc.user.id) {
+            const u = legacyAcc.user;
+            initialProfile = {
+              id: "sc_" + u.id,
+              type: legacyAcc.oauthToken ? "oauth" : "username",
+              name: u.full_name || u.username,
+              username: u.username,
+              avatar: u.avatar_url || "",
+              oauthToken: legacyAcc.oauthToken || "",
+              scUserId: u.id,
+              permalink: u.permalink || "",
+              createdAt: Date.now(),
+              lastActive: Date.now()
+            };
+          } else {
+            initialProfile = {
+              id: "guest",
+              type: "guest",
+              name: "Гость",
+              username: "guest",
+              avatar: "",
+              oauthToken: "",
+              scUserId: null,
+              createdAt: Date.now(),
+              lastActive: Date.now()
+            };
+          }
+          ProfileManager.saveProfiles([initialProfile]);
+          ProfileManager.setActiveProfileId(initialProfile.id);
+
+          const oldPl = localStorage.getItem("my_wave_playlists_v1");
+          if (oldPl) localStorage.setItem(ProfileManager.getStorageKey("playlists", initialProfile.id), oldPl);
+          const oldEng = localStorage.getItem("my_wave_engine_v1");
+          if (oldEng) localStorage.setItem(ProfileManager.getStorageKey("engine", initialProfile.id), oldEng);
+          const oldRec = localStorage.getItem("my_wave_recent_v1");
+          if (oldRec) localStorage.setItem(ProfileManager.getStorageKey("recent", initialProfile.id), oldRec);
+          const oldSess = localStorage.getItem("my_wave_session_v1");
+          if (oldSess) localStorage.setItem(ProfileManager.getStorageKey("session", initialProfile.id), oldSess);
+        }
+      } catch (e) {
+        console.warn("Migration failed:", e);
+      }
+
+      // Backward compatible accountState proxy
+      const accountState = {
+        get user() {
+          const p = ProfileManager.getActiveProfile();
+          return p && p.type !== "guest" ? {
+            id: p.scUserId || p.id,
+            username: p.username,
+            full_name: p.name,
+            avatar_url: p.avatar,
+            permalink: p.permalink || p.username
+          } : null;
+        },
+        get oauthToken() {
+          const p = ProfileManager.getActiveProfile();
+          return (p && p.oauthToken) || "";
+        }
+      };
 
       // =========================================================================
       // STATE MANAGEMENT
@@ -771,24 +1055,14 @@
         if (xv !== null && !isNaN(Number(xv))) xfadeSec = Math.max(0, Number(xv));
       } catch {}
 
-      let accountState = { user: null, oauthToken: "" };
-      try {
-        const savedAcc = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || "null");
-        if (savedAcc) {
-          accountState = {
-            user: savedAcc.user || null,
-            oauthToken: savedAcc.oauthToken || "",
-          };
-        }
-      } catch {}
-
       // =========================================================================
       // NETWORK CLIENT WITH TIMEOUT, RETRIES & OAUTH PROPAGATION
       // =========================================================================
       function getAuthHeaders(extra = {}) {
         const headers = { ...extra };
-        if (accountState.oauthToken) {
-          headers["X-SC-OAuth"] = accountState.oauthToken;
+        const profile = ProfileManager.getActiveProfile();
+        if (profile && profile.oauthToken) {
+          headers["X-SC-OAuth"] = profile.oauthToken;
         }
         return headers;
       }
@@ -983,7 +1257,7 @@
 
         loadState() {
           try {
-            const raw = localStorage.getItem(ENGINE_KEY);
+            const raw = localStorage.getItem(ProfileManager.getStorageKey("engine"));
             if (!raw) return;
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed.likedSeeds)) this.likedSeeds = parsed.likedSeeds.map(slimTrack).filter(Boolean);
@@ -1009,7 +1283,7 @@
         saveState() {
           try {
             localStorage.setItem(
-              ENGINE_KEY,
+              ProfileManager.getStorageKey("engine"),
               JSON.stringify({
                 likedSeeds: this.likedSeeds.slice(-120).map(slimTrack),
                 history: this.history.slice(-500),
@@ -1041,7 +1315,7 @@
           this.sessionGenrePenalties.clear();
           this.sessionArtistAffinities.clear();
           this.sessionGenreAffinities.clear();
-          localStorage.removeItem(ENGINE_KEY);
+          localStorage.removeItem(ProfileManager.getStorageKey("engine"));
         }
 
         isLiked(trackId) {
@@ -1668,14 +1942,18 @@
 
       function loadPlaylists() {
         try {
-          const raw = JSON.parse(localStorage.getItem(PLAYLISTS_KEY) || "[]");
-          if (Array.isArray(raw)) playlists = raw;
-        } catch {}
+          const key = ProfileManager.getStorageKey("playlists");
+          const raw = JSON.parse(localStorage.getItem(key) || "[]");
+          playlists = Array.isArray(raw) ? raw : [];
+        } catch {
+          playlists = [];
+        }
       }
 
       function savePlaylists() {
         try {
-          localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists, jsonClean));
+          const key = ProfileManager.getStorageKey("playlists");
+          localStorage.setItem(key, JSON.stringify(playlists, jsonClean));
         } catch {}
       }
 
@@ -2083,9 +2361,14 @@
         isGold: idx % 3 === 0,
       }));
 
+      let orbCanvasW = 0;
+      let orbCanvasH = 0;
+
       function resizeOrbCanvas() {
         const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
         const rect = canvas.getBoundingClientRect();
+        orbCanvasW = Math.round(rect.width);
+        orbCanvasH = Math.round(rect.height);
         canvas.width = Math.round(rect.width * dpr);
         canvas.height = Math.round(rect.height * dpr);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -2171,7 +2454,7 @@
 
         for (let k = 0; k < 3; k++) ACC[k] += (ACC_T[k] - ACC[k]) * 0.06;
         const ar = Math.round(ACC[0]), ag = Math.round(ACC[1]), ab = Math.round(ACC[2]);
-        const w = canvas.clientWidth, h = canvas.clientHeight;
+        const w = orbCanvasW, h = orbCanvasH;
         if (!w || !h) return;
         const cx = w / 2, cy = h / 2;
 
@@ -2307,10 +2590,18 @@
         modalUserName: document.getElementById("modal-user-name"),
         modalUserMeta: document.getElementById("modal-user-meta"),
         btnAccountLogout: document.getElementById("btn-account-logout"),
+        modalUserAvatarFallback: document.getElementById("modal-user-avatar-fallback"),
+        modalStatusDot: document.getElementById("modal-status-dot"),
+        modalUserBadge: document.getElementById("modal-user-badge"),
+        savedProfilesList: document.getElementById("saved-profiles-list"),
+        savedProfilesCount: document.getElementById("saved-profiles-count"),
+        tabLoginOauth: document.getElementById("tab-login-oauth"),
+        tabLoginUsername: document.getElementById("tab-login-username"),
+        loginOauthForm: document.getElementById("login-oauth-form"),
+        loginOauthInput: document.getElementById("login-oauth-input"),
         loginUsernameForm: document.getElementById("login-username-form"),
         loginUsernameInput: document.getElementById("login-username-input"),
-        loginOauthInput: document.getElementById("login-oauth-input"),
-        btnSaveOauth: document.getElementById("btn-save-oauth"),
+        btnResetEngine: document.getElementById("btn-reset-engine"),
         centerTitle: document.getElementById("center-track-title"),
         centerMeta: document.getElementById("center-track-meta"),
         orbToggleBtn: document.getElementById("orb-toggle-btn"),
@@ -2383,27 +2674,122 @@
       }
 
       function renderAccountUI() {
-        const u = accountState.user;
-        if (u) {
-          els.headerUserLabel.textContent = u.username || u.permalink;
-          if (u.avatar_url) {
-            els.headerUserAvatar.src = u.avatar_url;
+        const profile = ProfileManager.getActiveProfile();
+        const isGuest = profile.id === "guest" || profile.type === "guest";
+        
+        // Header profile button
+        if (!isGuest) {
+          els.headerUserLabel.textContent = profile.name || profile.username;
+          if (profile.avatar) {
+            els.headerUserAvatar.src = profile.avatar;
             els.headerUserAvatar.classList.remove("hidden");
             els.headerUserIcon.classList.add("hidden");
-            els.modalUserAvatar.src = u.avatar_url;
+          } else {
+            els.headerUserAvatar.classList.add("hidden");
+            els.headerUserIcon.classList.remove("hidden");
           }
-          els.accountActiveCard.classList.remove("hidden");
-          els.modalUserName.textContent = u.username;
-          els.modalUserMeta.textContent = `@${u.permalink || u.username}`;
         } else {
-          els.headerUserLabel.textContent = "Sign In";
+          els.headerUserLabel.textContent = "Гость";
           els.headerUserAvatar.classList.add("hidden");
           els.headerUserIcon.classList.remove("hidden");
-          els.accountActiveCard.classList.add("hidden");
         }
-        if (accountState.oauthToken) {
-          els.loginOauthInput.value = accountState.oauthToken;
+
+        // Active profile card in modal
+        if (els.modalUserName) {
+          els.modalUserName.textContent = profile.name || profile.username || "Гость";
         }
+        if (els.modalUserMeta) {
+          els.modalUserMeta.textContent = isGuest ? "Локальный сеанс" : `@${profile.username || profile.permalink}`;
+        }
+        if (els.modalUserBadge) {
+          if (profile.type === "oauth") {
+            els.modalUserBadge.textContent = "SC OAuth";
+            els.modalUserBadge.className = "px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30";
+          } else if (profile.type === "username") {
+            els.modalUserBadge.textContent = "SC @user";
+            els.modalUserBadge.className = "px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-gold/15 text-gold border border-gold/30";
+          } else {
+            els.modalUserBadge.textContent = "Гость";
+            els.modalUserBadge.className = "px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-white/10 text-white/60 border border-white/10";
+          }
+        }
+
+        if (els.modalStatusDot) {
+          els.modalStatusDot.className = `absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-surface ${
+            profile.type === "oauth" ? "bg-emerald-400" : profile.type === "username" ? "bg-gold" : "bg-white/40"
+          }`;
+        }
+
+        if (profile.avatar) {
+          els.modalUserAvatar.src = profile.avatar;
+          els.modalUserAvatar.classList.remove("hidden");
+          if (els.modalUserAvatarFallback) els.modalUserAvatarFallback.classList.add("hidden");
+        } else {
+          els.modalUserAvatar.classList.add("hidden");
+          if (els.modalUserAvatarFallback) {
+            els.modalUserAvatarFallback.textContent = (profile.name || profile.username || "G").charAt(0).toUpperCase();
+            els.modalUserAvatarFallback.classList.remove("hidden");
+          }
+        }
+
+        if (els.btnAccountLogout) {
+          els.btnAccountLogout.classList.toggle("hidden", isGuest);
+        }
+
+        renderProfilesList();
+      }
+
+      function renderProfilesList() {
+        if (!els.savedProfilesList) return;
+        const profiles = ProfileManager.getProfiles();
+        const activeId = ProfileManager.getActiveProfileId();
+        if (els.savedProfilesCount) {
+          els.savedProfilesCount.textContent = profiles.length;
+        }
+
+        els.savedProfilesList.innerHTML = profiles
+          .map((p) => {
+            const isActive = p.id === activeId;
+            const isG = p.id === "guest";
+            const initial = (p.name || p.username || "G").charAt(0).toUpperCase();
+            const badgeText = p.type === "oauth" ? "OAuth" : p.type === "username" ? "@user" : "Гость";
+            const badgeClass = p.type === "oauth"
+              ? "text-emerald-400 bg-emerald-500/10"
+              : p.type === "username"
+              ? "text-gold bg-gold/10"
+              : "text-white/50 bg-white/10";
+
+            return `
+              <div class="flex items-center justify-between p-2 rounded-xl ${isActive ? "bg-white/[0.08] border border-gold/40" : "bg-white/[0.03] border border-white/5 hover:border-white/15"} transition-colors">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  ${p.avatar
+                    ? `<img src="${escapeHtml(p.avatar)}" class="w-7 h-7 rounded-full object-cover border border-white/15 shrink-0" />`
+                    : `<div class="w-7 h-7 rounded-full bg-white/10 border border-white/15 flex items-center justify-center font-semibold text-[10px] text-silver shrink-0">${initial}</div>`
+                  }
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-xs font-medium text-silver truncate">${escapeHtml(p.name || p.username)}</span>
+                      <span class="font-mono text-[9px] px-1 py-0.2 rounded ${badgeClass}">${badgeText}</span>
+                    </div>
+                    <div class="font-mono text-[10px] text-white/40 truncate">${isG ? "Локальный профиль" : `@${escapeHtml(p.username || p.permalink)}`}</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  ${isActive
+                    ? `<span class="px-2 py-1 rounded-md text-[10px] font-mono text-gold bg-gold/10">Активен</span>`
+                    : `<button data-switch-profile="${escapeHtml(p.id)}" type="button" class="px-2 py-1 rounded-md text-[10px] font-mono text-silver bg-white/[0.06] hover:bg-white/[0.12] transition-colors">Выбрать</button>`
+                  }
+                  ${!isG
+                    ? `<button data-delete-profile="${escapeHtml(p.id)}" type="button" title="Удалить аккаунт" class="p-1 text-white/35 hover:text-red-400 rounded transition-colors">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M8 6V4h8v2m-1 0v14H9V6h6z"/></svg>
+                      </button>`
+                    : ""
+                  }
+                </div>
+              </div>
+            `;
+          })
+          .join("");
       }
 
       function renderFilterPills() {
@@ -2920,6 +3306,25 @@
         updatePlayStateIcons(false);
       });
 
+      let rafTimelinePending = false;
+      let lastTimelineCurrent = 0;
+      let lastTimelineDuration = 0;
+
+      function updateTimelineDOM() {
+        rafTimelinePending = false;
+        const timeStr = formatTime(lastTimelineCurrent);
+        if (timeStr !== lastRenderedTimeStr) {
+          lastRenderedTimeStr = timeStr;
+          els.timeCurrent.textContent = timeStr;
+        }
+
+        if (lastTimelineDuration > 0) {
+          const ratio = Math.min(1, Math.max(0, lastTimelineCurrent / lastTimelineDuration));
+          els.timelineProgress.style.transform = `scaleX(${ratio})`;
+          els.timelineThumb.style.left = `${ratio * 100}%`;
+        }
+      }
+
       deckListen("timeupdate", () => {
         if (isScrubbing) return;
         const current = audioEl.currentTime || 0;
@@ -2927,17 +3332,15 @@
           ? audioEl.duration
           : (engine.currentTrack?.duration || 0) / 1000;
 
-        const timeStr = formatTime(current);
-        if (timeStr !== lastRenderedTimeStr) {
-          lastRenderedTimeStr = timeStr;
-          els.timeCurrent.textContent = timeStr;
+        lastTimelineCurrent = current;
+        lastTimelineDuration = duration;
+        if (!rafTimelinePending) {
+          rafTimelinePending = true;
+          requestAnimationFrame(updateTimelineDOM);
         }
 
         if (duration > 0) {
           const ratio = Math.min(1, Math.max(0, current / duration));
-          els.timelineProgress.style.transform = `scaleX(${ratio})`;
-          els.timelineThumb.style.left = `${ratio * 100}%`;
-
           const remaining = duration - current;
           maybeCrossfade(remaining);
 
@@ -3492,19 +3895,20 @@
       document.getElementById("btn-export").addEventListener("click", () => {
         engine.saveState();
         const data = {
-          app: "my-wave",
-          v: 1,
+          app: "rivera",
+          v: 2,
           at: new Date().toISOString(),
-          engine: JSON.parse(localStorage.getItem(ENGINE_KEY) || "{}"),
+          activeProfile: ProfileManager.getActiveProfile(),
+          engine: JSON.parse(localStorage.getItem(ProfileManager.getStorageKey("engine")) || "{}"),
           playlists,
           recent,
         };
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
-        a.download = `my-wave-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = `rivera-sound-backup-${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
         setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-        showToast("Backup exported");
+        showToast("Резервная копия экспортирована");
       });
 
       document.getElementById("btn-import").addEventListener("click", () => {
@@ -3516,7 +3920,7 @@
         if (!f) return;
         try {
           const d = JSON.parse(await f.text());
-          if (d.app !== "my-wave") throw new Error("bad format");
+          if (d.app !== "rivera" && d.app !== "my-wave") throw new Error("bad format");
           const E = d.engine || {};
           const uni = (a, b, key) => {
             const m = new Map();
@@ -3538,9 +3942,9 @@
           savePlaylists();
           renderStatsAndQueue();
           renderPlaylists();
-          showToast("Backup imported successfully");
+          showToast("Резервная копия успешно импортирована");
         } catch {
-          showToast("Invalid backup file");
+          showToast("Неверный формат файла резервной копии");
         }
         e.target.value = "";
       });
@@ -3879,37 +4283,181 @@
         );
       }
 
-      els.btnAccountOpen.addEventListener("click", () => els.accountModal.classList.remove("hidden"));
+      els.btnAccountOpen.addEventListener("click", () => {
+        renderAccountUI();
+        els.accountModal.classList.remove("hidden");
+      });
       els.btnAccountClose.addEventListener("click", () => els.accountModal.classList.add("hidden"));
       els.accountModal.addEventListener("click", (e) => {
         if (e.target === els.accountModal) els.accountModal.classList.add("hidden");
       });
 
-      els.btnAccountLogout.addEventListener("click", () => {
-        accountState = { user: null, oauthToken: "" };
-        localStorage.removeItem(ACCOUNT_KEY);
-        els.loginOauthInput.value = "";
-        renderAccountUI();
-        showToast("Signed out");
-      });
-
-      els.btnSaveOauth.addEventListener("click", () => {
-        const token = els.loginOauthInput.value.trim();
-        accountState.oauthToken = token;
-        localStorage.setItem(ACCOUNT_KEY, JSON.stringify(accountState));
-        showToast(token ? "OAuth token saved & activated" : "OAuth token cleared");
-      });
-
-      els.loginUsernameForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const val = els.loginUsernameInput.value.trim();
-        if (!val) return;
-        try {
-          await loadUserProfile(val);
-          els.accountModal.classList.add("hidden");
-        } catch {
-          showToast("Profile not found — check spelling or use the Users search tab");
+      // Switch Profile click delegation
+      els.accountModal.addEventListener("click", async (e) => {
+        const switchBtn = e.target.closest("[data-switch-profile]");
+        if (switchBtn) {
+          const profId = switchBtn.dataset.switchProfile;
+          await ProfileManager.switchProfile(profId);
+          renderAccountUI();
+          return;
         }
+
+        const delBtn = e.target.closest("[data-delete-profile]");
+        if (delBtn) {
+          const profId = delBtn.dataset.deleteProfile;
+          if (confirm("Удалить этот профиль и его сохранённые данные?")) {
+            ProfileManager.deleteProfile(profId);
+            renderAccountUI();
+            showToast("Профиль удален");
+          }
+          return;
+        }
+      });
+
+      // Logout to Guest
+      els.btnAccountLogout.addEventListener("click", async () => {
+        await ProfileManager.switchProfile("guest");
+        renderAccountUI();
+        showToast("Переключено в гостевой режим");
+      });
+
+      // Tabs: OAuth vs Username
+      els.tabLoginOauth?.addEventListener("click", () => {
+        els.tabLoginOauth.classList.add("bg-white/10", "text-silver");
+        els.tabLoginOauth.classList.remove("text-white/50");
+        els.tabLoginUsername?.classList.remove("bg-white/10", "text-silver");
+        els.tabLoginUsername?.classList.add("text-white/50");
+        els.loginOauthForm?.classList.remove("hidden");
+        els.loginUsernameForm?.classList.add("hidden");
+      });
+
+      els.tabLoginUsername?.addEventListener("click", () => {
+        els.tabLoginUsername.classList.add("bg-white/10", "text-silver");
+        els.tabLoginUsername.classList.remove("text-white/50");
+        els.tabLoginOauth?.classList.remove("bg-white/10", "text-silver");
+        els.tabLoginOauth?.classList.add("text-white/50");
+        els.loginUsernameForm?.classList.remove("hidden");
+        els.loginOauthForm?.classList.add("hidden");
+      });
+
+      // Submit OAuth Form
+      els.loginOauthForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const token = (els.loginOauthInput.value || "").trim();
+        if (!token) {
+          showToast("Введите OAuth токен");
+          return;
+        }
+        showToast("Проверка OAuth токена SoundCloud...");
+        try {
+          const resp = await fetch("/api/me", {
+            headers: { "X-SC-OAuth": token, Accept: "application/json" }
+          });
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          const data = await resp.json();
+          if (!data.user || !data.user.id) throw new Error("Invalid user");
+
+          const u = data.user;
+          const profile = ProfileManager.addOrUpdateProfile({
+            id: `sc_${u.id}`,
+            type: "oauth",
+            name: u.full_name || u.username,
+            username: u.username,
+            avatar: u.avatar_url || "",
+            oauthToken: token,
+            scUserId: u.id,
+            permalink: u.permalink || "",
+          });
+
+          await ProfileManager.switchProfile(profile.id);
+
+          const likes = (data.collection || data.likes || [])
+            .map((x) => (x && x.track ? x.track : x))
+            .filter((t) => t && t.id && t.title);
+          const added = engine.addLikedSeedsBatch(likes);
+
+          const userPlaylists = (data.playlists || []).filter((p) => p && p.id);
+          for (const plMeta of userPlaylists) {
+            upsertSoundCloudPlaylist(plMeta, Array.isArray(plMeta.tracks) && plMeta.tracks.length ? plMeta.tracks : null);
+          }
+          savePlaylists();
+          engine.saveState();
+
+          renderPlaylists();
+          renderHomePlaylists();
+          if (engine.lastSuccessfulSeed || likes[0]) {
+            await engine.ensureBuffer(0, engine.lastSuccessfulSeed || likes[0]);
+          }
+          renderStatsAndQueue();
+          els.loginOauthInput.value = "";
+          els.accountModal.classList.add("hidden");
+          showToast(`Подключен @${u.username}: ${added} семян Волны, ${userPlaylists.length} плейлистов`);
+        } catch (err) {
+          console.error(err);
+          showToast("Ошибка авторизации. Проверьте правильность токена.");
+        }
+      });
+
+      // Submit Username Form
+      els.loginUsernameForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const val = (els.loginUsernameInput.value || "").trim();
+        if (!val) return;
+        const parsed = parseSoundCloudInput(val);
+        const slug = parsed && parsed.kind === "user" ? parsed.slug : val.replace(/^@/, "").replace(/^\/+|\/+$/g, "");
+        if (!slug) return;
+
+        showToast("Подключение профиля SoundCloud...");
+        try {
+          const data = await fetchProfile(slug);
+          const u = data.user || (data.username ? data : null);
+          if (!u) throw new Error("No user in response");
+
+          const profile = ProfileManager.addOrUpdateProfile({
+            id: `sc_${u.id || u.username || slug}`,
+            type: "username",
+            name: u.full_name || u.username,
+            username: u.username,
+            avatar: u.avatar_url || "",
+            oauthToken: "",
+            scUserId: u.id || null,
+            permalink: u.permalink || "",
+          });
+
+          await ProfileManager.switchProfile(profile.id);
+
+          const likes = (data.collection || data.likes || [])
+            .map((x) => (x && x.track ? x.track : x))
+            .filter((t) => t && t.id && t.title);
+          const added = engine.addLikedSeedsBatch(likes);
+
+          const userPlaylists = (data.playlists || []).filter((p) => p && p.id);
+          for (const plMeta of userPlaylists) {
+            upsertSoundCloudPlaylist(plMeta, Array.isArray(plMeta.tracks) && plMeta.tracks.length ? plMeta.tracks : null);
+          }
+          savePlaylists();
+          engine.saveState();
+
+          renderPlaylists();
+          renderHomePlaylists();
+          if (engine.lastSuccessfulSeed || likes[0]) {
+            await engine.ensureBuffer(0, engine.lastSuccessfulSeed || likes[0]);
+          }
+          renderStatsAndQueue();
+          els.loginUsernameInput.value = "";
+          els.accountModal.classList.add("hidden");
+          showToast(`Подключен @${u.username}: +${added} семян, ${userPlaylists.length} плейлистов`);
+        } catch (err) {
+          console.error(err);
+          showToast("Профиль не найден — проверьте написание логина");
+        }
+      });
+
+      // Reset Engine Data for Active Profile
+      els.btnResetEngine?.addEventListener("click", () => {
+        engine.resetState();
+        renderStatsAndQueue();
+        showToast("Данные Волны для текущего профиля сброшены");
       });
 
       // =========================================================================
@@ -3954,7 +4502,6 @@
                     <div class="font-mono text-[10px] text-white/40">${count} tracks · ${pl.source === "soundcloud" ? escapeHtml(pl.author || "SC") : "CUSTOM"}</div>
                   </button>
                   <div class="flex items-center gap-1.5 shrink-0">
-                    <button data-pl-wave="${pl.id}" type="button" title="Start My Wave from Playlist" class="px-2.5 py-1 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase transition-colors">Wave</button>
                     <button data-pl-del="${pl.id}" type="button" title="Delete Playlist" class="p-1.5 text-white/35 hover:text-silver">
                       <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M8 6V4h8v2m-1 0v14H9V6h6z"/></svg>
                     </button>
@@ -3994,14 +4541,6 @@
             savePlaylists();
             renderPlaylists();
             if (homeTab === "playlists") renderHomePlaylists();
-          });
-        });
-
-        els.playlistsContainer.querySelectorAll("[data-pl-wave]").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            const pl = playlists.find((p) => p.id === btn.dataset.plWave);
-            if (!pl) return;
-            await playSet(pl, "wave");
           });
         });
 
@@ -4059,12 +4598,24 @@
       // VIEWS: WAVE, PLAYLISTS & RECENT (HOME TABS)
       // =========================================================================
       let recent = { tracks: [], sets: [] };
-      try {
-        const r = JSON.parse(localStorage.getItem(RECENT_KEY) || "{}");
-        if (Array.isArray(r.tracks)) recent.tracks = r.tracks.map(slimTrack).filter(Boolean);
-        if (Array.isArray(r.sets)) recent.sets = r.sets;
-      } catch {}
-      const saveRecent = () => { try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch {} };
+
+      function loadRecent() {
+        recent = { tracks: [], sets: [] };
+        try {
+          const key = ProfileManager.getStorageKey("recent");
+          const r = JSON.parse(localStorage.getItem(key) || "{}");
+          if (Array.isArray(r.tracks)) recent.tracks = r.tracks.map(slimTrack).filter(Boolean);
+          if (Array.isArray(r.sets)) recent.sets = r.sets;
+        } catch {}
+      }
+      loadRecent();
+
+      const saveRecent = () => {
+        try {
+          const key = ProfileManager.getStorageKey("recent");
+          localStorage.setItem(key, JSON.stringify(recent));
+        } catch {}
+      };
 
       function recordTrack(t) {
         const slim = slimTrack(t);
@@ -4100,24 +4651,7 @@
       }
 
       async function playSet(pl, mode) {
-        if (mode === "wave") {
-          showToast("Loading...");
-          const tracks = await ensurePlaylistTracks(pl);
-          if (!tracks.length) {
-            showToast("Playlist is empty");
-            return;
-          }
-          setWaveMode();
-          const list = tracks.slice();
-          engine.addLikedSeedsBatch(tracks);
-          engine.queue = list.slice(1, 6);
-          engine.lastSuccessfulSeed = list[0];
-          recordSet(pl);
-          setHome("wave");
-          await playTrack(list[0], true);
-        } else {
-          await playPlaylist(pl, mode === "shuffle" ? -1 : 0, { shuffle: mode === "shuffle" });
-        }
+        await playPlaylist(pl, mode === "shuffle" ? -1 : 0, { shuffle: mode === "shuffle" });
       }
 
       function setHome(t) {
@@ -4218,8 +4752,8 @@
               <div class="text-xs text-silver truncate">${escapeHtml(pl.title)}</div>
               <div class="font-mono text-[10px] text-white/40">${n} tracks</div>
               <div class="flex gap-1.5 mt-2">
-                <button data-hp-shuffle type="button" class="flex-1 py-1.5 rounded-lg border border-white/10 hover:border-white/30 font-mono text-[10px] text-white/60 uppercase">Shuffle</button>
-                <button data-hp-wave type="button" class="flex-1 py-1.5 rounded-lg border border-gold/40 text-gold hover:bg-gold/10 font-mono text-[10px] uppercase">Wave</button>
+                <button data-hp-play type="button" class="flex-1 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 font-mono text-[10px] text-silver uppercase transition-colors">Слушать</button>
+                <button data-hp-shuffle type="button" class="flex-1 py-1.5 rounded-lg border border-white/10 hover:border-white/30 font-mono text-[10px] text-white/60 uppercase transition-colors">Перемешать</button>
               </div></div>`;
           })
           .join("");
@@ -4320,9 +4854,8 @@
               <div class="text-base font-semibold text-silver truncate">${escapeHtml(pl.title)}</div>
               <div class="font-mono text-[11px] text-white/45 mb-2">${escapeHtml(pl.author || "Custom")} · ${Math.max(tracks.length, pl.track_count || 0)} tracks</div>
               <div class="flex flex-wrap gap-2">
-                <button data-pd-play type="button" class="${btnClass} bg-silver text-obsidian font-semibold">Play</button>
-                <button data-pd-shuffle type="button" class="${btnClass} border border-white/15 text-white/70 hover:border-white/35">Shuffle</button>
-                <button data-pd-wave type="button" class="${btnClass} border border-gold/40 text-gold hover:bg-gold/10">Wave</button>
+                <button data-pd-play type="button" class="${btnClass} bg-silver text-obsidian font-semibold">Слушать</button>
+                <button data-pd-shuffle type="button" class="${btnClass} border border-white/15 text-white/70 hover:border-white/35">Перемешать</button>
               </div>
             </div>
           </div>
@@ -4348,7 +4881,6 @@
         const pl = playlists.find((p) => p.id === c.dataset.hp);
         if (!pl) return;
         if (e.target.closest("[data-hp-shuffle]")) return playSet(pl, "shuffle");
-        if (e.target.closest("[data-hp-wave]")) return playSet(pl, "wave");
         if (e.target.closest("[data-hp-play]")) return playSet(pl, "play");
         openPlId = pl.id;
         renderHomePlaylists();
@@ -4364,7 +4896,6 @@
         }
         if (e.target.closest("[data-pd-play]")) return playSet(pl, "play");
         if (e.target.closest("[data-pd-shuffle]")) return playSet(pl, "shuffle");
-        if (e.target.closest("[data-pd-wave]")) return playSet(pl, "wave");
         const row = e.target.closest("[data-pd-i]");
         if (row) playPlaylist(pl, Number(row.dataset.pdI), { shuffle: shuffleOn });
       });
@@ -4396,8 +4927,9 @@
       function saveSession() {
         if (!engine.currentTrack) return;
         try {
+          const key = ProfileManager.getStorageKey("session");
           localStorage.setItem(
-            SESSION_KEY,
+            key,
             JSON.stringify({
               track: slimTrack(engine.currentTrack),
               time: audioEl.currentTime || pendingResumeAt || 0,
@@ -4405,6 +4937,49 @@
               plId: activePlaylistId,
             })
           );
+        } catch {}
+      }
+
+      function loadSession() {
+        try {
+          const key = ProfileManager.getStorageKey("session");
+          const ss = JSON.parse(localStorage.getItem(key) || "null");
+          if (ss && ss.track && ss.track.id) {
+            engine.currentTrack = ss.track;
+            pendingResumeAt = ss.time || 0;
+            if (ss.mode === "playlist") {
+              const pl = playlists.find((p) => p.id === ss.plId);
+              if (pl && pl.tracks?.length) {
+                playbackMode = "playlist";
+                activePlaylistId = pl.id;
+                srcLabel = pl.title;
+                srcIds = new Set(pl.tracks.map((t) => t.id));
+                plTracks = pl.tracks.slice();
+                const i = pl.tracks.findIndex((t) => t.id === ss.track.id);
+                engine.queue = i >= 0 ? pl.tracks.slice(i + 1) : [];
+              }
+            } else {
+              playbackMode = "wave";
+              activePlaylistId = null;
+            }
+            updateTrackUI(ss.track);
+            els.timeCurrent.textContent = formatTime(pendingResumeAt);
+            const d = (ss.track.duration || 0) / 1000;
+            if (d > 0) {
+              const r = Math.min(1, pendingResumeAt / d);
+              els.timelineProgress.style.transform = `scaleX(${r})`;
+              els.timelineThumb.style.left = `${r * 100}%`;
+            }
+            updatePlayStateIcons(false);
+          } else {
+            els.dockTitle.textContent = "RIVERA SOUND";
+            els.dockArtist.textContent = "Выберите трек или запустите Волну";
+            els.centerTitle.textContent = "RIVERA WAVE";
+            els.centerMeta.textContent = "Нажмите на пластинку для старта";
+            els.dockArtwork.src = "";
+            els.dockArtwork.classList.add("hidden");
+            els.dockArtworkFallback.classList.remove("hidden");
+          }
         } catch {}
       }
 
@@ -4419,37 +4994,11 @@
       window.addEventListener("pagehide", saveSession);
       document.addEventListener("visibilitychange", () => {
         if (document.hidden) saveSession();
+        else if (homeTab === "wave") resizeOrbCanvas();
       });
 
       // Restore session on load
-      try {
-        const ss = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
-        if (ss && ss.track && ss.track.id) {
-          engine.currentTrack = ss.track;
-          pendingResumeAt = ss.time || 0;
-          if (ss.mode === "playlist") {
-            const pl = playlists.find((p) => p.id === ss.plId);
-            if (pl && pl.tracks?.length) {
-              playbackMode = "playlist";
-              activePlaylistId = pl.id;
-              srcLabel = pl.title;
-              srcIds = new Set(pl.tracks.map((t) => t.id));
-              plTracks = pl.tracks.slice();
-              const i = pl.tracks.findIndex((t) => t.id === ss.track.id);
-              engine.queue = i >= 0 ? pl.tracks.slice(i + 1) : [];
-            }
-          }
-          updateTrackUI(ss.track);
-          els.timeCurrent.textContent = formatTime(pendingResumeAt);
-          const d = (ss.track.duration || 0) / 1000;
-          if (d > 0) {
-            const r = Math.min(1, pendingResumeAt / d);
-            els.timelineProgress.style.transform = `scaleX(${r})`;
-            els.timelineThumb.style.left = `${r * 100}%`;
-          }
-          updatePlayStateIcons(false);
-        }
-      } catch {}
+      loadSession();
 
       // =========================================================================
       // KEYBOARD SHORTCUTS DISPATCHER
