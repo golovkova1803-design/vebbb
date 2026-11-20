@@ -4,9 +4,16 @@ const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
 let cachedClientId = null;
+let lastClientIdFetch = 0;
+const CLIENT_ID_CACHE_TTL = 3600 * 1000; // 1 hour
 
 async function getClientId(forceRefresh = false) {
-  if (cachedClientId && !forceRefresh) {
+  const now = Date.now();
+  if (process.env.SOUNDCLOUD_CLIENT_ID && !forceRefresh) {
+    return process.env.SOUNDCLOUD_CLIENT_ID;
+  }
+
+  if (cachedClientId && !forceRefresh && now - lastClientIdFetch < CLIENT_ID_CACHE_TTL) {
     return cachedClientId;
   }
 
@@ -19,10 +26,13 @@ async function getClientId(forceRefresh = false) {
 
   const html = await homeResp.text();
   let scriptUrls = [];
-  const tagRegex = /<script[^>]+src="(https:\/\/a-v2\.sndcdn\.com\/assets\/[^"]+\.js)"/g;
+  const tagRegex = /<script[^>]+src="([^">]+\.js)"/g;
   let match;
   while ((match = tagRegex.exec(html)) !== null) {
-    scriptUrls.push(match[1]);
+    const src = match[1];
+    if (src.includes("sndcdn.com") || src.includes("assets")) {
+      scriptUrls.push(src.startsWith("//") ? `https:${src}` : src);
+    }
   }
 
   if (scriptUrls.length === 0) {
@@ -41,9 +51,11 @@ async function getClientId(forceRefresh = false) {
       const jsText = await jsResp.text();
       const idMatch =
         jsText.match(/client_id\s*:\s*"([a-zA-Z0-9]{32})"/) ||
-        jsText.match(/client_id=([a-zA-Z0-9]{32})/);
+        jsText.match(/client_id=([a-zA-Z0-9]{32})/) ||
+        jsText.match(/client_id[:=]\s*["']?([a-zA-Z0-9]{32})["']?/);
       if (idMatch) {
         cachedClientId = idMatch[1];
+        lastClientIdFetch = now;
         return cachedClientId;
       }
     } catch {
@@ -51,6 +63,7 @@ async function getClientId(forceRefresh = false) {
     }
   }
 
+  if (cachedClientId) return cachedClientId;
   throw new Error("Failed to extract SoundCloud client_id from web bundles");
 }
 
@@ -94,7 +107,6 @@ async function requestV2(url, params = {}, oauthToken = null, retryOnAuth = true
 function normalizeTrack(raw) {
   if (!raw || typeof raw !== "object" || !raw.id) return null;
   const transcodings = raw.media?.transcodings || [];
-  if (!transcodings.length) return null;
 
   const user = raw.user || {};
   const artwork = raw.artwork_url || user.avatar_url || "";
@@ -108,10 +120,12 @@ function normalizeTrack(raw) {
     likes_count: raw.likes_count || 0,
     genre: raw.genre || "",
     tag_list: raw.tag_list || "",
+    bpm: raw.bpm || null,
+    created_at: raw.created_at || raw.release_date || "",
     permalink_url: raw.permalink_url || "",
     track_authorization: raw.track_authorization || "",
     user: {
-      id: user.id,
+      id: user.id || 0,
       username: user.username || "Unknown Artist",
       permalink: user.permalink || "",
       avatar_url: user.avatar_url || "",
@@ -160,11 +174,10 @@ async function hydrateTracks(rawTracks = [], oauthToken = null) {
           { ids: chunk.join(",") },
           oauthToken
         );
-        if (Array.isArray(fetched)) {
-          for (const item of fetched) {
-            const norm = normalizeTrack(item);
-            if (norm) ready.push(norm);
-          }
+        const list = Array.isArray(fetched) ? fetched : fetched.collection || [];
+        for (const item of list) {
+          const norm = normalizeTrack(item);
+          if (norm) ready.push(norm);
         }
       } catch {
         // Ignore partial chunk failures
@@ -173,7 +186,7 @@ async function hydrateTracks(rawTracks = [], oauthToken = null) {
   }
 
   const byId = new Map(ready.map((t) => [t.id, t]));
-  return rawTracks.map((t) => byId.get(t?.id)).filter(Boolean);
+  return rawTracks.map((t) => byId.get(t?.id) || normalizeTrack(t)).filter(Boolean);
 }
 
 function normalizePlaylistMeta(raw) {
@@ -186,7 +199,7 @@ function normalizePlaylistMeta(raw) {
     track_count: raw.track_count || (raw.tracks ? raw.tracks.length : 0),
     permalink_url: raw.permalink_url || "",
     user: {
-      id: user.id,
+      id: user.id || 0,
       username: user.username || "Unknown",
       permalink: user.permalink || "",
     },
@@ -214,8 +227,17 @@ module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "*");
 
   if (req.method === "OPTIONS") {
-    return res.status(204).end();
+    return res.status ? res.status(204).end() : (res.statusCode = 204, res.end());
   }
+
+  const sendJson = (status, payload) => {
+    if (res.status && typeof res.status === "function") {
+      return res.status(status).json(payload);
+    }
+    res.statusCode = status;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify(payload));
+  };
 
   try {
     const parsedUrl = new URL(req.url, "https://localhost");
@@ -228,33 +250,42 @@ module.exports = async function handler(req, res) {
 
     if (route === "/health") {
       const clientId = await getClientId();
-      return res.status(200).json({ status: "ok", client_id_cached: Boolean(clientId) });
+      return sendJson(200, { status: "ok", client_id_cached: Boolean(clientId) });
+    }
+
+    if (route === "/tracks") {
+      const ids = (parsedUrl.searchParams.get("ids") || "").trim();
+      if (!ids) return sendJson(400, { detail: "ids parameter is required" });
+      const data = await requestV2(`${API_V2_BASE}/tracks`, { ids }, oauthToken);
+      const list = Array.isArray(data) ? data : data.collection || [];
+      const collection = list.map(normalizeTrack).filter(Boolean);
+      return sendJson(200, { collection });
     }
 
     if (route === "/search") {
       const q = (parsedUrl.searchParams.get("q") || "").trim();
       const limit = Math.min(50, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 20)));
-      if (!q) return res.status(400).json({ detail: "Query parameter q is required" });
+      if (!q) return sendJson(400, { detail: "Query parameter q is required" });
 
       const data = await requestV2(`${API_V2_BASE}/search/tracks`, { q, limit, offset: 0 }, oauthToken);
       const collection = (data.collection || []).map(normalizeTrack).filter(Boolean);
-      return res.status(200).json({ collection });
+      return sendJson(200, { collection });
     }
 
     if (route === "/users/search") {
       const q = (parsedUrl.searchParams.get("q") || "").trim().replace(/^@/, "");
       const limit = Math.min(30, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 15)));
-      if (!q) return res.status(400).json({ detail: "Query parameter q is required" });
+      if (!q) return sendJson(400, { detail: "Query parameter q is required" });
 
       const data = await requestV2(`${API_V2_BASE}/search/users`, { q, limit, offset: 0 }, oauthToken);
       const collection = (data.collection || []).map(normalizeUser).filter(Boolean);
-      return res.status(200).json({ collection });
+      return sendJson(200, { collection });
     }
 
     if (route === "/playlists/search") {
       const q = (parsedUrl.searchParams.get("q") || "").trim();
       const limit = Math.min(30, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 15)));
-      if (!q) return res.status(400).json({ detail: "Query parameter q is required" });
+      if (!q) return sendJson(400, { detail: "Query parameter q is required" });
 
       const data = await requestV2(
         `${API_V2_BASE}/search/playlists_without_albums`,
@@ -262,7 +293,7 @@ module.exports = async function handler(req, res) {
         oauthToken
       );
       const collection = (data.collection || []).map(normalizePlaylistMeta).filter(Boolean);
-      return res.status(200).json({ collection });
+      return sendJson(200, { collection });
     }
 
     if (route === "/user/profile" || route === "/user/likes") {
@@ -274,7 +305,7 @@ module.exports = async function handler(req, res) {
       if (userIdParam) {
         userData = await requestV2(`${API_V2_BASE}/users/${encodeURIComponent(userIdParam)}`, {}, oauthToken);
       } else {
-        if (!rawUsername) return res.status(400).json({ detail: "username is required" });
+        if (!rawUsername) return sendJson(400, { detail: "username is required" });
         const profileUrl =
           rawUsername.startsWith("http://") || rawUsername.startsWith("https://")
             ? rawUsername.split("?")[0].replace(/\/+$/, "")
@@ -286,7 +317,6 @@ module.exports = async function handler(req, res) {
           userData = null;
         }
 
-        // Fallback to user search if /resolve failed (e.g. display name instead of permalink)
         if (!userData?.id || userData.kind !== "user") {
           const searchRes = await requestV2(
             `${API_V2_BASE}/search/users`,
@@ -300,7 +330,7 @@ module.exports = async function handler(req, res) {
       }
 
       if (!userData?.id || userData.kind !== "user") {
-        return res.status(404).json({ detail: "SoundCloud user profile not found" });
+        return sendJson(404, { detail: "SoundCloud user profile not found" });
       }
 
       const [likesRes, playlistsRes] = await Promise.all([
@@ -313,11 +343,11 @@ module.exports = async function handler(req, res) {
       ]);
 
       const likes = (likesRes.collection || [])
-        .map((entry) => normalizeTrack(entry?.track))
+        .map((entry) => normalizeTrack(entry?.track || entry))
         .filter(Boolean);
       const playlists = (playlistsRes.collection || []).map(normalizePlaylistMeta).filter(Boolean);
 
-      return res.status(200).json({
+      return sendJson(200, {
         user: normalizeUser(userData),
         collection: likes,
         playlists,
@@ -326,7 +356,7 @@ module.exports = async function handler(req, res) {
 
     if (route === "/me") {
       if (!oauthToken) {
-        return res.status(401).json({ detail: "OAuth token required" });
+        return sendJson(401, { detail: "OAuth token required" });
       }
       const me = await requestV2(`${API_V2_BASE}/me`, {}, oauthToken);
       const [likesRes, playlistsRes] = await Promise.all([
@@ -339,11 +369,11 @@ module.exports = async function handler(req, res) {
       ]);
 
       const likes = (likesRes.collection || [])
-        .map((entry) => normalizeTrack(entry?.track))
+        .map((entry) => normalizeTrack(entry?.track || entry))
         .filter(Boolean);
       const playlists = (playlistsRes.collection || []).map(normalizePlaylistMeta).filter(Boolean);
 
-      return res.status(200).json({
+      return sendJson(200, {
         user: normalizeUser(me),
         collection: likes,
         playlists,
@@ -360,15 +390,15 @@ module.exports = async function handler(req, res) {
       } else if (playlistUrl) {
         plData = await requestV2(`${API_V2_BASE}/resolve`, { url: playlistUrl }, oauthToken);
       } else {
-        return res.status(400).json({ detail: "Playlist id or url is required" });
+        return sendJson(400, { detail: "Playlist id or url is required" });
       }
 
       if (!plData?.id || !Array.isArray(plData.tracks)) {
-        return res.status(404).json({ detail: "Playlist not found" });
+        return sendJson(404, { detail: "Playlist not found" });
       }
 
       const tracks = await hydrateTracks(plData.tracks, oauthToken);
-      return res.status(200).json({
+      return sendJson(200, {
         playlist: normalizePlaylistMeta(plData),
         tracks,
       });
@@ -377,28 +407,31 @@ module.exports = async function handler(req, res) {
     if (route === "/wave/related") {
       const trackId = parsedUrl.searchParams.get("track_id");
       const limit = Math.min(50, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 25)));
-      if (!trackId) return res.status(400).json({ detail: "track_id is required" });
+      if (!trackId) return sendJson(400, { detail: "track_id is required" });
 
-      const data = await requestV2(
-        `${API_V2_BASE}/tracks/${encodeURIComponent(trackId)}/related`,
-        { limit, offset: 0 },
-        oauthToken
-      );
-      const collection = (data.collection || []).map(normalizeTrack).filter(Boolean);
-      return res.status(200).json({ collection });
+      try {
+        const data = await requestV2(
+          `${API_V2_BASE}/tracks/${encodeURIComponent(trackId)}/related`,
+          { limit, offset: 0 },
+          oauthToken
+        );
+        const collection = (data.collection || []).map(normalizeTrack).filter(Boolean);
+        return sendJson(200, { collection });
+      } catch (relErr) {
+        return sendJson(200, { collection: [] });
+      }
     }
 
     if (route === "/stream") {
       const trackId = parsedUrl.searchParams.get("track_id");
-      if (!trackId) return res.status(400).json({ detail: "track_id is required" });
+      if (!trackId) return sendJson(400, { detail: "track_id is required" });
 
       const trackData = await requestV2(`${API_V2_BASE}/tracks/${encodeURIComponent(trackId)}`, {}, oauthToken);
       const transcodings = trackData.media?.transcodings || [];
       if (!transcodings.length) {
-        return res.status(404).json({ detail: "No playable transcodings available" });
+        return sendJson(404, { detail: "No playable transcodings available" });
       }
 
-      // Sort transcodings: progressive mpeg -> hls mpeg -> other hls -> anything else
       const score = (t) => {
         const proto = t.format?.protocol || "";
         const mime = t.format?.mime_type || "";
@@ -432,14 +465,14 @@ module.exports = async function handler(req, res) {
       const fallback = resolvedList[1] || null;
 
       if (!primary?.url) {
-        return res.status(502).json({
+        return sendJson(502, {
           detail: "No working stream URL returned by SoundCloud",
           errors,
           formats: ordered.map((t) => t.format),
         });
       }
 
-      return res.status(200).json({
+      return sendJson(200, {
         url: primary.url,
         protocol: primary.protocol,
         mime_type: primary.mime_type,
@@ -449,9 +482,9 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    return res.status(404).json({ detail: `Unknown API route: ${route}` });
+    return sendJson(404, { detail: `Unknown API route: ${route}` });
   } catch (err) {
     const status = err.status || 502;
-    return res.status(status).json({ detail: err.message || "Upstream SoundCloud error" });
+    return sendJson(status, { detail: err.message || "Upstream SoundCloud error" });
   }
 };
