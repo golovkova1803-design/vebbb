@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#050505" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>MY WAVE — Flagship SoundCloud Discovery Player</title>
+  <title>RIVERA SOUND — Wave Music Stream</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -276,7 +276,7 @@
     ></div>
   </div>
 
-  <!-- Top Navigation, Multi-Tab Search & Account Modal -->
+  <!-- Top Navigation, Search & Account Modal -->
   <header id="top-header" class="shrink-0 relative z-30 w-full max-w-6xl mx-auto px-4 sm:px-5 pt-3 sm:pt-4 pb-2 flex flex-col md:flex-row items-center justify-between gap-3">
     <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
       <div class="flex items-center gap-2.5">
@@ -285,10 +285,10 @@
           <span class="eq-bar w-[2px] h-full bg-gold rounded-full"></span>
           <span class="eq-bar w-[2px] h-full bg-gold rounded-full"></span>
         </div>
-        <span class="text-xs font-semibold tracking-[0.24em] uppercase text-silver">MY WAVE</span>
+        <span class="text-xs font-bold tracking-[0.24em] uppercase text-silver">RIVERA SOUND</span>
       </div>
-      <div class="font-mono text-[11px] text-white/50 border border-white/10 rounded-full px-3 py-0.5 glass">
-        <span id="seed-stats-label">SEEDS 0 · QUEUE 0</span>
+      <div class="flex items-center gap-2">
+        <span class="font-mono text-[10px] text-gold/80 px-2.5 py-0.5 rounded-full border border-gold/20 bg-gold/5">ONLINE</span>
       </div>
     </div>
 
@@ -303,20 +303,20 @@
             id="search-input"
             type="text"
             autocomplete="off"
-            placeholder="Track, @artist, playlist or URL..."
+            placeholder="Трек, артист (@user) или плейлист..."
             class="w-full bg-transparent text-xs text-silver placeholder-white/35 focus:outline-none min-w-0"
           />
           <button type="submit" id="search-submit-btn" class="ml-2 px-2 py-0.5 text-[11px] font-mono uppercase tracking-wider text-white/60 hover:text-gold transition-colors shrink-0">
-            Go
+            Найти
           </button>
         </form>
 
         <div id="search-results-panel" class="hidden absolute left-0 right-0 mt-2 bg-surface border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
           <div class="px-3 py-2 border-b border-white/10 flex items-center justify-between gap-2">
             <div class="flex items-center gap-1.5">
-              <button data-search-tab="tracks" type="button" class="search-tab-btn px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider border border-gold/60 text-gold bg-gold/10 transition-colors">Tracks</button>
-              <button data-search-tab="users" type="button" class="search-tab-btn px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Users</button>
-              <button data-search-tab="playlists" type="button" class="search-tab-btn px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Playlists</button>
+              <button data-search-tab="tracks" type="button" class="search-tab-btn px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider border border-gold/60 text-gold bg-gold/10 transition-colors">Треки</button>
+              <button data-search-tab="users" type="button" class="search-tab-btn px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Артисты</button>
+              <button data-search-tab="playlists" type="button" class="search-tab-btn px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Плейлисты</button>
             </div>
             <button id="close-search-btn" type="button" class="text-white/40 hover:text-silver transition-colors p-1.5">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -335,30 +335,31 @@
           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
         </svg>
-        <span id="header-user-label" class="font-mono text-[11px] text-silver max-w-[80px] sm:max-w-[120px] truncate">Sign In</span>
+        <span id="header-user-label" class="font-mono text-[11px] text-silver max-w-[80px] sm:max-w-[120px] truncate">Войти</span>
       </button>
     </div>
   </header>
 
-  <!-- Navigation View Tabs -->
-  <nav id="home-tabs" class="shrink-0 relative z-20 flex justify-center px-4 pb-1">
-    <div class="inline-flex p-1 rounded-full bg-white/[0.05] border border-white/10 font-mono text-[11px] uppercase tracking-wider">
-      <button data-home="wave" type="button" class="px-4 py-1.5 rounded-full transition-colors bg-white/10 text-silver">Моя волна</button>
-      <button data-home="playlists" type="button" class="px-4 py-1.5 rounded-full transition-colors text-white/50 hover:text-silver">Плейлисты</button>
-      <button data-home="recent" type="button" class="px-4 py-1.5 rounded-full transition-colors text-white/50 hover:text-silver">Недавнее</button>
+  <!-- Navigation View Tabs: Real Player Architecture -->
+  <nav id="home-tabs" class="shrink-0 relative z-20 flex justify-center px-4 pb-2">
+    <div class="inline-flex p-1 rounded-full bg-white/[0.05] border border-white/10 font-mono text-[11px] uppercase tracking-wider shadow-lg">
+      <button data-home="wave" type="button" class="px-4 py-1.5 rounded-full transition-all bg-white/10 text-silver font-medium">Волна</button>
+      <button data-home="search" type="button" class="px-4 py-1.5 rounded-full transition-all text-white/50 hover:text-silver">Поиск</button>
+      <button data-home="playlists" type="button" class="px-4 py-1.5 rounded-full transition-all text-white/50 hover:text-silver">Медиатека</button>
+      <button data-home="recent" type="button" class="px-4 py-1.5 rounded-full transition-all text-white/50 hover:text-silver">История</button>
     </div>
   </nav>
 
   <!-- Main Player Stage Views -->
   <main class="relative z-10 flex-1 min-h-0 overflow-y-auto px-4">
-    <!-- View 1: My Wave Orb & Discovery Stage -->
+    <!-- View 1: RIVERA Wave Stage (Only one clean page to launch and enjoy Wave) -->
     <div id="home-wave" class="min-h-full flex flex-col items-center justify-center py-2 gap-2">
-      <button id="ctx-badge" type="button" title="Click to switch back to My Wave" class="font-mono text-[10px] uppercase tracking-[0.22em] text-white/40 hover:text-gold transition-colors py-0.5 px-2 rounded-full border border-transparent hover:border-white/10">
-        Now playing · My Wave
+      <button id="ctx-badge" type="button" title="Переключить на Волну" class="font-mono text-[10px] uppercase tracking-[0.22em] text-white/40 hover:text-gold transition-colors py-0.5 px-3 rounded-full border border-transparent hover:border-white/10">
+        RIVERA WAVE · Персональный поток
       </button>
 
       <div id="orb-stage" class="relative flex items-center justify-center select-none" style="touch-action: pan-y; contain: layout paint;">
-        <button id="orb-toggle-btn" type="button" aria-label="Toggle Play or Pause" class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-200 active:scale-[0.98]">
+        <button id="orb-toggle-btn" type="button" aria-label="Запустить или остановить Волну" class="group relative rounded-full focus:outline-none cursor-pointer transition-transform duration-200 active:scale-[0.98]">
           <canvas id="wave-orb-canvas" class="block orb-size"></canvas>
           <div id="orb-vinyl-stage">
             <div id="orb-vinyl">
@@ -381,12 +382,12 @@
       <div class="flex items-center justify-center gap-3 max-w-md w-full px-4 min-h-[48px]">
         <img id="center-art" alt="" class="hidden w-11 h-11 rounded-lg object-cover shrink-0 border border-white/10 shadow-md" />
         <div class="min-w-0 text-center">
-          <p id="center-track-title" class="text-base sm:text-lg font-semibold text-silver tracking-tight truncate max-w-full">Click the Wave Orb or Sign In to start</p>
-          <p id="center-track-meta" class="font-mono text-[11px] text-white/45 mt-0.5 truncate max-w-full">IDLE · READY</p>
+          <p id="center-track-title" class="text-base sm:text-lg font-semibold text-silver tracking-tight truncate max-w-full">Нажмите на винил для запуска Волны</p>
+          <p id="center-track-meta" class="font-mono text-[11px] text-white/45 mt-0.5 truncate max-w-full">RIVERA SOUND · ГОТОВ К ВОСПРОИЗВЕДЕНИЮ</p>
         </div>
       </div>
 
-      <!-- 9 Filter Pills -->
+      <!-- 9 Filter Pills (Direct mood tune without extra buttons) -->
       <div id="vibe-pills-container" class="flex flex-wrap items-center justify-center gap-2 max-w-xl px-1">
         <button data-filter="bodroe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Бодрое</button>
         <button data-filter="spokoynoe" type="button" class="vibe-pill glass border border-white/10 rounded-full px-4 py-2 sm:px-3.5 sm:py-1.5 text-xs text-white/65 hover:text-silver hover:border-white/25 active:scale-95 transition-all duration-150">Спокойное</button>
@@ -402,17 +403,55 @@
       <p id="engine-toast" class="font-mono text-[11px] h-4 opacity-0 transition-opacity duration-200 text-center px-2" style="color: rgb(var(--acc));"></p>
     </div>
 
-    <!-- View 2: Playlists -->
+    <!-- View 2: Search & Catalog Explore -->
+    <div id="home-search" class="hidden max-w-3xl mx-auto py-3 space-y-4">
+      <div class="glass border border-white/10 rounded-2xl p-4">
+        <form id="explore-search-form" class="flex items-center glass border border-white/10 rounded-xl px-3.5 py-2.5 focus-within:border-gold/60 transition-colors">
+          <svg class="w-4 h-4 text-white/45 shrink-0 mr-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input
+            id="explore-search-input"
+            type="text"
+            autocomplete="off"
+            placeholder="Искать трек, артиста (@user) или плейлист..."
+            class="w-full bg-transparent text-sm text-silver placeholder-white/35 focus:outline-none min-w-0"
+          />
+          <button type="submit" class="ml-2 px-3 py-1 rounded-lg bg-gold/15 text-gold border border-gold/40 text-xs font-mono uppercase tracking-wider hover:bg-gold/25 transition-colors shrink-0">
+            Найти
+          </button>
+        </form>
+
+        <div class="flex items-center gap-2 mt-3 overflow-x-auto pb-1 text-xs">
+          <span class="font-mono text-[10px] text-white/40 uppercase tracking-wider shrink-0">Популярное:</span>
+          <button data-quick-search="phonk" class="quick-genre-pill px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-white/70 hover:text-gold hover:border-gold/40 transition-colors shrink-0">Phonk</button>
+          <button data-quick-search="synthwave" class="quick-genre-pill px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-white/70 hover:text-gold hover:border-gold/40 transition-colors shrink-0">Synthwave</button>
+          <button data-quick-search="deep house" class="quick-genre-pill px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-white/70 hover:text-gold hover:border-gold/40 transition-colors shrink-0">Deep House</button>
+          <button data-quick-search="drum and bass" class="quick-genre-pill px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-white/70 hover:text-gold hover:border-gold/40 transition-colors shrink-0">D&B</button>
+          <button data-quick-search="lofi hip hop" class="quick-genre-pill px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-white/70 hover:text-gold hover:border-gold/40 transition-colors shrink-0">Lo-Fi</button>
+          <button data-quick-search="ambient" class="quick-genre-pill px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-white/70 hover:text-gold hover:border-gold/40 transition-colors shrink-0">Ambient</button>
+        </div>
+      </div>
+
+      <div id="explore-results-container" class="space-y-2">
+        <div id="explore-results-list" class="divide-y divide-white/[0.06] rounded-2xl glass border border-white/10 overflow-hidden">
+          <div class="p-8 text-center text-xs font-mono text-white/40">Введите запрос или выберите жанр для поиска</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View 3: Playlists & Library -->
     <div id="home-playlists" class="hidden max-w-3xl mx-auto py-3">
       <div id="home-pl-head" class="flex items-center justify-between mb-3 px-1">
-        <h2 id="home-pl-title" class="font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">Твои плейлисты</h2>
-        <button id="home-new-pl" type="button" class="px-3 py-1.5 rounded-lg border border-white/15 hover:border-gold/50 hover:text-gold font-mono text-[10px] uppercase text-white/60 transition-colors">+ Новый</button>
+        <h2 id="home-pl-title" class="font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">Твоя медиатека</h2>
+        <button id="home-new-pl" type="button" class="px-3 py-1.5 rounded-lg border border-white/15 hover:border-gold/50 hover:text-gold font-mono text-[10px] uppercase text-white/60 transition-colors">+ Новый плейлист</button>
       </div>
       <div id="home-pl-detail" class="hidden"></div>
       <div id="home-pl-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
     </div>
 
-    <!-- View 3: Recent Tracks and Sets -->
+    <!-- View 4: Recent Tracks and Sets -->
     <div id="home-recent" class="hidden max-w-3xl mx-auto py-3 space-y-5">
       <section>
         <h2 class="px-1 mb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">Недавние альбомы и сеты</h2>
@@ -518,7 +557,7 @@
     </div>
   </footer>
 
-  <!-- Slide-Over Drawer: Wave Queue, Playlists & Blocklist -->
+  <!-- Slide-Over Drawer: Clean Player Queue & Library -->
   <aside
     id="queue-drawer"
     class="fixed top-0 right-0 h-full w-full sm:w-[420px] glass-surface border-l border-white/10 z-50 transform translate-x-full transition-transform duration-200 flex flex-col shadow-2xl"
@@ -526,9 +565,9 @@
   >
     <div class="px-5 py-3.5 border-b border-white/10 flex items-center justify-between">
       <div class="flex items-center gap-1.5">
-        <button data-drawer-tab="wave" type="button" class="drawer-tab-btn px-3 py-1.5 rounded-full font-mono text-[11px] uppercase tracking-wider border border-gold/60 text-gold bg-gold/10 transition-colors">Wave</button>
-        <button data-drawer-tab="playlists" type="button" class="drawer-tab-btn px-3 py-1.5 rounded-full font-mono text-[11px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Playlists</button>
-        <button data-drawer-tab="blocked" type="button" class="drawer-tab-btn px-3 py-1.5 rounded-full font-mono text-[11px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Blocked</button>
+        <button data-drawer-tab="wave" type="button" class="drawer-tab-btn px-3.5 py-1.5 rounded-full font-mono text-[11px] uppercase tracking-wider border border-gold/60 text-gold bg-gold/10 transition-colors">Очередь</button>
+        <button data-drawer-tab="playlists" type="button" class="drawer-tab-btn px-3.5 py-1.5 rounded-full font-mono text-[11px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Плейлисты</button>
+        <button data-drawer-tab="blocked" type="button" class="drawer-tab-btn px-3.5 py-1.5 rounded-full font-mono text-[11px] uppercase tracking-wider border border-transparent text-white/50 hover:text-silver transition-colors">Блокировки</button>
       </div>
       <button id="btn-queue-close" type="button" class="p-2 text-white/45 hover:text-silver transition-colors">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -538,34 +577,18 @@
       </button>
     </div>
 
-    <!-- Drawer Tab 1: Wave Buffer & Live Queue -->
+    <!-- Drawer Tab 1: Live Queue (Clean, no debug stats or reload buttons) -->
     <div id="drawer-panel-wave" class="flex-1 flex flex-col min-h-0">
-      <div class="px-5 py-2.5 border-b border-white/10">
-        <p id="drawer-seed-info" class="font-mono text-[11px] text-white/50 truncate">SEED: NONE</p>
-      </div>
-      <div class="grid grid-cols-3 gap-px bg-white/10 border-b border-white/10">
-        <div class="bg-surface px-3 py-2 text-center">
-          <div id="stat-seeds" class="font-mono text-sm text-gold">0</div>
-          <div class="font-mono text-[10px] text-white/40 uppercase">Seeds</div>
-        </div>
-        <div class="bg-surface px-3 py-2 text-center">
-          <div id="stat-history" class="font-mono text-sm text-silver">0</div>
-          <div class="font-mono text-[10px] text-white/40 uppercase">Played</div>
-        </div>
-        <div class="bg-surface px-3 py-2 text-center">
-          <div id="stat-blacklist" class="font-mono text-sm text-white/60">0</div>
-          <div class="font-mono text-[10px] text-white/40 uppercase">Blocked</div>
-        </div>
+      <div class="px-5 py-2.5 border-b border-white/10 flex items-center justify-between">
+        <span id="queue-count-label" class="font-mono text-[11px] text-white/50 uppercase tracking-wider">Далее в потоке</span>
+        <span class="font-mono text-[10px] text-gold/80 px-2 py-0.5 rounded-full border border-gold/20 bg-gold/5">RIVERA FLOW</span>
       </div>
 
       <div id="queue-list" class="flex-1 overflow-y-auto divide-y divide-white/[0.06] px-2 py-2"></div>
 
-      <div class="p-4 border-t border-white/10 flex items-center justify-between gap-2.5">
-        <button id="btn-refresh-buffer" type="button" class="flex-1 py-2.5 rounded-xl glass border border-white/10 hover:border-gold/50 text-xs text-silver hover:text-gold transition-colors font-medium">
-          Regenerate Wave
-        </button>
-        <button id="btn-reset-engine" type="button" class="px-3.5 py-2.5 rounded-xl glass border border-white/10 hover:border-white/30 font-mono text-[11px] text-white/50 hover:text-silver transition-colors">
-          Reset
+      <div class="p-3.5 border-t border-white/10 flex items-center justify-between gap-2.5">
+        <button id="btn-clear-queue" type="button" class="flex-1 py-2 rounded-xl glass border border-white/10 hover:border-white/30 text-xs text-white/60 hover:text-silver transition-colors font-medium">
+          Очистить очередь
         </button>
       </div>
     </div>
@@ -639,6 +662,14 @@
             </div>
             <p class="text-[10px] text-white/35 mt-1">Enables private playlists, full likes library, and prevents rate-limiting.</p>
           </div>
+
+          <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+            <div>
+              <div class="text-xs text-silver">Сброс данных Волны</div>
+              <div class="text-[10px] text-white/35">Очистить историю прослушиваний и кэш семян</div>
+            </div>
+            <button id="btn-reset-engine" type="button" class="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 font-mono text-[10px] uppercase transition-colors shrink-0">Сбросить</button>
+          </div>
         </form>
       </div>
     </div>
@@ -667,7 +698,7 @@
       <div><span class="text-gold">R</span> — toggle repeat (off / 1 / ∞)</div>
       <div><span class="text-gold">Q</span> — toggle queue & wave drawer</div>
       <div><span class="text-gold">F</span> — full-screen focus visualizer</div>
-      <div><span class="text-gold">1 / 2 / 3</span> — wave / playlists / recent</div>
+      <div><span class="text-gold">1 / 2 / 3 / 4</span> — Волна / Поиск / Медиатека / История</div>
       <div><span class="text-gold">/</span> — search · <span class="text-gold">?</span> — hotkeys · <span class="text-gold">Esc</span> — close</div>
       <div class="pt-2 text-white/40 border-t border-white/10 mt-2">Orb gestures: double-click / tap = Like, swipe = prev / next</div>
     </div>
@@ -940,6 +971,13 @@
           this.lastSuccessfulSeed = null;
           this.isFetching = false;
           this.fetchGen = 0;
+
+          // WaveEngine 2.0: Soft Session Feedback & Dynamic Affinity
+          this.sessionArtistPenalties = new Map();
+          this.sessionGenrePenalties = new Map();
+          this.sessionArtistAffinities = new Map();
+          this.sessionGenreAffinities = new Map();
+
           this.loadState();
         }
 
@@ -999,6 +1037,10 @@
           this.queue = [];
           this.playStack = [];
           this.lastSuccessfulSeed = null;
+          this.sessionArtistPenalties.clear();
+          this.sessionGenrePenalties.clear();
+          this.sessionArtistAffinities.clear();
+          this.sessionGenreAffinities.clear();
           localStorage.removeItem(ENGINE_KEY);
         }
 
@@ -1016,6 +1058,7 @@
             const slim = slimTrack(track);
             this.likedSeeds.push(slim);
             this.lastSuccessfulSeed = slim;
+            this.applySessionAffinity(track);
             added = true;
           }
           this.saveState();
@@ -1062,7 +1105,62 @@
             this.recentCompleted.push(slim);
             if (this.recentCompleted.length > 30) this.recentCompleted.shift();
           }
+          this.applySessionAffinity(track);
+          this.decaySessionFeedback();
           this.saveState();
+        }
+
+        // Soft Feedback: Early Skip Penalty (<15s)
+        applySessionSkipPenalty(track) {
+          if (!track) return;
+          const aid = track.user?.id;
+          if (aid) {
+            this.sessionArtistPenalties.set(aid, (this.sessionArtistPenalties.get(aid) || 0) + 32);
+          }
+          const gen = (track.genre || "").trim().toLowerCase();
+          if (gen) {
+            this.sessionGenrePenalties.set(gen, (this.sessionGenrePenalties.get(gen) || 0) + 18);
+          }
+          this.markPlayed(track);
+          // Remove remaining tracks by penalized artist from immediate queue
+          this.queue = this.queue.filter((t) => t.user?.id !== aid);
+        }
+
+        // Soft Feedback: Positive Affinity (>70% listen or like)
+        applySessionAffinity(track) {
+          if (!track) return;
+          const aid = track.user?.id;
+          if (aid) {
+            this.sessionArtistAffinities.set(aid, (this.sessionArtistAffinities.get(aid) || 0) + 16);
+          }
+          const gen = (track.genre || "").trim().toLowerCase();
+          if (gen) {
+            this.sessionGenreAffinities.set(gen, (this.sessionGenreAffinities.get(gen) || 0) + 10);
+          }
+        }
+
+        // Natural session drift: gradually forgive penalties and soften affinities
+        decaySessionFeedback() {
+          for (const [k, v] of this.sessionArtistPenalties.entries()) {
+            const nv = v * 0.72;
+            if (nv < 3) this.sessionArtistPenalties.delete(k);
+            else this.sessionArtistPenalties.set(k, nv);
+          }
+          for (const [k, v] of this.sessionGenrePenalties.entries()) {
+            const nv = v * 0.72;
+            if (nv < 3) this.sessionGenrePenalties.delete(k);
+            else this.sessionGenrePenalties.set(k, nv);
+          }
+          for (const [k, v] of this.sessionArtistAffinities.entries()) {
+            const nv = v * 0.82;
+            if (nv < 3) this.sessionArtistAffinities.delete(k);
+            else this.sessionArtistAffinities.set(k, nv);
+          }
+          for (const [k, v] of this.sessionGenreAffinities.entries()) {
+            const nv = v * 0.82;
+            if (nv < 3) this.sessionGenreAffinities.delete(k);
+            else this.sessionGenreAffinities.set(k, nv);
+          }
         }
 
         blacklistAndFlush(track, withArtist = true) {
@@ -1152,6 +1250,36 @@
           };
         }
 
+        // Engagement ratio scoring: separates quality tracks from bot/spam inflation
+        calcEngagementScore(t) {
+          const plays = Math.max(1, t.playback_count || 0);
+          const likes = Math.max(0, t.likes_count || 0);
+          const ratio = likes / plays;
+          if (plays < 80) return 0;
+          if (ratio >= 0.08) return 22; // Elite community appreciation
+          if (ratio >= 0.04) return 14;
+          if (ratio >= 0.02) return 6;
+          if (plays > 4000 && ratio < 0.01) return -20; // Dead weight or bot plays
+          return 0;
+        }
+
+        // Harmonic BPM & Tempo flow continuity
+        calcBpmFlowScore(candBpm, seedBpm) {
+          if (!candBpm || !seedBpm) return 0;
+          const b1 = Number(seedBpm), b2 = Number(candBpm);
+          if (b1 <= 0 || b2 <= 0) return 0;
+          const diff = Math.abs(b1 - b2) / b1;
+          if (diff <= 0.08) return 16; // Seamless tempo match (+-8%)
+          if (diff <= 0.15) return 9;  // Natural transition (+-15%)
+          // Harmonic half-time or double-time (e.g. 70 bpm half-time of 140 bpm)
+          const dbl = Math.abs((b1 * 2) - b2) / b2;
+          const hlf = Math.abs((b1 * 0.5) - b2) / b2;
+          if (dbl <= 0.06 || hlf <= 0.06) return 14;
+          if (diff > 0.32) return -20; // Harsh jarring tempo clash
+          if (diff > 0.20) return -10; // Noticeable mismatch
+          return 0;
+        }
+
         buildCtx(pool, relPool) {
           const liked = new Set(this.likedSeeds.map((t) => t.id));
           const likedArtists = new Set(this.likedSeeds.map((t) => t.user?.id).filter(Boolean));
@@ -1191,8 +1319,11 @@
 
           if (level >= 1) return true;
           const plays = t.playback_count || 0;
+          const likes = t.likes_count || 0;
+          const ratio = likes / Math.max(1, plays);
+
           if (f.neznakomoe && (ctx.liked.has(t.id) || ctx.likedArtists.has(t.user?.id) || plays > 150000)) return false;
-          if (f.andegraund && plays >= ctx.undergroundCap) return false;
+          if (f.andegraund && (plays >= ctx.undergroundCap || (plays > 800 && ratio < 0.025))) return false;
 
           const m = this.moodOf(t);
           if (f.bodroe && (SLOW_RE.test(m.tx) || (m.bpm > 0 && m.bpm <= 95))) return false;
@@ -1203,18 +1334,53 @@
         scoreTrack(t, seed, ctx) {
           const f = this.activeFilters, m = this.moodOf(t);
           const mood = ["bodroe", "spokoynoe", "tyomnoe"].find((k) => f[k]);
-          let sc = mood ? (m[mood] ? 40 : 0) : 20;
-          if (!ctx.recentArtists.includes(t.user?.id)) sc += 20;
+          let sc = mood ? (m[mood] ? 40 : 0) : 22;
+
+          // Diversity: penalize repeating the same artist back-to-back in queue
+          if (ctx.recentArtists.includes(t.user?.id)) sc -= 25;
+
+          // Seed Flow & Semantic Proximity
           if (seed) {
             const ds = seed.duration || 240000, dt = t.duration || ds;
             sc += 10 * (Math.min(ds, dt) / Math.max(ds, dt));
-            if (t.genre && seed.genre && t.genre.toLowerCase() === seed.genre.toLowerCase()) sc += 8;
             const tg = (x) => (x.tag_list || "").toLowerCase().replace(/"/g, "").split(/\s+/).filter(Boolean);
             const st = new Set(tg(seed));
-            sc += Math.min(7, tg(t).filter((x) => st.has(x)).length * 2.5);
+            const common = tg(t).filter((x) => st.has(x)).length;
+            sc += Math.min(8, common * 2.5);
+
+            if (t.genre && seed.genre && t.genre.toLowerCase() === seed.genre.toLowerCase()) {
+              sc += 9;
+            }
+
+            // BPM Flow Continuity
+            sc += this.calcBpmFlowScore(t.bpm, seed.bpm);
           }
+
+          // Engagement & Quality Ratio
+          sc += this.calcEngagementScore(t);
+
+          // Discovery Source Boosts
+          if (t._sourceChannel === "artist_likes") sc += 14;
           if (ctx.relIds.has(t.id)) sc += 6;
-          if (f.lyubimoe && ctx.liked.has(t.id)) sc += 12;
+          if (f.lyubimoe && ctx.liked.has(t.id)) sc += 15;
+
+          // Soft Session Feedback (Penalties & Affinities)
+          const aid = t.user?.id;
+          if (aid && this.sessionArtistPenalties.has(aid)) {
+            sc -= this.sessionArtistPenalties.get(aid);
+          }
+          if (aid && this.sessionArtistAffinities.has(aid)) {
+            sc += this.sessionArtistAffinities.get(aid);
+          }
+          const gen = (t.genre || "").trim().toLowerCase();
+          if (gen && this.sessionGenrePenalties.has(gen)) {
+            sc -= this.sessionGenrePenalties.get(gen);
+          }
+          if (gen && this.sessionGenreAffinities.has(gen)) {
+            sc += this.sessionGenreAffinities.get(gen);
+          }
+
+          // Freshness bonus
           if (f.svezhee) {
             const ts = Date.parse(t.created_at || t.release_date || "");
             if (ts) {
@@ -1224,33 +1390,138 @@
               sc += 8;
             }
           }
-          return Math.max(0, Math.min(100, sc + Math.random() * 5));
+
+          return Math.max(0, Math.min(100, sc + Math.random() * 4));
         }
 
         rank(list, seed, ctx) {
           return list.map((t) => ({ t, sc: this.scoreTrack(t, seed, ctx) })).sort((a, b) => b.sc - a.sc);
         }
 
-        pick(list, seed, ctx, n) {
-          let out = this.rank(list, seed, ctx);
-          const mood = ["bodroe", "spokoynoe", "tyomnoe"].find((k) => this.activeFilters[k]);
-          if (mood) {
-            const matched = out.filter((x) => this.moodOf(x.t)[mood]);
-            out = matched.length >= n ? matched : [...matched, ...out.filter((x) => !matched.includes(x))];
+        // 70 / 20 / 10 Buffer Allocation Strategy
+        choose(pool, seed, ctx, needed) {
+          const f = this.activeFilters;
+          let cands = [];
+          for (const lvl of [0, 1, 2, 3]) {
+            cands = pool.filter((t) => this.hardOk(t, ctx, lvl));
+            if (cands.length >= Math.min(needed, 3)) break;
           }
-          const seen = new Set(), res = [];
-          for (const x of out) {
-            const a = x.t.user?.id;
-            if (seen.has(a)) continue;
-            seen.add(a);
-            res.push(x.t);
-            if (res.length >= n) break;
+
+          if (f.lyubimoe) {
+            const fav = this.favPool().filter((t) => this.hardOk(t, ctx, 1));
+            const rankedFav = this.rank(fav, seed, ctx);
+            const picks = [];
+            const seenArtists = new Set([...ctx.recentArtists]);
+            for (const item of rankedFav) {
+              const a = item.t.user?.id;
+              if (a && seenArtists.has(a)) continue;
+              if (a) seenArtists.add(a);
+              item.t._waveBadge = "Любимое";
+              item.t._waveBadgeClass = "bg-amber-500/20 text-amber-300";
+              picks.push(item.t);
+              if (picks.length >= Math.round(needed * 0.7)) break;
+            }
+            const rest = cands.filter((t) => !picks.some((p) => p.id === t.id));
+            const rankedRest = this.rank(rest, seed, ctx);
+            for (const item of rankedRest) {
+              if (picks.length >= needed) break;
+              item.t._waveBadge = "В потоке";
+              item.t._waveBadgeClass = "bg-gold/15 text-gold";
+              picks.push(item.t);
+            }
+            return picks;
           }
-          for (const x of out) {
-            if (res.length >= n) break;
-            if (!res.includes(x.t)) res.push(x.t);
+
+          const targetInPocket = Math.max(1, Math.round(needed * 0.70));
+          const targetDiscovery = Math.max(0, Math.round(needed * 0.20));
+          const targetWildcard = Math.max(0, needed - targetInPocket - targetDiscovery);
+
+          const ranked = this.rank(cands, seed, ctx);
+          const inPocketList = [];
+          const seenArtists = new Set([...ctx.recentArtists]);
+
+          // 1. In-Pocket candidates: high flow, matching seed, related or known
+          for (const item of ranked) {
+            const a = item.t.user?.id;
+            if (a && seenArtists.has(a)) continue;
+            if (item.sc >= 32 || inPocketList.length < targetInPocket) {
+              if (a) seenArtists.add(a);
+              item.t._waveBadge = "В потоке";
+              item.t._waveBadgeClass = "bg-gold/15 text-gold";
+              inPocketList.push(item.t);
+              if (inPocketList.length >= targetInPocket) break;
+            }
           }
-          return res;
+
+          // 2. Lateral Discovery candidates: unheard artists with high engagement ratio or from artist-likes channel
+          const discoveryList = [];
+          const inPocketIds = new Set(inPocketList.map((t) => t.id));
+          const discoveryPool = cands.filter((t) => !inPocketIds.has(t.id));
+
+          for (const t of discoveryPool) {
+            const a = t.user?.id;
+            if (a && (ctx.likedArtists.has(a) || seenArtists.has(a))) continue;
+            const plays = t.playback_count || 0;
+            const likes = t.likes_count || 0;
+            const ratio = likes / Math.max(1, plays);
+            const isArtistLike = t._sourceChannel === "artist_likes";
+
+            if (isArtistLike || (ratio >= 0.035 && plays > 200)) {
+              if (a) seenArtists.add(a);
+              t._waveBadge = isArtistLike ? "Выбор автора" : "Открытие";
+              t._waveBadgeClass = isArtistLike ? "bg-cyan-500/20 text-cyan-300" : "bg-purple-500/20 text-purple-300";
+              discoveryList.push(t);
+              if (discoveryList.length >= Math.max(1, targetDiscovery)) break;
+            }
+          }
+
+          // 3. Serendipity / Wildcard candidates: novel tags or fresh gems
+          const wildcardList = [];
+          const usedIds = new Set([...inPocketIds, ...discoveryList.map((t) => t.id)]);
+          const wildcardPool = cands.filter((t) => !usedIds.has(t.id));
+
+          for (const t of wildcardPool) {
+            const a = t.user?.id;
+            if (a && seenArtists.has(a)) continue;
+            const plays = t.playback_count || 0;
+            const likes = t.likes_count || 0;
+            const ratio = likes / Math.max(1, plays);
+            if (ratio >= 0.025 || t._sourceChannel === "search") {
+              if (a) seenArtists.add(a);
+              t._waveBadge = "Сюрприз";
+              t._waveBadgeClass = "bg-emerald-500/20 text-emerald-300";
+              wildcardList.push(t);
+              if (wildcardList.length >= Math.max(1, targetWildcard)) break;
+            }
+          }
+
+          // Interleave: [In-Pocket, In-Pocket, Discovery, In-Pocket, Wildcard, In-Pocket]
+          const interleaved = [];
+          const ip = [...inPocketList], disc = [...discoveryList], wild = [...wildcardList];
+
+          while (interleaved.length < needed && (ip.length || disc.length || wild.length)) {
+            if (ip.length) interleaved.push(ip.shift());
+            if (ip.length && interleaved.length < needed) interleaved.push(ip.shift());
+            if (disc.length && interleaved.length < needed) interleaved.push(disc.shift());
+            if (ip.length && interleaved.length < needed) interleaved.push(ip.shift());
+            if (wild.length && interleaved.length < needed) interleaved.push(wild.shift());
+          }
+
+          // Backfill if needed
+          if (interleaved.length < needed) {
+            const finalUsed = new Set(interleaved.map((t) => t.id));
+            for (const item of ranked) {
+              if (!finalUsed.has(item.t.id)) {
+                item.t._waveBadge = item.t._waveBadge || "В потоке";
+                item.t._waveBadgeClass = item.t._waveBadgeClass || "bg-gold/15 text-gold";
+                interleaved.push(item.t);
+                finalUsed.add(item.t.id);
+                if (interleaved.length >= needed) break;
+              }
+            }
+          }
+
+          return interleaved;
         }
 
         favPool() {
@@ -1291,7 +1562,10 @@
               .filter(Boolean)
               .map(async (q) => {
                 try {
-                  return pickTracks(await apiJson(`/api/search?q=${encodeURIComponent(q)}&limit=30`, { retries: 0 }));
+                  const res = await apiJson(`/api/search?q=${encodeURIComponent(q)}&limit=30`, { retries: 0 });
+                  const tracks = pickTracks(res);
+                  tracks.forEach((t) => (t._sourceChannel = "search"));
+                  return tracks;
                 } catch {
                   return [];
                 }
@@ -1308,22 +1582,6 @@
           return [...m.values()];
         }
 
-        choose(pool, seed, ctx, needed) {
-          const f = this.activeFilters;
-          let cands = [];
-          for (const lvl of [0, 1, 2, 3]) {
-            cands = pool.filter((t) => this.hardOk(t, ctx, lvl));
-            if (cands.length >= Math.min(needed, 3)) break;
-          }
-          if (f.lyubimoe) {
-            const fav = this.favPool().filter((t) => this.hardOk(t, ctx, 1));
-            const picks = this.pick(fav, seed, ctx, Math.round(needed * 0.7));
-            const rest = cands.filter((t) => !picks.some((p) => p.id === t.id));
-            return [...picks, ...this.pick(rest, seed, ctx, needed - picks.length)];
-          }
-          return this.pick(cands, seed, ctx, needed);
-        }
-
         abortFetch() {
           this.fetchGen = (this.fetchGen || 0) + 1;
           this.isFetching = false;
@@ -1331,7 +1589,7 @@
 
         async ensureBuffer(playedRatio = 0, forceSeed = null) {
           if (playbackMode === "playlist") return;
-          if (this.isFetching || this.queue.length >= 3) return;
+          if (this.isFetching || this.queue.length >= 4) return;
           const seed = forceSeed || this.selectSeed(playedRatio);
           if (!seed) return;
           const seed2 = this.selectSeed(0.2, seed);
@@ -1344,22 +1602,40 @@
             const anyPill = Object.values(f).some(Boolean);
             const mood = ["bodroe", "spokoynoe", "tyomnoe"].find((k) => f[k]);
             const timeout = (p, ms) => Promise.race([p, new Promise((r) => setTimeout(() => r([]), ms))]);
+
             const rel = (sd) =>
               sd && !sd._stub
-                ? apiJson(`/api/wave/related?track_id=${encodeURIComponent(sd.id)}&limit=30`, { retries: 0 })
-                    .then(pickTracks)
+                ? apiJson(`/api/wave/related?track_id=${encodeURIComponent(sd.id)}&limit=35`, { retries: 0 })
+                    .then((res) => {
+                      const tracks = pickTracks(res);
+                      tracks.forEach((t) => (t._sourceChannel = "related"));
+                      return tracks;
+                    })
                     .catch(() => [])
                 : Promise.resolve([]);
 
-            const [r1, r2, sp] = await Promise.all([
+            const artistLikes = (sd) =>
+              sd?.user?.id
+                ? apiJson(`/api/wave/artist-likes?user_id=${encodeURIComponent(sd.user.id)}&limit=30`, { retries: 0 })
+                    .then((res) => {
+                      const tracks = pickTracks(res);
+                      tracks.forEach((t) => (t._sourceChannel = "artist_likes"));
+                      return tracks;
+                    })
+                    .catch(() => [])
+                : Promise.resolve([]);
+
+            // Multi-source candidate pooling: Related + Artist-Likes + Search
+            const [r1, r2, al, sp] = await Promise.all([
               rel(seed),
               rel(seed2),
+              artistLikes(seed),
               anyPill ? timeout(this.searchPool(seed, 0), 2800) : Promise.resolve([]),
             ]);
 
             if (this.fetchGen !== gen) return;
             const relPool = [...r1, ...r2];
-            let pool = this.mergePool(relPool, sp);
+            let pool = this.mergePool(relPool, al, sp);
             const needed = Math.max(0, 6 - this.queue.length);
             let ctx = this.buildCtx(pool, relPool);
             let picks = this.choose(pool, seed, ctx, needed);
@@ -2075,12 +2351,9 @@
         drawerTabBtns: document.querySelectorAll(".drawer-tab-btn"),
         drawerPanelWave: document.getElementById("drawer-panel-wave"),
         drawerPanelPlaylists: document.getElementById("drawer-panel-playlists"),
-        drawerSeedInfo: document.getElementById("drawer-seed-info"),
-        statSeeds: document.getElementById("stat-seeds"),
-        statHistory: document.getElementById("stat-history"),
-        statBlacklist: document.getElementById("stat-blacklist"),
+        queueCountLabel: document.getElementById("queue-count-label"),
         queueList: document.getElementById("queue-list"),
-        btnRefreshBuffer: document.getElementById("btn-refresh-buffer"),
+        btnClearQueue: document.getElementById("btn-clear-queue"),
         btnResetEngine: document.getElementById("btn-reset-engine"),
         createPlaylistForm: document.getElementById("create-playlist-form"),
         newPlaylistName: document.getElementById("new-playlist-name"),
@@ -2146,22 +2419,31 @@
       }
 
       function renderStatsAndQueue() {
-        els.seedStatsLabel.textContent = `SEEDS ${engine.likedSeeds.length} · QUEUE ${engine.queue.length}`;
-        els.statSeeds.textContent = String(engine.likedSeeds.length);
-        els.statHistory.textContent = String(engine.history.length);
-        els.statBlacklist.textContent = String(engine.blacklist.tracks.length);
-        els.drawerSeedInfo.textContent = `SEED: ${engine.lastSuccessfulSeed?.title || "NONE"}`;
+        if (els.queueCountLabel) {
+          els.queueCountLabel.textContent = `Далее в потоке · ${engine.queue.length}`;
+        }
+        if (els.seedStatsLabel) els.seedStatsLabel.textContent = `SEEDS ${engine.likedSeeds.length} · QUEUE ${engine.queue.length}`;
+        if (els.statSeeds) els.statSeeds.textContent = String(engine.likedSeeds.length);
+        if (els.statHistory) els.statHistory.textContent = String(engine.history.length);
+        if (els.statBlacklist) els.statBlacklist.textContent = String(engine.blacklist.tracks.length);
+        if (els.drawerSeedInfo) els.drawerSeedInfo.textContent = `SEED: ${engine.lastSuccessfulSeed?.title || "NONE"}`;
 
         els.queueList.innerHTML = engine.queue.length
           ? engine.queue
               .map((t, idx) => {
                 const art = getHighResArtwork(t.artwork_url);
+                const badge = t._waveBadge
+                  ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider shrink-0 ${t._waveBadgeClass || "bg-gold/15 text-gold"}">${escapeHtml(t._waveBadge)}</span>`
+                  : "";
                 return `<div data-q="${idx}" class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/[0.04] cursor-pointer group">
                   <span class="font-mono text-[10px] text-white/30 w-4 text-right">${idx + 1}</span>
                   <div class="w-9 h-9 rounded-md bg-obsidian border border-white/10 overflow-hidden shrink-0">${art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : ""}</div>
                   <div class="min-w-0 flex-1">
                     <div class="text-xs text-silver truncate group-hover:text-gold transition-colors">${escapeHtml(t.title)}</div>
-                    <div class="text-[11px] text-white/45 truncate">${escapeHtml(t.user?.username)}</div>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                      <span class="text-[11px] text-white/45 truncate">${escapeHtml(t.user?.username)}</span>
+                      ${badge}
+                    </div>
                   </div>
                   <span class="font-mono text-[10px] text-white/35">${formatTime((t.duration || 0) / 1000)}</span>
                   <button data-q-top type="button" title="Play next" class="cb !w-7 !h-7"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></button>
@@ -2169,7 +2451,7 @@
                 </div>`;
               })
               .join("")
-          : `<div class="px-4 py-8 text-center font-mono text-xs text-white/35">Queue empty. Pick a vibe, search a song, or import a playlist.</div>`;
+          : `<div class="px-4 py-10 text-center font-mono text-xs text-white/35">Очередь пуста. Выберите настроение или нажмите на винил для запуска Волны.</div>`;
 
         const bl = document.getElementById("blocked-list");
         if (bl) {
@@ -2235,22 +2517,22 @@
 
         if (srcLabel && !srcIds.has(track.id)) srcLabel = "";
         els.ctxBadge.textContent = srcLabel
-          ? `Playing from · ${srcLabel}${
+          ? `Играет из · ${srcLabel}${
               playbackMode === "playlist" && plTracks.length
                 ? shuffleOn
                   ? " · shuffle"
                   : ` · ${plTracks.findIndex((t) => t.id === track.id) + 1}/${plTracks.length}`
                 : ""
             }`
-          : "Now playing · My Wave";
+          : "RIVERA WAVE · Персональный поток";
 
-        document.title = `${track.title} — MY WAVE`;
+        document.title = `${track.title} — RIVERA SOUND`;
 
         if ("mediaSession" in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata({
             title: track.title,
             artist: track.user?.username || "",
-            album: srcLabel || "MY WAVE",
+            album: srcLabel || "RIVERA SOUND",
             artwork: art ? [{ src: art, sizes: "500x500", type: "image/jpeg" }] : [],
           });
         }
@@ -2343,7 +2625,7 @@
         srcLabel = "";
         srcIds = new Set();
         plTracks = [];
-        els.ctxBadge.textContent = "Now playing · My Wave";
+        els.ctxBadge.textContent = "RIVERA WAVE · Персональный поток";
       }
 
       function applyRate() {
@@ -2450,13 +2732,13 @@
         const cur = engine.currentTrack;
         const dur = (audioEl.duration && Number.isFinite(audioEl.duration) ? audioEl.duration : (cur?.duration || 0) / 1000) || 0;
 
-        if (checkSkipLearning && cur && playbackMode !== "playlist" && dur > 30 && audioEl.currentTime > 0 && audioEl.currentTime < 15) {
-          engine.blacklistAndFlush(cur, false);
-          showUndo("Skipped early — track blocked", cur);
+        if (checkSkipLearning && cur && playbackMode !== "playlist" && dur > 25 && audioEl.currentTime > 0 && audioEl.currentTime < 15) {
+          engine.applySessionSkipPenalty(cur);
+          showToast("Пропуск: снизили приоритет автора на эту сессию");
           await engine.ensureBuffer(0, engine.lastSuccessfulSeed);
         } else if (cur) {
           const ratio = dur > 0 ? audioEl.currentTime / dur : 0;
-          if (ratio >= 0.75) engine.markCompleted(cur);
+          if (ratio >= 0.70) engine.markCompleted(cur);
           await engine.ensureBuffer(ratio);
         } else {
           await engine.ensureBuffer(0);
@@ -2775,7 +3057,7 @@
           clearStandby();
           await engine.ensureBuffer(0, engine.currentTrack || engine.lastSuccessfulSeed);
           renderStatsAndQueue();
-          showToast("Switched to My Wave");
+          showToast("Переключено на RIVERA WAVE");
         }
       });
 
@@ -2784,7 +3066,7 @@
         btn.addEventListener("click", async () => {
           if (playbackMode === "playlist") {
             setWaveMode();
-            showToast("Switched to My Wave");
+            showToast("Переключено на RIVERA WAVE");
           }
           engine.toggleFilter(btn.dataset.filter);
           renderFilterPills();
@@ -3141,21 +3423,22 @@
         });
       });
 
-      els.btnRefreshBuffer.addEventListener("click", async () => {
-        setWaveMode();
-        engine.queue = [];
-        clearStandby();
-        await engine.ensureBuffer(0, engine.currentTrack || engine.lastSuccessfulSeed);
-        renderStatsAndQueue();
-        showToast("Wave queue regenerated");
-      });
+      if (els.btnClearQueue) {
+        els.btnClearQueue.addEventListener("click", () => {
+          engine.queue = [];
+          renderStatsAndQueue();
+          showToast("Очередь очищена");
+        });
+      }
 
-      els.btnResetEngine.addEventListener("click", () => {
-        engine.resetState();
-        renderFilterPills();
-        renderStatsAndQueue();
-        showToast("Wave engine memory cleared");
-      });
+      if (els.btnResetEngine) {
+        els.btnResetEngine.addEventListener("click", () => {
+          engine.resetState();
+          renderFilterPills();
+          renderStatsAndQueue();
+          showToast("Данные и история Волны сброшены");
+        });
+      }
 
       // Queue Item Click, Play Next, Remove
       els.queueList.addEventListener("click", (e) => {
@@ -3839,9 +4122,10 @@
 
       function setHome(t) {
         homeTab = t;
-        ["wave", "playlists", "recent"].forEach((k) =>
-          document.getElementById("home-" + k).classList.toggle("hidden", k !== t)
-        );
+        ["wave", "search", "playlists", "recent"].forEach((k) => {
+          const el = document.getElementById("home-" + k);
+          if (el) el.classList.toggle("hidden", k !== t);
+        });
         document.querySelectorAll("[data-home]").forEach((b) => {
           const on = b.dataset.home === t;
           b.classList.toggle("bg-white/10", on);
@@ -3853,6 +4137,70 @@
         if (t === "wave") setTimeout(resizeOrbCanvas, 30);
       }
       document.querySelectorAll("[data-home]").forEach((b) => b.addEventListener("click", () => setHome(b.dataset.home)));
+
+      // Explore & Catalog Search
+      async function doExploreSearch(query) {
+        const q = (query || "").trim();
+        if (!q) return;
+        const resList = document.getElementById("explore-results-list");
+        if (!resList) return;
+        resList.innerHTML = `<div class="p-8 text-center text-xs font-mono text-white/40 animate-pulse">Поиск в RIVERA SOUND...</div>`;
+        try {
+          const data = await apiJson(`/api/search?q=${encodeURIComponent(q)}&limit=30`);
+          const tracks = pickTracks(data);
+          if (!tracks.length) {
+            resList.innerHTML = `<div class="p-8 text-center text-xs font-mono text-white/40">Ничего не найдено по запросу "${escapeHtml(q)}"</div>`;
+            return;
+          }
+          resList.innerHTML = tracks
+            .map((t, idx) => {
+              const art = getHighResArtwork(t.artwork_url || t.user?.avatar_url);
+              return `<div data-search-track="${idx}" class="flex items-center gap-3 p-3 hover:bg-white/[0.04] cursor-pointer transition-colors group">
+                <div class="w-10 h-10 rounded-lg bg-obsidian border border-white/10 overflow-hidden shrink-0">
+                  ${art ? `<img src="${escapeHtml(art)}" alt="" loading="lazy" class="w-full h-full object-cover" />` : ""}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs text-silver truncate group-hover:text-gold transition-colors font-medium">${escapeHtml(t.title)}</div>
+                  <div class="text-[11px] text-white/40 truncate">${escapeHtml(t.user?.username || "Unknown")} · ${escapeHtml(t.genre || "Music")}</div>
+                </div>
+                <span class="font-mono text-[10px] text-white/35 shrink-0">${formatTime((t.duration || 0) / 1000)}</span>
+                <button type="button" class="px-2.5 py-1 rounded-lg border border-gold/30 text-gold hover:bg-gold/15 text-[10px] font-mono uppercase tracking-wider shrink-0">Слушать</button>
+              </div>`;
+            })
+            .join("");
+
+          resList.querySelectorAll("[data-search-track]").forEach((row) => {
+            row.addEventListener("click", async () => {
+              const idx = Number(row.dataset.searchTrack);
+              const track = tracks[idx];
+              if (!track) return;
+              await playTrack(track, true);
+              setHome("wave");
+              showToast(`Запущено: ${track.title}`);
+            });
+          });
+        } catch {
+          resList.innerHTML = `<div class="p-8 text-center text-xs font-mono text-red-400/70">Ошибка поиска. Проверьте соединение.</div>`;
+        }
+      }
+
+      const exploreForm = document.getElementById("explore-search-form");
+      if (exploreForm) {
+        exploreForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const q = document.getElementById("explore-search-input")?.value;
+          doExploreSearch(q);
+        });
+      }
+
+      document.querySelectorAll("[data-quick-search]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const q = btn.dataset.quickSearch;
+          const expInput = document.getElementById("explore-search-input");
+          if (expInput) expInput.value = q;
+          doExploreSearch(q);
+        });
+      });
 
       function renderHomeGrid() {
         const g = document.getElementById("home-pl-grid");
@@ -4145,11 +4493,15 @@
         } else if (k === "1") {
           setHome("wave");
         } else if (k === "2") {
-          setHome("playlists");
+          setHome("search");
         } else if (k === "3") {
+          setHome("playlists");
+        } else if (k === "4") {
           setHome("recent");
         } else if (k === "/") {
-          els.searchInput.focus();
+          setHome("search");
+          const exp = document.getElementById("explore-search-input") || els.searchInput;
+          if (exp) exp.focus();
         } else if (k === "?") {
           document.getElementById("help-modal").classList.toggle("hidden");
         } else if (k === "Escape") {

@@ -121,6 +121,7 @@ function normalizeTrack(raw) {
     genre: raw.genre || "",
     tag_list: raw.tag_list || "",
     bpm: raw.bpm || null,
+    waveform_url: raw.waveform_url || "",
     created_at: raw.created_at || raw.release_date || "",
     permalink_url: raw.permalink_url || "",
     track_authorization: raw.track_authorization || "",
@@ -317,6 +318,7 @@ module.exports = async function handler(req, res) {
           userData = null;
         }
 
+        // Fallback to user search if /resolve failed (e.g. display name instead of permalink)
         if (!userData?.id || userData.kind !== "user") {
           const searchRes = await requestV2(
             `${API_V2_BASE}/search/users`,
@@ -418,6 +420,27 @@ module.exports = async function handler(req, res) {
         const collection = (data.collection || []).map(normalizeTrack).filter(Boolean);
         return sendJson(200, { collection });
       } catch (relErr) {
+        // Graceful fallback if SoundCloud has no related tracks graph for this item
+        return sendJson(200, { collection: [] });
+      }
+    }
+
+    if (route === "/wave/artist-likes") {
+      const userId = parsedUrl.searchParams.get("user_id");
+      const limit = Math.min(50, Math.max(1, Number(parsedUrl.searchParams.get("limit") || 25)));
+      if (!userId) return sendJson(400, { detail: "user_id is required" });
+
+      try {
+        const data = await requestV2(
+          `${API_V2_BASE}/users/${encodeURIComponent(userId)}/likes`,
+          { limit, offset: 0 },
+          oauthToken
+        );
+        const collection = (data.collection || [])
+          .map((entry) => normalizeTrack(entry?.track || entry))
+          .filter(Boolean);
+        return sendJson(200, { collection });
+      } catch (err) {
         return sendJson(200, { collection: [] });
       }
     }
@@ -432,6 +455,7 @@ module.exports = async function handler(req, res) {
         return sendJson(404, { detail: "No playable transcodings available" });
       }
 
+      // Sort transcodings: progressive mpeg -> hls mpeg -> other hls -> anything else
       const score = (t) => {
         const proto = t.format?.protocol || "";
         const mime = t.format?.mime_type || "";
