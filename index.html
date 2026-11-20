@@ -496,18 +496,7 @@
           <p class="text-[11px] text-white/40">Loads your public likes as My Wave seeds and imports your playlists.</p>
         </form>
 
-        <div class="border-t border-white/10 pt-4">
-          <form id="login-oauth-form" class="space-y-2">
-            <label class="block font-mono text-[10px] uppercase tracking-wider text-white/50">Full Account via OAuth Token (Optional)</label>
-            <div class="flex items-center gap-2">
-              <input id="login-oauth-input" type="password" placeholder="Paste oauth_token from soundcloud.com..." class="flex-1 bg-obsidian border border-white/10 rounded-xl px-3 py-2 font-mono text-[11px] text-silver placeholder-white/30 focus:outline-none focus:border-gold/50" />
-              <button type="submit" class="px-4 py-2 rounded-xl bg-gold/15 border border-gold/40 hover:border-gold text-xs text-gold transition-colors shrink-0">Auth</button>
-            </div>
-            <p class="text-[11px] text-white/40 leading-relaxed">
-              For private likes &amp; playlists: open soundcloud.com, press F12 &rarr; Application &rarr; Cookies &rarr; copy <span class="font-mono text-white/60">oauth_token</span>.
-            </p>
-          </form>
-        </div>
+        
       </div>
     </div>
   </div>
@@ -535,7 +524,7 @@
       const ACCOUNT_KEY = "my_wave_account_v1";
       const PLAYLISTS_KEY = "my_wave_playlists_v1";
       const ENGINE_KEY = "my_wave_engine_v1";
-      let repeatOne = false, shuffleOn = false, sleepEOT = false, isScrubbing = false, lastSearchTracks = [];
+      let repeatAll = false, plTracks = [], repeatOne = false, shuffleOn = false, sleepEOT = false, isScrubbing = false, lastSearchTracks = [];
       let ACC = [212, 175, 55], ACC_T = [212, 175, 55];
       let aCtx = null, analyser = null, aSrc = null, aStream = null, freqData = new Uint8Array(128), flat = 0, kick = 0, bassAvg = 0.2;
       let playbackMode = "wave", activePlaylistId = null, xfadeSec = 4, pendingResumeAt = 0, fade = null, standby = null, suppressPause = false, userVol = 0.85;
@@ -544,15 +533,79 @@
       let accountState = { user: null, oauthToken: "" };
       try {
         const savedAcc = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || "null");
-        if (savedAcc) accountState = savedAcc;
+        if (savedAcc && savedAcc.user) accountState = { user: savedAcc.user, oauthToken: "" };
       } catch {}
 
       function apiFetch(path, options = {}) {
-        const headers = new Headers(options.headers || {});
-        if (accountState.oauthToken) {
-          headers.set("X-SC-OAuth", accountState.oauthToken);
+        return fetch(path, options);
+      }
+
+      // JSON fetch with timeout, abort support and one retry on network/5xx/429
+      async function apiJson(path, { timeout = 12000, retries = 1, signal } = {}) {
+        let lastErr = new Error("request failed");
+        for (let i = 0; i <= retries; i++) {
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), timeout);
+          const onAbort = () => ctrl.abort();
+          if (signal) signal.addEventListener("abort", onAbort, { once: true });
+          try {
+            const res = await fetch(path, { signal: ctrl.signal });
+            if (res.ok) return await res.json();
+            lastErr = new Error(`HTTP ${res.status}`);
+            lastErr.status = res.status;
+            if (res.status < 500 && res.status !== 429) throw lastErr;
+          } catch (e) {
+            lastErr = e;
+            if (signal && signal.aborted) throw e;
+            if (e && e.status && e.status < 500 && e.status !== 429) throw e;
+          } finally {
+            clearTimeout(timer);
+            if (signal) signal.removeEventListener("abort", onAbort);
+          }
+          if (i < retries) await new Promise((r) => setTimeout(r, 450 * (i + 1)));
         }
-        return fetch(path, { ...options, headers });
+        throw lastErr;
+      }
+
+      const jsonClean = (k, v) => (k === "_resolvedStream" || k === "_resolvedAt" || k === "_resolving" ? undefined : v);
+
+      // Accepts {collection|tracks|results|[...]} and keeps only real tracks
+      function pickTracks(d) {
+        const arr = (d && (d.collection || d.tracks || d.results)) || (Array.isArray(d) ? d : []);
+        return arr.map((x) => (x && x.track ? x.track : x)).filter((t) => t && t.id && t.title);
+      }
+
+      // @user, soundcloud.com/user[/likes|tracks|...], /user/track, /user/sets/name, on.soundcloud.com/xyz
+      function parseSoundCloudInput(raw) {
+        const s0 = String(raw || "").trim();
+        const at = s0.match(/^@([\w.\-]+)$/);
+        if (at) return { kind: "user", slug: at[1] };
+        if (!/(^|\/\/|\.)soundcloud\.com\//i.test(s0)) return null;
+        let url;
+        try { url = new URL(/^https?:/i.test(s0) ? s0 : "https://" + s0.replace(/^\/+/, "")); } catch { return null; }
+        const host = url.hostname.replace(/^www\.|^m\./i, "").toLowerCase();
+        const parts = url.pathname.split("/").filter(Boolean).map((x) => { try { return decodeURIComponent(x); } catch { return x; } });
+        if (host === "on.soundcloud.com") return { kind: "short", url: url.origin + url.pathname };
+        if (!parts.length) return null;
+        const sub = (parts[1] || "").toLowerCase();
+        if (parts.length === 1 || ["tracks", "likes", "albums", "reposts", "popular-tracks", "following", "followers", "comments"].includes(sub)) return { kind: "user", slug: parts[0] };
+        if (sub === "sets" && parts[2]) return { kind: "set", url: `https://soundcloud.com/${parts[0]}/sets/${parts[2]}` };
+        return { kind: "track", user: parts[0], slug: parts[1], url: `https://soundcloud.com/${parts[0]}/${parts[1]}` };
+      }
+
+      function normTrack(t) {
+        if (!t || !t.id) return null;
+        if (t.title) return t;
+        // SoundCloud returns only ids for most of a long playlist: keep them as placeholders
+        return { id: t.id, title: `Track ${t.id}`, duration: t.duration || 0, genre: "", tag_list: "", artwork_url: "", user: { id: t.user_id || 0, username: "SoundCloud" }, _stub: true };
+      }
+      function normTracks(arr) {
+        const seen = new Set(), out = [];
+        for (const x of arr || []) {
+          const t = normTrack(x && x.track ? x.track : x);
+          if (t && !seen.has(t.id)) { seen.add(t.id); out.push(t); }
+        }
+        return out;
       }
 
       function formatTime(seconds) {
@@ -579,9 +632,9 @@
       // WAVE ENGINE
       // =========================================================================
       const VIBE_KEYWORDS = {
-        bodroe: ["drum", "dnb", "house", "techno", "electro", "dance", "edm", "trap", "hyperpop", "fast", "upbeat", "energy", "rave", "breakbeat", "garage"],
-        spokoynoe: ["ambient", "chill", "lofi", "lo-fi", "acoustic", "piano", "downtempo", "sleep", "calm", "meditation", "jazz", "drone", "soft", "instrumental"],
-        tyomnoe: ["dark", "phonk", "witch", "industrial", "goth", "minimal", "deep", "shadow", "noir", "acid", "doom", "hard", "wave", "night"],
+        bodroe: ["drum", "dnb", "house", "techno", "electro", "dance", "edm", "trap", "hyperpop", "fast", "upbeat", "energy", "rave", "breakbeat", "garage", "club", "party", "bass", "бодр", "энерг", "танц"],
+        spokoynoe: ["ambient", "chill", "lofi", "lo-fi", "acoustic", "piano", "downtempo", "sleep", "calm", "meditation", "jazz", "drone", "soft", "instrumental", "relax", "спокой", "расслаб", "чилл", "медит"],
+        tyomnoe: ["dark", "phonk", "witch", "industrial", "goth", "minimal", "deep", "shadow", "noir", "acid", "doom", "hard", "wave", "night", "тёмн", "темн", "мрач", "ночь"],
       };
 
       const MOOD_QUERIES = {
@@ -599,6 +652,8 @@
           this.recentCompleted = [];
           this.blacklist = { tracks: [], artists: [] };
           this.blocked = [];
+          this.recentPlayed = [];
+          this.seedHist = [];
           this.activeFilters = {
             bodroe: false,
             spokoynoe: false,
@@ -627,6 +682,7 @@
             if (Array.isArray(parsed.history)) this.history = parsed.history;
             if (Array.isArray(parsed.recentCompleted)) this.recentCompleted = parsed.recentCompleted;
             if (Array.isArray(parsed.blocked)) this.blocked = parsed.blocked;
+            if (Array.isArray(parsed.recentPlayed)) this.recentPlayed = parsed.recentPlayed;
             if (parsed.blacklist) {
               this.blacklist = {
                 tracks: Array.isArray(parsed.blacklist.tracks) ? parsed.blacklist.tracks : [],
@@ -656,7 +712,8 @@
                   artists: this.blacklist.artists.slice(-300),
                 },
                 activeFilters: this.activeFilters,
-              })
+                recentPlayed: this.recentPlayed.slice(-60),
+              }, jsonClean)
             );
           } catch {}
         }
@@ -667,6 +724,8 @@
           this.recentCompleted = [];
           this.blacklist = { tracks: [], artists: [] };
           this.blocked = [];
+          this.recentPlayed = [];
+          this.seedHist = [];
           this.queue = [];
           this.lastSuccessfulSeed = null;
           localStorage.removeItem(ENGINE_KEY);
@@ -694,7 +753,7 @@
         addLikedSeedsBatch(tracks) {
           let count = 0;
           for (const t of tracks) {
-            if (!this.isBlacklisted(t) && !this.isLiked(t.id)) {
+            if (!t._stub && !this.isBlacklisted(t) && !this.isLiked(t.id)) {
               this.likedSeeds.push(t);
               count++;
             }
@@ -716,9 +775,10 @@
 
         markPlayed(track) {
           if (!track) return;
-          if (!this.history.includes(track.id)) {
-            this.history.push(track.id);
-          }
+          if (!this.history.includes(track.id)) this.history.push(track.id);
+          this.recentPlayed = this.recentPlayed.filter((id) => id !== track.id);
+          this.recentPlayed.push(track.id);
+          if (this.recentPlayed.length > 80) this.recentPlayed.shift();
           this.saveState();
         }
 
@@ -767,30 +827,29 @@
           this.saveState();
         }
 
-        selectSeed(playedRatio = 0) {
-          if (this.activeFilters.lyubimoe && this.likedSeeds.length > 0) {
-            return this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)];
+        noteSeed(s) {
+          if (!s) return;
+          this.seedHist.push(s.id);
+          if (this.seedHist.length > 8) this.seedHist.shift();
+        }
+
+        // Rotates between current track, likes and recently finished tracks so the wave never sits on one seed
+        selectSeed(playedRatio = 0, avoid = null) {
+          const shuf = (a) => [...a].sort(() => Math.random() - 0.5);
+          const bad = new Set([...this.seedHist.slice(-5), avoid && avoid.id]);
+          let cands = [];
+          if (this.activeFilters.lyubimoe && this.likedSeeds.length) cands.push(...shuf(this.likedSeeds).slice(0, 6));
+          else {
+            if (this.currentTrack && playedRatio > 0.3) cands.push(this.currentTrack, this.currentTrack);
+            cands.push(...shuf(this.likedSeeds).slice(0, 3), ...shuf(this.recentCompleted).slice(0, 3));
+            if (this.lastSuccessfulSeed) cands.push(this.lastSuccessfulSeed);
+            if (this.currentTrack) cands.push(this.currentTrack);
           }
-          const roll = Math.random();
-          if (roll < 0.60 && this.currentTrack && playedRatio > 0.5 && !this.isBlacklisted(this.currentTrack)) {
-            return this.currentTrack;
-          }
-          if (roll < 0.85 && this.likedSeeds.length > 0) {
-            return this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)];
-          }
-          if (this.recentCompleted.length > 0) {
-            return this.recentCompleted[Math.floor(Math.random() * this.recentCompleted.length)];
-          }
-          if (this.lastSuccessfulSeed && !this.isBlacklisted(this.lastSuccessfulSeed)) {
-            return this.lastSuccessfulSeed;
-          }
-          if (this.currentTrack && !this.isBlacklisted(this.currentTrack)) {
-            return this.currentTrack;
-          }
-          if (this.likedSeeds.length > 0) {
-            return this.likedSeeds[Math.floor(Math.random() * this.likedSeeds.length)];
-          }
-          return null;
+          const ok = (t) => t && !t._stub && !this.isBlacklisted(t);
+          let list = cands.filter((t) => ok(t) && !bad.has(t.id));
+          if (!list.length) list = cands.filter(ok);
+          if (!list.length) list = this.likedSeeds.filter(ok);
+          return list.length ? list[Math.floor(Math.random() * list.length)] : null;
         }
 
         moodOf(t) {
@@ -816,8 +875,9 @@
           const f = this.activeFilters;
           if (!t || !t.id || this.isBlacklisted(t)) return false;
           if (this.queue.some((q) => q.id === t.id) || this.currentTrack?.id === t.id) return false;
+          const win = level >= 3 ? 8 : f.lyubimoe ? 12 : 30;
+          if (this.recentPlayed.slice(-win).includes(t.id)) return false;
           if (level < 2 && !f.lyubimoe && this.history.includes(t.id)) return false;
-          if (f.lyubimoe && ctx.recentIds.has(t.id)) return false;
           const d = t.duration || 0;
           if (f.sety) { if (d < 900000) return false; }
           else if (f.korotkoe) { if (d < 45000 || d > 210000) return false; }
@@ -878,28 +938,46 @@
           return [...m.values()];
         }
 
-        async searchPool(seed) {
+        async searchPool(seed, round = 0) {
           const f = this.activeFilters;
           const mood = ["bodroe", "spokoynoe", "tyomnoe"].find((k) => f[k]);
           const shuf = (a) => [...a].sort(() => Math.random() - 0.5);
           const extra = [];
           if (f.sety) extra.push(shuf(["dj set", "mix", "live set"])[0]);
           if (f.andegraund) extra.push("underground");
+          if (f.svezhee) extra.push(String(new Date().getFullYear()));
+          const genre = (seed && seed.genre) || "";
           const qs = [];
-          if (mood) {
-            const [w1, w2] = shuf(MOOD_QUERIES[mood]);
-            qs.push([w1, ...extra, seed?.genre || ""].join(" ").trim());
-            if (w2) qs.push([w2, ...extra].join(" ").trim());
-          } else qs.push([...extra, seed?.genre || seed?.user?.username || ""].join(" ").trim());
-          const results = await Promise.all(qs.filter(Boolean).map(async (q) => {
-            try {
-              const res = await apiFetch(`/api/search?q=${encodeURIComponent(q)}`);
-              if (!res.ok) return [];
-              const d = await res.json();
-              return Array.isArray(d.collection) ? d.collection : [];
-            } catch { return []; }
+          if (round >= 2) qs.push(shuf(COLD_QUERIES)[0] + " " + extra.join(" "));
+          else if (mood) {
+            const ws = shuf(MOOD_QUERIES[mood]);
+            const [a, b] = round === 0 ? [ws[0], ws[1]] : [ws[2] || ws[0], ws[3] || ws[1]];
+            qs.push([a, ...extra, round === 0 ? genre : ""].join(" "));
+            if (b) qs.push([b, ...extra].join(" "));
+          } else qs.push(round === 0 ? [...extra, genre || (seed && seed.user && seed.user.username) || ""].join(" ") : [(seed && seed.user && seed.user.username) || genre, ...extra].join(" "));
+          const results = await Promise.all(qs.map((q) => q.trim()).filter(Boolean).map(async (q) => {
+            try { return pickTracks(await apiJson(`/api/search?q=${encodeURIComponent(q)}`, { retries: 0 })); } catch { return []; }
           }));
           return results.flat();
+        }
+
+        mergePool(...lists) {
+          const m = new Map();
+          lists.flat().forEach((t) => { if (t && t.id && t.title && !m.has(t.id)) m.set(t.id, t); });
+          return [...m.values()];
+        }
+
+        choose(pool, seed, ctx, needed) {
+          const f = this.activeFilters;
+          let cands = [];
+          for (const lvl of [0, 1, 2, 3]) { cands = pool.filter((t) => this.hardOk(t, ctx, lvl)); if (cands.length >= Math.min(needed, 3)) break; }
+          if (f.lyubimoe) {
+            const fav = this.favPool().filter((t) => this.hardOk(t, ctx, 1));
+            const picks = this.pick(fav, seed, ctx, Math.round(needed * 0.7));
+            const rest = cands.filter((t) => !picks.some((p) => p.id === t.id));
+            return [...picks, ...this.pick(rest, seed, ctx, needed - picks.length)];
+          }
+          return this.pick(cands, seed, ctx, needed);
         }
 
         abortFetch() { this.fetchGen = (this.fetchGen || 0) + 1; this.isFetching = false; }
@@ -909,30 +987,31 @@
           if (this.isFetching || this.queue.length >= 3) return;
           const seed = forceSeed || this.selectSeed(playedRatio);
           if (!seed) return;
+          const seed2 = this.selectSeed(0.2, seed);
+          this.noteSeed(seed);
           const gen = this.fetchGen || 0;
           this.isFetching = true;
           try {
             const f = this.activeFilters, anyPill = Object.values(f).some(Boolean);
-            const relP = apiFetch(`/api/wave/related?track_id=${encodeURIComponent(seed.id)}&limit=30`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-            const srcP = anyPill ? Promise.race([this.searchPool(seed), new Promise((r) => setTimeout(() => r([]), 2200))]) : Promise.resolve([]);
-            const [rel, srch] = await Promise.all([relP, srcP]);
+            const mood = ["bodroe", "spokoynoe", "tyomnoe"].find((k) => f[k]);
+            const timeout = (p, ms) => Promise.race([p, new Promise((r) => setTimeout(() => r([]), ms))]);
+            const rel = (sd) => (sd && !sd._stub ? apiJson(`/api/wave/related?track_id=${encodeURIComponent(sd.id)}&limit=30`, { retries: 0 }).then(pickTracks).catch(() => []) : Promise.resolve([]));
+            const [r1, r2, sp] = await Promise.all([rel(seed), rel(seed2), anyPill ? timeout(this.searchPool(seed, 0), 2500) : Promise.resolve([])]);
             if ((this.fetchGen || 0) !== gen) return;
-            const relPool = Array.isArray(rel?.collection) ? rel.collection : [];
-            const merged = new Map();
-            [...relPool, ...srch].forEach((t) => { if (t && t.id && !merged.has(t.id)) merged.set(t.id, t); });
-            const pool = [...merged.values()];
-            const ctx = this.buildCtx(pool, relPool);
+            const relPool = [...r1, ...r2];
+            let pool = this.mergePool(relPool, sp);
             const needed = Math.max(0, 6 - this.queue.length);
-            let cands = [];
-            for (const lvl of [0, 1, 2]) { cands = pool.filter((t) => this.hardOk(t, ctx, lvl)); if (cands.length >= Math.min(needed, 3)) break; }
-            let picks;
-            if (f.lyubimoe) {
-              const fav = this.favPool().filter((t) => this.hardOk(t, ctx, 1));
-              const nFav = Math.round(needed * 0.7);
-              picks = this.pick(fav, seed, ctx, nFav);
-              const rest = cands.filter((t) => !picks.some((p) => p.id === t.id));
-              picks.push(...this.pick(rest, seed, ctx, needed - picks.length));
-            } else picks = this.pick(cands, seed, ctx, needed);
+            let ctx = this.buildCtx(pool, relPool);
+            let picks = this.choose(pool, seed, ctx, needed);
+            const want = Math.min(needed, 3);
+            const weak = (list) => list.length < want || (mood && list.filter((t) => this.moodOf(t)[mood]).length < want);
+            for (let round = 1; round <= 2 && weak(picks); round++) {
+              const extra = await timeout(this.searchPool(seed, round), 3000);
+              if ((this.fetchGen || 0) !== gen) return;
+              pool = this.mergePool(pool, extra);
+              ctx = this.buildCtx(pool, relPool);
+              picks = this.choose(pool, seed, ctx, needed);
+            }
             this.queue.push(...picks);
             this.lastSuccessfulSeed = seed;
           } catch {}
@@ -955,7 +1034,7 @@
 
       function savePlaylists() {
         try {
-          localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists));
+          localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists, jsonClean));
         } catch {}
       }
 
@@ -970,18 +1049,22 @@
       }
 
       function upsertSoundCloudPlaylist(meta, tracks = null) {
+        meta = meta || {};
         const plId = `sc_${meta.id}`;
         const existingIdx = playlists.findIndex((p) => p.id === plId);
-        const existingTracks = existingIdx >= 0 ? playlists[existingIdx].tracks : [];
+        const existing = existingIdx >= 0 ? playlists[existingIdx] : null;
+        const incoming = tracks !== null ? normTracks(tracks) : null;
+        const keep = (existing && existing.tracks) || [];
+        const merged = incoming && incoming.length >= keep.length ? incoming : keep;
         const entry = {
           id: plId,
           scId: meta.id,
-          title: meta.title,
-          author: meta.user?.username || "SoundCloud",
-          artwork_url: meta.artwork_url || (tracks && tracks[0]?.artwork_url) || "",
-          track_count: meta.track_count || (tracks ? tracks.length : existingTracks.length),
+          title: meta.title || (existing && existing.title) || "Playlist",
+          author: (meta.user && meta.user.username) || (existing && existing.author) || "SoundCloud",
+          artwork_url: meta.artwork_url || (merged.find((t) => t.artwork_url) || {}).artwork_url || (existing && existing.artwork_url) || "",
+          track_count: Math.max(meta.track_count || (existing && existing.track_count) || 0, merged.length),
           source: "soundcloud",
-          tracks: tracks !== null ? tracks : existingTracks,
+          tracks: merged,
         };
         if (existingIdx >= 0) playlists[existingIdx] = entry;
         else playlists.unshift(entry);
@@ -989,14 +1072,39 @@
         return entry;
       }
 
+      const fullTried = new Set();
+      let batchUnsupported = false;
+      async function hydrateStubs(pl) {
+        const stubs = (pl.tracks || []).filter((t) => t._stub);
+        if (!stubs.length || batchUnsupported) return;
+        for (let i = 0; i < stubs.length; i += 40) {
+          const chunk = stubs.slice(i, i + 40);
+          try {
+            const d = await apiJson(`/api/tracks?ids=${chunk.map((t) => t.id).join(",")}`, { retries: 0 });
+            const map = new Map(pickTracks(d).map((t) => [t.id, t]));
+            pl.tracks = pl.tracks.map((t) => map.get(t.id) || t);
+          } catch { batchUnsupported = true; break; }
+        }
+        savePlaylists();
+      }
+
+      // Loads the FULL playlist: refetches partial lists and keeps id-only tracks as placeholders
       async function ensurePlaylistTracks(pl) {
-        if (pl.tracks && pl.tracks.length > 0) return pl.tracks;
-        if (pl.source !== "soundcloud" || !pl.scId) return [];
-        const res = await apiFetch(`/api/playlist?id=${encodeURIComponent(pl.scId)}`);
-        if (!res.ok) return [];
-        const data = await res.json();
-        pl.tracks = data.tracks || [];
-        pl.track_count = pl.tracks.length;
+        const have = (pl.tracks && pl.tracks.length) || 0;
+        const want = pl.track_count || 0;
+        if (pl.source === "soundcloud" && pl.scId && (have === 0 || (want > have && !fullTried.has(pl.id)))) {
+          fullTried.add(pl.id);
+          try {
+            const d = await apiJson(`/api/playlist?id=${encodeURIComponent(pl.scId)}`, { retries: 1 });
+            const tr = normTracks(d.tracks || (d.playlist && d.playlist.tracks) || d.collection || []);
+            const meta = d.playlist || {};
+            if (meta.track_count) pl.track_count = meta.track_count;
+            if (tr.length > have) pl.tracks = tr;
+          } catch {}
+        }
+        if (pl.tracks && pl.tracks.some((t) => t._stub)) await hydrateStubs(pl);
+        pl.tracks = pl.tracks || [];
+        pl.track_count = Math.max(pl.track_count || 0, pl.tracks.length);
         savePlaylists();
         return pl.tracks;
       }
@@ -1244,6 +1352,7 @@
       }
 
       function maybeCrossfade(rem) {
+        if (rem > 0 && rem < 25) refillIfNeeded();
         if (fade || repeatOne || sleepEOT || !(rem > 0)) return;
         const thr = xfadeSec > 0 ? xfadeSec : 0.4;
         if (rem > thr) return;
@@ -1452,8 +1561,6 @@
         btnAccountLogout: document.getElementById("btn-account-logout"),
         loginUsernameForm: document.getElementById("login-username-form"),
         loginUsernameInput: document.getElementById("login-username-input"),
-        loginOauthForm: document.getElementById("login-oauth-form"),
-        loginOauthInput: document.getElementById("login-oauth-input"),
         centerTitle: document.getElementById("center-track-title"),
         centerMeta: document.getElementById("center-track-meta"),
         orbToggleBtn: document.getElementById("orb-toggle-btn"),
@@ -1534,7 +1641,7 @@
           }
           els.accountActiveCard.classList.remove("hidden");
           els.modalUserName.textContent = u.username;
-          els.modalUserMeta.textContent = accountState.oauthToken ? "OAUTH CONNECTED" : `@${u.permalink}`;
+          els.modalUserMeta.textContent = `@${u.permalink || u.username}`;
         } else {
           els.headerUserLabel.textContent = "Sign In";
           els.headerUserAvatar.classList.add("hidden");
@@ -1656,7 +1763,7 @@
             }
             expandedPlaylistId = id;
             const pl = playlists.find((p) => p.id === id);
-            if (pl && pl.source === "soundcloud" && (!pl.tracks || !pl.tracks.length)) {
+            if (pl && pl.source === "soundcloud") {
               showToast("Loading playlist tracks...");
               await ensurePlaylistTracks(pl);
             }
@@ -1734,6 +1841,11 @@
         lastRenderedTimeStr = "00:00";
         els.timelineProgress.style.transform = "scaleX(0)";
 
+        updateLikeUI(track);
+      }
+
+      function updateLikeUI(track) {
+        if (!track) return;
         const liked = engine.isLiked(track.id);
         els.iconLike.setAttribute("fill", liked ? "#d4af37" : "none");
         els.btnLike.classList.toggle("text-gold", liked);
@@ -1795,7 +1907,7 @@
             return;
           }
           consecutivePlayErrors += 1;
-          if (consecutivePlayErrors <= 2 && engine.queue.length > 0) {
+          if (consecutivePlayErrors <= (playbackMode === "playlist" ? 12 : 3) && engine.queue.length > 0) {
             showToast("Track unavailable — trying next...");
             await playNext(false);
           } else {
@@ -1821,6 +1933,7 @@
           await engine.ensureBuffer(0);
         }
 
+        refillIfNeeded();
         let nextTrack = engine.queue.shift();
         if (!nextTrack) {
           await engine.ensureBuffer(0, engine.lastSuccessfulSeed || engine.currentTrack);
@@ -1842,33 +1955,57 @@
       // =========================================================================
       // ACCOUNT & PROFILE LOADING
       // =========================================================================
-      async function loadUserProfile(usernameOrUrl) {
+      async function fetchProfile(slug) {
+        const full = `https://soundcloud.com/${slug}`;
+        const attempts = [
+          `/api/user/profile?username=${encodeURIComponent(slug)}`,
+          `/api/user/profile?username=${encodeURIComponent(full)}`,
+          `/api/user/profile?url=${encodeURIComponent(full)}`,
+        ];
+        let lastErr = null;
+        for (const a of attempts) {
+          try {
+            const d = await apiJson(a, { retries: 0 });
+            if (d && (d.user || d.username || d.collection)) return d;
+          } catch (e) { lastErr = e; }
+        }
+        // fallback: find the user through user search and use the exact permalink
+        try {
+          const d = await apiJson(`/api/users/search?q=${encodeURIComponent(slug)}`, { retries: 0 });
+          const list = (d && d.collection) || [];
+          const hit = list.find((u) => (u.permalink || "").toLowerCase() === slug.toLowerCase()) || list[0];
+          if (hit) {
+            for (const a of [`/api/user/profile?username=${encodeURIComponent(hit.permalink || slug)}`, `/api/user/profile?id=${encodeURIComponent(hit.id)}`]) {
+              try { const dd = await apiJson(a, { retries: 0 }); if (dd && (dd.user || dd.username || dd.collection)) return dd; } catch {}
+            }
+            return { user: hit, collection: [], playlists: [] };
+          }
+        } catch (e) { lastErr = e; }
+        throw lastErr || new Error("profile not found");
+      }
+
+      async function loadUserProfile(input) {
+        const parsed = parseSoundCloudInput(input);
+        const slug = parsed && parsed.kind === "user" ? parsed.slug : String(input || "").trim().replace(/^@/, "").replace(/^\/+|\/+$/g, "");
+        if (!slug) throw new Error("empty");
         showToast("Loading SoundCloud profile...");
-        const res = await apiFetch(`/api/user/profile?username=${encodeURIComponent(usernameOrUrl)}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        await applyProfileData(data, "");
+        const data = await fetchProfile(slug);
+        await applyProfileData(data);
       }
 
-      async function loadMeWithOAuth(token) {
-        showToast("Authenticating SoundCloud account...");
-        const res = await fetch("/api/me", { headers: { "X-SC-OAuth": token } });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        await applyProfileData(data, token);
-      }
-
-      async function applyProfileData(data, oauthToken) {
-        accountState = { user: data.user, oauthToken: oauthToken || "" };
+      async function applyProfileData(data) {
+        const user = data.user || (data.username ? data : null);
+        if (!user) throw new Error("no user");
+        accountState = { user, oauthToken: "" };
         localStorage.setItem(ACCOUNT_KEY, JSON.stringify(accountState));
         renderAccountUI();
 
-        const likes = data.collection || [];
+        const likes = ((data.collection || data.likes || [])).map((x) => (x && x.track ? x.track : x)).filter((t) => t && t.id && t.title);
         const added = engine.addLikedSeedsBatch(likes);
 
-        const userPlaylists = data.playlists || [];
+        const userPlaylists = (data.playlists || []).filter((p) => p && p.id);
         for (const plMeta of userPlaylists) {
-          upsertSoundCloudPlaylist(plMeta, null);
+          upsertSoundCloudPlaylist(plMeta, Array.isArray(plMeta.tracks) && plMeta.tracks.length ? plMeta.tracks : null);
         }
 
         renderPlaylists();
@@ -1876,7 +2013,9 @@
           await engine.ensureBuffer(0, engine.lastSuccessfulSeed || likes[0]);
         }
         renderStatsAndQueue();
-        showToast(`Connected ${data.user.username}: +${added} seeds, ${userPlaylists.length} playlists`);
+        showToast(likes.length || userPlaylists.length
+          ? `Connected ${user.username}: +${added} seeds, ${userPlaylists.length} playlists`
+          : `Connected ${user.username}. No public likes found — tap the orb to start a wave`);
       }
 
       els.btnAccountOpen.addEventListener("click", () => els.accountModal.classList.remove("hidden"));
@@ -1900,20 +2039,7 @@
           await loadUserProfile(val);
           els.accountModal.classList.add("hidden");
         } catch {
-          showToast("User not found — try Users search tab");
-        }
-      });
-
-      els.loginOauthForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const token = els.loginOauthInput.value.trim();
-        if (!token) return;
-        try {
-          await loadMeWithOAuth(token);
-          els.loginOauthInput.value = "";
-          els.accountModal.classList.add("hidden");
-        } catch {
-          showToast("Invalid or expired OAuth token");
+          showToast("Profile not found — check the link or use the Users search tab");
         }
       });
 
@@ -1997,13 +2123,17 @@
           return;
         }
         const prev = engine.playStack.pop();
-        if (prev) playTrack(prev, false);
+        if (prev) {
+          const cur = engine.currentTrack;
+          if (cur && cur.id !== prev.id && !engine.isBlacklisted(cur)) engine.queue.unshift(cur);
+          playTrack(prev, false);
+        }
       });
 
       els.btnLike.addEventListener("click", () => {
         if (!engine.currentTrack) return;
         const added = engine.toggleLike(engine.currentTrack);
-        updateTrackUI(engine.currentTrack);
+        updateLikeUI(engine.currentTrack);
         renderStatsAndQueue();
         showToast(added ? "Added to Wave Seeds" : "Removed from Wave Seeds");
       });
@@ -2179,7 +2309,7 @@
           const res = await apiFetch(`/api/playlist?url=${encodeURIComponent(url)}`);
           if (!res.ok) throw new Error();
           const data = await res.json();
-          const entry = upsertSoundCloudPlaylist(data.playlist, data.tracks || []);
+          const entry = upsertSoundCloudPlaylist(data.playlist || data, data.tracks || (data.playlist && data.playlist.tracks) || []);
           expandedPlaylistId = entry.id;
           els.importPlaylistUrl.value = "";
           renderPlaylists();
@@ -2214,55 +2344,99 @@
         runSearch();
       });
 
+      let searchSeq = 0, searchCtl = null, searchDebounce = null;
+
+      async function searchTracksSmart(q, signal) {
+        const norm = (x) => x.replace(/[\[\]()"'“”«»|]/g, " ").replace(/\s+/g, " ").trim();
+        const variants = [...new Set([q, norm(q), norm(q.replace(/[-–—_]/g, " ")), norm(q).split(" ").slice(0, 3).join(" ")])].filter(Boolean);
+        let lastErr = null;
+        for (const v of variants) {
+          try {
+            const tracks = pickTracks(await apiJson(`/api/search?q=${encodeURIComponent(v)}`, { signal, retries: 1 }));
+            if (tracks.length) return tracks;
+          } catch (e) { if (signal && signal.aborted) throw e; lastErr = e; }
+        }
+        if (lastErr) throw lastErr;
+        return [];
+      }
+
       async function runSearch() {
-        const query = els.searchInput.value.trim();
-        if (!query) return;
+        const raw = els.searchInput.value.trim();
+        if (!raw) return;
+        const seq = ++searchSeq;
+        if (searchCtl) searchCtl.abort();
+        searchCtl = new AbortController();
+        const signal = searchCtl.signal;
+        const stale = () => seq !== searchSeq;
+        const msg = (t) => { els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">${escapeHtml(t)}</div>`; };
 
         els.searchResultsPanel.classList.remove("hidden");
-        els.searchResultsList.innerHTML = `<div class="px-4 py-6 text-center font-mono text-xs text-white/40">Searching...</div>`;
+        msg("Searching...");
+        const parsed = parseSoundCloudInput(raw);
 
         try {
-          if (query.includes("soundcloud.com/") && query.includes("/sets/")) {
-            const res = await apiFetch(`/api/playlist?url=${encodeURIComponent(query)}`);
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            const entry = upsertSoundCloudPlaylist(data.playlist, data.tracks || []);
+          if (parsed && parsed.kind === "set") {
+            const d = await apiJson(`/api/playlist?url=${encodeURIComponent(parsed.url)}`, { signal });
+            if (stale()) return;
+            const entry = upsertSoundCloudPlaylist(d.playlist || d, d.tracks || (d.playlist && d.playlist.tracks) || []);
             renderPlaylists();
             els.searchResultsPanel.classList.add("hidden");
-            if (entry.tracks.length) {
-              engine.addLikedSeedsBatch(entry.tracks);
-                await playPlaylist(entry, 0, { shuffle: false });
-            }
-            showToast(`Loaded playlist "${entry.title}"`);
+            await playPlaylist(entry, 0, { shuffle: false });
             return;
           }
-
-          if (query.startsWith("@") || (query.includes("soundcloud.com/") && !query.includes("/sets/"))) {
-            await loadUserProfile(query);
-            els.searchResultsPanel.classList.add("hidden");
+          if (parsed && parsed.kind === "user") {
+            await loadUserProfile(parsed.slug);
+            if (!stale()) els.searchResultsPanel.classList.add("hidden");
+            return;
+          }
+          if (parsed && parsed.kind === "short") {
+            msg("Short on.soundcloud.com links can't be opened — paste the full soundcloud.com link");
+            return;
+          }
+          if (parsed && parsed.kind === "track") {
+            const q = `${parsed.user.replace(/[-_]/g, " ")} ${parsed.slug.replace(/[-_]/g, " ")}`;
+            const tracks = await searchTracksSmart(q, signal);
+            if (stale()) return;
+            const want = `/${parsed.user}/${parsed.slug}`.toLowerCase();
+            const hit = tracks.find((t) => (t.permalink_url || "").toLowerCase().includes(want));
+            if (hit) {
+              consecutivePlayErrors = 0; setWaveMode(); engine.queue = []; engine.lastSuccessfulSeed = hit;
+              els.searchResultsPanel.classList.add("hidden");
+              playTrack(hit, true);
+              return;
+            }
+            if (!tracks.length) { msg("Track not found"); return; }
+            renderTrackResults(tracks);
+            return;
+          }
+          if (raw.startsWith("@")) {
+            await loadUserProfile(raw);
+            if (!stale()) els.searchResultsPanel.classList.add("hidden");
             return;
           }
 
           if (activeSearchTab === "users") {
-            const res = await apiFetch(`/api/users/search?q=${encodeURIComponent(query)}`);
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            renderUserResults(data.collection || []);
+            const d = await apiJson(`/api/users/search?q=${encodeURIComponent(raw)}`, { signal });
+            if (!stale()) renderUserResults((d && d.collection) || []);
           } else if (activeSearchTab === "playlists") {
-            const res = await apiFetch(`/api/playlists/search?q=${encodeURIComponent(query)}`);
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            renderPlaylistResults(data.collection || []);
+            const d = await apiJson(`/api/playlists/search?q=${encodeURIComponent(raw)}`, { signal });
+            if (!stale()) renderPlaylistResults((d && d.collection) || []);
           } else {
-            const res = await apiFetch(`/api/search?q=${encodeURIComponent(query)}`);
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            renderTrackResults(data.collection || []);
+            const tracks = await searchTracksSmart(raw, signal);
+            if (!stale()) renderTrackResults(tracks);
           }
-        } catch {
-          els.searchResultsList.innerHTML = `<div class="px-4 py-5 text-center font-mono text-xs text-white/45">Nothing found or SoundCloud error.</div>`;
+        } catch (e) {
+          if (stale() || (e && e.name === "AbortError")) return;
+          msg(e && e.status ? `Search failed (HTTP ${e.status}). Try again.` : "Nothing found or connection error. Try again.");
         }
       }
+
+      els.searchInput.addEventListener("input", () => {
+        clearTimeout(searchDebounce);
+        const v = els.searchInput.value.trim();
+        if (v.length < 2 || v.startsWith("@") || parseSoundCloudInput(v)) return;
+        searchDebounce = setTimeout(runSearch, 550);
+      });
 
       function renderTrackResults(tracks) {
         lastSearchTracks = tracks;
@@ -2366,7 +2540,7 @@
               const res = await apiFetch(`/api/playlist?id=${encodeURIComponent(p.id)}`);
               if (!res.ok) throw new Error();
               const data = await res.json();
-              const entry = upsertSoundCloudPlaylist(data.playlist, data.tracks || []);
+              const entry = upsertSoundCloudPlaylist(data.playlist || data, data.tracks || (data.playlist && data.playlist.tracks) || []);
               expandedPlaylistId = entry.id;
               renderPlaylists();
               if (entry.tracks.length) {
@@ -2417,7 +2591,7 @@
         document.title = `${track.title} — MY WAVE`;
         recordTrack(track);
         if (srcLabel && !srcIds.has(track.id)) srcLabel = "";
-        $("ctx-badge").textContent = srcLabel ? `Playing from · ${srcLabel}` : "Now playing · My Wave";
+        $("ctx-badge").textContent = srcLabel ? `Playing from · ${srcLabel}${playbackMode === "playlist" && plTracks.length ? (shuffleOn ? " · shuffle" : ` · ${plTracks.findIndex((t) => t.id === track.id) + 1}/${plTracks.length}`) : ""}` : "Now playing · My Wave";
         if ("mediaSession" in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata({
             title: track.title, artist: track.user?.username || "", album: "MY WAVE",
@@ -2512,13 +2686,20 @@
       // Shuffle / repeat / speed
       $("btn-shuffle").addEventListener("click", () => {
         shuffleOn = !shuffleOn; $("btn-shuffle").classList.toggle("on", shuffleOn);
-        if (shuffleOn) { engine.queue = shuffled(engine.queue); renderStatsAndQueue(); }
+        if (playbackMode === "playlist" && plTracks.length) {
+          if (shuffleOn) engine.queue = shuffled(engine.queue);
+          else { const ids = new Set(engine.queue.map((t) => t.id)); engine.queue = plTracks.filter((t) => ids.has(t.id)); }
+        } else if (shuffleOn) engine.queue = shuffled(engine.queue);
+        renderStatsAndQueue();
         showToast(shuffleOn ? "Shuffle on" : "Shuffle off");
       });
       $("btn-repeat").addEventListener("click", () => {
-        repeatOne = !repeatOne; audioEl.loop = repeatOne;
-        $("btn-repeat").classList.toggle("on", repeatOne); $("repeat-one-badge").classList.toggle("hidden", !repeatOne);
-        showToast(repeatOne ? "Repeat track" : "Repeat off");
+        const ns = ((repeatOne ? 1 : repeatAll ? 2 : 0) + 1) % 3;
+        repeatOne = ns === 1; repeatAll = ns === 2; audioEl.loop = repeatOne;
+        $("btn-repeat").classList.toggle("on", ns > 0);
+        $("repeat-one-badge").classList.toggle("hidden", ns === 0);
+        $("repeat-one-badge").textContent = ns === 1 ? "1" : "∞";
+        showToast(["Repeat off", "Repeat track", "Repeat playlist"][ns]);
       });
       const RATES = [0.75, 1, 1.25, 1.5, 2]; let rateIdx = 1;
       $("btn-speed").addEventListener("click", () => {
@@ -2693,7 +2874,7 @@
         const g = $("home-pl-grid");
         if (!playlists.length) { g.innerHTML = `<div class="col-span-full py-10 text-center font-mono text-xs text-white/40">Плейлистов пока нет. Создай свой или импортируй из SoundCloud через поиск.</div>`; return; }
         g.innerHTML = playlists.map((pl) => {
-          const n = pl.tracks?.length || pl.track_count || 0;
+          const n = Math.max(pl.tracks?.length || 0, pl.track_count || 0);
           return `<div data-hp="${escapeHtml(pl.id)}" class="group rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/25 p-2.5 cursor-pointer transition-colors">
             <div class="relative aspect-square rounded-xl overflow-hidden bg-obsidian mb-2 flex items-center justify-center">${setCover(pl)}
               <div data-hp-play class="absolute right-2 bottom-2 w-9 h-9 rounded-full bg-silver text-obsidian flex items-center justify-center shadow-lg md:opacity-0 md:group-hover:opacity-100 transition-opacity"><svg class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></div>
@@ -2771,10 +2952,22 @@
         return { id: t.id, title: t.title, duration: t.duration, artwork_url: t.artwork_url, genre: t.genre, tag_list: t.tag_list, bpm: t.bpm, playback_count: t.playback_count, created_at: t.created_at, permalink_url: t.permalink_url, user: { id: t.user?.id, username: t.user?.username, avatar_url: t.user?.avatar_url } };
       }
       function setWaveMode() {
-        playbackMode = "wave"; activePlaylistId = null; srcLabel = ""; srcIds = new Set();
+        playbackMode = "wave"; activePlaylistId = null; srcLabel = ""; srcIds = new Set(); plTracks = [];
         $("ctx-badge").textContent = "Now playing · My Wave";
       }
       function applyRate() { const r = RATES[rateIdx]; decks.forEach((d) => { d.defaultPlaybackRate = r; d.playbackRate = r; }); }
+
+      function refillIfNeeded() {
+        if (playbackMode !== "playlist" || !repeatAll || engine.queue.length || !plTracks.length) return false;
+        const cur = engine.currentTrack && engine.currentTrack.id;
+        const list = plTracks.filter((t) => !engine.isBlacklisted(t));
+        let out;
+        if (shuffleOn) out = shuffled(list.filter((t) => t.id !== cur));
+        else { const i = list.findIndex((t) => t.id === cur); out = i >= 0 ? [...list.slice(i + 1), ...list.slice(0, i)] : list.slice(); }
+        if (!out.length && engine.currentTrack) out = [engine.currentTrack];
+        engine.queue = out;
+        return true;
+      }
 
       async function playPlaylist(pl, startIdx = 0, o = {}) {
         showToast("Loading...");
@@ -2783,10 +2976,12 @@
         let first, rest;
         if (o.shuffle) { first = tracks[startIdx] || tracks[Math.floor(Math.random() * tracks.length)]; rest = shuffled(tracks.filter((t) => t.id !== first.id)); }
         else { first = tracks[startIdx] || tracks[0]; rest = tracks.slice(tracks.indexOf(first) + 1); }
-        playbackMode = "playlist"; activePlaylistId = pl.id; srcLabel = pl.title; srcIds = new Set(tracks.map((t) => t.id));
+        playbackMode = "playlist"; activePlaylistId = pl.id; srcLabel = pl.title; srcIds = new Set(tracks.map((t) => t.id)); plTracks = tracks.slice();
+        engine.playStack = [];
         engine.queue = rest.filter((t) => !engine.isBlacklisted(t));
         engine.lastSuccessfulSeed = first;
         recordSet(pl); setHome("wave");
+        if ((pl.track_count || 0) > tracks.length) showToast(`Loaded ${tracks.length} of ${pl.track_count} tracks (server returned a partial list)`);
         await playTrack(first, true);
       }
 
@@ -2818,14 +3013,14 @@
         if (!pl) { openPlId = null; detail.classList.add("hidden"); grid.classList.remove("hidden"); head.classList.remove("hidden"); renderHomeGrid(); return; }
         grid.classList.add("hidden"); head.classList.add("hidden"); detail.classList.remove("hidden");
         const tracks = pl.tracks || [];
-        if (!tracks.length && pl.source === "soundcloud") ensurePlaylistTracks(pl).then(() => { if (openPlId === pl.id) renderHomePlaylists(); });
+        if (pl.source === "soundcloud" && !pl._loading && (!tracks.length || (pl.track_count || 0) > tracks.length || tracks.some((t) => t._stub))) { pl._loading = true; ensurePlaylistTracks(pl).finally(() => { pl._loading = false; if (openPlId === pl.id) renderHomePlaylists(); }); }
         const btn = "px-3.5 py-2 rounded-xl font-mono text-[11px] uppercase transition-colors";
         detail.innerHTML = `<button data-pd-back type="button" class="font-mono text-[11px] uppercase text-white/50 hover:text-gold mb-3">← Плейлисты</button>
           <div class="flex items-center gap-4 mb-4">
             <div class="w-24 h-24 rounded-2xl overflow-hidden bg-obsidian border border-white/10 shrink-0 flex items-center justify-center">${setCover(pl)}</div>
             <div class="min-w-0">
               <div class="text-base font-semibold text-silver truncate">${escapeHtml(pl.title)}</div>
-              <div class="font-mono text-[11px] text-white/45 mb-2">${escapeHtml(pl.author || "Мой плейлист")} · ${tracks.length || pl.track_count || 0} tracks</div>
+              <div class="font-mono text-[11px] text-white/45 mb-2">${escapeHtml(pl.author || "Мой плейлист")} · ${Math.max(tracks.length, pl.track_count || 0)} tracks</div>
               <div class="flex flex-wrap gap-2">
                 <button data-pd-play type="button" class="${btn} bg-silver text-obsidian">Play</button>
                 <button data-pd-shuffle type="button" class="${btn} border border-white/15 text-white/70 hover:border-white/35">Shuffle</button>
@@ -2873,6 +3068,13 @@
       const _rsq = renderStatsAndQueue;
       renderStatsAndQueue = function () { _rsq(); scheduleStandby(); };
       deckListen("playing", () => { setTlLoading(false); scheduleStandby(); });
+      deckListen("loadedmetadata", () => {
+        const d = audioEl.duration;
+        if (Number.isFinite(d) && d > 0) {
+          els.timeTotal.textContent = formatTime(d);
+          if (engine.currentTrack && !engine.currentTrack.duration) engine.currentTrack.duration = d * 1000;
+        }
+      });
       deckListen("waiting", () => setTlLoading(true));
       deckListen("canplay", () => setTlLoading(false));
 
@@ -2915,7 +3117,7 @@
           if (ss.mode === "playlist") {
             const pl = playlists.find((p) => p.id === ss.plId);
             if (pl && pl.tracks?.length) {
-              playbackMode = "playlist"; activePlaylistId = pl.id; srcLabel = pl.title; srcIds = new Set(pl.tracks.map((t) => t.id));
+              playbackMode = "playlist"; activePlaylistId = pl.id; srcLabel = pl.title; srcIds = new Set(pl.tracks.map((t) => t.id)); plTracks = pl.tracks.slice();
               const i = pl.tracks.findIndex((t) => t.id === ss.track.id);
               engine.queue = i >= 0 ? pl.tracks.slice(i + 1) : [];
             }
